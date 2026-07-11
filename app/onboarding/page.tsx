@@ -328,7 +328,9 @@ export default function OnboardingPage() {
         trackFunnel("onboarding_complete");
         assignFirst500ProBenefit().catch(() => {});
         if (referredBy) {
-          recordReferral(referredBy).catch(() => {});
+          recordReferral(referredBy).then((r) => {
+            if (!r.ok) console.warn("[referral] recordReferral failed:", r.error);
+          }).catch((e) => console.error("[referral] recordReferral exception:", e));
         }
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();

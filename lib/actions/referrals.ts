@@ -144,21 +144,21 @@ export async function recordReferral(code: string): Promise<{ ok: boolean; error
 
     const admin = createAdmin();
 
-    const { data: codeRow } = await admin
+    const { data: codeRow, error: codeErr } = await admin
       .from("referral_codes")
       .select("user_id, code")
       .ilike("code", code)
       .eq("is_active", true)
       .single();
 
-    if (!codeRow) return { ok: false, error: "Invalid referral code" };
+    if (codeErr || !codeRow) return { ok: false, error: "Invalid referral code" };
     if (codeRow.user_id === user.id) return { ok: false, error: "Cannot refer yourself" };
 
-    const { data: existingReferral } = await admin
+    const { data: existingReferral, error: existErr } = await admin
       .from("referrals")
       .select("id")
       .eq("referred_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (existingReferral) return { ok: false, error: "Already referred" };
 
@@ -175,15 +175,18 @@ export async function recordReferral(code: string): Promise<{ ok: boolean; error
 
     if (insertErr) {
       console.error("[referrals] insert error:", insertErr);
-      return { ok: false, error: "Failed to record referral" };
+      return { ok: false, error: `Insert failed: ${insertErr.message}` };
     }
 
-    await admin.rpc("grant_pro_reward", { referrer_uuid: codeRow.user_id });
+    const { error: rpcErr } = await admin.rpc("grant_pro_reward", { referrer_uuid: codeRow.user_id });
+    if (rpcErr) {
+      console.error("[referrals] grant_pro_reward error:", rpcErr);
+    }
 
     return { ok: true };
   } catch (err) {
     console.error("[referrals] recordReferral error:", err);
-    return { ok: false, error: "Failed to record referral" };
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to record referral" };
   }
 }
 
