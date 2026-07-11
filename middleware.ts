@@ -120,6 +120,18 @@ export async function middleware(request: NextRequest) {
       dashUrl.pathname = "/dashboard";
       return NextResponse.redirect(dashUrl);
     }
+
+    // Block incomplete profiles from accessing anything except /onboarding and auth routes
+    if (
+      !profile?.onboarding_completed &&
+      pathname !== "/onboarding" &&
+      !pathname.startsWith("/auth/") &&
+      !pathname.startsWith("/onboarding/")
+    ) {
+      const onboardingUrl = request.nextUrl.clone();
+      onboardingUrl.pathname = "/onboarding";
+      return NextResponse.redirect(onboardingUrl);
+    }
   } else if (isProtectedPath) {
     const signInUrl = request.nextUrl.clone();
     signInUrl.pathname = "/auth/sign-in";
