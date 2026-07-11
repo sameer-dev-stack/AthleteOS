@@ -27,7 +27,7 @@ SELECT pg_notify('pgrst', 'reload schema');
 - `docs/QA_TESTING.md`, `docs/CHANGELOG.md`
 
 ### Commit
-LOCAL ONLY — not committed/pushed yet (pending build + DB fix verification).
+`1b929d2` (pushed to `origin/main`). Code guard is LIVE in production — onboarding no longer crashes. DB schema fix (SQL below) still pending: must be run in the Supabase SQL Editor by an admin, OR applied via `supabase db push` once the CLI is linked to the AthleteOS project.
 
 ---
 

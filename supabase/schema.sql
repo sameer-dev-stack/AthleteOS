@@ -45,6 +45,9 @@ CREATE TABLE IF NOT EXISTS profiles (
   profile_published BOOLEAN DEFAULT false,
   onboarding_completed BOOLEAN DEFAULT false,
 
+  -- Referrals (migration 20260706_referrals.sql)
+  referred_by TEXT DEFAULT NULL,
+
   -- Subscription tier (Phase 6)
   plan TEXT DEFAULT 'free',
   stripe_subscription_id TEXT,
