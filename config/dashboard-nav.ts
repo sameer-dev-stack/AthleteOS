@@ -1,4 +1,4 @@
-import { LayoutDashboard, User, Sparkles, BarChart3, CreditCard, ShieldCheck, LineChart, Users, Store, Calendar, Mail, Settings, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, User, Sparkles, BarChart3, CreditCard, ShieldCheck, LineChart, Users, Store, Calendar, Mail, Settings, UserPlus, type LucideIcon } from "lucide-react";
 
 export type NavItem = {
   title: string;
@@ -25,6 +25,7 @@ export const dashboardNavSections: NavSection[] = [
       { title: "NIL Value", href: "/dashboard/nil", icon: LineChart },
       { title: "Marketplace", href: "/dashboard/marketplace", icon: Store },
       { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
+      { title: "Referrals", href: "/dashboard/referrals", icon: UserPlus },
     ],
   },
   {

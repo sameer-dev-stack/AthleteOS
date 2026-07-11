@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Copy, Check, Users, ExternalLink, Share2 } from "lucide-react";
+import { Copy, Check, Users, Share2 } from "lucide-react";
+import Link from "next/link";
 import { getReferralStats, type ReferralStats } from "@/lib/actions/referrals";
 
 export function ReferralCard() {
@@ -44,7 +45,7 @@ export function ReferralCard() {
         </div>
         <div>
           <h3 className="text-sm font-semibold text-white">Refer Athletes</h3>
-          <p className="text-xs text-ink-dim">Invite other athletes to AthleteOS</p>
+          <p className="text-xs text-ink-dim">Earn 7 days of Pro per referral</p>
         </div>
       </div>
 
@@ -61,10 +62,16 @@ export function ReferralCard() {
         </button>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs text-ink-muted">
-          <span className="font-semibold text-white">{stats.totalReferrals}</span>
-          athlete{stats.totalReferrals !== 1 ? "s" : ""} joined
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-4 text-xs text-ink-muted">
+          <span>
+            <span className="font-semibold text-white">{stats.totalReferrals}</span> joined
+          </span>
+          {stats.proDaysEarned > 0 && (
+            <span>
+              <span className="font-semibold text-accent">{stats.proDaysEarned}</span> Pro days
+            </span>
+          )}
         </div>
         <button
           onClick={handleShare}
@@ -74,6 +81,13 @@ export function ReferralCard() {
           Share
         </button>
       </div>
+
+      <Link
+        href="/dashboard/referrals"
+        className="block text-center text-xs text-accent hover:text-accent/80 transition-colors"
+      >
+        View all details
+      </Link>
     </div>
   );
 }

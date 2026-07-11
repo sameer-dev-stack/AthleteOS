@@ -460,23 +460,36 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
                       </div>
 
                       {/* Stats chips */}
-                      {profile.stats && profile.stats.length > 0 && (
-                        <div className="mt-3 flex gap-1.5">
-                          {profile.stats.slice(0, 3).map((stat) => (
-                            <div
-                              key={stat.label}
-                              className="flex-1 rounded-xl py-2 px-2 text-center backdrop-blur-md"
-                              style={{
-                                background: "rgba(255,255,255,0.06)",
-                                border: "1px solid rgba(255,255,255,0.08)",
-                              }}
-                            >
-                              <p className="text-[11px] font-black text-white">{stat.value}</p>
-                              <p className="text-[7px] font-bold text-white/35 uppercase tracking-wider mt-0.5">{stat.label}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      {(() => {
+                        const PLACEHOLDER_STATS = /^(test|asdf|foo|bar|baz|aaa|123|000|xxx|yyy|zzz|na|n\/a|none|sample|demo|example|temp|placeholder)$/i;
+                        const validStats = (profile.stats ?? []).filter(s => {
+                          if (!s.label?.trim() || !s.value?.trim()) return false;
+                          const l = s.label.trim().toLowerCase();
+                          const v = s.value.trim();
+                          if (/^(.)\1+$/.test(l) && l.length > 2) return false;
+                          if (/^(.)\1+$/.test(v) && v.length > 2) return false;
+                          if (v.length > 50) return false;
+                          if (PLACEHOLDER_STATS.test(l) || PLACEHOLDER_STATS.test(v)) return false;
+                          return true;
+                        }).slice(0, 3);
+                        return validStats.length > 0 ? (
+                          <div className="mt-3 flex gap-1.5">
+                            {validStats.map((stat) => (
+                              <div
+                                key={stat.label}
+                                className="flex-1 rounded-xl py-2 px-2 text-center backdrop-blur-md"
+                                style={{
+                                  background: "rgba(255,255,255,0.06)",
+                                  border: "1px solid rgba(255,255,255,0.08)",
+                                }}
+                              >
+                                <p className="text-[11px] font-black text-white">{stat.value}</p>
+                                <p className="text-[7px] font-bold text-white/35 uppercase tracking-wider mt-0.5">{stat.label}</p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null;
+                      })()}
 
                       {/* CTA */}
                       {profile.profile_published ? (

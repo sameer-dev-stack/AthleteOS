@@ -32,6 +32,7 @@ export type Profile = {
   theme_accent: string;
   theme_layout: string;
   moderation_status: string;
+  extended_pro_until: string | null;
   created_at: string;
   updated_at: string;
   contact_phone: string | null;

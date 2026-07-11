@@ -169,7 +169,11 @@ export function DashboardEditor({ profile, onSaved }: Props) {
       promises.push(
         updateProfile({
           bio: bio.trim() || null,
-          stats: stats.filter((s) => s.label.trim() && s.value.trim()),
+          stats: stats.filter((s) => {
+            if (!s.label.trim() || !s.value.trim()) return false;
+            const PLACEHOLDER_STATS = /^(test|asdf|foo|bar|baz|aaa|123|000|xxx|yyy|zzz|na|n\/a|none|sample|demo|example|temp|placeholder)$/i;
+            return !PLACEHOLDER_STATS.test(s.label.trim()) && !PLACEHOLDER_STATS.test(s.value.trim());
+          }),
           links: cleanLinks,
           social: cleanSocial,
           highlights: cleanHighlights,

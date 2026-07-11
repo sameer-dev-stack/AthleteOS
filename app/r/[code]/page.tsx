@@ -5,28 +5,29 @@ import { cookies } from "next/headers";
 const REF_COOKIE = "athleteos_ref";
 const REF_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
-type Props = { params: Promise<{ username: string }> };
+type Props = { params: Promise<{ code: string }> };
 
 export default async function ReferralRedirect({ params }: Props) {
-  const { username } = await params;
+  const { code } = await params;
 
   const serviceRole = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  const { data: profile } = await serviceRole
-    .from("profiles")
-    .select("id, username")
-    .eq("username", username)
+  const { data: codeRow } = await serviceRole
+    .from("referral_codes")
+    .select("code")
+    .ilike("code", code)
+    .eq("is_active", true)
     .single();
 
-  if (!profile?.username) {
+  if (!codeRow?.code) {
     redirect("/auth/sign-up");
   }
 
   const cookieStore = await cookies();
-  cookieStore.set(REF_COOKIE, profile.username, {
+  cookieStore.set(REF_COOKIE, codeRow.code, {
     httpOnly: false,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

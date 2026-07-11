@@ -21,6 +21,7 @@ import { createClient } from "@/lib/supabase/client";
 import { checkUsername, updateProfile } from "@/lib/actions/profile";
 import { assignFirst500ProBenefit } from "@/lib/actions/first-500-pro";
 import { sendWelcomeEmail } from "@/lib/actions/emails";
+import { recordReferral } from "@/lib/actions/referrals";
 import confetti from "canvas-confetti";
 import { Logo } from "@/components/logo";
 import { AvatarUpload } from "@/components/avatar-upload";
@@ -326,6 +327,9 @@ export default function OnboardingPage() {
       if (result.ok) {
         trackFunnel("onboarding_complete");
         assignFirst500ProBenefit().catch(() => {});
+        if (referredBy) {
+          recordReferral(referredBy).catch(() => {});
+        }
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (user?.email) {

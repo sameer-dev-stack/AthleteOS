@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS profiles (
 
   -- Referrals (migration 20260706_referrals.sql)
   referred_by TEXT DEFAULT NULL,
+  extended_pro_until TIMESTAMPTZ,
 
   -- Subscription tier (Phase 6)
   plan TEXT DEFAULT 'free',
@@ -122,6 +123,27 @@ CREATE TABLE IF NOT EXISTS audit_log (
   target_type TEXT NOT NULL,
   target_id TEXT,
   metadata JSONB DEFAULT '{}'::jsonb NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- Referral codes (one per user)
+CREATE TABLE IF NOT EXISTS referral_codes (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE UNIQUE NOT NULL,
+  code TEXT UNIQUE NOT NULL,
+  is_active BOOLEAN DEFAULT true NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- Referral tracking
+CREATE TABLE IF NOT EXISTS referrals (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  referrer_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  referred_id UUID REFERENCES profiles(id) ON DELETE CASCADE UNIQUE NOT NULL,
+  code_used TEXT NOT NULL,
+  status TEXT DEFAULT 'pending' NOT NULL CHECK (status IN ('pending', 'completed', 'rewarded')),
+  reward_days INTEGER DEFAULT 7 NOT NULL,
+  rewarded_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 

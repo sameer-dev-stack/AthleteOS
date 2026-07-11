@@ -98,6 +98,7 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
   const photos: string[] = [profile.avatar_url].filter(Boolean) as string[];
   const hasMultiplePhotos = photos.length > 1;
 
+  const PLACEHOLDER_STATS = /^(test|asdf|foo|bar|baz|aaa|123|000|xxx|yyy|zzz|na|n\/a|none|sample|demo|example|temp|placeholder)$/i;
   const stats = (profile.stats ?? []).filter(s => {
     if (!s.label?.trim() || !s.value?.trim()) return false;
     const l = s.label.trim().toLowerCase();
@@ -105,6 +106,7 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
     if (/^(.)\1+$/.test(l) && l.length > 2) return false;
     if (/^(.)\1+$/.test(v) && v.length > 2) return false;
     if (v.length > 50) return false;
+    if (PLACEHOLDER_STATS.test(l) || PLACEHOLDER_STATS.test(v)) return false;
     return true;
   }).slice(0, 3);
 
