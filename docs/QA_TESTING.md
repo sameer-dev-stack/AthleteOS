@@ -218,6 +218,7 @@ npx playwright show-trace test-results/<test-folder>/trace.zip
 | Date | Bug | Severity | Notes |
 |------|-----|----------|-------|
 | 2026-07-02 | `/[username]` returns HTTP 200 for non-existent users | Low | `notFound()` is called correctly in code but response status arrives as 200. Likely Next.js middleware/response pipeline issue. Does not affect user experience (not-found UI still renders). |
+| 2026-07-11 | QA-021: Onboarding "Launch my card" crashes with `Could not find the 'referred_by' column of 'profiles' in the schema cache` | Blocker | Root cause: migration `supabase/migrations/20260706_referrals.sql` (adds `referred_by`) was never applied to the hosted DB / PostgREST schema cache stale. Code guard added in `lib/actions/profile.ts` so the update retries without `referred_by` (onboarding no longer hard-blocks), but the column must still be applied + cache reloaded for referral attribution to work. See fix SQL in CHANGELOG. |
 
 ---
 

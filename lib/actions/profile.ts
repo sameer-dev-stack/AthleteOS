@@ -191,12 +191,27 @@ export async function updateProfile(
       updatePayload.referred_by = updates.referred_by;
     }
 
-    const { data, error } = await admin
+    let { data, error } = await admin
       .from("profiles")
       .update(updatePayload)
       .eq("id", user.id)
       .select("*")
       .single();
+
+    // Resilience: if the column is missing from the DB / PostgREST schema cache
+    // (migration not yet applied), retry without referred_by so onboarding is
+    // never hard-blocked. Referral attribution is best-effort until the column exists.
+    if (error && /referred_by/.test(error.message)) {
+      const { referred_by: _drop, ...payloadWithoutRef } = updatePayload;
+      const retry = await admin
+        .from("profiles")
+        .update(payloadWithoutRef)
+        .eq("id", user.id)
+        .select("*")
+        .single();
+      data = retry.data;
+      error = retry.error;
+    }
 
     if (error) {
       // Unique constraint violation on username = TOCTOU race, another user claimed it first

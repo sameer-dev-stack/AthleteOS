@@ -5,6 +5,32 @@
 
 ---
 
+## 2026-07-11 — QA-021: onboarding crash on missing `referred_by` (code guard + DB fix)
+
+### What changed
+1. **`lib/actions/profile.ts`** — `updateProfile` now retries the profile update without the `referred_by` field if PostgREST reports the column is missing from the schema cache. Onboarding can no longer be hard-blocked by the missing column; referral attribution is best-effort until the column exists.
+2. **Docs** — QA-021 logged in `docs/QA_TESTING.md` (Known Issues); this entry added.
+
+### Why
+QA-021 (BLOCKER): newly verified users clicking "Launch my card" got a red schema-cache error because migration `supabase/migrations/20260706_referrals.sql` (adds `profiles.referred_by`) was never applied to the hosted Supabase DB / PostgREST cache was stale.
+
+### Required DB fix (apply in Supabase SQL Editor — idempotent)
+```sql
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS referred_by text DEFAULT NULL;
+CREATE INDEX IF NOT EXISTS idx_profiles_referred_by ON profiles(referred_by) WHERE referred_by IS NOT NULL;
+SELECT pg_notify('pgrst', 'reload schema');
+```
+(Reloads PostgREST schema cache; or Dashboard → Database → Schema cache → Reload.)
+
+### Files touched
+- `lib/actions/profile.ts`
+- `docs/QA_TESTING.md`, `docs/CHANGELOG.md`
+
+### Commit
+LOCAL ONLY — not committed/pushed yet (pending build + DB fix verification).
+
+---
+
 ## 2026-07-11 — Bug fix QA-002: email verification redirect + feedback
 
 ### What changed
