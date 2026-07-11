@@ -1,0 +1,30 @@
+{
+  "name": "AthleteOS",
+  "short_name": "AthleteOS",
+  "description": "One card. One link. Your entire NIL business.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0A0B",
+  "theme_color": "#C6FF3D",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["sports", "business", "finance"],
+  "scope": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "screenshots": [],
+  "prefer_related_applications": false
+}

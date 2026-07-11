@@ -1,0 +1,137 @@
+import { NextResponse, type NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
+import { isAdmin } from "@/lib/admin";
+
+const serviceRole = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
+
+  // Intercept Supabase email-confirmation authorization codes that land on a
+  // non-callback path (e.g. the root landing page) and forward them to the
+  // auth callback route so the session is established and the user is routed
+  // into the app instead of being stranded on the marketing page.
+  const code = request.nextUrl.searchParams.get("code");
+  if (code && pathname !== "/auth/callback") {
+    const callbackUrl = request.nextUrl.clone();
+    callbackUrl.pathname = "/auth/callback";
+    return NextResponse.redirect(callbackUrl);
+  }
+
+  if (pathname === "/auth/signin") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/sign-in";
+    return NextResponse.redirect(url);
+  }
+  if (pathname === "/auth/signup") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/sign-up";
+    return NextResponse.redirect(url);
+  }
+
+  const isAdminPath = pathname === "/admin" || (pathname.startsWith("/admin/") && !pathname.startsWith("/admin-settings"));
+  const isProtectedPath =
+    pathname === "/dashboard" ||
+    pathname.startsWith("/dashboard/") ||
+    pathname === "/onboarding" ||
+    pathname.startsWith("/onboarding/") ||
+    pathname === "/teams" ||
+    pathname.startsWith("/teams/") ||
+    pathname === "/brands" ||
+    pathname.startsWith("/brands/") ||
+    pathname === "/settings" ||
+    pathname.startsWith("/settings/") ||
+    pathname === "/analytics" ||
+    pathname.startsWith("/analytics/");
+
+  // Single Supabase client for all non-admin paths — avoids double-client cookie loss
+  let supabaseResponse = NextResponse.next({ request });
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          );
+          supabaseResponse = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (isAdminPath) {
+    if (!user) {
+      return new NextResponse("Forbidden", { status: 403 });
+    }
+
+    const { data: profile } = await serviceRole
+      .from("profiles")
+      .select("role, suspended")
+      .eq("id", user.id)
+      .single();
+
+    const authorized = profile?.role === "admin" || isAdmin(user.email);
+    if (!authorized) {
+      return new NextResponse("Forbidden", { status: 403 });
+    }
+
+    if (profile?.suspended) {
+      const suspendedUrl = request.nextUrl.clone();
+      suspendedUrl.pathname = "/suspended";
+      return NextResponse.redirect(suspendedUrl);
+    }
+
+    return supabaseResponse;
+  }
+
+  if (user) {
+    const { data: profile } = await serviceRole
+      .from("profiles")
+      .select("suspended, onboarding_completed")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.suspended) {
+      const suspendedUrl = request.nextUrl.clone();
+      suspendedUrl.pathname = "/suspended";
+      return NextResponse.redirect(suspendedUrl);
+    }
+
+    if (pathname === "/onboarding" && profile?.onboarding_completed) {
+      const dashUrl = request.nextUrl.clone();
+      dashUrl.pathname = "/dashboard";
+      return NextResponse.redirect(dashUrl);
+    }
+  } else if (isProtectedPath) {
+    const signInUrl = request.nextUrl.clone();
+    signInUrl.pathname = "/auth/sign-in";
+    signInUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(signInUrl);
+  }
+
+  return supabaseResponse;
+}
+
+export const config = {
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|api/stripe/webhook|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
+};

@@ -1,0 +1,27 @@
+{
+  "buildCommand": "npm run build",
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "crons": [
+    {
+      "path": "/api/cron/weekly-briefing",
+      "schedule": "0 8 * * 1"
+    },
+    {
+      "path": "/api/cron/prune-analytics",
+      "schedule": "0 3 * * 0"
+    },
+    {
+      "path": "/api/cron/profile-nudge",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/card-digest",
+      "schedule": "0 10 * * 1"
+    },
+    {
+      "path": "/api/cron/scheduled-reports",
+      "schedule": "0 9 * * *"
+    }
+  ]
+}
