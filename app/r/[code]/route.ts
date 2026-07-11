@@ -1,14 +1,16 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
 const REF_COOKIE = "athleteos_ref";
 const REF_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
 type Props = { params: Promise<{ code: string }> };
 
-export default async function ReferralRedirect({ params }: Props) {
+export async function GET(_request: Request, { params }: Props) {
   const { code } = await params;
+
+  const response = NextResponse.redirect(new URL("/auth/sign-up", _request.url));
 
   try {
     const serviceRole = createClient(
@@ -24,8 +26,7 @@ export default async function ReferralRedirect({ params }: Props) {
       .single();
 
     if (codeRow?.code) {
-      const cookieStore = await cookies();
-      cookieStore.set(REF_COOKIE, codeRow.code, {
+      response.cookies.set(REF_COOKIE, codeRow.code, {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
@@ -37,5 +38,5 @@ export default async function ReferralRedirect({ params }: Props) {
     console.error("[referral-redirect] error:", err);
   }
 
-  redirect("/auth/sign-up");
+  return response;
 }

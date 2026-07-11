@@ -5,6 +5,28 @@
 
 ---
 
+## 2026-07-11 — Referral cookie fix + dashboard crash fix
+
+### What changed
+1. **`app/r/[code]/page.tsx` → `app/r/[code]/route.ts`** — Converted referral redirect from Server Component to Route Handler. In Next.js App Router, `cookies().set()` only works in Route Handlers, Server Actions, and Middleware — not in Server Components. The cookie was silently never set, so `document.cookie` in onboarding never saw `athleteos_ref`.
+2. **`app/dashboard/page.tsx`** — Changed `redirect("/onboarding")` on profile fetch failure to `throw new Error(...)`. Prevents infinite redirect loop: if `getMyProfile()` fails, the old code redirected to `/onboarding`, but the middleware saw `onboarding_completed: true` and redirected back to `/dashboard`.
+3. **`app/dashboard/layout.tsx`** — Same fix: throw error instead of redirect on profile fetch failure.
+
+### Why
+- QA-023 (referral recording): Cookie was never set because Server Components can't set cookies in Next.js App Router.
+- Dashboard crash: `getMyProfile()` failure + `redirect("/onboarding")` created an infinite redirect loop between `/dashboard` and `/onboarding`, which the browser surfaces as an error.
+
+### Files touched
+- `app/r/[code]/route.ts` (new Route Handler)
+- `app/r/[code]/page.tsx` (deleted)
+- `app/dashboard/page.tsx`
+- `app/dashboard/layout.tsx`
+
+### Commit
+`TBD` (pending push)
+
+---
+
 ## 2026-07-11 — QA-021: onboarding crash on missing `referred_by` (code guard + DB fix)
 
 ### What changed

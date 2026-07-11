@@ -22,7 +22,7 @@ export default async function DashboardLayout({
   const profileResult = await getMyProfile();
 
   if (!profileResult.ok || !profileResult.data) {
-    redirect("/onboarding");
+    throw new Error("Failed to load profile. Please try again.");
   }
 
   const profile = profileResult.data;
