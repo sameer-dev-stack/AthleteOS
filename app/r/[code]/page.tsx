@@ -10,30 +10,32 @@ type Props = { params: Promise<{ code: string }> };
 export default async function ReferralRedirect({ params }: Props) {
   const { code } = await params;
 
-  const serviceRole = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  try {
+    const serviceRole = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
 
-  const { data: codeRow } = await serviceRole
-    .from("referral_codes")
-    .select("code")
-    .ilike("code", code)
-    .eq("is_active", true)
-    .single();
+    const { data: codeRow } = await serviceRole
+      .from("referral_codes")
+      .select("code")
+      .ilike("code", code)
+      .eq("is_active", true)
+      .single();
 
-  if (!codeRow?.code) {
-    redirect("/auth/sign-up");
+    if (codeRow?.code) {
+      const cookieStore = await cookies();
+      cookieStore.set(REF_COOKIE, codeRow.code, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: REF_MAX_AGE,
+      });
+    }
+  } catch (err) {
+    console.error("[referral-redirect] error:", err);
   }
-
-  const cookieStore = await cookies();
-  cookieStore.set(REF_COOKIE, codeRow.code, {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: REF_MAX_AGE,
-  });
 
   redirect("/auth/sign-up");
 }
