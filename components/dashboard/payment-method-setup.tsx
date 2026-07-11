@@ -42,6 +42,24 @@ export function PaymentMethodSetup({ onSuccess }: Props) {
       return;
     }
 
+    const routing = bankData.routingNumber.trim();
+    const account = bankData.accountNumber.trim();
+
+    if (!/^\d{9}$/.test(routing)) {
+      setError("Routing number must be exactly 9 digits.");
+      return;
+    }
+
+    if (!/^\d+$/.test(account)) {
+      setError("Account number must contain only digits.");
+      return;
+    }
+
+    if (account.length < 4 || account.length > 17) {
+      setError("Account number must be between 4 and 17 digits.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -193,6 +211,8 @@ export function PaymentMethodSetup({ onSuccess }: Props) {
                     onChange={handleBankChange}
                     disabled={loading}
                     placeholder="123456789"
+                    inputMode="numeric"
+                    pattern="\d*"
                     className="w-full rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-xs text-white placeholder-white/20 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                     required
                   />
@@ -208,6 +228,9 @@ export function PaymentMethodSetup({ onSuccess }: Props) {
                     onChange={handleBankChange}
                     disabled={loading}
                     placeholder="987654321"
+                    inputMode="numeric"
+                    pattern="\d*"
+                    maxLength={9}
                     className="w-full rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-xs text-white placeholder-white/20 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                     required
                   />
