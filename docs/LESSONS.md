@@ -106,6 +106,24 @@ navigation completes. Release the overlay on the error path so the user can retr
 
 ---
 
+## L9 — Never call revalidatePath inside a useFormState Server Action that navigates on the client
+
+A `useFormState` Server Action's returned state is what drives client-side
+navigation (e.g. an effect that calls `router.push` when `state.ok`). Calling
+`revalidatePath(path)` inside that action revalidates the *current* route, which
+resets the form state to its initial value and interrupts/cancels the pending
+`router.push`. The user sees the submit overlay (e.g. "Processing…") but is
+stranded on the same page — and no error text renders, because the state was
+reset, not failed. Tell the two apart: a *failed* submit still shows the red
+error copy; a *reset* submit shows nothing. Fix is to drop `revalidatePath`
+when the action's only job is to return state and the client then navigates
+away (the new route re-renders fresh anyway). Applies to both `signUp` and
+`signIn` in `lib/actions/auth.ts`, which share the same pattern.
+
+**Source:** Fixed create-account / sign-in stuck on "Processing…" (T16), 2026-07-12.
+
+---
+
 ## L8 — Auth inputs deserve SaaS-grade polish: password toggle, reduced-motion, trust signal
 
 Repeated form inputs ship as one shared component (`PasswordField` in

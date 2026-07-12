@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-07-12 — T16: Fix create-account stuck on "Processing…" (navigation bug)
+
+### What changed
+1. **`lib/actions/auth.ts`** — Removed `revalidatePath("/")` from `signUp` and `signIn` (and dropped the now-unused `revalidatePath` import). Both are `useFormState` server actions whose returned state drives a `router.push` on the client.
+
+### Why
+`revalidatePath` inside a `useFormState` action triggers a route revalidation of the current page, which resets the form state to its initial value and cancels the in-flight `router.push`. Symptom: clicking Create account showed the full-screen overlay ("Processing…") but never navigated to `/auth/account-created` — the user was stranded on the sign-up screen. A normal signup *error* would still render the red error text; the total absence of any error text confirmed a state reset, not a failed signup. `signIn` shares the identical `useFormState` + `router.push` pattern, so it was fixed too.
+
+### Files touched
+- `lib/actions/auth.ts`
+
+### Commit
+7512a0e
+
+---
+
 ## 2026-07-12 — T15: Auth UX hardening (password toggle, reduced-motion, trust note)
 
 ### What changed
