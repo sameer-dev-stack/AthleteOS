@@ -1,4 +1,4 @@
-import { accountCreatedCopy } from "@/lib/auth-copy";
+import { accountCreatedCopy, nextPasswordInputType, securedNote } from "@/lib/auth-copy";
 
 describe("accountCreatedCopy", () => {
   it("includes the verification line with the email", () => {
@@ -11,5 +11,18 @@ describe("accountCreatedCopy", () => {
     const c = accountCreatedCopy(null);
     expect(c.heading).toBe("Your account has been created");
     expect(c.body).toContain("verification email has been sent");
+  });
+});
+
+describe("nextPasswordInputType", () => {
+  it("toggles text <-> password", () => {
+    expect(nextPasswordInputType(false)).toBe("text");
+    expect(nextPasswordInputType(true)).toBe("password");
+  });
+});
+
+describe("securedNote", () => {
+  it("returns the secured trust line", () => {
+    expect(securedNote()).toBe("Secured by 256-bit encryption · No card required");
   });
 });

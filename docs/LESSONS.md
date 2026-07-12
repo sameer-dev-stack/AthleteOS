@@ -103,3 +103,18 @@ on the button (`animate-spin` + disabled) **plus** a full-screen overlay
 navigation completes. Release the overlay on the error path so the user can retry.
 
 **Source:** Signup submit loading state + verify-email copy (T14), 2026-07-12.
+
+---
+
+## L8 — Auth inputs deserve SaaS-grade polish: password toggle, reduced-motion, trust signal
+
+Repeated form inputs ship as one shared component (`PasswordField` in
+`components/auth/password-field.tsx`) so sign-up and sign-in never drift — the
+show/hide eye toggle flips the input type via a pure helper
+(`nextPasswordInputType` in `lib/auth-copy.ts`), is `type="button"` (never
+submits), and carries an `aria-label`. Every CSS animation must be gated with
+`motion-reduce:animate-none` (the `animate-pulse` skeleton in
+`account-created/page.tsx` respects `prefers-reduced-motion`). Trust copy
+("Secured by…") lives in `lib/auth-copy.ts` and renders under each submit button.
+
+**Source:** Auth UX hardening (T15), 2026-07-12.

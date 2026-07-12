@@ -5,6 +5,32 @@
 
 ---
 
+## 2026-07-12 — T15: Auth UX hardening (password toggle, reduced-motion, trust note)
+
+### What changed
+1. **`lib/auth-copy.ts`** — Added `nextPasswordInputType(isVisible)` (pure toggle helper) and `securedNote()` (`"Secured by 256-bit encryption · No card required"`). TDD-covered in `__tests__/auth-copy.test.ts`.
+2. **`__tests__/auth-copy.test.ts`** — Added `nextPasswordInputType` (toggles text/password) and `securedNote` suites.
+3. **`components/auth/password-field.tsx`** — New `"use client"` password input with a show/hide eye toggle (`Eye`/`EyeOff` from lucide-react), `aria-label`, `type="button"` so it never submits. `autoComplete` is a prop (new-password vs current-password).
+4. **`app/auth/sign-up/page.tsx`** — Replaced inline password `<input>` with `<PasswordField autoComplete="new-password" />`; added the secured note under `<SubmitButton />`.
+5. **`app/auth/sign-in/page.tsx`** — Replaced inline password `<input>` with `<PasswordField autoComplete="current-password" />` (kept the "Forgot password?" link); added the secured note under `<SubmitButton />`.
+6. **`app/auth/account-created/page.tsx`** — Confirmed `animate-pulse` skeleton carries `motion-reduce:animate-none` (added in T14) so it respects `prefers-reduced-motion`.
+
+### Why
+Bring the auth forms to SaaS-standard polish: users expect a password visibility toggle, motion-sensitive users must not get a pulsing skeleton, and a trust signal under the submit button lifts conversion.
+
+### Files touched
+- `lib/auth-copy.ts`
+- `__tests__/auth-copy.test.ts`
+- `components/auth/password-field.tsx`
+- `app/auth/sign-up/page.tsx`
+- `app/auth/sign-in/page.tsx`
+- `app/auth/account-created/page.tsx`
+
+### Commit
+(pending)
+
+---
+
 ## 2026-07-12 — T14: Signup submit loading state (spinner + overlay) & verify-email copy
 
 ### What changed
@@ -25,7 +51,7 @@ The submit affordance was a bare disabled label — ambiguous during the slow se
 - `app/auth/account-created/page.tsx`
 
 ### Commit
-(pending)
+`467e1b5`
 
 ---
 

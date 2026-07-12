@@ -644,9 +644,13 @@ Client component shown on `/auth/sign-up`. Reads the `athleteos_ref` cookie (non
 ### `<ProcessingOverlay />` — `components/auth/processing-overlay.tsx`
 Client component (T14) shown as a full-screen `bg-bg` overlay during the signup submit→route transition. Renders a `text-accent` `Loader2` spinner + "Processing…". `show` prop toggles it; no props beyond `show: boolean`. Wired in `app/auth/sign-up/page.tsx` (set on submit, released only on the error path so it stays until navigation).
 
-### `lib/auth-copy.ts` — `accountCreatedCopy(email)`
-Pure, TDD-able copy builder (T14) for the post-signup verification screen. Returns `{ heading: "Your account has been created", body }` where `body` is `"Please verify your account — a verification email has been sent to {email}."` (or `…to your email.` when email is missing). Keeps user-facing auth copy in one testable place.
-- **Used by:** `app/auth/account-created/page.tsx`
+### `<PasswordField />` — `components/auth/password-field.tsx`
+Client password input (T15) with a show/hide eye toggle (`Eye`/`EyeOff` from lucide-react). The toggle is `type="button"` (never submits), has an `aria-label`, and uses `nextPasswordInputType` from `lib/auth-copy` to flip the input type. Props: `id`, `name`, `autoComplete` (new-password on signup / current-password on signin), `placeholder`. Shared by both auth forms so they never drift.
+- **Used by:** `app/auth/sign-up/page.tsx`, `app/auth/sign-in/page.tsx`
+
+### `lib/auth-copy.ts` — `accountCreatedCopy(email)`, `nextPasswordInputType(isVisible)`, `securedNote()`
+Pure, TDD-able copy/helper module (T14/T15) for the auth surface. `accountCreatedCopy` builds the verification screen wording; `nextPasswordInputType` flips the password input type for the toggle; `securedNote()` returns `"Secured by 256-bit encryption · No card required"` (rendered under each auth submit button). Keeps user-facing auth copy in one testable place.
+- **Used by:** `app/auth/account-created/page.tsx`, `components/auth/password-field.tsx`, `app/auth/sign-up/page.tsx`, `app/auth/sign-in/page.tsx`
 
 ### `/api/referral/referrer` — `app/api/referral/referrer/route.ts`
 Route Handler (nodejs) that resolves a referral code to the referrer's display name for the sign-up banner. Reads `?code=`, looks up `referral_codes.user_id` then `profiles.full_name` via service-role, and returns `{ name }`. **Leak-safe (T13):** the returned name is passed through `sanitizeReferrerName`, so an email-shaped `full_name` becomes `null` and never crosses the wire. Fails closed to `{ name: null }`.

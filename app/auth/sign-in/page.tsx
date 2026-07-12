@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { signIn, signInWithGoogle, resendConfirmationEmail } from "@/lib/actions/auth";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { PasswordField } from "@/components/auth/password-field";
+import { securedNote } from "@/lib/auth-copy";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -100,13 +102,10 @@ export default function SignInPage() {
             >
               Password
             </label>
-            <input
+            <PasswordField
               id="password"
               name="password"
-              type="password"
-              required
               autoComplete="current-password"
-              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
               placeholder="At least 6 characters"
             />
             <div className="mt-2 text-right">
@@ -150,6 +149,7 @@ export default function SignInPage() {
           )}
 
           <SubmitButton />
+          <p className="mt-3 text-center text-[10px] text-ink-dim">{securedNote()}</p>
         </form>
 
         <div className="my-6 flex items-center gap-3">

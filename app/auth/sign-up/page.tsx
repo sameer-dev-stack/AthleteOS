@@ -9,6 +9,8 @@ import { trackFunnel } from "@/lib/hooks/use-funnel-tracking";
 import { Logo } from "@/components/logo";
 import { ReferralInviteBanner } from "@/components/auth/referral-invite-banner";
 import { ProcessingOverlay } from "@/components/auth/processing-overlay";
+import { PasswordField } from "@/components/auth/password-field";
+import { securedNote } from "@/lib/auth-copy";
 import { Shield, Zap, Users } from "lucide-react";
 
 function SubmitButton() {
@@ -106,13 +108,10 @@ export default function SignUpPage() {
             >
               Password
             </label>
-            <input
+            <PasswordField
               id="password"
               name="password"
-              type="password"
-              required
               autoComplete="new-password"
-              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
               placeholder="At least 6 characters"
             />
           </div>
@@ -122,6 +121,7 @@ export default function SignUpPage() {
           )}
 
           <SubmitButton />
+          <p className="mt-3 text-center text-[10px] text-ink-dim">{securedNote()}</p>
         </form>
 
         <div className="my-6 flex items-center gap-3">
