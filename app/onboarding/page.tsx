@@ -268,10 +268,21 @@ export default function OnboardingPage() {
     }
   }, [step]);
 
-  const skipOptional = useCallback(() => {
+  const skipOptional = useCallback(async () => {
+    await updateProfile({
+      username: username.trim() || undefined,
+      full_name: fullName.trim() || undefined,
+      sport: sport.trim() || undefined,
+      school: school.trim() || undefined,
+      class_year: classYear || undefined,
+      position: position.trim() || undefined,
+      bio: bio.trim() || undefined,
+      avatar_url: avatarUrl || undefined,
+      onboarding_completed: true,
+    });
     setSlideDir(1);
     setStep("done");
-  }, []);
+  }, [username, fullName, sport, school, classYear, position, bio, avatarUrl]);
 
   const markTouched = useCallback((field: string) => {
     setTouched((prev) => ({ ...prev, [field]: true }));

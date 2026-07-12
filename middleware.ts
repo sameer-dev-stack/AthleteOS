@@ -121,12 +121,15 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(dashUrl);
     }
 
-    // Block incomplete profiles from accessing anything except /onboarding and auth routes
+    // Block incomplete profiles from accessing anything except /onboarding, auth,
+    // and public profile pages (/:username single-segment paths).
+    const isPublicProfile = /^\/[a-zA-Z0-9_-]+$/.test(pathname) && !pathname.startsWith("/_next");
     if (
       !profile?.onboarding_completed &&
       pathname !== "/onboarding" &&
       !pathname.startsWith("/auth/") &&
-      !pathname.startsWith("/onboarding/")
+      !pathname.startsWith("/onboarding/") &&
+      !isPublicProfile
     ) {
       const onboardingUrl = request.nextUrl.clone();
       onboardingUrl.pathname = "/onboarding";
