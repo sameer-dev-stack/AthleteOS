@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-07-11 — GDPR: deleteAccount now removes referral data
+
+### What changed
+1. **`lib/actions/gdpr.ts`** — `deleteAccount` now deletes `referral_clicks`, `referrals`, and `referral_codes` rows owned by the deleted user. Previously these tables were omitted from the delete sequence, leaving orphaned PII after account deletion.
+
+### Why
+GDPR D1 risk: referral tables were added after the original delete list and were missed. `referrals.referred_id` is UNIQUE (one referral per person), so scoped deletes are safe and indexed.
+
+### Files touched
+- `lib/actions/gdpr.ts`
+
+### Commit
+`TBD` (pending push)
+
+---
+
 ## 2026-07-11 — Referral cookie fix + dashboard crash fix
 
 ### What changed

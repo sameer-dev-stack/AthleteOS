@@ -72,6 +72,11 @@ export async function deleteAccount(): Promise<{ ok: boolean; error?: string }> 
       } catch { /* best effort */ }
     }
 
+    // referral data removed with account (GDPR) — referred_id unique = one referral per person
+    await admin.from("referral_clicks").delete().eq("referrer_id", user.id);
+    await admin.from("referrals").delete().or(`referrer_id.eq.${user.id},referred_id.eq.${user.id}`);
+    await admin.from("referral_codes").delete().eq("user_id", user.id);
+
     await admin.from("profiles").delete().eq("id", user.id);
 
     return { ok: true };
