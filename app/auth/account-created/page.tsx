@@ -1,12 +1,12 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { AuthLayout } from "@/components/auth/auth-layout";
 import { resendConfirmationEmail } from "@/lib/actions/auth";
-import { Logo } from "@/components/logo";
 import { accountCreatedCopy } from "@/lib/auth-copy";
-import { Mail } from "lucide-react";
+import { Mail, RefreshCw, ArrowRight } from "lucide-react";
 
 function AccountCreatedContent() {
   const searchParams = useSearchParams();
@@ -28,51 +28,76 @@ function AccountCreatedContent() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg px-4">
-      <div className="w-full max-w-sm">
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-8 text-center shadow-[0_0_40px_-12px_rgba(198,255,61,0.15)]">
-          <div className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 ring-1 ring-accent/20">
-            <Mail className="h-8 w-8 text-accent" />
-          </div>
+    <AuthLayout
+      title={copy.heading}
+      subtitle="Verify your account to activate your AthleteOS card"
+    >
+      <div className="py-4 text-center space-y-6">
+        <div className="w-16 h-16 rounded-2xl bg-accent/10 text-accent flex items-center justify-center mx-auto border border-accent/20">
+          <Mail className="w-8 h-8 animate-pulse" />
+        </div>
 
-          <h1 className="mb-3 text-2xl font-bold text-white">{copy.heading}</h1>
+        <div className="space-y-2">
+          <p className="text-xs text-ink-muted leading-relaxed">
+            {copy.body}
+            {email && (
+              <>
+                {" "}
+                A verification email has been sent to{" "}
+                <strong className="text-white font-medium">{email}</strong>.
+              </>
+            )}
+          </p>
+        </div>
 
-          <p className="mb-6 text-sm text-ink-muted">{copy.body}</p>
+        <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs text-ink-dim text-left space-y-2">
+          <p className="font-medium text-ink-muted">
+            Didn&apos;t receive the email?
+          </p>
+          <ul className="list-disc list-inside space-y-1 text-ink-dim">
+            <li>Check your spam or junk folder</li>
+            <li>Ensure your email address was typed correctly</li>
+          </ul>
+        </div>
 
+        <div className="space-y-3 pt-2">
           {email && (
             <>
               {resendState && (
-                <p className={`mb-4 text-sm ${resendState.ok ? "text-accent" : "text-red-400"}`}>
+                <p
+                  className={`text-sm ${resendState.ok ? "text-accent" : "text-red-400"}`}
+                >
                   {resendState.message}
                 </p>
               )}
-
               <button
                 onClick={handleResend}
                 disabled={resending}
-                className="mb-4 w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-medium text-ink transition-all hover:bg-white/[0.06] disabled:opacity-50"
+                className="w-full py-3 px-4 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded-xl text-white font-medium text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
-                {resending ? "Sending..." : "Resend confirmation email"}
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>{resending ? "Sending..." : "Resend confirmation email"}</span>
               </button>
             </>
           )}
 
           <Link
             href="/auth/sign-in"
-            className="block w-full rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-bg transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)]"
+            className="w-full py-3.5 px-4 bg-accent hover:bg-accent-soft text-bg font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition-all inline-flex"
           >
-            Go to Sign In
+            <span>Continue</span>
+            <ArrowRight className="w-4 h-4" />
           </Link>
+        </div>
 
-          <p className="mt-4 text-xs text-ink-dim">
-            Already confirmed?{" "}
-            <Link href="/auth/sign-in" className="text-ink-muted hover:text-white">
-              Sign in
-            </Link>
-          </p>
+        <div className="text-xs text-ink-dim pt-2">
+          Already confirmed?{" "}
+          <Link href="/auth/sign-in" className="text-accent font-medium hover:underline">
+            Sign in
+          </Link>
         </div>
       </div>
-    </div>
+    </AuthLayout>
   );
 }
 
@@ -82,7 +107,7 @@ export default function AccountCreatedPage() {
       fallback={
         <div className="flex min-h-screen items-center justify-center bg-bg px-4">
           <div className="w-full max-w-sm">
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-8 text-center">
+            <div className="rounded-2xl border border-white/[0.08] bg-elev p-8 text-center">
               <div className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 ring-1 ring-accent/20 animate-pulse motion-reduce:animate-none" />
               <div className="h-6 w-48 rounded bg-white/[0.06] mx-auto mb-4 animate-pulse motion-reduce:animate-none" />
               <div className="h-4 w-64 rounded bg-white/[0.04] mx-auto mb-2 animate-pulse motion-reduce:animate-none" />

@@ -1,9 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
+import { Sparkles } from "lucide-react";
 import { buildInvitedBy } from "@/lib/referral-display";
 
-// Reads the athleteos_ref cookie (set by middleware on /r/[code]) and shows
-// "Invited by {Name}" on sign-up. Renders nothing when absent or unresolved.
 export function ReferralInviteBanner() {
   const [text, setText] = useState<string | null>(null);
 
@@ -19,10 +18,9 @@ export function ReferralInviteBanner() {
 
   if (!text) return null;
   return (
-    <div className="mb-6 text-center">
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
-        {text}
-      </span>
+    <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-accent/10 border border-accent/20 text-accent text-xs font-medium">
+      <Sparkles className="w-4 h-4 shrink-0" />
+      <span>{text}</span>
     </div>
   );
 }
