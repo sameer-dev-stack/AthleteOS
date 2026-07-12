@@ -101,7 +101,7 @@ export function CompoundingValue({ themeAccent, createdAt, memory }: Props) {
 
       <div className="space-y-1">
         <div className="flex justify-between text-[9px] font-bold text-white/30 uppercase tracking-widest">
-          <span>Day 1</span>
+          <span style={{ color: themeAccent }}>Day {daysOnPlatform}</span>
           <span style={{ color: themeAccent }}>
             {progressPercent}% to Elite
           </span>
@@ -111,6 +111,10 @@ export function CompoundingValue({ themeAccent, createdAt, memory }: Props) {
             className="h-full rounded-full transition-all duration-1000 ease-out"
             style={{ width: `${progressPercent}%`, backgroundColor: themeAccent }}
           />
+        </div>
+        <div className="flex justify-between text-[9px] font-bold text-white/20 uppercase tracking-widest pt-0.5">
+          <span>Day 1</span>
+          <span>Day {maxMilestone}</span>
         </div>
       </div>
 

@@ -18,9 +18,11 @@ import { InquiryForm } from "@/components/inquiry-form";
 import { trackView, trackLinkClick } from "@/lib/actions/analytics";
 import { trackFunnel } from "@/lib/hooks/use-funnel-tracking";
 import { Logo } from "@/components/logo";
+import { resolvePlan } from "@/lib/referral-reward";
 import { ShareButtons } from "@/components/share-buttons";
 import { QrShareModal } from "@/components/dashboard/qr-share-modal";
 import { CARD_W, CARD_H } from "@/lib/constants";
+import { cleanName } from "@/lib/display-name";
 
 /* ── Constants ───────────────────────────────────────── */
 
@@ -48,15 +50,6 @@ const SOCIAL_MAP: { key: string; Icon: React.ElementType; prefix: string; color:
 ];
 
 /* ── Helpers ─────────────────────────────────────────── */
-
-function isEmail(v: string) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
-
-function cleanName(full: string | null, user: string | null): string {
-  const raw = full || user || "";
-  if (!raw) return "Athlete";
-  if (isEmail(raw)) return raw.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-  return raw;
-}
 
 function sanitize(t: string | null): string {
   if (!t) return "";
@@ -363,14 +356,14 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
                     <span className="text-[8px] font-bold" style={{ color: accent }}>Verified</span>
                   </div>
                 )}
-                {profile.plan !== "free" && (
+                {resolvePlan(profile.plan, profile.extended_pro_until) !== "free" && (
                   <div
                     className="flex items-center gap-1 rounded-full px-2 py-0.5 backdrop-blur-md"
                     style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
                   >
                     <Star className="h-2.5 w-2.5 text-white/50" />
                     <span className="text-[8px] font-bold text-white/50">
-                      {profile.plan === "pro" ? "Pro" : "Team"}
+                      {resolvePlan(profile.plan, profile.extended_pro_until) === "pro" ? "Pro" : "Team"}
                     </span>
                   </div>
                 )}

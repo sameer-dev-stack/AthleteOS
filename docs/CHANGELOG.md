@@ -5,6 +5,32 @@
 
 ---
 
+## 2026-07-12 — Plan delegation + rewire all plan-gated reads
+
+### What changed
+1. **`lib/actions/ai-usage.ts`** — `getPlan()` now delegates entirely to `getEffectivePlan()` (single source of truth). `Plan` type re-exported from `EffectivePlan`. Removed inline DB query + `resolvePlan` call. `getAiQuota` calls `getPlan()` without passing a client.
+2. **`__tests__/plan-delegation.test.ts`** [NEW] — Test asserting `getPlan()` returns `"pro"` when `extended_pro_until` is future. Passes immediately (behavior was already correct via `resolvePlan`; test is a regression guard).
+3. **`lib/stripe-billing.ts`** — `getSubscriptionByUserId` now uses `resolvePlan()` for tier fallback. Added `extended_pro_until` to the profiles select query. Three locations updated: no-subscription fallback, initial tier from DB, catch-block fallback.
+4. **`components/dashboard/overview.tsx`** — Upgrade CTA now checks `resolvePlan(profile.plan, profile.extended_pro_until)` instead of raw `profile.plan`.
+5. **`components/profile-card.tsx`** — Plan badge now uses `resolvePlan()` for both visibility and label.
+6. **`components/dashboard/settings-panel.tsx`** — Plan info section now uses `resolvePlan()` for visibility and display.
+
+### Why
+`getPlan()` was functionally correct but duplicated `getEffectivePlan()` logic. Architectural consolidation ensures a single source of truth. Plan-gated reads across the UI (upgrade CTA, profile badge, settings display, billing tier) now honor `extended_pro_until` so referral-earned and Stripe-granted Pro users see correct plan status everywhere.
+
+### Files touched
+- `lib/actions/ai-usage.ts`
+- `__tests__/plan-delegation.test.ts` (new)
+- `lib/stripe-billing.ts`
+- `components/dashboard/overview.tsx`
+- `components/profile-card.tsx`
+- `components/dashboard/settings-panel.tsx`
+
+### Commit
+`TBD`
+
+---
+
 ## 2026-07-12 — Two-sided referral reward (referrer + referred both earn Pro)
 
 ### What changed

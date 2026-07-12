@@ -56,17 +56,51 @@ const SOCIAL_PLATFORMS = [
 /** Strip protocol + domain prefix from a social handle if the user pasted a full URL */
 function cleanSocialHandle(value: string, prefixes: readonly string[]): string {
   let v = value.trim();
-  // Strip protocol
-  v = v.replace(/^https?:\/\//i, "");
-  // Strip known domain prefixes
-  for (const prefix of prefixes) {
-    if (v.toLowerCase().startsWith(prefix.toLowerCase())) {
-      v = v.slice(prefix.length);
-      break;
+  if (!v) return v;
+  // Repeat until stable to handle doubled URLs (e.g. site.com/site.com/user)
+  for (let i = 0; i < 5; i++) {
+    let changed = false;
+    const lower = v.toLowerCase();
+    if (/^https?:\/\//i.test(v)) {
+      v = v.replace(/^https?:\/\//i, "");
+      changed = true;
+    } else if (/^www\./i.test(v)) {
+      v = v.replace(/^www\./i, "");
+      changed = true;
+    } else {
+      const matched = prefixes.find((p) => lower.startsWith(p.toLowerCase()));
+      if (matched) {
+        v = v.slice(matched.length);
+        changed = true;
+      }
     }
+    if (!changed) break;
   }
-  // Strip leading @ for non-youtube platforms (YouTube uses @handle convention)
+  // Keep only the first path segment (drop trailing slash, path, query)
+  const slash = v.indexOf("/");
+  if (slash !== -1) v = v.slice(0, slash);
+  // Card prefixes add "@" where needed, so strip any leading/trailing @ and dots
+  v = v.replace(/^@+/, "").replace(/\.+$/, "");
   return v;
+}
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isValidEmail(value: string): boolean {
+  return EMAIL_REGEX.test(value.trim());
+}
+
+// Keep only digits and auto-format to US-style "+1 (999) 999-9999".
+// International numbers (more than 10 digits) fall back to a "+<digits>" string.
+function formatPhone(value: string): string {
+  const digits = value.replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.length > 10) {
+    return `+${digits.startsWith("1") ? digits : `1${digits}`}`.slice(0, 17);
+  }
+  if (digits.length <= 3) return `(${digits}`;
+  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
 }
 
 export function DashboardEditor({ profile, onSaved }: Props) {
@@ -106,7 +140,7 @@ export function DashboardEditor({ profile, onSaved }: Props) {
     setAccent(profile.theme_accent || "#C6FF3D");
     setContactEmail(profile.contact_email || "");
     setContactPhone(profile.contact_phone || "");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profileBio, profileStatsStr, profileLinksStr, profileSocialStr, profileHighlightsStr, profileAccent, profileContactEmail, profileContactPhone]);
 
   const contentChanged =
@@ -120,6 +154,7 @@ export function DashboardEditor({ profile, onSaved }: Props) {
 
   const themeChanged = accent !== profileAccent;
   const hasChanges = contentChanged || themeChanged;
+  const contactEmailInvalid = contactEmail.trim().length > 0 && !isValidEmail(contactEmail);
 
   useEffect(() => {
     if (!hasChanges) return;
@@ -135,6 +170,12 @@ export function DashboardEditor({ profile, onSaved }: Props) {
     setSaving(true);
     setError(null);
     setSaved(false);
+
+    if (contactEmailInvalid) {
+      setSaving(false);
+      setError("Please enter a valid email address.");
+      return;
+    }
 
     const cleanLinks = links
       .map((l) => {
@@ -206,7 +247,7 @@ export function DashboardEditor({ profile, onSaved }: Props) {
     } else {
       onSaved?.(profile);
     }
-  }, [bio, stats, links, social, highlights, accent, contactEmail, contactPhone, contentChanged, themeChanged, onSaved, profile]);
+  }, [bio, stats, links, social, highlights, accent, contactEmail, contactPhone, contentChanged, themeChanged, contactEmailInvalid, onSaved, profile]);
 
   return (
     <div className="rounded-xl border border-white/[0.06] bg-[#111113]">
@@ -215,7 +256,7 @@ export function DashboardEditor({ profile, onSaved }: Props) {
           <h2 className="text-lg font-semibold text-white">Edit Profile</h2>
           <button
             onClick={handleSave}
-            disabled={saving || !hasChanges}
+            disabled={saving || !hasChanges || contactEmailInvalid}
             className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-bg transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {saving ? (
@@ -242,11 +283,10 @@ export function DashboardEditor({ profile, onSaved }: Props) {
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${
-                  tab === t.id
+                className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${tab === t.id
                     ? "bg-accent/15 text-accent"
                     : "text-ink-muted hover:bg-white/[0.04] hover:text-white"
-                }`}
+                  }`}
               >
                 {t.label}
                 {isComplete && (
@@ -309,7 +349,7 @@ export function DashboardEditor({ profile, onSaved }: Props) {
         <div className="fixed bottom-4 inset-x-4 z-50 lg:hidden">
           <button
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || !hasChanges || contactEmailInvalid}
             className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-bg shadow-lg shadow-accent/20 transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] disabled:opacity-50"
           >
             {saving ? (
@@ -473,7 +513,8 @@ function StatsEditor({
     <div className="space-y-3">
       <p className="text-xs text-ink-dim">
         Add key stats that show up on your public card (e.g., PPG, GPA, 40-yard
-        dash). Up to 3 appear on the front face of your card.
+        dash). The first 3 are featured on the front face of your card — reorder
+        by removing and re-adding, or clear a row to push others up.
       </p>
       {stats.length === 0 ? (
         <EmptyState
@@ -484,13 +525,33 @@ function StatsEditor({
         />
       ) : (
         <>
+          <div className="flex items-center gap-2 px-1">
+            <span className="w-9 shrink-0" />
+            <span className="w-1/2 text-[10px] font-bold uppercase tracking-widest text-ink-dim">
+              Stat Label
+            </span>
+            <span className="w-1/2 text-[10px] font-bold uppercase tracking-widest text-ink-dim">
+              Value
+            </span>
+            <span className="w-9 shrink-0" />
+          </div>
           {stats.map((stat, i) => (
-            <div key={i} className="flex gap-2">
+            <div key={i} className="flex items-center gap-2">
+              {i < 3 ? (
+                <span
+                  className="flex w-9 shrink-0 justify-center rounded-md border border-accent/30 bg-accent/10 text-[8px] font-bold uppercase tracking-wide text-accent"
+                  title="Featured on the front of your card"
+                >
+                  ★
+                </span>
+              ) : (
+                <span className="w-9 shrink-0" />
+              )}
               <input
                 type="text"
                 value={stat.label}
                 onChange={(e) => updateStat(i, "label", e.target.value)}
-                placeholder="Label (e.g., PPG)"
+                placeholder="e.g., 40-yard"
                 maxLength={50}
                 className="w-1/2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
               />
@@ -498,13 +559,13 @@ function StatsEditor({
                 type="text"
                 value={stat.value}
                 onChange={(e) => updateStat(i, "value", e.target.value)}
-                placeholder="Value (e.g., 24.5)"
+                placeholder="e.g., 4.5s"
                 maxLength={50}
                 className="w-1/2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
               />
               <button
                 onClick={() => removeStat(i)}
-                className="rounded-lg border border-white/[0.06] p-2 text-ink-dim hover:text-red-400 transition-colors"
+                className="w-9 shrink-0 rounded-lg border border-white/[0.06] p-2 text-ink-dim hover:text-red-400 transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -630,7 +691,9 @@ function SocialEditor({
   onChange: (v: { twitter?: string; instagram?: string; tiktok?: string; youtube?: string }) => void;
 }) {
   function updatePlatform(key: string, value: string) {
-    onChange({ ...social, [key]: value || undefined });
+    const platform = SOCIAL_PLATFORMS.find((p) => p.key === key);
+    const cleaned = platform ? cleanSocialHandle(value, platform.prefixes) : value;
+    onChange({ ...social, [key]: cleaned || undefined });
   }
 
   return (
@@ -651,8 +714,8 @@ function SocialEditor({
             maxLength={50}
             className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
           />
-          <p className="mt-1 text-[11px] text-white/20">
-            Handle only — e.g. <span className="text-white/35">{p.placeholder}</span>. Don&apos;t paste the full URL.
+          <p className="mt-1 text-[11px] text-white/50">
+            Handle only — e.g. <span className="font-semibold text-white/70">{p.placeholder}</span>. If you paste a full link, we&apos;ll trim it to your handle automatically.
           </p>
         </div>
       ))}
@@ -748,6 +811,7 @@ function ContactEditor({
   onEmailChange: (v: string) => void;
   onPhoneChange: (v: string) => void;
 }) {
+  const emailError = email.trim().length > 0 && !isValidEmail(email);
   return (
     <div className="space-y-4">
       <p className="text-xs text-ink-dim">
@@ -762,13 +826,22 @@ function ContactEditor({
           type="email"
           value={email}
           onChange={(e) => onEmailChange(e.target.value)}
+          onBlur={() => onEmailChange(email.trim())}
           placeholder="contact@yourname.com"
           maxLength={200}
-          className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+          aria-invalid={emailError}
+          className={`w-full rounded-lg border bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:outline-none ${emailError
+              ? "border-red-500/60 focus:border-red-500/60"
+              : "border-white/[0.08] focus:border-accent/40"
+            }`}
         />
-        <p className="mt-1 text-[11px] text-white/20">
-          This email will be visible to users who click the Contact button on your card.
-        </p>
+        {emailError ? (
+          <p className="mt-1 text-[11px] text-red-400">Please enter a valid email address.</p>
+        ) : (
+          <p className="mt-1 text-[11px] text-white/20">
+            This email will be visible to users who click the Contact button on your card.
+          </p>
+        )}
       </div>
       <div>
         <label htmlFor="contact_phone" className="mb-1 block text-sm font-medium text-ink-muted">
@@ -776,15 +849,16 @@ function ContactEditor({
         </label>
         <input
           id="contact_phone"
-          type="text"
+          type="tel"
+          inputMode="tel"
           value={phone}
-          onChange={(e) => onPhoneChange(e.target.value)}
+          onChange={(e) => onPhoneChange(formatPhone(e.target.value))}
           placeholder="+1 (555) 000-0000"
-          maxLength={30}
+          maxLength={17}
           className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
         />
         <p className="mt-1 text-[11px] text-white/20">
-          Your phone number for direct calls, texts, or WhatsApp.
+          Your phone number for direct calls, texts, or WhatsApp. Digits only — formatting is applied automatically.
         </p>
       </div>
     </div>

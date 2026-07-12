@@ -1,10 +1,35 @@
 {
-  "worktrees": {},
-  "sessions": {},
+  "worktrees": {
+    "wt-1783770699102-1": {
+      "branch": "endurable-fall",
+      "path": "d:\\Projects\\AthleteOS-main\\.kilo\\worktrees\\endurable-fall",
+      "parentBranch": "main",
+      "createdAt": "2026-07-11T11:51:39.102Z",
+      "remote": "origin",
+      "branchOwned": true,
+      "autoNameSessionId": "ses_0aefb0a39ffegU3h4GyezrvYox",
+      "autoNamePromptCount": 4
+    }
+  },
+  "sessions": {
+    "ses_0aefb0a39ffegU3h4GyezrvYox": {
+      "worktreeId": "wt-1783770699102-1",
+      "createdAt": "2026-07-11T11:51:47.528Z"
+    },
+    "ses_0ab020541ffevEONfRtVw4k4sX": {
+      "worktreeId": null,
+      "createdAt": "2026-07-12T06:22:38.888Z"
+    }
+  },
   "tabOrder": {
     "local": [
-      "pending:1"
+      "ses_0afa321efffe7Sj9uh9Djho9Xi",
+      "pending:2",
+      "ses_0ab020541ffevEONfRtVw4k4sX"
     ]
   },
+  "worktreeOrder": [
+    "wt-1783770699102-1"
+  ],
   "sessionsCollapsed": true
 }

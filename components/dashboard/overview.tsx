@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Profile } from "@/lib/actions/profile";
+import { cleanName } from "@/lib/display-name";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { updateProfile } from "@/lib/actions/profile";
 import { ProfileScore } from "@/components/dashboard/profile-score";
@@ -21,6 +22,7 @@ import { NilMetricsStrip } from "@/components/dashboard/nil-metrics-strip";
 import { getSavedAssetsCount } from "@/lib/actions/ai-vault";
 import { getSocialAccounts, type SocialAccount } from "@/lib/actions/social-accounts";
 import { SmartAiActions } from "@/components/dashboard/smart-ai-actions";
+import { resolvePlan } from "@/lib/referral-reward";
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton";
 import { CompoundingValue } from "@/components/dashboard/compounding-value";
 import { ReferralCard } from "@/components/dashboard/referral-card";
@@ -44,6 +46,7 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
   const [avatarUrl, setAvatarUrl] = useState(initialProfile.avatar_url);
 
   const [earnings, setEarnings] = useState<TipEarningsData | null>(null);
+  const cardName = cleanName(profile.full_name, profile.username);
   const [balance, setBalance] = useState<PayoutBalance | null>(null);
   const [loadingTips, setLoadingTips] = useState(true);
   const [connecting, setConnecting] = useState(false);
@@ -143,7 +146,7 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
     const url = `${process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app"}/${profile.username}`;
     if (navigator.share) {
       try {
-        await navigator.share({ title: `${profile.full_name || profile.username} on AthleteOS`, text: "Check out my athlete card", url });
+        await navigator.share({ title: `${cardName} on AthleteOS`, text: "Check out my athlete card", url });
       } catch {}
     } else {
       try {
@@ -169,7 +172,7 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
       const confettiMod = await import("canvas-confetti");
       confettiMod.default({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
       if (profile.username) {
-        const name = (profile.full_name || profile.username).split(" ")[0];
+        const name = cardName.split(" ")[0];
         sendCardPublishedEmail(profile.email, name, profile.username).catch(() => {});
       }
     }
@@ -177,7 +180,7 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
   }
 
   const accentColor = profile.theme_accent || "#C6FF3D";
-  const initials = (profile.full_name || profile.username || "A")
+  const initials = cardName
     .split(" ")
     .map((w) => w[0])
     .join("")
@@ -285,7 +288,7 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
       </div>
 
       {/* Upgrade CTA for free users */}
-      {profile.plan === "free" && (
+      {resolvePlan(profile.plan, profile.extended_pro_until) === "free" && (
         <a
           href="/dashboard/billing"
           className="flex items-center justify-between rounded-2xl border border-accent/20 bg-accent/5 p-4 transition-all hover:bg-accent/10"
@@ -417,7 +420,7 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
                       {avatarUrl ? (
                         <Image
                           src={avatarUrl}
-                          alt={profile.full_name || profile.username || ""}
+                          alt={cardName}
                           fill
                           className="object-cover object-top"
                           unoptimized
@@ -452,14 +455,28 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
                       {/* Name + Role */}
                       <div>
                         <p className="text-[15px] font-black text-white leading-tight tracking-tight">
-                          {profile.full_name || profile.username}
+                          {cardName}
                         </p>
-                        <p className="text-[11px] font-bold mt-1" style={{ color: accentColor }}>
-                          {[profile.position, profile.sport].filter(Boolean).join(" · ")}
-                        </p>
-                      </div>
+                      <p className="text-[11px] font-bold mt-1" style={{ color: accentColor }}>
+                        {[profile.position, profile.sport].filter(Boolean).join(" · ")}
+                      </p>
+                    </div>
 
-                      {/* Stats chips */}
+                    {/* Bio */}
+                    {profile.bio && profile.bio.trim().length > 15 ? (
+                      <p
+                        className="mt-2 text-[10px] leading-[1.5] text-white/55 line-clamp-3"
+                        style={{ overflowWrap: "break-word", wordBreak: "break-word" }}
+                      >
+                        {profile.bio.trim()}
+                      </p>
+                    ) : (
+                      <p className="mt-2 text-[10px] italic text-white/25">
+                        No bio added yet
+                      </p>
+                    )}
+
+                    {/* Stats chips */}
                       {(() => {
                         const PLACEHOLDER_STATS = /^(test|asdf|foo|bar|baz|aaa|123|000|xxx|yyy|zzz|na|n\/a|none|sample|demo|example|temp|placeholder)$/i;
                         const validStats = (profile.stats ?? []).filter(s => {

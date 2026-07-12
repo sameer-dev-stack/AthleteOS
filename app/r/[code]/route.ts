@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { trackReferralClick } from "@/lib/actions/referrals";
 
 const REF_COOKIE = "athleteos_ref";
 const REF_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
@@ -33,6 +34,12 @@ export async function GET(_request: Request, { params }: Props) {
         path: "/",
         maxAge: REF_MAX_AGE,
       });
+
+      await trackReferralClick(
+        codeRow.code,
+        _request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+        _request.headers.get("user-agent")
+      );
     }
   } catch (err) {
     console.error("[referral-redirect] error:", err);

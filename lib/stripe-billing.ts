@@ -1,4 +1,5 @@
 import { stripe } from "@/lib/stripe";
+import { resolvePlan } from "@/lib/referral-reward";
 
 const PRICE_IDS = {
   pro: process.env.STRIPE_PRICE_ID_PRO ?? "",
@@ -76,7 +77,7 @@ export async function recoverSubscriptionFromStripe(userId: string, userEmail: s
     // Check if already synced
     const { data: profile } = await supabase
       .from("profiles")
-      .select("plan, stripe_subscription_id")
+    .select("plan, extended_pro_until, stripe_subscription_id")
       .eq("id", userId)
       .single();
 
@@ -148,14 +149,14 @@ export async function getSubscriptionByUserId(userId: string): Promise<{
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("plan, stripe_subscription_id")
+    .select("plan, extended_pro_until, stripe_subscription_id")
     .eq("id", userId)
     .single();
 
   if (!profile?.stripe_subscription_id) {
     return {
       status: null,
-      tier: (profile?.plan as PlanTier) || "free",
+      tier: resolvePlan(profile?.plan, (profile as any)?.extended_pro_until) as PlanTier,
       currentPeriodEnd: null,
       customerId: null,
       subscriptionId: null,
@@ -171,7 +172,7 @@ export async function getSubscriptionByUserId(userId: string): Promise<{
     const currentPeriodEnd = firstItem?.current_period_end ?? null;
 
     // Derive tier from live Stripe price ID — not from DB which may be stale
-    let tier: PlanTier = (profile?.plan as PlanTier) || "free";
+    let tier: PlanTier = resolvePlan(profile?.plan, (profile as any)?.extended_pro_until) as PlanTier;
     if (subscription.status === "active" || subscription.status === "trialing") {
       const priceId = firstItem?.price?.id;
       if (priceId === process.env.STRIPE_PRICE_ID_PRO) {
@@ -194,7 +195,7 @@ export async function getSubscriptionByUserId(userId: string): Promise<{
   } catch {
     return {
       status: null,
-      tier: (profile?.plan as PlanTier) || "free",
+      tier: resolvePlan(profile?.plan, (profile as any)?.extended_pro_until) as PlanTier,
       currentPeriodEnd: null,
       customerId: null,
       subscriptionId: profile.stripe_subscription_id,

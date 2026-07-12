@@ -3,6 +3,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { REFERRAL_REWARD_DAYS, REFERRAL_CODE_CHARS } from "@/lib/constants";
+import { hashIp } from "@/lib/referral-click";
+import { usersToReward } from "@/lib/referral-reward";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app";
 
@@ -177,9 +179,11 @@ export async function recordReferral(code: string): Promise<{ ok: boolean; error
       return { ok: false, error: `Insert failed: ${insertErr.message}` };
     }
 
-    const { error: rpcErr } = await admin.rpc("grant_pro_reward", { referrer_uuid: codeRow.user_id });
-    if (rpcErr) {
-      console.error("[referrals] grant_pro_reward error:", rpcErr);
+    // Two-sided reward: referrer AND referred both earn Pro (standard referral model).
+    const rewarded = usersToReward(codeRow.user_id, user.id, codeRow.user_id === user.id, false);
+    for (const uid of rewarded) {
+      const { error: rpcErr } = await admin.rpc("grant_pro_reward", { referrer_uuid: uid });
+      if (rpcErr) console.error("[referrals] grant_pro_reward error:", rpcErr);
     }
 
     return { ok: true };
@@ -227,5 +231,26 @@ export async function getReferralHistory(): Promise<ReferralHistoryEntry[]> {
   } catch (err) {
     console.error("[referrals] getReferralHistory error:", err);
     return [];
+  }
+}
+
+export async function trackReferralClick(code: string, ip: string | null, ua: string | null) {
+  try {
+    const admin = createAdmin();
+    const { data: row } = await admin
+      .from("referral_codes")
+      .select("user_id, code")
+      .ilike("code", code)
+      .eq("is_active", true)
+      .single();
+    if (!row) return;
+    await admin.from("referral_clicks").insert({
+      code: row.code,
+      referrer_id: row.user_id,
+      ip_hash: hashIp(ip, process.env.ANALYTICS_IP_HASH_SECRET),
+      user_agent: ua ?? null,
+    });
+  } catch (err) {
+    console.error("[referrals] trackReferralClick error:", err);
   }
 }

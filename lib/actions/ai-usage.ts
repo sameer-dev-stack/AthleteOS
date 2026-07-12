@@ -1,5 +1,6 @@
 "use server";
 
+import { createClient } from "@/lib/supabase/server";
 import { getEffectivePlan } from "@/lib/actions/plan";
 import type { EffectivePlan } from "@/lib/actions/plan";
 
@@ -33,7 +34,7 @@ export async function getAiQuota(): Promise<{
     } = await supabase.auth.getUser();
     if (!user) return { used: 0, limit: 0, remaining: 0, plan: "free" };
 
-    const plan = await getPlan(supabase);
+    const plan = await getPlan();
     const periodStart = getCurrentPeriod();
 
     const { data } = await supabase

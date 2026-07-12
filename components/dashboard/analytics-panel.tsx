@@ -129,7 +129,7 @@ export function AnalyticsPanel({ athleteId, themeAccent = "#C6FF3D" }: Props) {
       "Metric,Value",
       `Click Rate,${data.engagement.clickRate.toFixed(2)}%`,
       `Inquiry Rate,${data.engagement.inquiryRate.toFixed(2)}%`,
-      `Tip Rate,$${data.engagement.tipRate.toFixed(4)}`,
+      `Tip Rate,$${data.engagement.tipRate.toFixed(2)}`,
       `Avg Views/Day,${data.engagement.avgViewsPerDay.toFixed(1)}`,
     ];
 
@@ -644,7 +644,7 @@ export function AnalyticsPanel({ athleteId, themeAccent = "#C6FF3D" }: Props) {
                   <span className="text-xs font-medium">Tip rate</span>
                 </div>
                 <p className="mt-2 text-2xl font-bold text-emerald-400">
-                  ${data.engagement.tipRate.toFixed(4)}
+                  ${data.engagement.tipRate.toFixed(2)}
                 </p>
                 <p className="text-[10px] text-ink-dim mt-1">Revenue / view</p>
               </div>

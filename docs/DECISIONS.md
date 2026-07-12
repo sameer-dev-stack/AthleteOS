@@ -926,3 +926,25 @@ Referral rewards were cosmetic because plan-checking logic (`getPlan` in `lib/ac
 - Reward policy is isolated in a pure, unit-tested function separate from DB application.
 - Self-referral cannot trigger any reward (policy returns `[]`).
 
+---
+
+## ADR-041 — getPlan() delegates to getEffectivePlan(); rewire all plan-gated reads
+
+**Status:** Accepted · 2026-07-12
+
+**Context:**
+`getPlan()` in `lib/actions/ai-usage.ts` duplicated the same DB query + `resolvePlan()` logic as `getEffectivePlan()` in `lib/actions/plan.ts`. While functionally correct, two identical code paths create drift risk. Additionally, several UI components (upgrade CTA, profile badge, settings display, billing tier) read the raw `plan` column directly, ignoring `extended_pro_until` — meaning referral-earned Pro users saw incorrect plan status in the UI.
+
+**Decision:**
+1. `getPlan()` now delegates entirely to `getEffectivePlan()` — single source of truth. `Plan` type re-exported from `EffectivePlan`.
+2. `stripe-billing.ts` uses `resolvePlan()` for tier fallback (added `extended_pro_until` to select query).
+3. `overview.tsx`, `profile-card.tsx`, `settings-panel.tsx` now call `resolvePlan(profile.plan, profile.extended_pro_until)` instead of reading `profile.plan` directly.
+4. Admin functions and `first-500-pro.ts` left unchanged (admin display / write paths, not feature gates).
+5. `discover/client.tsx` left unchanged (already receives effective plan from `discovery.ts`).
+
+**Consequences:**
+- All plan-gated reads route through `resolvePlan()` or `getEffectivePlan()`.
+- Stripe webhook write path unchanged (still writes raw plan column).
+- One extra Supabase client creation in `getAiQuota()` (creates its own + `getEffectivePlan()` creates one). Acceptable for architectural clarity.
+- Test suite includes delegation regression test.
+

@@ -81,6 +81,29 @@ export function SmartAiActions({
     icon: Send,
   });
 
+  // Client-side safety net: the server action can hang (slow/throttled MiMo
+  // API, Vercel function timeout) and never settle on the client, which would
+  // leave the "AI Engine Thinking..." spinner on screen forever.
+  const CLIENT_TIMEOUT_MS = 45_000;
+
+  function withClientTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error("The AI engine took too long to respond. Please try again."));
+      }, ms);
+      promise.then(
+        (value) => {
+          clearTimeout(timer);
+          resolve(value);
+        },
+        (err) => {
+          clearTimeout(timer);
+          reject(err);
+        }
+      );
+    });
+  }
+
   async function handleAction(signalId: string) {
     setLoading(true);
     setError(null);
@@ -89,7 +112,7 @@ export function SmartAiActions({
     setActiveSignal(signalId);
 
     try {
-      const res = await quickAiAction(signalId);
+      const res = await withClientTimeout(quickAiAction(signalId), CLIENT_TIMEOUT_MS);
       if (res.ok && res.data) {
         setOutput(res.data);
         if (res.quota) setQuota(res.quota);
@@ -98,7 +121,7 @@ export function SmartAiActions({
         if (res.quota) setQuota(res.quota);
       }
     } catch (e) {
-      setError("An unexpected error occurred.");
+      setError(e instanceof Error ? e.message : "An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -108,7 +131,7 @@ export function SmartAiActions({
 
   function handleCopy() {
     if (!output) return;
-    navigator.clipboard.writeText(output).catch(() => {});
+    navigator.clipboard.writeText(output).catch(() => { });
     setCopied(true);
     if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
     copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
@@ -190,6 +213,16 @@ export function SmartAiActions({
             </div>
             <div className="flex-1">
               <p className="text-xs font-semibold text-white">{error}</p>
+              {activeSignal && (
+                <button
+                  onClick={() => handleAction(activeSignal)}
+                  disabled={loading}
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-[11px] font-bold text-white/80 hover:text-white hover:bg-white/[0.04] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Zap className="h-3.5 w-3.5" style={{ color: themeAccent }} />
+                  Retry
+                </button>
+              )}
               {(error.includes("quota") || error.includes("limit") || error.includes("Upgrade")) && (
                 <div className="mt-3 rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
                   <p className="text-[11px] text-white/60 mb-2">Unlock unlimited AI generations with Pro</p>

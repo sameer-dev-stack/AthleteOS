@@ -24,6 +24,7 @@ import {
 import { updateProfile, updateTheme, type Profile } from "@/lib/actions/profile";
 import { updatePassword } from "@/lib/actions/auth";
 import { exportUserData, deleteAccount } from "@/lib/actions/gdpr";
+import { resolvePlan } from "@/lib/referral-reward";
 import { ThemePicker } from "./theme-picker";
 
 type Props = {
@@ -405,13 +406,13 @@ export function SettingsPanel({ profile, user }: Props) {
                         </div>
                       </div>
                     )}
-                    {profile.plan && profile.plan !== "free" && (
+                    {profile.plan && resolvePlan(profile.plan, profile.extended_pro_until) !== "free" && (
                       <div>
                         <label className="text-xs font-medium text-ink-muted">Plan</label>
                         <div className="mt-1.5 flex items-center gap-2">
                           <span className="inline-flex items-center gap-1 rounded-full border border-accent/20 bg-accent/5 px-2.5 py-1 text-xs font-semibold text-accent capitalize">
                             <Shield className="h-3 w-3" />
-                            {profile.plan}
+                            {resolvePlan(profile.plan, profile.extended_pro_until)}
                           </span>
                         </div>
                       </div>
