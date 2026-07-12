@@ -75,3 +75,17 @@ Reuse the cookie-read regex from `app/onboarding/page.tsx:306` so both stay in s
 render `buildInvitedBy(name)`.
 
 **Source:** Built the sign-up "Invited by {Name}" banner (T12), 2026-07-12.
+
+---
+
+## L6 — Sanitize free-text display names (reject email-shaped) before showing them to other users
+
+Free-text display names (e.g. `profiles.full_name`) are untrusted input. Any value
+surfaced to a *different* user — referral banner, mentions, sender names — must be
+sanitized for PII before render. Use a single pure guard (`sanitizeReferrerName`
+in `lib/referral-display.ts`): drop empty/whitespace and email-shaped values
+(`/^\S+@\S+\.\S+$/`), and fall back to a generic string. Apply it both server-side
+(return only the sanitized name from the API — never let the raw value cross the
+wire) and client-side (the render helper re-sanitizes) for defense in depth.
+
+**Source:** Fixed the referral banner PII leak (T13), 2026-07-12.

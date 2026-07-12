@@ -637,12 +637,12 @@ Reusable share surface: native share (falls back to copy), Copy, X/Twitter, What
 ## Auth Pages (`app/auth/`)
 
 ### `<ReferralInviteBanner />` — `components/auth/referral-invite-banner.tsx`
-Client component shown on `/auth/sign-up`. Reads the `athleteos_ref` cookie (non-httpOnly, set by middleware on `/r/[code]`) and calls `GET /api/referral/referrer?code=` to resolve the referrer's display name, then renders a pill: `"Invited by {Name}"` (`bg-accent/10`, `text-accent`, `rounded-full`). Renders nothing when the cookie is absent or the name lookup fails. No props.
+Client component shown on `/auth/sign-up`. Reads the `athleteos_ref` cookie (non-httpOnly, set by middleware on `/r/[code]`) and calls `GET /api/referral/referrer?code=` to resolve the referrer's display name, then renders a pill: `"Invited by {Name}"` or the generic `"You've been invited"` fallback (`bg-accent/10`, `text-accent`, `rounded-full`). **Leak-safe (T13):** the name is sanitized through `sanitizeReferrerName` so an email-shaped `full_name` is never displayed; it falls back to the generic invite. Renders nothing when the cookie is absent or the lookup fails. No props.
 - **Used by:** `app/auth/sign-up/page.tsx` (between the logo block and the `<h1>`)
 - Uses the pure `buildInvitedBy()` helper from `lib/referral-display.ts`
 
 ### `/api/referral/referrer` — `app/api/referral/referrer/route.ts`
-Route Handler (nodejs) that resolves a referral code to the referrer's display name for the sign-up banner. Reads `?code=`, looks up `referral_codes.user_id` then `profiles.full_name` via service-role, and returns `{ name }`. Never returns email or other PII; fails closed to `{ name: null }`.
+Route Handler (nodejs) that resolves a referral code to the referrer's display name for the sign-up banner. Reads `?code=`, looks up `referral_codes.user_id` then `profiles.full_name` via service-role, and returns `{ name }`. **Leak-safe (T13):** the returned name is passed through `sanitizeReferrerName`, so an email-shaped `full_name` becomes `null` and never crosses the wire. Fails closed to `{ name: null }`.
 - **Used by:** `components/auth/referral-invite-banner.tsx`
 
 ### `/auth/sign-up` — `app/auth/sign-up/page.tsx`

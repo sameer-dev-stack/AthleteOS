@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-07-12 — T13: Referral banner PII fix (leak-safe)
+
+### What changed
+1. **`lib/referral-display.ts`** — Added `sanitizeReferrerName(name)`; `buildInvitedBy` now uses it and falls back to `"You've been invited"` when the name is missing or PII-shaped (email). TDD-covered in `__tests__/referral-display.test.ts`.
+2. **`app/api/referral/referrer/route.ts`** — Now returns `sanitizeReferrerName(profile?.full_name ?? null)` so an email-shaped `full_name` never leaves the server. Banner re-sanitizes via `buildInvitedBy` (defense in depth).
+3. **`__tests__/referral-display.test.ts`** — Added `sanitizeReferrerName` suite (plain name, email-shaped, empty) and updated `buildInvitedBy` to assert the generic fallback.
+
+### Why
+A referrer with `full_name` = their email made the banner leak PII to the invited stranger. Free-text display names are untrusted; any value surfaced to another user must be sanitized before render.
+
+### Files touched
+- `lib/referral-display.ts`
+- `__tests__/referral-display.test.ts`
+- `app/api/referral/referrer/route.ts`
+
+### Commit
+(pending)
+
+---
+
 ## 2026-07-12 — T12: "Invited by {Name}" banner on the sign-up page
 
 ### What changed

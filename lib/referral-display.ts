@@ -21,9 +21,20 @@ export function buildShareText(referrerName?: string | null): string {
   return referrerName ? `${referrerName} invited you to ${base}` : base;
 }
 
-// Greeting shown on the sign-up page when a referral cookie is present.
-// Returns null when there's no referrer name so the UI can render nothing.
-export function buildInvitedBy(name: string | null | undefined): string | null {
-  if (!name) return null;
-  return `Invited by ${name}`;
+// Strips any value that looks like an email (or is empty) so the referral
+// banner can never surface PII. Free-text display names are not trustworthy.
+export function sanitizeReferrerName(name: string | null | undefined): string | null {
+  if (!name || !name.trim()) return null;
+  // Email-shaped (has @ and a dot-domain) is treated as PII and dropped.
+  if (/^\S+@\S+\.\S+$/.test(name.trim())) return null;
+  const trimmed = name.trim();
+  if (trimmed.length > 50) return null; // absurd-length guard
+  return trimmed;
+}
+
+// Greeting on the sign-up page. Falls back to a generic invite when the name
+// is missing or PII-shaped, so we never display an email on a stranger's page.
+export function buildInvitedBy(name: string | null | undefined): string {
+  const safe = sanitizeReferrerName(name);
+  return safe ? `Invited by ${safe}` : "You've been invited";
 }

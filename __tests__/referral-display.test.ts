@@ -1,4 +1,4 @@
-import { proUntilLabel, statusLabel, buildShareText, buildInvitedBy } from "@/lib/referral-display";
+import { proUntilLabel, statusLabel, buildShareText, sanitizeReferrerName, buildInvitedBy } from "@/lib/referral-display";
 
 describe("proUntilLabel", () => {
   it("returns dash when null/undefined", () => {
@@ -25,12 +25,28 @@ describe("statusLabel", () => {
   });
 });
 
+describe("sanitizeReferrerName", () => {
+  it("returns a plain display name", () => {
+    expect(sanitizeReferrerName("Ava Carter")).toBe("Ava Carter");
+  });
+  it("returns null for email-shaped values", () => {
+    expect(sanitizeReferrerName("cljefylo@denip.net")).toBeNull();
+    expect(sanitizeReferrerName("a@b.co")).toBeNull();
+    expect(sanitizeReferrerName("user@example.com")).toBeNull();
+  });
+  it("returns null for empty/whitespace", () => {
+    expect(sanitizeReferrerName("")).toBeNull();
+    expect(sanitizeReferrerName(null)).toBeNull();
+    expect(sanitizeReferrerName("   ")).toBeNull();
+  });
+});
+
 describe("buildInvitedBy", () => {
-  it("builds greeting from name", () => {
+  it("builds greeting from a safe name", () => {
     expect(buildInvitedBy("Ava")).toBe("Invited by Ava");
   });
-  it("returns null when no name", () => {
-    expect(buildInvitedBy(null)).toBeNull();
-    expect(buildInvitedBy("")).toBeNull();
+  it("falls back to generic when name unsafe/missing", () => {
+    expect(buildInvitedBy(null)).toBe("You've been invited");
+    expect(buildInvitedBy("cljefylo@denip.net")).toBe("You've been invited");
   });
 });

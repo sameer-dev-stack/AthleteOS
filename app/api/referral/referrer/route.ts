@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { sanitizeReferrerName } from "@/lib/referral-display";
 
 export const runtime = "nodejs";
 
@@ -29,5 +30,5 @@ export async function GET(request: Request) {
     .eq("id", codeRow.user_id)
     .single();
 
-  return NextResponse.json({ name: profile?.full_name ?? null });
+  return NextResponse.json({ name: sanitizeReferrerName(profile?.full_name ?? null) });
 }
