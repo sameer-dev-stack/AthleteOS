@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { z } from "zod";
@@ -95,7 +94,6 @@ export async function signUp(
       });
     }
 
-    revalidatePath("/");
     return {
       ok: true,
       message: isConfirmed
@@ -143,7 +141,6 @@ export async function signIn(
 
   const admin = checkIsAdmin(email);
 
-  revalidatePath("/");
   return { ok: true, message: "Signed in.", isAdmin: admin };
 }
 
