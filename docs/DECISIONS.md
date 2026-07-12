@@ -888,3 +888,41 @@ After deploying Sessions 73-74, the billing page returned HTTP 405. Investigatio
 - `useSearchParams()` is properly wrapped for Next.js 14 compatibility
 - Middleware runs on all routes (including API) — Stripe webhook still works because `request.text()` is independent of middleware
 - Any future component using `useSearchParams()` must be wrapped in `<Suspense>` when rendered in a Server Component tree
+
+---
+
+## ADR-039 — Single Source of Truth for Plan Gating (resolvePlan)
+
+**Status:** Accepted · 2026-07-12
+
+**Context:**
+Referral rewards were cosmetic because plan-checking logic (`getPlan` in `lib/actions/ai-usage.ts`) only checked the `plan` column of the `profiles` table and ignored `extended_pro_until`. Any user with a future `extended_pro_until` (earned via referrals or granted via stripe-recovery) was still treated as a `free` plan user, blocking access to Pro quotas.
+
+**Decision:**
+1. **Centralized Plan Resolution Helper**: Created `resolvePlan` in `lib/referral-reward.ts` as a pure function. It returns `"pro"` if `extended_pro_until` is in the future, or the base plan column value if it is `"pro"` or `"elite"`, defaulting to `"free"`.
+2. **Server Action `getEffectivePlan`**: Created a new server action `getEffectivePlan()` in `lib/actions/plan.ts` using `getUser()` (compliant with AGENTS.md) that queries the `profiles` table and calls `resolvePlan`.
+3. **Refactored Consumers**: Updated `getPlan` in `lib/actions/ai-usage.ts`, `weekly-briefing` cron, and `discovery.ts` to query `extended_pro_until` and use `resolvePlan` instead of checking the plan column directly.
+
+**Consequences:**
+- Referral-earned Pro days now correctly unlock access and quota.
+- Pure resolution logic is fully unit-testable.
+- Single source of truth for plan determination prevents future drift.
+
+---
+
+## ADR-040 — Two-sided Referral Reward
+
+**Status:** Accepted · 2026-07-12
+
+**Context:**
+`recordReferral` only rewarded the referrer with Pro days via `grant_pro_reward`. A completed referral should reward both sides — the standard two-sided referral model — so the referred user also gets Pro days on completing onboarding.
+
+**Decision:**
+1. Added a pure policy helper `usersToReward(referrerId, referredId, isSelf, alreadyReferred)` in `lib/referral-reward.ts` that returns `[referrerId, referredId]` for a valid completion and `[]` for self-referral or duplicate.
+2. `recordReferral` calls `usersToReward` and loops `grant_pro_reward` over each returned ID (service-role admin client only). Existing self-referral and `referred_id` UNIQUE guards remain.
+
+**Consequences:**
+- Both referrer and referred earn 7 Pro days on completion.
+- Reward policy is isolated in a pure, unit-tested function separate from DB application.
+- Self-referral cannot trigger any reward (policy returns `[]`).
+

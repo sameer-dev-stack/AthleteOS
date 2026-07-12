@@ -215,6 +215,7 @@ NIL/
 │   ├── resend.ts                 # Resend client setup
 │   ├── stripe.ts                 # Stripe client (lazy Proxy pattern)
 │   ├── stripe-billing.ts         # Checkout, Portal, Subscription lookup
+│   ├── referral-reward.ts        # Pure resolvePlan helper for gating
 │   ├── supabase/
 │   │   ├── client.ts             # Browser client (for client components)
 │   │   ├── server.ts             # Server client (for Server Actions + route handlers)
@@ -236,6 +237,7 @@ NIL/
 │       ├── inquiries.ts          # Server Actions: submitInquiry, getAthleteInquiries, updateInquiryStatus
 │       ├── memberships.ts        # Server Actions: createTier, getTiers, createContentPost, createSubscriptionCheckout
 │       ├── memberships-client.ts # Server Action: getTierForSubscription (for fan subscribe page)
+│       ├── plan.ts               # Server Action: getEffectivePlan
 │       ├── profile.ts            # Server Actions: getMyProfile, checkUsername, updateProfile, getPublicProfile
 │       ├── quick-ai.ts           # Server Actions: quickAiAction (One-click signal actions)
 │       ├── stripe.ts             # Server Actions: createStripeConnectLink, getStripeDashboardLink

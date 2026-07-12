@@ -1,6 +1,9 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { getEffectivePlan } from "@/lib/actions/plan";
+import type { EffectivePlan } from "@/lib/actions/plan";
+
+export type Plan = EffectivePlan;
 
 const QUOTA_CONFIG = {
   free: { total: 5 },
@@ -8,34 +11,13 @@ const QUOTA_CONFIG = {
   elite: { total: 500 },
 } as const;
 
-type Plan = keyof typeof QUOTA_CONFIG;
-
 function getCurrentPeriod(): string {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
 }
 
-export async function getPlan(client?: Awaited<ReturnType<typeof createClient>>): Promise<Plan> {
-  try {
-    const supabase = client ?? await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return "free";
-
-    const { data } = await supabase
-      .from("profiles")
-      .select("plan")
-      .eq("id", user.id)
-      .single();
-
-    const plan = data?.plan;
-    if (plan === "pro" || plan === "elite") return plan;
-    return "free";
-  } catch (err) {
-    console.error("[ai-usage] getPlan error:", err);
-    return "free";
-  }
+export async function getPlan(): Promise<Plan> {
+  return getEffectivePlan();
 }
 
 export async function getAiQuota(): Promise<{

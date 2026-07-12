@@ -5,6 +5,72 @@
 
 ---
 
+## 2026-07-12 — Two-sided referral reward (referrer + referred both earn Pro)
+
+### What changed
+1. **`lib/referral-reward.ts`** — Added pure `usersToReward(referrerId, referredId, isSelf, alreadyReferred)` policy helper returning the list of user IDs to reward on a completed referral.
+2. **`__tests__/referral-reward.test.ts`** — Added `usersToReward` unit suite (valid completion, self-referral, duplicate) — written TDD-first as a failing test, then implemented.
+3. **`lib/actions/referrals.ts`** — `recordReferral` now calls `usersToReward` and loops `grant_pro_reward` over both the referrer and the referred user (was referrer-only).
+
+### Why
+The referral reward was one-sided (only the referrer earned Pro days). Standard referral models reward both sides. Isolating the policy in a pure, unit-tested helper keeps the reward/attribution decision separate from the DB application (rpc calls) and makes future changes (e.g. unequal amounts) trivial.
+
+### Files touched
+- `lib/referral-reward.ts`
+- `__tests__/referral-reward.test.ts`
+- `lib/actions/referrals.ts`
+
+### Commit
+`TBD`
+
+---
+
+## 2026-07-12 — Single source of truth for Plan Gating (getEffectivePlan)
+
+### What changed
+1. **`lib/referral-reward.ts`** [NEW] — Created pure `resolvePlan(plan, extendedProUntil)` function to centralize decision logic on whether a user has an active Pro/Elite status.
+2. **`__tests__/referral-reward.test.ts`** [NEW] — Added unit test suite covering all base plan and referral-granted future date edge cases.
+3. **`lib/actions/plan.ts`** [NEW] — Implemented `getEffectivePlan()` server action that reads user profile and invokes `resolvePlan`.
+4. **`lib/actions/ai-usage.ts`** — Updated `getPlan()` to query `extended_pro_until` and use `resolvePlan`.
+5. **`app/api/cron/weekly-briefing/route.ts`** — Updated cron profile query and limits to respect `extended_pro_until` resolved via `resolvePlan`.
+6. **`lib/actions/discovery.ts`** — Updated brand discovery search action to query `extended_pro_until` and resolve plan via `resolvePlan`.
+
+### Why
+Previously, plan check logic was split and did not check `extended_pro_until`, meaning referral-earned Pro days did not unlock actual Pro features or quotas. Centralizing the logic in `resolvePlan` and `getEffectivePlan` fixes this.
+
+### Files touched
+- `lib/referral-reward.ts` (new)
+- `__tests__/referral-reward.test.ts` (new)
+- `lib/actions/plan.ts` (new)
+- `lib/actions/ai-usage.ts`
+- `app/api/cron/weekly-briefing/route.ts`
+- `lib/actions/discovery.ts`
+
+### Commit
+`TBD`
+
+---
+
+## 2026-07-12 — Referral click funnel tracking
+
+### What changed
+1. **`lib/referral-click.ts`** (new) — Pure `hashIp(ip, secret)` helper. HMAC-SHA256, fail-closed to null if secret unset. Never stores raw IP.
+2. **`lib/actions/referrals.ts`** — Added `trackReferralClick(code, ip, ua)` server action. Looks up active referral code, inserts into `referral_clicks` with hashed IP.
+3. **`app/r/[code]/route.ts`** — Calls `trackReferralClick` after setting cookie. Click tracking failure never breaks the redirect (caught internally).
+
+### Why
+Funnel analytics: attribute referral clicks to referrers before sign-up. IP hashed per PROJECT.md section 16 (same posture as page_views analytics).
+
+### Files touched
+- `lib/referral-click.ts` (new)
+- `lib/actions/referrals.ts`
+- `app/r/[code]/route.ts`
+
+### Commit
+`TBD` (pending push)
+
+---
+
 ## 2026-07-11 — Referral tunables centralized in lib/constants.ts
 
 ### What changed

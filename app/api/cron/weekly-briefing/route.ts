@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { callGemini } from "@/lib/ai";
 import { sendWeeklyBriefing } from "@/lib/actions/emails";
+import { resolvePlan } from "@/lib/referral-reward";
+
 
 // Runs every Monday at 8AM UTC via Vercel Cron (configured in vercel.json)
 // Protected by CRON_SECRET environment variable
@@ -35,7 +37,7 @@ export async function GET(req: NextRequest) {
 
     const { data: athletes, error: athletesErr } = await admin
       .from("profiles")
-      .select("id, email, full_name, sport, school, position, bio, created_at, plan")
+      .select("id, email, full_name, sport, school, position, bio, created_at, plan, extended_pro_until")
       .eq("onboarding_completed", true)
       .eq("suspended", false)
       .not("email", "is", null);
@@ -75,7 +77,8 @@ export async function GET(req: NextRequest) {
         const nilScore = nilRes.data?.[0]?.nil_score || null;
         const memory = memoryRes.data;
         const aiUsed = quotaRes.data?.used_count || 0;
-        const aiLimit = athlete.plan === "pro" ? 300 : athlete.plan === "elite" ? 500 : 5;
+        const effectivePlan = resolvePlan(athlete.plan, athlete.extended_pro_until);
+        const aiLimit = effectivePlan === "pro" ? 300 : effectivePlan === "elite" ? 500 : 5;
         const aiRemaining = Math.max(0, aiLimit - aiUsed);
 
         const newInquiries = inquiriesRes.count || 0;

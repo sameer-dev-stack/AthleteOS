@@ -2,6 +2,8 @@
 
 import { z } from "zod";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { resolvePlan } from "@/lib/referral-reward";
+
 
 function getServiceClient() {
   return createServiceClient(
@@ -58,7 +60,7 @@ export async function searchPublicAthletes(
   let dbQuery = supabase
     .from("profiles")
     .select(
-      "id, full_name, username, avatar_url, sport, school, position, bio, is_verified, plan",
+      "id, full_name, username, avatar_url, sport, school, position, bio, is_verified, plan, extended_pro_until",
       { count: "exact" }
     )
     .eq("profile_published", true)
@@ -118,7 +120,7 @@ export async function searchPublicAthletes(
     position: p.position,
     bio: p.bio,
     is_verified: p.is_verified,
-    plan: p.plan,
+    plan: resolvePlan(p.plan, p.extended_pro_until),
     total_followers: followerMap.get(p.id) ?? 0,
   }));
 
