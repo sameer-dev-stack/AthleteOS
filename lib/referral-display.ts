@@ -14,3 +14,9 @@ export function statusLabel(status: string | null | undefined): string {
     default: return "—";
   }
 }
+
+// Default share copy for referral invites; optionally personalized with referrer name.
+export function buildShareText(referrerName?: string | null): string {
+  const base = "Claim your free athlete card on AthleteOS";
+  return referrerName ? `${referrerName} invited you to ${base}` : base;
+}

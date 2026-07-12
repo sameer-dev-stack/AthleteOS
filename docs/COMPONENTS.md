@@ -227,6 +227,16 @@ Interest tag chip with label. Supports placeholder mode with dashed border.
 Swipeable photo gallery with dot indicators. Supports multiple images with touch/swipe navigation.
 - **Props:** `images: string[]`, `alt: string`, `accent: string`
 
+### `<ShareSheet>` — `components/dashboard/share-sheet.tsx`
+5-button share surface: native share + Copy + X/Twitter + WhatsApp + Email. Button class matches referral-card.tsx (`bg-accent/10 ... text-accent`).
+- **Used by:** `components/dashboard/referral-card.tsx`, `app/dashboard/referrals/client.tsx`
+- **Props:** `{ link: string; text: string }`
+
+### `buildShareText()` — `lib/referral-display.ts`
+Pure helper returning share copy string. Optionally personalized with referrer name.
+- `buildShareText()` → `"Claim your free athlete card on AthleteOS"`
+- `buildShareText("Ava")` → `"Ava invited you to Claim your free athlete card on AthleteOS"`
+
 ### `<AnalyticsPanel />` — `components/dashboard/analytics-panel.tsx`
 Dashboard analytics panel for published profiles. Shows total views, unique visitors, link clicks, views-by-day bar chart, top referrers, top links, and top countries with 7d/30d/90d range controls.
 - Client component (uses `useState` + `useEffect`).
@@ -615,6 +625,13 @@ Reusable empty state component with icon, title, description, and optional CTA b
   - `description: string` — body text
   - `action?: { label: string; onClick: () => void }` — optional CTA button
 
+### `<ShareSheet>` — `components/dashboard/share-sheet.tsx`
+Reusable share surface: native share (falls back to copy), Copy, X/Twitter, WhatsApp, and Email deep links for a given referral link. `"use client"` and fully presentational — share URLs are built by the pure `buildShareLinks(link, text)` helper in `lib/share-links.ts` (TDD-covered). Button styling matches `referral-card.tsx` (`bg-accent/10 ... text-accent`). `navigator.clipboard`/`navigator.share` wrapped in try/catch; `target="_blank"` links use `rel="noopener noreferrer"`.
+- **Used by (planned):** `app/dashboard/referrals/client.tsx` (T10 will swap the inline share block for this component)
+- **Props:**
+  - `link: string` — full referral URL to share
+  - `text: string` — share message/caption
+
 ---
 
 ## Auth Pages (`app/auth/`)
@@ -662,6 +679,17 @@ Branded referral landing page. Replaces the old bare redirect to `/auth/sign-up`
 - **No emojis. No second accent. Dark only.**
 - **Props:** `{ params: Promise<{ code: string }> }`
 - **Security:** SUPABASE_SERVICE_ROLE_KEY only referenced in this Server Component, never shipped to client
+
+## Referral Dashboard (`app/dashboard/referrals/`)
+
+### `/dashboard/referrals` — `app/dashboard/referrals/page.tsx` + `app/dashboard/referrals/client.tsx`
+Server Component fetches four datasets in parallel (`getReferralStats`, `getReferralHistory`, `getReferralFunnel`, `getReferralLeaderboard`) and passes them as props to the presentational `"use client"` component `ReferralsPageClient`.
+- **`page.tsx`:** Server Component, redirects unauthenticated users to `/auth/sign-in` via `getMyProfile()`. No client data fetching.
+- **`client.tsx` (`ReferralsPageClient`):** presentational only. Renders: share link (copy + native share), stats grid, Pro status, click→conversion funnel, "How It Works", recent referrals history, and a top-referrers leaderboard. Uses pure helpers `proUntilLabel` / `statusLabel` from `lib/referral-display.ts`.
+- **T10:** replace the inline share action with the reusable `<ShareSheet link text>` component (built in T9, `components/dashboard/share-sheet.tsx`). Share block is isolated, no re-architect needed.
+- **Styling:** matches `components/dashboard/referral-card.tsx` classes (`rounded-2xl border border-white/[0.06] bg-[#111113]`, `text-accent`, `ink-dim`, `ink-muted`, `text-white`).
+- **No emojis. No second accent. Dark only.**
+
 
 ---
 

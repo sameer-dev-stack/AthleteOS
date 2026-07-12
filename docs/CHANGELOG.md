@@ -5,6 +5,48 @@
 
 ---
 
+## 2026-07-12 — T10: Wire ShareSheet into ReferralCard + ReferralsPageClient
+
+### What changed
+1. **`lib/referral-display.ts`** — Added `buildShareText(referrerName?)` pure helper returning the share copy string. Optionally personalized with referrer name.
+2. **`__tests__/referral-display.test.ts`** — Added 2 unit tests for `buildShareText` (no-name default, with-name personalization).
+3. **`components/dashboard/referral-card.tsx`** — Replaced single-button `handleShare` with `<ShareSheet link={stats.referralLink} text={buildShareText()} />`. Removed `handleShare` function and `Share2` import. Link-row Copy button preserved.
+4. **`app/dashboard/referrals/client.tsx`** — Replaced single-button `handleShare` with `<ShareSheet link={stats.referralLink} text={buildShareText()} />`. Removed `handleShare` function and `Share2` import. Link-row Copy button preserved.
+
+### Why
+The 5-button ShareSheet (native + Copy + X + WhatsApp + Email) was built in T9 but not wired into the two surfaces where athletes actually share. This completes D8 (rich sharing). Consistent copy comes from one pure `buildShareText` helper rather than duplicated strings.
+
+### Files touched
+- `lib/referral-display.ts`
+- `__tests__/referral-display.test.ts`
+- `components/dashboard/referral-card.tsx`
+- `app/dashboard/referrals/client.tsx`
+
+### Commit
+`TBD`
+
+---
+
+## 2026-07-12 — T9: ShareSheet component + buildShareLinks helper
+
+### What changed
+1. **`lib/share-links.ts`** [NEW] — Pure `buildShareLinks(link, text)` returning `{ twitter, whatsapp, email }` encoded deep-links. No React/DB.
+2. **`__tests__/share-links.test.ts`** [NEW] — 3 unit tests (twitter intent, whatsapp, mailto) covering URL building.
+3. **`components/dashboard/share-sheet.tsx`** [NEW] — `"use client"` presentational `ShareSheet({ link, text })` with native share + Copy + X/Twitter + WhatsApp + Email. Button class string matches `referral-card.tsx` (`bg-accent/10 ... text-accent`). Uses `navigator.clipboard` and `navigator.share` wrapped in try/catch; `target="_blank"` links use `rel="noopener noreferrer"`.
+
+### Why
+D8 (rich sharing) requires a reusable share surface so athletes can spread their referral link across channels. Pure helper keeps URL logic TDD-able and the component presentational; styling mirrors the existing referral card for visual consistency.
+
+### Files touched
+- `lib/share-links.ts` (new)
+- `__tests__/share-links.test.ts` (new)
+- `components/dashboard/share-sheet.tsx` (new)
+
+### Commit
+`TBD`
+
+---
+
 ## 2026-07-12 — Referral landing page replaces bare redirect
 
 ### What changed

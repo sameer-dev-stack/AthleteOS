@@ -1,4 +1,4 @@
-import { proUntilLabel, statusLabel } from "@/lib/referral-display";
+import { proUntilLabel, statusLabel, buildShareText } from "@/lib/referral-display";
 
 describe("proUntilLabel", () => {
   it("returns dash when null/undefined", () => {
@@ -22,5 +22,14 @@ describe("statusLabel", () => {
   it("falls back to dash", () => {
     expect(statusLabel(null)).toBe("—");
     expect(statusLabel("unknown")).toBe("—");
+  });
+});
+
+describe("buildShareText", () => {
+  it("returns default CTA when no name", () => {
+    expect(buildShareText()).toBe("Claim your free athlete card on AthleteOS");
+  });
+  it("includes referrer name when provided", () => {
+    expect(buildShareText("Ava")).toBe("Ava invited you to Claim your free athlete card on AthleteOS");
   });
 });

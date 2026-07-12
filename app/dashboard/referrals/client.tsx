@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Copy, Check, Share2, Users, Gift, Clock, TrendingUp, ExternalLink } from "lucide-react";
+import { Copy, Check, Users, Gift, Clock, TrendingUp, ExternalLink } from "lucide-react";
 import { getOrCreateReferralCode, getReferralStats, type ReferralStats, type ReferralHistoryEntry, type ReferralFunnel, type LeaderboardEntry } from "@/lib/actions/referrals";
-import { proUntilLabel, statusLabel } from "@/lib/referral-display";
+import { statusLabel } from "@/lib/referral-display";
+import { buildShareText } from "@/lib/referral-display";
+import { ShareSheet } from "@/components/dashboard/share-sheet";
 import type { Profile } from "@/lib/actions/profile";
 
 type Props = {
@@ -40,20 +42,6 @@ export function ReferralsPageClient({ profile, initialStats, initialHistory, ini
     } catch {}
   }
 
-  async function handleShare() {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "Join AthleteOS",
-          text: "Claim your free athlete card on AthleteOS",
-          url: stats.referralLink,
-        });
-      } catch {}
-    } else {
-      handleCopy();
-    }
-  }
-
   const daysUntilExpiry = stats.extendedProUntil
     ? Math.max(0, Math.ceil((new Date(stats.extendedProUntil).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : 0;
@@ -84,13 +72,7 @@ export function ReferralsPageClient({ profile, initialStats, initialHistory, ini
               {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
               {copied ? "Copied" : "Copy"}
             </button>
-            <button
-              onClick={handleShare}
-              className="flex-shrink-0 flex items-center gap-1.5 rounded-lg bg-white/[0.06] px-3 py-1.5 text-xs font-semibold text-ink-muted transition-colors hover:bg-white/[0.10]"
-            >
-              <Share2 className="h-3 w-3" />
-              Share
-            </button>
+            <ShareSheet link={stats.referralLink} text={buildShareText()} />
           </div>
         )}
       </div>

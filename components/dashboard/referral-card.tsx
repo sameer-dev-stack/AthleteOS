@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Copy, Check, Users, Share2 } from "lucide-react";
+import { Copy, Check, Users } from "lucide-react";
 import Link from "next/link";
 import { getReferralStats, type ReferralStats } from "@/lib/actions/referrals";
+import { ShareSheet } from "@/components/dashboard/share-sheet";
+import { buildShareText } from "@/lib/referral-display";
 
 export function ReferralCard() {
   const [stats, setStats] = useState<ReferralStats | null>(null);
@@ -21,20 +23,6 @@ export function ReferralCard() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2200);
     } catch {}
-  }
-
-  async function handleShare() {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "Join AthleteOS",
-          text: "Claim your free athlete card on AthleteOS",
-          url: stats!.referralLink,
-        });
-      } catch {}
-    } else {
-      handleCopy();
-    }
   }
 
   return (
@@ -73,13 +61,7 @@ export function ReferralCard() {
             </span>
           )}
         </div>
-        <button
-          onClick={handleShare}
-          className="flex items-center gap-1.5 text-xs text-ink-dim transition-colors hover:text-accent"
-        >
-          <Share2 className="h-3 w-3" />
-          Share
-        </button>
+        <ShareSheet link={stats.referralLink} text={buildShareText()} />
       </div>
 
       <Link
