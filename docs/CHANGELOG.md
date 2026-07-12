@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-07-12 — Create-account: full-screen loading + exact confirmation copy
+
+### What changed
+1. **`app/auth/sign-up/page.tsx`** — Removed the inline button spinner/"Processing…" text from `SubmitButton`. The whole screen now loads via the existing `ProcessingOverlay` (triggered on submit), instead of the button loading itself.
+2. **`lib/auth-copy.ts`** — `accountCreatedCopy` now returns the exact requested body: `"Please verify your account email has been sent to your email."` (generic, no email interpolation).
+3. **`__tests__/auth-copy.test.ts`** — Updated assertions to match the new generic copy.
+
+### Why
+User wanted the create-account action to show a full-screen loading state (not a button-level spinner) and land on a confirmation page reading "Your account has been created. Please verify your account email has been sent to your email."
+
+### Files touched
+- `app/auth/sign-up/page.tsx`
+- `lib/auth-copy.ts`
+- `__tests__/auth-copy.test.ts`
+
+### Commit
+- (pending)
+
+---
+
 ## 2026-07-12 — T16: Fix create-account stuck on "Processing…" (navigation bug)
 
 ### What changed

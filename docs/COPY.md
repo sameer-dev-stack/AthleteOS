@@ -426,6 +426,13 @@ Native share uses `navigator.share` when available and falls back to clipboard c
 - Button: `Resend Link` / `Sending...`
 - Success: `New verification link sent. Please check your inbox.`
 
+## Account Created Page
+- Heading: `Your account has been created`
+- Body: `Please verify your account email has been sent to your email.`
+- Resend button: `Resend confirmation email`
+- Primary CTA: `Go to Sign In`
+- Footer: `Already confirmed?` + link `Sign in`
+
 ---
 
 Last updated: 2026-07-12 (Session 57)
