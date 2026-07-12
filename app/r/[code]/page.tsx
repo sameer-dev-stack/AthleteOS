@@ -1,13 +1,17 @@
 import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
-import { trackReferralClick } from "@/lib/actions/referrals";
+import { hashIp } from "@/lib/referral-click";
 import { resolveReferrerView } from "@/lib/referral-landing";
 
 const REF_COOKIE = "athleteos_ref";
 const REF_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
 export const dynamic = "force-dynamic";
+// Middleware runs on the Node.js runtime; this page uses cookies()/headers()
+// from next/headers + supabase-js, which are not supported on the Edge runtime.
+// Pinning nodejs keeps the runtime consistent and avoids runtime/API mismatches.
+export const runtime = "nodejs";
 
 type Props = { params: Promise<{ code: string }> };
 
@@ -56,7 +60,14 @@ export default async function ReferralLanding({ params }: Props) {
     const h = await headers();
     const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
     const ua = h.get("user-agent") ?? null;
-    await trackReferralClick(codeRow.code, ip, ua);
+    // trackReferralClick lives in a "use server" file and can't be called from a
+    // Server Component, so record the click directly with the client we already have.
+    await serviceRole.from("referral_clicks").insert({
+      code: codeRow.code,
+      referrer_id: codeRow.user_id,
+      ip_hash: hashIp(ip, process.env.ANALYTICS_IP_HASH_SECRET),
+      user_agent: ua ?? null,
+    });
   }
 
   return (

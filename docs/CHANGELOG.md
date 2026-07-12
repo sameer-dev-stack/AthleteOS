@@ -5,6 +5,23 @@
 
 ---
 
+## 2026-07-12 — Hotfix: /r/[code] referral landing crashed ("Something went wrong")
+
+### What changed
+1. **`app/r/[code]/page.tsx`** — Removed the call to `trackReferralClick()` (exported from `lib/actions/referrals.ts`, a `"use server"` file). A Server Component cannot invoke a `"use server"` function; the call threw and the `error.tsx` boundary returned the generic "Something went wrong" page. The referral click is now recorded inline using the `serviceRole` client the page already creates, reusing `hashIp` from `lib/referral-click.ts`.
+2. Added `export const runtime = "nodejs";` so the route runs on the Node.js runtime (matches middleware and the `supabase-js` / `next/headers` APIs it uses — avoids any Edge runtime mismatch).
+
+### Why
+Commit `5b3caf1` ("Replace referral redirect with branded landing page") swapped the old redirect Route Handler for a Server Component page but kept the `trackReferralClick` call from a `"use server"` module. That broke every referral link in production (e.g. `/r/V4UWBPBR` returned the error page). This restores the branded landing + cookie + click tracking without the framework-rule violation.
+
+### Files touched
+- `app/r/[code]/page.tsx`
+
+### Commit
+`TBD`
+
+---
+
 ## 2026-07-12 — T10: Wire ShareSheet into ReferralCard + ReferralsPageClient
 
 ### What changed
