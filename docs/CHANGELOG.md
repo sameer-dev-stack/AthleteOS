@@ -24,11 +24,11 @@ A signed-out visitor who lands on `/r/<code>` gets the `athleteos_ref` cookie (s
 - `app/auth/sign-up/page.tsx`
 
 ### Commit
-`TBD`
+`7e5b5e7`
 
 ---
 
-
+## 2026-07-12 — Hotfix 2: /r/[code] crashed on cookies().set() in Server Component
 
 ### What changed
 1. **`app/r/[code]/page.tsx`** — Removed `cookies().set("athleteos_ref", ...)`. Next.js forbids mutating cookies during a Server Component render (only Server Actions / Route Handlers may). The page now only renders the branded landing and records the click (wrapped in try/catch).
