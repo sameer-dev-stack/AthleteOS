@@ -5,6 +5,30 @@
 
 ---
 
+## 2026-07-12 — T14: Signup submit loading state (spinner + overlay) & verify-email copy
+
+### What changed
+1. **`lib/auth-copy.ts`** — New pure helper `accountCreatedCopy(email)` returning `{ heading, body }`. Centralizes the exact verification screen wording (`"Your account has been created"` + `"Please verify your account — a verification email has been sent to {email}."`). TDD-covered in `__tests__/auth-copy.test.ts`.
+2. **`__tests__/auth-copy.test.ts`** — New suite: email present → body includes the email; email missing → falls back to "sent to your email".
+3. **`components/auth/processing-overlay.tsx`** — New `"use client"` full-screen overlay (`bg-bg` + `text-accent` `Loader2` spinner + "Processing…"), shown during the submit→route transition.
+4. **`app/auth/sign-up/page.tsx`** — `SubmitButton` now shows an inline `animate-spin` spinner and "Processing…" while pending; a `processing` state drives `<ProcessingOverlay show={processing} />` (set on submit, released only on the error path so the overlay stays until navigation).
+5. **`app/auth/account-created/page.tsx`** — Renders `accountCreatedCopy(email)` for heading/body; added `motion-reduce:animate-none` to the `animate-pulse` skeleton.
+
+### Why
+The submit affordance was a bare disabled label — ambiguous during the slow server action. A spinner + disabled + full-screen overlay removes doubt, and centralizing auth copy keeps the exact wording testable and consistent.
+
+### Files touched
+- `lib/auth-copy.ts`
+- `__tests__/auth-copy.test.ts`
+- `components/auth/processing-overlay.tsx`
+- `app/auth/sign-up/page.tsx`
+- `app/auth/account-created/page.tsx`
+
+### Commit
+(pending)
+
+---
+
 ## 2026-07-12 — T13: Referral banner PII fix (leak-safe)
 
 ### What changed
@@ -21,7 +45,7 @@ A referrer with `full_name` = their email made the banner leak PII to the invite
 - `app/api/referral/referrer/route.ts`
 
 ### Commit
-(pending)
+`97501d3`
 
 ---
 

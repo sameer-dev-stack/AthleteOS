@@ -641,6 +641,13 @@ Client component shown on `/auth/sign-up`. Reads the `athleteos_ref` cookie (non
 - **Used by:** `app/auth/sign-up/page.tsx` (between the logo block and the `<h1>`)
 - Uses the pure `buildInvitedBy()` helper from `lib/referral-display.ts`
 
+### `<ProcessingOverlay />` — `components/auth/processing-overlay.tsx`
+Client component (T14) shown as a full-screen `bg-bg` overlay during the signup submit→route transition. Renders a `text-accent` `Loader2` spinner + "Processing…". `show` prop toggles it; no props beyond `show: boolean`. Wired in `app/auth/sign-up/page.tsx` (set on submit, released only on the error path so it stays until navigation).
+
+### `lib/auth-copy.ts` — `accountCreatedCopy(email)`
+Pure, TDD-able copy builder (T14) for the post-signup verification screen. Returns `{ heading: "Your account has been created", body }` where `body` is `"Please verify your account — a verification email has been sent to {email}."` (or `…to your email.` when email is missing). Keeps user-facing auth copy in one testable place.
+- **Used by:** `app/auth/account-created/page.tsx`
+
 ### `/api/referral/referrer` — `app/api/referral/referrer/route.ts`
 Route Handler (nodejs) that resolves a referral code to the referrer's display name for the sign-up banner. Reads `?code=`, looks up `referral_codes.user_id` then `profiles.full_name` via service-role, and returns `{ name }`. **Leak-safe (T13):** the returned name is passed through `sanitizeReferrerName`, so an email-shaped `full_name` becomes `null` and never crosses the wire. Fails closed to `{ name: null }`.
 - **Used by:** `components/auth/referral-invite-banner.tsx`

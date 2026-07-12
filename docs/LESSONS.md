@@ -89,3 +89,17 @@ in `lib/referral-display.ts`): drop empty/whitespace and email-shaped values
 wire) and client-side (the render helper re-sanitizes) for defense in depth.
 
 **Source:** Fixed the referral banner PII leak (T13), 2026-07-12.
+
+---
+
+## L7 — Auth copy belongs in a pure helper; always show a processing state on async submit
+
+User-facing auth copy (verification screen wording, etc.) lives in a pure,
+TDD-able helper (`accountCreatedCopy` in `lib/auth-copy.ts`), not inline JSX —
+so the exact wording is tested and consistent. On any async submit (server
+action / slow route), show an unambiguous processing state: an inline spinner
+on the button (`animate-spin` + disabled) **plus** a full-screen overlay
+(`components/auth/processing-overlay.tsx`) for multi-second transitions, until
+navigation completes. Release the overlay on the error path so the user can retry.
+
+**Source:** Signup submit loading state + verify-email copy (T14), 2026-07-12.

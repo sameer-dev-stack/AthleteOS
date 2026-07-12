@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import { signUp, signInWithGoogle } from "@/lib/actions/auth";
@@ -8,6 +8,7 @@ import Link from "next/link";
 import { trackFunnel } from "@/lib/hooks/use-funnel-tracking";
 import { Logo } from "@/components/logo";
 import { ReferralInviteBanner } from "@/components/auth/referral-invite-banner";
+import { ProcessingOverlay } from "@/components/auth/processing-overlay";
 import { Shield, Zap, Users } from "lucide-react";
 
 function SubmitButton() {
@@ -16,9 +17,15 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="w-full rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-bg transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] disabled:opacity-50"
+      className="w-full rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-bg transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] disabled:opacity-50 flex items-center justify-center gap-2"
     >
-      {pending ? "Creating account..." : "Create free account"}
+      {pending && (
+        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+        </svg>
+      )}
+      {pending ? "Processing…" : "Create free account"}
     </button>
   );
 }
@@ -35,6 +42,7 @@ export default function SignUpPage() {
     ok: false,
     message: "",
   });
+  const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     trackFunnel("sign_up_start");
@@ -45,11 +53,20 @@ export default function SignUpPage() {
       trackFunnel("sign_up_complete");
       const email = state.email || "";
       router.push(`/auth/account-created?email=${encodeURIComponent(email)}`);
+    } else if (state.message) {
+      // Error path: release the full-screen overlay so the user can retry.
+      setProcessing(false);
     }
-  }, [state.ok, state.email, router]);
+  }, [state.ok, state.email, state.message, router]);
+
+  const handleSubmit = (formData: FormData) => {
+    setProcessing(true);
+    formAction(formData);
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg px-4">
+      <ProcessingOverlay show={processing} />
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <Link href="/" className="inline-flex items-center gap-2.5 mb-6" aria-label="AthleteOS home">
@@ -63,7 +80,7 @@ export default function SignUpPage() {
           </p>
         </div>
 
-        <form action={formAction} className="space-y-4">
+        <form action={handleSubmit} className="space-y-4">
           <div>
             <label
               htmlFor="email"
