@@ -7,6 +7,7 @@ import { signUp, signInWithGoogle } from "@/lib/actions/auth";
 import Link from "next/link";
 import { trackFunnel } from "@/lib/hooks/use-funnel-tracking";
 import { Logo } from "@/components/logo";
+import { ReferralInviteBanner } from "@/components/auth/referral-invite-banner";
 import { Shield, Zap, Users } from "lucide-react";
 
 function SubmitButton() {
@@ -55,6 +56,7 @@ export default function SignUpPage() {
             <Logo />
             <span className="text-lg font-semibold tracking-tight">AthleteOS</span>
           </Link>
+          <ReferralInviteBanner />
           <h1 className="text-2xl font-bold text-white">Create your free account</h1>
           <p className="mt-2 text-sm text-ink-muted">
             Build your athlete card in under 2 minutes.

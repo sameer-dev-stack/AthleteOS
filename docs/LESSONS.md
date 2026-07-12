@@ -58,3 +58,20 @@ than inline in the component. Same pattern as the T3/T4/T6/T7/T8 helpers:
   never import a non-existent icon.
 
 **Source:** Built `<ShareSheet>` (T9), 2026-07-12.
+
+---
+
+## L5 — Personalized referral UI needs a code→name lookup that exposes only the display name
+
+When surfacing a referral at signup, the client only has the `athleteos_ref` cookie
+(the referral code), not the name. Resolve `code → referral_codes.user_id →
+profiles.full_name` server-side in a nodejs Route Handler using the service-role
+client, and return only `{ name }` — never email/avatar/other PII. The client reads
+the cookie (non-httpOnly, set by middleware on `/r/[code]`), fetches the API, and
+renders the name via a pure helper (`buildInvitedBy(name)` in `lib/referral-display.ts`).
+Reuse the cookie-read regex from `app/onboarding/page.tsx:306` so both stay in sync.
+
+**Pattern:** client reads `athleteos_ref` cookie → `GET /api/referral/referrer?code=` →
+render `buildInvitedBy(name)`.
+
+**Source:** Built the sign-up "Invited by {Name}" banner (T12), 2026-07-12.

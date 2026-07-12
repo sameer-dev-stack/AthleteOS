@@ -636,8 +636,17 @@ Reusable share surface: native share (falls back to copy), Copy, X/Twitter, What
 
 ## Auth Pages (`app/auth/`)
 
+### `<ReferralInviteBanner />` — `components/auth/referral-invite-banner.tsx`
+Client component shown on `/auth/sign-up`. Reads the `athleteos_ref` cookie (non-httpOnly, set by middleware on `/r/[code]`) and calls `GET /api/referral/referrer?code=` to resolve the referrer's display name, then renders a pill: `"Invited by {Name}"` (`bg-accent/10`, `text-accent`, `rounded-full`). Renders nothing when the cookie is absent or the name lookup fails. No props.
+- **Used by:** `app/auth/sign-up/page.tsx` (between the logo block and the `<h1>`)
+- Uses the pure `buildInvitedBy()` helper from `lib/referral-display.ts`
+
+### `/api/referral/referrer` — `app/api/referral/referrer/route.ts`
+Route Handler (nodejs) that resolves a referral code to the referrer's display name for the sign-up banner. Reads `?code=`, looks up `referral_codes.user_id` then `profiles.full_name` via service-role, and returns `{ name }`. Never returns email or other PII; fails closed to `{ name: null }`.
+- **Used by:** `components/auth/referral-invite-banner.tsx`
+
 ### `/auth/sign-up` — `app/auth/sign-up/page.tsx`
-Email/password sign-up form + Google OAuth button. Calls `signUp` or `signInWithGoogle`. On success, redirects to `/auth/sign-in`.
+Email/password sign-up form + Google OAuth button. Calls `signUp` or `signInWithGoogle`. On success, redirects to `/auth/account-created`. Renders `<ReferralInviteBanner />` above the headline when a referral cookie is present.
 
 ### `/auth/sign-in` — `app/auth/sign-in/page.tsx`
 Email/password sign-in form + Google OAuth button. Calls `signIn` or `signInWithGoogle`. On success, redirects to `/admin`.

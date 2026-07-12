@@ -5,7 +5,30 @@
 
 ---
 
-## 2026-07-12 — Hotfix 2: /r/[code] crashed on cookies().set() in Server Component
+## 2026-07-12 — T12: "Invited by {Name}" banner on the sign-up page
+
+### What changed
+1. **`lib/referral-display.ts`** — Added `buildInvitedBy(name)` pure helper. Returns `"Invited by {name}"` or `null` when no name (TDD-covered in `__tests__/referral-display.test.ts`).
+2. **`app/api/referral/referrer/route.ts`** — New nodejs Route Handler. Reads `?code=`, resolves `referral_codes.user_id → profiles.full_name` via service-role, returns `{ name }` only (no email/PII).
+3. **`components/auth/referral-invite-banner.tsx`** — New `"use client"` component. Reads `athleteos_ref` cookie (same regex as `app/onboarding/page.tsx:306`), fetches the API, renders the banner or nothing.
+4. **`app/auth/sign-up/page.tsx`** — Wired `<ReferralInviteBanner />` between the logo block and the `<h1>`.
+
+### Why
+A signed-out visitor who lands on `/r/<code>` gets the `athleteos_ref` cookie (set in `middleware.ts`). The sign-up page can now tell them who invited them before they create an account, closing the referral loop with a personalized invite at signup (PROJECT.md D8).
+
+### Files touched
+- `lib/referral-display.ts`
+- `__tests__/referral-display.test.ts`
+- `app/api/referral/referrer/route.ts`
+- `components/auth/referral-invite-banner.tsx`
+- `app/auth/sign-up/page.tsx`
+
+### Commit
+`TBD`
+
+---
+
+
 
 ### What changed
 1. **`app/r/[code]/page.tsx`** — Removed `cookies().set("athleteos_ref", ...)`. Next.js forbids mutating cookies during a Server Component render (only Server Actions / Route Handlers may). The page now only renders the branded landing and records the click (wrapped in try/catch).

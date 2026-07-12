@@ -20,3 +20,10 @@ export function buildShareText(referrerName?: string | null): string {
   const base = "Claim your free athlete card on AthleteOS";
   return referrerName ? `${referrerName} invited you to ${base}` : base;
 }
+
+// Greeting shown on the sign-up page when a referral cookie is present.
+// Returns null when there's no referrer name so the UI can render nothing.
+export function buildInvitedBy(name: string | null | undefined): string | null {
+  if (!name) return null;
+  return `Invited by ${name}`;
+}
