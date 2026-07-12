@@ -2,9 +2,9 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { REFERRAL_REWARD_DAYS, REFERRAL_CODE_CHARS } from "@/lib/constants";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app";
-const REWARD_DAYS = 7;
 
 function createAdmin() {
   return createServiceClient(
@@ -14,10 +14,9 @@ function createAdmin() {
 }
 
 function generateCode(): string {
-  const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
   let code = "";
   for (let i = 0; i < 8; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
+    code += REFERRAL_CODE_CHARS[Math.floor(Math.random() * REFERRAL_CODE_CHARS.length)];
   }
   return code;
 }
@@ -119,7 +118,7 @@ export async function getReferralStats(): Promise<ReferralStats> {
       .single();
 
     const completedCount = completed || 0;
-    const proDaysEarned = completedCount * REWARD_DAYS;
+    const proDaysEarned = completedCount * REFERRAL_REWARD_DAYS;
 
     return {
       referralCode: code,
@@ -169,7 +168,7 @@ export async function recordReferral(code: string): Promise<{ ok: boolean; error
         referred_id: user.id,
         code_used: codeRow.code,
         status: "completed",
-        reward_days: REWARD_DAYS,
+        reward_days: REFERRAL_REWARD_DAYS,
         rewarded_at: new Date().toISOString(),
       });
 

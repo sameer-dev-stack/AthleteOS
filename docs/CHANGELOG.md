@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-07-11 — Referral tunables centralized in lib/constants.ts
+
+### What changed
+1. **`lib/constants.ts`** — Added `REFERRAL_REWARD_DAYS`, `REFERRED_BONUS_DAYS`, `REFERRAL_WINDOW_DAYS`, `REFERRAL_CODE_CHARS`.
+2. **`lib/actions/referrals.ts`** — Imports `REFERRAL_REWARD_DAYS` and `REFERRAL_CODE_CHARS` from constants; deleted local `REWARD_DAYS` and `chars` variables.
+
+### Why
+D2/D3 dedupe: magic numbers were hardcoded in referrals.ts. Now all tunables live in one place.
+
+### Files touched
+- `lib/constants.ts`
+- `lib/actions/referrals.ts`
+
+### Commit
+`TBD` (pending push)
+
+---
+
 ## 2026-07-11 — GDPR: deleteAccount now removes referral data
 
 ### What changed
