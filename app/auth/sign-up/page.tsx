@@ -61,11 +61,6 @@ export default function SignUpPage() {
     }
   }, [state.ok, state.email, state.message, router]);
 
-  const handleSubmit = (formData: FormData) => {
-    setProcessing(true);
-    formAction(formData);
-  };
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg px-4">
       <ProcessingOverlay show={processing} />
@@ -82,7 +77,7 @@ export default function SignUpPage() {
           </p>
         </div>
 
-        <form action={handleSubmit} className="space-y-4">
+        <form action={formAction} onSubmit={() => setProcessing(true)} className="space-y-4">
           <div>
             <label
               htmlFor="email"
