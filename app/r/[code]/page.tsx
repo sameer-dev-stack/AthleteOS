@@ -1,16 +1,13 @@
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { hashIp } from "@/lib/referral-click";
 import { resolveReferrerView } from "@/lib/referral-landing";
 
-const REF_COOKIE = "athleteos_ref";
-const REF_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
-
 export const dynamic = "force-dynamic";
-// Middleware runs on the Node.js runtime; this page uses cookies()/headers()
-// from next/headers + supabase-js, which are not supported on the Edge runtime.
-// Pinning nodejs keeps the runtime consistent and avoids runtime/API mismatches.
+// The athleteos_ref cookie is set in middleware (cookies can't be set in a
+// Server Component render). This page only renders the branded landing and
+// records the click via the service-role client.
 export const runtime = "nodejs";
 
 type Props = { params: Promise<{ code: string }> };
@@ -48,26 +45,20 @@ export default async function ReferralLanding({ params }: Props) {
   );
 
   if (view.valid && codeRow) {
-    // Set referral cookie (httpOnly: false — read client-side at signup)
-    (await cookies()).set(REF_COOKIE, codeRow.code, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: REF_MAX_AGE,
-    });
-
     const h = await headers();
     const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
     const ua = h.get("user-agent") ?? null;
-    // trackReferralClick lives in a "use server" file and can't be called from a
-    // Server Component, so record the click directly with the client we already have.
-    await serviceRole.from("referral_clicks").insert({
-      code: codeRow.code,
-      referrer_id: codeRow.user_id,
-      ip_hash: hashIp(ip, process.env.ANALYTICS_IP_HASH_SECRET),
-      user_agent: ua ?? null,
-    });
+    // The referral cookie is set in middleware (cookies can't be set in a
+    // Server Component render). Record the click here with the client we
+    // already have. Wrapped so analytics failures never break the landing render.
+    try {
+      await serviceRole.from("referral_clicks").insert({
+        code: codeRow.code,
+        referrer_id: codeRow.user_id,
+        ip_hash: hashIp(ip, process.env.ANALYTICS_IP_HASH_SECRET),
+        user_agent: ua ?? null,
+      });
+    } catch {}
   }
 
   return (

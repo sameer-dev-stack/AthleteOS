@@ -139,6 +139,30 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(signInUrl);
   }
 
+  // Referral attribution: a visitor landing on /r/<code> gets the athleteos_ref
+  // cookie so the signup flow can credit the referrer. Cookies can only be set
+  // in middleware/route handlers, NOT in a Server Component render — so this
+  // lives here, not in app/r/[code]/page.tsx. Placed after the Supabase auth
+  // client's setAll so the cookie isn't wiped by the response reassignment.
+  const refMatch = pathname.match(/^\/r\/([A-Za-z0-9]+)$/);
+  if (refMatch) {
+    const refCode = refMatch[1];
+    const { data: codeRow } = await serviceRole
+      .from("referral_codes")
+      .select("code, is_active")
+      .ilike("code", refCode)
+      .single();
+    if (codeRow?.is_active) {
+      supabaseResponse.cookies.set("athleteos_ref", codeRow.code, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 30,
+      });
+    }
+  }
+
   return supabaseResponse;
 }
 

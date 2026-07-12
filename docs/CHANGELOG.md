@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-07-12 — Hotfix 2: /r/[code] crashed on cookies().set() in Server Component
+
+### What changed
+1. **`app/r/[code]/page.tsx`** — Removed `cookies().set("athleteos_ref", ...)`. Next.js forbids mutating cookies during a Server Component render (only Server Actions / Route Handlers may). The page now only renders the branded landing and records the click (wrapped in try/catch).
+2. **`middleware.ts`** — Sets the `athleteos_ref` cookie in middleware (which may set response cookies) when the `/r/<code>` path resolves to an active referral code. Positioned after the Supabase auth `setAll` so it isn't overwritten.
+
+### Why
+Vercel runtime logs showed `Cookies can only be modified in a Server Action or Route Handler` at `app/r/[code]/page.js`. The prior hotfix (`d3b799d`) removed the `"use server"` call but left the illegal cookie write, so the branded landing still threw on every real visit. Cookie-based attribution now happens in the correct layer.
+
+### Files touched
+- `app/r/[code]/page.tsx`
+- `middleware.ts`
+
+### Commit
+`TBD`
+
+---
+
 ## 2026-07-12 — Hotfix: /r/[code] referral landing crashed ("Something went wrong")
 
 ### What changed
