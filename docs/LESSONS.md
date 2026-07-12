@@ -106,21 +106,23 @@ navigation completes. Release the overlay on the error path so the user can retr
 
 ---
 
-## L9 — Never call revalidatePath inside a useFormState Server Action that navigates on the client
+## L9 — A plain function passed to `<form action>` is NOT a React 18 form action
 
-A `useFormState` Server Action's returned state is what drives client-side
-navigation (e.g. an effect that calls `router.push` when `state.ok`). Calling
-`revalidatePath(path)` inside that action revalidates the *current* route, which
-resets the form state to its initial value and interrupts/cancels the pending
-`router.push`. The user sees the submit overlay (e.g. "Processing…") but is
-stranded on the same page — and no error text renders, because the state was
-reset, not failed. Tell the two apart: a *failed* submit still shows the red
-error copy; a *reset* submit shows nothing. Fix is to drop `revalidatePath`
-when the action's only job is to return state and the client then navigates
-away (the new route re-renders fresh anyway). Applies to both `signUp` and
-`signIn` in `lib/actions/auth.ts`, which share the same pattern.
+In React 18 / Next 14 App Router, `<form action={fn}>` only accepts a real
+form-action dispatch — e.g. the `formAction` returned by `useFormState` (as the
+sign-in form does). Passing a *plain client function* (a `handleSubmit`
+wrapper) makes the browser fall back to a **native form submission (full page
+reload)**. The reload resets `useFormState` to its initial value and cancels any
+client `router.push`, so the user sees the submit overlay ("Processing…") and
+is then stranded on the same page with no error text. Same signature as
+calling `revalidatePath` inside the action (also resets state + cancels
+navigation) — but the native-submit bug is the usual culprit. Fix: pass
+`formAction` straight to `<form action>`, and set any loading flag via
+`onSubmit={() => setLoading(true)}` (don't `preventDefault`, or the action
+won't run). Tell a *reset* submit (no error copy) from a *failed* one (red
+error copy shows): only a reset strands the user silently.
 
-**Source:** Fixed create-account / sign-in stuck on "Processing…" (T16), 2026-07-12.
+**Source:** Fixed create-account stuck on "Processing…" (T16), 2026-07-12.
 
 ---
 

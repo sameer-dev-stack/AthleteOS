@@ -8,18 +8,22 @@
 ## 2026-07-12 — T16: Fix create-account stuck on "Processing…" (navigation bug)
 
 ### What changed
-1. **`lib/actions/auth.ts`** — Removed `revalidatePath("/")` from `signUp` and `signIn` (and dropped the now-unused `revalidatePath` import). Both are `useFormState` server actions whose returned state drives a `router.push` on the client.
+1. **`app/auth/sign-up/page.tsx`** — Replaced the wrapper `<form action={handleSubmit}>` (where `handleSubmit` was a plain client function) with `<form action={formAction} onSubmit={() => setProcessing(true)}>`, mirroring the sign-in form. Removed the now-unused `handleSubmit` wrapper.
+2. **`lib/actions/auth.ts`** — Removed `revalidatePath("/")` from `signUp` and `signIn` (and dropped the now-unused `revalidatePath` import).
 
 ### Why
-`revalidatePath` inside a `useFormState` action triggers a route revalidation of the current page, which resets the form state to its initial value and cancels the in-flight `router.push`. Symptom: clicking Create account showed the full-screen overlay ("Processing…") but never navigated to `/auth/account-created` — the user was stranded on the sign-up screen. A normal signup *error* would still render the red error text; the total absence of any error text confirmed a state reset, not a failed signup. `signIn` shares the identical `useFormState` + `router.push` pattern, so it was fixed too.
+Clicking Create account showed the full-screen overlay ("Processing…") but never navigated to `/auth/account-created` — the user was stranded on the sign-up screen with no error text. Two compounding bugs:
+- **Primary:** a plain client function passed to `<form action>` is not a valid React 18 / Next 14 form action, so the browser performed a **native form submission (full page reload)**, which reset `useFormState` to its initial value and canceled the `router.push`. Every click silently reloaded `/auth/sign-up`. The sign-in form already used `formAction` directly and was correct.
+- **Secondary:** `revalidatePath` inside a `useFormState` action also revalidates/reloads the current route, resetting state and canceling navigation.
+
+A normal signup *error* would still render the red error copy; the total absence of any error text confirmed a state reset, not a failed signup.
 
 ### Files touched
+- `app/auth/sign-up/page.tsx`
 - `lib/actions/auth.ts`
 
-### Commit
-7512a0e
-
----
+### Commits
+35421ac (form action fix), 7512a0e (revalidatePath removal)
 
 ## 2026-07-12 — T15: Auth UX hardening (password toggle, reduced-motion, trust note)
 
