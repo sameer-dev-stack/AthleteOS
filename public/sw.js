@@ -1,4 +1,4 @@
-const CACHE_NAME = "athleteos-v2";
+const CACHE_NAME = "athleteos-v3";
 const OFFLINE_URL = "/offline";
 const STATIC_ASSETS = [
   "/",
@@ -40,6 +40,29 @@ self.addEventListener("fetch", (event) => {
   if (url.pathname.startsWith("/admin")) return;
   if (url.pathname.startsWith("/onboarding")) return;
 
+  const isNavigation = event.request.mode === "navigate";
+
+  // Navigations are network-first: always try the live server so fixes deploy
+  // immediately. Only fall back to cache (or the offline page) when the network
+  // is truly unreachable. Cache-first here would serve stale error pages forever.
+  if (isNavigation) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request).then((cached) =>
+          cached || caches.match(OFFLINE_URL)
+        ))
+    );
+    return;
+  }
+
+  // Static assets: cache-first with background refresh.
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const networkFetch = fetch(event.request)
@@ -52,9 +75,6 @@ self.addEventListener("fetch", (event) => {
         })
         .catch(() => {
           if (cached) return cached;
-          if (event.request.mode === "navigate") {
-            return caches.match(OFFLINE_URL);
-          }
           return new Response("Offline", { status: 503, statusText: "Offline" });
         });
 
