@@ -47,7 +47,7 @@ Previously, plan check logic was split and did not check `extended_pro_until`, m
 - `lib/actions/discovery.ts`
 
 ### Commit
-`TBD`
+`3e34f7e`
 
 ---
 
