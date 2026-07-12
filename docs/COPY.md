@@ -395,6 +395,28 @@ Native share uses `navigator.share` when available and falls back to clipboard c
 
 ---
 
+## Referral Landing Page (`/r/[code]`)
+
+**Eyebrow:** AthleteOS (uppercase, tracking-wider, accent)
+
+**Headline (valid code, name present):**
+> {referrerName} invited you to AthleteOS
+
+**Headline (valid code, no name):**
+> You've been invited to AthleteOS
+
+**Headline (invalid/expired code):**
+> Join AthleteOS
+
+**Body:**
+> The operating system for student-athletes. Build your brand, track your NIL value, and grow your audience.
+
+**CTA:** Claim your free athlete card
+
+**Footnote:** Free to start. No card required.
+
+---
+
 ## Auth Error Page
 - Headline: `Authentication Error`
 - Default message: `Verification failed or link expired.`
@@ -406,4 +428,4 @@ Native share uses `navigator.share` when available and falls back to clipboard c
 
 ---
 
-Last updated: 2026-06-28 (Session 57)
+Last updated: 2026-07-12 (Session 57)

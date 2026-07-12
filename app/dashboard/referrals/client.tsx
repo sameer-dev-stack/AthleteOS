@@ -2,18 +2,23 @@
 
 import { useState, useEffect } from "react";
 import { Copy, Check, Share2, Users, Gift, Clock, TrendingUp, ExternalLink } from "lucide-react";
-import { getOrCreateReferralCode, getReferralStats, type ReferralStats, type ReferralHistoryEntry } from "@/lib/actions/referrals";
+import { getOrCreateReferralCode, getReferralStats, type ReferralStats, type ReferralHistoryEntry, type ReferralFunnel, type LeaderboardEntry } from "@/lib/actions/referrals";
+import { proUntilLabel, statusLabel } from "@/lib/referral-display";
 import type { Profile } from "@/lib/actions/profile";
 
 type Props = {
   profile: Profile;
   initialStats: ReferralStats;
   initialHistory: ReferralHistoryEntry[];
+  initialFunnel: ReferralFunnel;
+  initialLeaderboard: LeaderboardEntry[];
 };
 
-export function ReferralsPageClient({ profile, initialStats, initialHistory }: Props) {
+export function ReferralsPageClient({ profile, initialStats, initialHistory, initialFunnel, initialLeaderboard }: Props) {
   const [stats, setStats] = useState<ReferralStats>(initialStats);
   const [history, setHistory] = useState<ReferralHistoryEntry[]>(initialHistory);
+  const [funnel] = useState<ReferralFunnel>(initialFunnel);
+  const [leaderboard] = useState<LeaderboardEntry[]>(initialLeaderboard);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(!initialStats.referralCode);
 
@@ -138,6 +143,24 @@ export function ReferralsPageClient({ profile, initialStats, initialHistory }: P
         </div>
       )}
 
+      {/* Click -> Conversion Funnel */}
+      <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-6 mb-6">
+        <h2 className="text-sm font-semibold text-white mb-4">Conversion Funnel</h2>
+        <div className="flex items-center gap-4">
+          <div className="flex-1">
+            <p className="text-xs text-ink-dim mb-1">Link clicks</p>
+            <p className="text-2xl font-bold text-white">{funnel.clicks}</p>
+          </div>
+          <div className="flex items-center text-ink-muted">
+            <ExternalLink className="h-4 w-4" />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs text-ink-dim mb-1">Conversions</p>
+            <p className="text-2xl font-bold text-accent">{funnel.conversions}</p>
+          </div>
+        </div>
+      </div>
+
       {/* How It Works */}
       <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-6 mb-6">
         <h2 className="text-sm font-semibold text-white mb-4">How It Works</h2>
@@ -192,6 +215,46 @@ export function ReferralsPageClient({ profile, initialStats, initialHistory }: P
           </div>
         )}
       </div>
+
+      {/* Top Referrers Leaderboard */}
+      <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-6">
+        <h2 className="text-sm font-semibold text-white mb-4">Top Referrers</h2>
+        {leaderboard.length === 0 ? (
+          <p className="text-sm text-ink-dim">No referrals completed yet across the community.</p>
+        ) : (
+          <div className="space-y-3">
+            {leaderboard.map((entry, i) => (
+              <div
+                key={entry.id}
+                className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10 text-xs font-bold text-accent">
+                    {i + 1}
+                  </div>
+                  {entry.avatar_url ? (
+                    <img
+                      src={entry.avatar_url}
+                      alt=""
+                      className="h-8 w-8 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.06] text-xs font-semibold text-ink-muted">
+                      {entry.full_name?.charAt(0) || "?"}
+                    </div>
+                  )}
+                  <p className="text-sm font-medium text-white">
+                    {entry.full_name || "Athlete"}
+                  </p>
+                </div>
+                <p className="text-sm font-semibold text-accent">
+                  {entry.referrals} {entry.referrals === 1 ? "referral" : "referrals"}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -228,14 +291,9 @@ function StatusBadge({ status }: { status: string }) {
     rewarded: "bg-accent/10 text-accent",
     pending: "bg-yellow-400/10 text-yellow-400",
   };
-  const labels = {
-    completed: "Completed",
-    rewarded: "Rewarded",
-    pending: "Pending",
-  };
   return (
     <span className={`text-xs font-medium px-2 py-1 rounded-lg ${styles[status as keyof typeof styles] || "bg-white/[0.06] text-ink-muted"}`}>
-      {labels[status as keyof typeof labels] || status}
+      {statusLabel(status)}
     </span>
   );
 }

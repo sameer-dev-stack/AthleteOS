@@ -648,6 +648,23 @@ Admin-only page showing Stripe webhook health. Displays: webhook endpoint status
 
 ---
 
+## Referral Landing Page (`app/r/[code]/`)
+
+### `/r/[code]` — `app/r/[code]/page.tsx`
+Branded referral landing page. Replaces the old bare redirect to `/auth/sign-up`. Server Component that:
+- Looks up the referral code + referrer profile (service-role client, server-only)
+- Sets `athleteos_ref` cookie (30d, non-httpOnly, secure in prod, sameSite lax) via `cookies().set()` during render
+- Calls `trackReferralClick` with IP from `headers()` and user-agent
+- Renders a dark, single-accent (#C6FF3D) landing with personalized invite ("{name} invited you to AthleteOS") or generic CTA for invalid/expired codes
+- CTA `<Link>` goes to `/auth/sign-up`
+- Pure helper `resolveReferrerView()` in `lib/referral-landing.ts` handles the view logic
+- Uses `dynamic = "force-dynamic"` (personalized content)
+- **No emojis. No second accent. Dark only.**
+- **Props:** `{ params: Promise<{ code: string }> }`
+- **Security:** SUPABASE_SERVICE_ROLE_KEY only referenced in this Server Component, never shipped to client
+
+---
+
 ## Public Discovery Portal (`app/discover/`)
 
 ### `<DiscoverClient>` — `app/discover/client.tsx`

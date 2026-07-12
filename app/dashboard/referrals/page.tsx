@@ -1,6 +1,11 @@
 import { redirect } from "next/navigation";
 import { getMyProfile } from "@/lib/actions/profile";
-import { getReferralStats, getReferralHistory } from "@/lib/actions/referrals";
+import {
+  getReferralStats,
+  getReferralHistory,
+  getReferralFunnel,
+  getReferralLeaderboard,
+} from "@/lib/actions/referrals";
 import { ReferralsPageClient } from "./client";
 
 export const metadata = {
@@ -15,9 +20,11 @@ export default async function ReferralsPage() {
   }
   const profile = profileResult.data;
 
-  const [stats, history] = await Promise.all([
+  const [stats, history, funnel, leaderboard] = await Promise.all([
     getReferralStats(),
     getReferralHistory(),
+    getReferralFunnel(),
+    getReferralLeaderboard(10),
   ]);
 
   return (
@@ -25,6 +32,8 @@ export default async function ReferralsPage() {
       profile={profile}
       initialStats={stats}
       initialHistory={history}
+      initialFunnel={funnel}
+      initialLeaderboard={leaderboard}
     />
   );
 }

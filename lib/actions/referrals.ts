@@ -41,6 +41,18 @@ export type ReferralHistoryEntry = {
   created_at: string;
 };
 
+export type ReferralFunnel = {
+  clicks: number;
+  conversions: number;
+};
+
+export type LeaderboardEntry = {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  referrals: number;
+};
+
 export async function getOrCreateReferralCode(): Promise<{ code: string; link: string }> {
   try {
     const supabase = await createClient();
@@ -190,6 +202,77 @@ export async function recordReferral(code: string): Promise<{ ok: boolean; error
   } catch (err) {
     console.error("[referrals] recordReferral error:", err);
     return { ok: false, error: err instanceof Error ? err.message : "Failed to record referral" };
+  }
+}
+
+export async function getReferralFunnel(): Promise<ReferralFunnel> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { clicks: 0, conversions: 0 };
+
+    const admin = createAdmin();
+
+    const { count: clicks } = await admin
+      .from("referral_clicks")
+      .select("id", { count: "exact", head: true })
+      .eq("referrer_id", user.id);
+
+    const { count: conversions } = await admin
+      .from("referrals")
+      .select("id", { count: "exact", head: true })
+      .eq("referrer_id", user.id)
+      .in("status", ["completed", "rewarded"]);
+
+    return { clicks: clicks || 0, conversions: conversions || 0 };
+  } catch (err) {
+    console.error("[referrals] getReferralFunnel error:", err);
+    return { clicks: 0, conversions: 0 };
+  }
+}
+
+export async function getReferralLeaderboard(limit = 10): Promise<LeaderboardEntry[]> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const admin = createAdmin();
+
+    const { data: referrals } = await admin
+      .from("referrals")
+      .select("referrer_id")
+      .in("status", ["completed", "rewarded"])
+      .limit(1000);
+
+    if (!referrals || referrals.length === 0) return [];
+
+    const counts = new Map<string, number>();
+    for (const r of referrals) {
+      counts.set(r.referrer_id, (counts.get(r.referrer_id) || 0) + 1);
+    }
+    const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit);
+
+    const ids = top.map(([id]) => id);
+    const { data: profiles } = await admin
+      .from("profiles")
+      .select("id, full_name, avatar_url")
+      .in("id", ids);
+
+    const profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
+
+    return top.map(([id, count]) => {
+      const profile = profileMap.get(id);
+      return {
+        id,
+        full_name: profile?.full_name || null,
+        avatar_url: profile?.avatar_url || null,
+        referrals: count,
+      };
+    });
+  } catch (err) {
+    console.error("[referrals] getReferralLeaderboard error:", err);
+    return [];
   }
 }
 

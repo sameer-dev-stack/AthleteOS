@@ -5,6 +5,28 @@
 
 ---
 
+## 2026-07-12 — Referral landing page replaces bare redirect
+
+### What changed
+1. **`lib/referral-landing.ts`** [NEW] — Pure helper `resolveReferrerView(code, codeRow, profile)` that returns `{ valid, referrerName, referrerAvatar }`. Extracted from route logic for testability.
+2. **`__tests__/referral-landing.test.ts`** [NEW] — 5 unit tests covering valid code, missing code, inactive code, null profile, and null name fallback.
+3. **`app/r/[code]/route.ts`** [DELETED] — Was a GET Route Handler that redirected to `/auth/sign-up` and set cookie + tracked click. Replaced by Server Component page.
+4. **`app/r/[code]/page.tsx`** [NEW] — Server Component that looks up the referral code + referrer profile (service-role client, server-only), sets `athleteos_ref` cookie via `cookies().set()` during render, calls `trackReferralClick`, and renders a branded landing page with personalized invite and CTA to `/auth/sign-up`. Uses `force-dynamic`. Reads IP from `headers()` for click tracking.
+
+### Why
+The referral link `/r/[code]` was a bare redirect to sign-up — no personalization, no brand moment. A friend clicking a referral link sees "Ava invited you to AthleteOS" before signing up, which improves conversion. The pure helper enables TDD and keeps the Server Component focused on rendering.
+
+### Files touched
+- `lib/referral-landing.ts` (new)
+- `__tests__/referral-landing.test.ts` (new)
+- `app/r/[code]/route.ts` (deleted)
+- `app/r/[code]/page.tsx` (new)
+
+### Commit
+`TBD`
+
+---
+
 ## 2026-07-12 — Plan delegation + rewire all plan-gated reads
 
 ### What changed
@@ -25,6 +47,30 @@
 - `components/dashboard/overview.tsx`
 - `components/profile-card.tsx`
 - `components/dashboard/settings-panel.tsx`
+
+### Commit
+`TBD`
+
+---
+
+## 2026-07-12 — Built /dashboard/referrals (funnel + leaderboard)
+
+### What changed
+1. **`lib/referral-display.ts`** [NEW] — Pure, TDD-tested display helpers `proUntilLabel` and `statusLabel` (no DB/React).
+2. **`__tests__/referral-display.test.ts`** [NEW] — Unit suite for the helpers (written failing → implemented → passing).
+3. **`lib/actions/referrals.ts`** — Added `getReferralFunnel()` and `getReferralLeaderboard(limit)` server actions plus `ReferralFunnel` and `LeaderboardEntry` types (the missing T7 exports the page depends on).
+4. **`app/dashboard/referrals/page.tsx`** — Now fetches all four datasets (stats, history, funnel, leaderboard) via `Promise.all` and passes them to the client.
+5. **`app/dashboard/referrals/client.tsx`** — Added a click→conversion Funnel section and a Top Referrers leaderboard section; `StatusBadge` now uses the `statusLabel` helper. (Pre-existing share link, stats, history retained — enhanced, not rewritten.)
+
+### Why
+The ReferralCard linked to `/dashboard/referrals`; the goal was an authed athlete seeing their share link, click→conversion funnel, stats, history, and a top-referrers leaderboard. The page already existed for link/stats/history, so this adds the two missing sections with the smallest possible change.
+
+### Files touched
+- `lib/referral-display.ts`
+- `__tests__/referral-display.test.ts`
+- `lib/actions/referrals.ts`
+- `app/dashboard/referrals/page.tsx`
+- `app/dashboard/referrals/client.tsx`
 
 ### Commit
 `TBD`
