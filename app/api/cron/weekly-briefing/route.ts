@@ -89,6 +89,12 @@ export async function GET(req: NextRequest) {
         const newInquiries = inquiriesRes.count || 0;
         const fanSubscribers = subsRes.count || 0;
 
+        // Pro/Elite only — Free tier athletes do not receive weekly briefings
+        if (effectivePlan === "free") {
+          results.skipped++;
+          continue;
+        }
+
         // Skip athletes with zero activity this week
         if (cardViews === 0 && linkClicks === 0 && tipsTotal === 0 && newInquiries === 0) {
           results.skipped++;

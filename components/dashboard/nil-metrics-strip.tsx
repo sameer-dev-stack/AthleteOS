@@ -73,10 +73,18 @@ export function NilMetricsStrip({
               <span className="text-lg font-black text-white tracking-tight">
                 {stat.value}
               </span>
-              {stat.delta !== undefined && stat.delta !== 0 && (
-                <span className={`text-[10px] font-bold ${stat.delta > 0 ? "text-[#C6FF3D]" : "text-red-400"}`}>
-                  {stat.delta > 0 ? `+${stat.delta.toFixed(1)}%` : `${stat.delta.toFixed(1)}%`}
-                </span>
+              {stat.delta !== undefined && (
+                stat.delta > 0 ? (
+                  <span className="text-[10px] font-bold text-[#C6FF3D]">
+                    +{stat.delta.toFixed(1)}%
+                  </span>
+                ) : stat.delta < 0 ? (
+                  <span className="text-[10px] font-bold text-red-400">
+                    {stat.delta.toFixed(1)}%
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold text-white/30">—</span>
+                )
               )}
             </div>
           </div>

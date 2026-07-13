@@ -5,6 +5,34 @@
 
 ---
 
+## 2026-07-13 — Automation & Background Processing Engine: Verification + Gaps Closed
+
+### What changed
+- **`app/api/cron/weekly-briefing/route.ts`** — Added Pro/Elite-only tier gate before the zero-activity skip. Free-tier athletes are now skipped with `results.skipped++` before any AI or email work runs.
+- **`components/dashboard/nil-metrics-strip.tsx`** — Replaced binary delta rendering (show/hide) with a full three-state system: lime-green `+X.X%` for positive, red `-X.X%` for negative, gray `—` for zero/unchanged.
+- **`vercel.json`** — Registered `/api/cron/poll-social` at `0 4 * * *` (4:00 AM UTC daily). Previously missing from the cron manifest.
+
+### Why
+Post-integration audit revealed two spec gaps: (1) weekly briefing was processing all tiers instead of Pro/Elite only, and (2) poll-social was built but never registered in vercel.json so it would never fire. Nil-metrics-strip also lacked the neutral-state visual specified in the PRD.
+
+### Files touched
+- `app/api/cron/weekly-briefing/route.ts`
+- `components/dashboard/nil-metrics-strip.tsx`
+- `vercel.json`
+- `docs/CHANGELOG.md`
+
+### Verification checklist
+- [x] All cron handlers protected via `CRON_SECRET` Bearer header guard
+- [x] `poll-social` alternates scrape scope by tier (Free: IG only / 30d, Pro/Elite: IG+TikTok / 7d)
+- [x] AI credits audited and deducted in upsert before email fires; `< 2` credits triggers quota warning path
+- [x] Nil-metrics-strip renders three visual states without breaking layout
+- [x] Weekly briefing gate: Pro/Elite only — Free tier skipped before any computation
+
+### Commit
+- `feat: close automation engine gaps — Pro/Elite briefing gate, three-state delta UI, register poll-social cron`
+
+---
+
 ## 2026-07-13 — NIL Value Engine Integration: Asynchronous Scrapers, Bounded ER valuation, and Quota Gated Briefings
 
 ### What changed

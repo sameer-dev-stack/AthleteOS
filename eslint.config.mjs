@@ -12,6 +12,7 @@ export default [
       "coverage/",
       "graphify-out/",
       "authpage/",
+      ".kilo/",
       "next-env.d.ts",
       "*.config.js",
       "*.config.mjs",
