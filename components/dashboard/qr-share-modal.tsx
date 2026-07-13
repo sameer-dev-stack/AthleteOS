@@ -39,8 +39,10 @@ export function QrShareModal({ url, open, onClose }: Props) {
   useEffect(() => {
     let cancelled = false;
     if (!open) {
-      setCopied(false);
-      setQrDataUrl(null);
+      queueMicrotask(() => {
+        setCopied(false);
+        setQrDataUrl(null);
+      });
     }
   }, [open]);
 

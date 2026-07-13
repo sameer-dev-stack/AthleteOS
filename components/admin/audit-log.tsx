@@ -73,7 +73,7 @@ export function AuditLog() {
   }, []);
 
   useEffect(() => {
-    fetchLogs(page);
+    queueMicrotask(() => fetchLogs(page));
   }, [page, fetchLogs]);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);

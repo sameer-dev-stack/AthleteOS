@@ -14,7 +14,7 @@ export function ShareButtons({ url, title, description }: ShareButtonsProps) {
   const [canShare, setCanShare] = useState(false);
 
   useEffect(() => {
-    setCanShare(typeof navigator !== "undefined" && !!navigator.share);
+    queueMicrotask(() => setCanShare(typeof navigator !== "undefined" && !!navigator.share));
   }, []);
 
   const encodedUrl = encodeURIComponent(url);

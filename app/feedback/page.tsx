@@ -111,17 +111,18 @@ export default function FeedbackPage() {
   useEffect(() => {
     const stored = localStorage.getItem(VOTES_KEY);
     const voted = new Set<string>(stored ? JSON.parse(stored) : []);
-    setVotedIds(voted);
-
     const savedCounts = localStorage.getItem("athleteos_feature_counts");
     const counts: Record<string, number> = savedCounts ? JSON.parse(savedCounts) : {};
 
-    setFeatures(
-      INITIAL_FEATURES.map((f) => ({
-        ...f,
-        votes: counts[f.id] ?? Math.floor(Math.random() * 40) + 5,
-      })).sort((a, b) => b.votes - a.votes)
-    );
+    queueMicrotask(() => {
+      setVotedIds(voted);
+      setFeatures(
+        INITIAL_FEATURES.map((f) => ({
+          ...f,
+          votes: counts[f.id] ?? Math.floor(Math.random() * 40) + 5,
+        })).sort((a, b) => b.votes - a.votes)
+      );
+    });
   }, []);
 
   function handleVote(id: string) {

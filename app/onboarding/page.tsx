@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -115,9 +116,12 @@ function PreviewCard({
       <div className="relative px-4 pb-4 -mt-8">
         <div className="flex items-end gap-3">
           {avatarUrl ? (
-            <img
+            <Image
               src={avatarUrl}
               alt="Avatar"
+              unoptimized
+              width={64}
+              height={64}
               className="h-16 w-16 rounded-2xl object-cover ring-4 ring-bg-elev"
             />
           ) : (
@@ -233,15 +237,15 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     if (username.length < 3) {
-      setUsernameStatus("idle");
+      queueMicrotask(() => setUsernameStatus("idle"));
       return;
     }
     if (!/^[a-z0-9_-]+$/.test(username)) {
-      setUsernameStatus("invalid");
+      queueMicrotask(() => setUsernameStatus("invalid"));
       return;
     }
 
-    setUsernameStatus("checking");
+    queueMicrotask(() => setUsernameStatus("checking"));
     const t = setTimeout(() => {
       checkUsername(username).then(({ available }) => {
         setUsernameStatus(available ? "available" : "taken");

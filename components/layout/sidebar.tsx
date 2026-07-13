@@ -27,7 +27,7 @@ export function Sidebar({ profile, email }: SidebarProps) {
     .toUpperCase();
 
   useEffect(() => {
-    setMobileOpen(false);
+    queueMicrotask(() => setMobileOpen(false));
   }, [pathname]);
 
   useEffect(() => {

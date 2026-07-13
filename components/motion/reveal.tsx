@@ -1,7 +1,8 @@
 "use client";
 
 import { motion, useReducedMotion, type Variants } from "framer-motion";
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
+import { useMounted } from "@/lib/hooks/use-mounted";
 
 const VARIANTS: Variants = {
   hidden: { opacity: 0, y: 24, filter: "blur(8px)" },
@@ -29,9 +30,7 @@ export function Reveal({
   y?: number;
 }) {
   const prefersReducedMotion = useReducedMotion();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useMounted();
 
   if (mounted && prefersReducedMotion) {
     return <Tag className={className}>{children}</Tag>;
@@ -74,9 +73,7 @@ export function RevealStagger({
   amount?: number;
 }) {
   const prefersReducedMotion = useReducedMotion();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useMounted();
 
   if (mounted && prefersReducedMotion) return <div className={className}>{children}</div>;
 
@@ -108,9 +105,7 @@ export function RevealItem({
   y?: number;
 }) {
   const prefersReducedMotion = useReducedMotion();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useMounted();
 
   if (mounted && prefersReducedMotion) return <div className={className}>{children}</div>;
 

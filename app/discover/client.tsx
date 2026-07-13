@@ -188,7 +188,7 @@ export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props)
             >
               <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border border-accent/20">
                 {athletes[0].avatar_url ? (
-                  <img src={athletes[0].avatar_url} alt="" className="h-full w-full object-cover" />
+                  <Image src={athletes[0].avatar_url} alt="" unoptimized width={56} height={56} className="h-full w-full object-cover" />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-accent/10 text-lg font-bold text-accent">
                     {(athletes[0].full_name || athletes[0].username || "?")[0].toUpperCase()}

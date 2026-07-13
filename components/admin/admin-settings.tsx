@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Check, ExternalLink } from "lucide-react";
 
 interface ServiceStatus {
@@ -77,13 +78,13 @@ export function AdminSettings({ user }: AdminSettingsProps) {
           Operational dashboards
         </p>
         <div className="mt-3 space-y-2">
-          <a
+          <Link
             href="/stripe/status"
             className="flex items-center gap-2 rounded-lg border border-white/[0.06] bg-[#0D0D0F] p-3 text-sm text-white transition-colors hover:bg-white/[0.04]"
           >
             <ExternalLink className="h-4 w-4 text-ink-muted" />
             Stripe Webhook Status
-          </a>
+          </Link>
           <a
             href="https://supabase.com/dashboard/project/nkyedqekfligqhrnwkqt"
             target="_blank"

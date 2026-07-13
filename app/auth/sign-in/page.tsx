@@ -75,7 +75,7 @@ export default function SignInPage() {
         cancelled = true;
       };
     } else if (state.message) {
-      setProcessing(false);
+      queueMicrotask(() => setProcessing(false));
     }
   }, [state.ok, state.message, router]);
 

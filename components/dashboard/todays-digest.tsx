@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { TrendingUp, TrendingDown, Eye, MousePointerClick, MessageCircle, Sparkles, ArrowRight } from "lucide-react";
 import type { AnalyticsData } from "@/lib/actions/analytics";
@@ -91,7 +92,7 @@ export function TodaysDigest({ analytics, nilScore, tipsCount, inquiriesCount = 
       });
     }
 
-    setItems(newItems);
+    queueMicrotask(() => setItems(newItems));
   }, [analytics, nilScore, tipsCount, inquiriesCount]);
 
   if (items.length === 0) {
@@ -108,13 +109,13 @@ export function TodaysDigest({ analytics, nilScore, tipsCount, inquiriesCount = 
         </div>
         <div className="rounded-xl border border-dashed border-white/[0.08] bg-white/[0.01] p-6 text-center">
           <p className="text-xs text-white/40 mb-3">Publish your card to start seeing analytics</p>
-          <a
+          <Link
             href="/dashboard/profile"
             className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold transition-all"
             style={{ backgroundColor: `${themeAccent}15`, color: themeAccent, border: `1px solid ${themeAccent}30` }}
           >
             Complete your profile <ArrowRight className="h-3 w-3" />
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -151,13 +152,13 @@ export function TodaysDigest({ analytics, nilScore, tipsCount, inquiriesCount = 
 
       <div className="mt-4 pt-3 border-t border-white/[0.04] flex items-center justify-between">
         <span className="text-[10px] text-white/30">Updated just now</span>
-        <a
+        <Link
           href="/dashboard/analytics"
           className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider transition-colors hover:text-white"
           style={{ color: themeAccent }}
         >
           View Analytics <ArrowRight className="h-3 w-3" />
-        </a>
+        </Link>
       </div>
     </div>
   );

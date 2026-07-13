@@ -6,7 +6,8 @@ import {
   useSpring,
   useReducedMotion,
 } from "framer-motion";
-import { useRef, useState, useEffect, type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
+import { useMounted } from "@/lib/hooks/use-mounted";
 
 export function Magnetic({
   children,
@@ -19,9 +20,7 @@ export function Magnetic({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useMounted();
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);

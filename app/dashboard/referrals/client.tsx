@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Copy, Check, Users, Gift, Clock, TrendingUp, ExternalLink } from "lucide-react";
 import { getOrCreateReferralCode, getReferralStats, type ReferralStats, type ReferralHistoryEntry, type ReferralFunnel, type LeaderboardEntry } from "@/lib/actions/referrals";
@@ -215,9 +216,12 @@ export function ReferralsPageClient({ profile, initialStats, initialHistory, ini
                     {i + 1}
                   </div>
                   {entry.avatar_url ? (
-                    <img
+                    <Image
                       src={entry.avatar_url}
                       alt=""
+                      unoptimized
+                      width={32}
+                      height={32}
                       className="h-8 w-8 rounded-lg object-cover"
                     />
                   ) : (

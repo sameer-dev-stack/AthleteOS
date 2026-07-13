@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useMounted } from "@/lib/hooks/use-mounted";
 import Link from "next/link";
 import { Check, Circle, ExternalLink, Trophy } from "lucide-react";
 import { motion } from "framer-motion";
@@ -15,12 +16,12 @@ type ChecklistItem = {
 };
 
 export function LaunchChecklist({ profile }: { profile: Profile }) {
-  const [dismissed, setDismissed] = useState(false);
-
-  useEffect(() => {
-    const key = `athleteos_checklist_dismissed_${profile.id}`;
-    if (localStorage.getItem(key) === "true") setDismissed(true);
-  }, [profile.id]);
+  const mounted = useMounted();
+  const [dismissed, setDismissed] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      localStorage.getItem(`athleteos_checklist_dismissed_${profile.id}`) === "true",
+  );
 
   function handleDismiss() {
     setDismissed(true);
@@ -77,7 +78,7 @@ export function LaunchChecklist({ profile }: { profile: Profile }) {
   const allDone = completedCount === totalCount;
   const progress = (completedCount / totalCount) * 100;
 
-  if (dismissed || allDone) return null;
+  if (!mounted || dismissed || allDone) return null;
 
   return (
     <motion.div

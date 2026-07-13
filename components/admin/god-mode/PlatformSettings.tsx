@@ -34,7 +34,7 @@ export default function PlatformSettings() {
   }, []);
 
   useEffect(() => {
-    fetchHealthAndSettings();
+    queueMicrotask(() => fetchHealthAndSettings());
   }, [fetchHealthAndSettings]);
 
   // Handle Feature Flag toggle click

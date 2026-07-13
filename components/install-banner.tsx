@@ -32,7 +32,7 @@ export function InstallBanner() {
     if (dismissedAt) {
       const elapsed = Date.now() - Number(dismissedAt);
       if (elapsed < 7 * 24 * 60 * 60 * 1000) {
-        setDismissed(true);
+        queueMicrotask(() => setDismissed(true));
         return;
       }
     }

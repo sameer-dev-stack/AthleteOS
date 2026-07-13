@@ -65,8 +65,10 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
   const haptic = useHaptic();
 
   useEffect(() => {
-    setProfile(initialProfile);
-    setAvatarUrl(initialProfile.avatar_url);
+    queueMicrotask(() => {
+      setProfile(initialProfile);
+      setAvatarUrl(initialProfile.avatar_url);
+    });
   }, [initialProfile]);
 
   useEffect(() => {
@@ -289,7 +291,7 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
 
       {/* Upgrade CTA for free users */}
       {resolvePlan(profile.plan, profile.extended_pro_until) === "free" && (
-        <a
+        <Link
           href="/dashboard/billing"
           className="flex items-center justify-between rounded-2xl border border-accent/20 bg-accent/5 p-4 transition-all hover:bg-accent/10"
         >
@@ -298,7 +300,7 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
             <p className="text-xs text-white/40 mt-0.5">300 AI actions, analytics, custom branding</p>
           </div>
           <Zap className="h-4 w-4 text-accent" />
-        </a>
+        </Link>
       )}
 
       {/* Card Performance Metrics */}

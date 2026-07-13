@@ -44,13 +44,13 @@ export function AIPitchWriter({ profile, onQuotaChange, disabled }: Props) {
   }, []);
 
   useEffect(() => {
-    if (streamError) setError(streamError);
+    if (streamError) queueMicrotask(() => setError(streamError));
   }, [streamError]);
 
   useEffect(() => {
     if (!isStreaming && streamedText) {
       const parsed = parsePitches(streamedText);
-      setPitches(parsed);
+      queueMicrotask(() => setPitches(parsed));
       hasGeneratedRef.current = true;
     }
   }, [isStreaming, streamedText]);

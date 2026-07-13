@@ -30,7 +30,7 @@ export default function FinancialsMonitor() {
   }, [statusFilter]);
 
   useEffect(() => {
-    fetchFinancialData();
+    queueMicrotask(() => fetchFinancialData());
   }, [fetchFinancialData]);
 
   // Convert cents to formatted USD String

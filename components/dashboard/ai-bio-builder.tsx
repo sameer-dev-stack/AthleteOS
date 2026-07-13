@@ -57,13 +57,13 @@ export function AIBioBuilder({ profile, onQuotaChange, onProfileChange, disabled
   }, []);
 
   useEffect(() => {
-    if (streamError) setError(streamError);
+    if (streamError) queueMicrotask(() => setError(streamError));
   }, [streamError]);
 
   useEffect(() => {
     if (!isStreaming && streamedText) {
       const parsed = parseBios(streamedText);
-      setBios(parsed);
+      queueMicrotask(() => setBios(parsed));
       hasGeneratedRef.current = true;
     }
   }, [isStreaming, streamedText]);

@@ -50,7 +50,7 @@ export default function AuditLogViewer() {
   }, [page, adminId, actionType, targetType, startDate, endDate]);
 
   useEffect(() => {
-    fetchAuditLogs();
+    queueMicrotask(() => fetchAuditLogs());
   }, [fetchAuditLogs]);
 
   // Handle Clear Filters

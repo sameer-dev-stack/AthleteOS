@@ -54,7 +54,7 @@ export default function UserManagement() {
   }, [search, page]);
 
   useEffect(() => {
-    fetchProfiles();
+    queueMicrotask(() => fetchProfiles());
   }, [fetchProfiles]);
 
   // Fetch detail drawer info

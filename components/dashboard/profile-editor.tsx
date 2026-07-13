@@ -132,14 +132,16 @@ export function DashboardEditor({ profile, onSaved }: Props) {
   const profileContactPhone = profile.contact_phone || "";
 
   useEffect(() => {
-    setBio(profile.bio || "");
-    setStats(profile.stats || []);
-    setLinks(profile.links || []);
-    setSocial(profile.social || {});
-    setHighlights(profile.highlights || []);
-    setAccent(profile.theme_accent || "#C6FF3D");
-    setContactEmail(profile.contact_email || "");
-    setContactPhone(profile.contact_phone || "");
+    queueMicrotask(() => {
+      setBio(profile.bio || "");
+      setStats(profile.stats || []);
+      setLinks(profile.links || []);
+      setSocial(profile.social || {});
+      setHighlights(profile.highlights || []);
+      setAccent(profile.theme_accent || "#C6FF3D");
+      setContactEmail(profile.contact_email || "");
+      setContactPhone(profile.contact_phone || "");
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profileBio, profileStatsStr, profileLinksStr, profileSocialStr, profileHighlightsStr, profileAccent, profileContactEmail, profileContactPhone]);
 

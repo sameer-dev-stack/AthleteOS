@@ -11,7 +11,7 @@ export function AnnouncementBar() {
 
   useEffect(() => {
     const wasDismissed = localStorage.getItem(DISMISS_KEY);
-    if (wasDismissed === "true") setDismissed(true);
+    if (wasDismissed === "true") queueMicrotask(() => setDismissed(true));
   }, []);
 
   function handleDismiss() {

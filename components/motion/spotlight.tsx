@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState, useEffect, type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
+import { useMounted } from "@/lib/hooks/use-mounted";
 import { motion, useMotionValue, useMotionTemplate, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -17,9 +18,7 @@ export function Spotlight({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useMounted();
 
   const x = useMotionValue(-9999);
   const y = useMotionValue(-9999);

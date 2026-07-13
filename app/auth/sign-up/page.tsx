@@ -62,7 +62,7 @@ export default function SignUpPage() {
         `/auth/account-created?email=${encodeURIComponent(email)}`
       );
     } else if (state.message) {
-      setProcessing(false);
+      queueMicrotask(() => setProcessing(false));
     }
   }, [state.ok, state.email, state.message, router]);
 

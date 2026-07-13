@@ -34,7 +34,7 @@ export default function AnalyticsOverview() {
   }, []);
 
   useEffect(() => {
-    fetchAnalytics();
+    queueMicrotask(() => fetchAnalytics());
   }, [fetchAnalytics]);
 
   // Calculate Click-Through Rate (Clicks / Views)

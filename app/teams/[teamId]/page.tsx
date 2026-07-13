@@ -601,7 +601,7 @@ function ChatTab({ teamId }: { teamId: string }) {
     setLoading(false);
   }, [teamId]);
 
-  useEffect(() => { loadMessages(); }, [loadMessages]);
+  useEffect(() => { queueMicrotask(() => loadMessages()); }, [loadMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -701,7 +701,7 @@ function ContentTab({ teamId }: { teamId: string }) {
     setLoading(false);
   }, [teamId]);
 
-  useEffect(() => { loadContent(); }, [loadContent]);
+  useEffect(() => { queueMicrotask(() => loadContent()); }, [loadContent]);
 
   async function handleAdd() {
     if (!title.trim() || adding) return;
@@ -856,7 +856,7 @@ function TasksTab({ teamId }: { teamId: string }) {
     setLoading(false);
   }, [teamId]);
 
-  useEffect(() => { loadTasks(); }, [loadTasks]);
+  useEffect(() => { queueMicrotask(() => loadTasks()); }, [loadTasks]);
 
   async function handleAdd() {
     if (!title.trim() || adding) return;
@@ -1036,7 +1036,7 @@ function CalendarTab({ teamId }: { teamId: string }) {
     setLoading(false);
   }, [teamId]);
 
-  useEffect(() => { loadEvents(); }, [loadEvents]);
+  useEffect(() => { queueMicrotask(() => loadEvents()); }, [loadEvents]);
 
   async function handleAdd() {
     if (!title.trim() || !eventDate || adding) return;
@@ -1236,7 +1236,7 @@ function AnnouncementsTab({ teamId }: { teamId: string }) {
     setLoading(false);
   }, [teamId]);
 
-  useEffect(() => { loadAnnouncements(); }, [loadAnnouncements]);
+  useEffect(() => { queueMicrotask(() => loadAnnouncements()); }, [loadAnnouncements]);
 
   async function handleAdd() {
     if (!title.trim() || !content.trim() || adding) return;

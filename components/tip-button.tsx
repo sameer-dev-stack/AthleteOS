@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useMounted } from "@/lib/hooks/use-mounted";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Loader2, X, Check } from "lucide-react";
 import { createTipSession } from "@/lib/actions/stripe";
@@ -21,11 +22,7 @@ export function TipButton({ athleteId, athleteName, accentColor = "#C6FF3D" }: P
   const [selected, setSelected] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useMounted();
 
   useEffect(() => {
     if (!open) return;

@@ -34,7 +34,7 @@ export default function RealtimeDashboard() {
   }, []);
 
   useEffect(() => {
-    fetchMetrics();
+    queueMicrotask(() => fetchMetrics());
     const interval = setInterval(fetchMetrics, 15000);
     return () => clearInterval(interval);
   }, [fetchMetrics]);

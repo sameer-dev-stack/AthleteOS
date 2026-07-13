@@ -10,7 +10,7 @@ export function CookieConsent() {
 
   useEffect(() => {
     const consent = localStorage.getItem(CONSENT_KEY);
-    if (!consent) setVisible(true);
+    if (!consent) queueMicrotask(() => setVisible(true));
   }, []);
 
   function accept() {

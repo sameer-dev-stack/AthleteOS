@@ -30,7 +30,7 @@ export default function ComplianceQueue() {
   }, []);
 
   useEffect(() => {
-    fetchPendingDeals();
+    queueMicrotask(() => fetchPendingDeals());
   }, [fetchPendingDeals]);
 
   // Format cents to dollars

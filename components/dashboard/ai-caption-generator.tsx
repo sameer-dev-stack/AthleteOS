@@ -57,13 +57,13 @@ export function AICaptionGenerator({ profile, onQuotaChange, disabled }: Props) 
   }, []);
 
   useEffect(() => {
-    if (streamError) setError(streamError);
+    if (streamError) queueMicrotask(() => setError(streamError));
   }, [streamError]);
 
   useEffect(() => {
     if (!isStreaming && streamedText) {
       const parsed = parseCaptions(streamedText);
-      setCaptions(parsed);
+      queueMicrotask(() => setCaptions(parsed));
       hasGeneratedRef.current = true;
     }
   }, [isStreaming, streamedText]);

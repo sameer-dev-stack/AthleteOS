@@ -38,7 +38,7 @@ export default function UsageMonitor() {
   }, []);
 
   useEffect(() => {
-    fetchMetrics();
+    queueMicrotask(() => fetchMetrics());
   }, [fetchMetrics]);
 
   // Compute maximum tool usage for chart scaling

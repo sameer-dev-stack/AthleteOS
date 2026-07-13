@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useMounted } from "@/lib/hooks/use-mounted";
 
 const ELEMENTS = [
   { icon: "$", x: "8%", y: "18%", delay: 0, size: 40, rotate: -12 },
@@ -12,9 +12,7 @@ const ELEMENTS = [
 
 export function FloatingElements() {
   const prefersReducedMotion = useReducedMotion();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useMounted();
 
   if (mounted && prefersReducedMotion) return null;
 

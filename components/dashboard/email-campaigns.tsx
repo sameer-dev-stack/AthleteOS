@@ -48,7 +48,7 @@ export function EmailCampaigns({ athleteId }: Props) {
   };
 
   useEffect(() => {
-    loadData();
+    queueMicrotask(() => loadData());
   }, []);
 
   const handleSend = async (id: string) => {

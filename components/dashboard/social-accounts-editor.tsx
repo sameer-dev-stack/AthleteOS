@@ -69,11 +69,12 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
   }, [onUpdate]);
 
   // Poll every 5s while any platform is PENDING so the UI can react to resolution
+  const pendingKey = pendingPlatforms.join(",");
   useEffect(() => {
-    if (pendingPlatforms.length === 0) return;
+    if (!pendingKey) return;
     const id = setInterval(() => onUpdate(), 5000);
     return () => clearInterval(id);
-  }, [pendingPlatforms.join(","), onUpdate]);
+  }, [pendingKey, onUpdate]);
 
   // Auto-dismiss the toast after 5 seconds
   useEffect(() => {
@@ -86,11 +87,15 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
   useEffect(() => {
     const priv = accounts.find((a) => a.verification_status === "PRIVATE_ACCOUNT");
     if (priv && !privateAccount && dismissedPrivate !== priv.handle) {
-      setPrivateAccount({ platform: priv.platform, handle: priv.handle.replace(/^@/, "") });
+      queueMicrotask(() =>
+        setPrivateAccount({ platform: priv.platform, handle: priv.handle.replace(/^@/, "") })
+      );
     }
     const errored = accounts.find((a) => a.verification_status === "ERROR");
     if (errored && !toast) {
-      setToast({ message: "Scraper task failed. Please verify the handle spelling and try again.", type: "error" });
+      queueMicrotask(() =>
+        setToast({ message: "Scraper task failed. Please verify the handle spelling and try again.", type: "error" })
+      );
     }
   }, [accounts, privateAccount, dismissedPrivate, toast]);
 

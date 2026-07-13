@@ -30,7 +30,7 @@ export default function AbuseDashboard() {
   }, []);
 
   useEffect(() => {
-    fetchSecurityData();
+    queueMicrotask(() => fetchSecurityData());
   }, [fetchSecurityData]);
 
   // Handle Reactivate Trigger

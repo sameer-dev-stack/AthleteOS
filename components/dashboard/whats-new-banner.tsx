@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useMounted } from "@/lib/hooks/use-mounted";
 import Link from "next/link";
 import { Sparkles, X, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
@@ -8,16 +9,14 @@ import { motion } from "framer-motion";
 const BANNER_KEY = "athleteos_whatsnew_jul7";
 
 export function WhatsNewBanner() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    if (localStorage.getItem(BANNER_KEY) !== "dismissed") {
-      setVisible(true);
-    }
-  }, []);
+  const mounted = useMounted();
+  const [dismissed, setDismissed] = useState(
+    () => typeof window !== "undefined" && localStorage.getItem(BANNER_KEY) === "dismissed",
+  );
+  const visible = mounted && !dismissed;
 
   function handleDismiss() {
-    setVisible(false);
+    setDismissed(true);
     localStorage.setItem(BANNER_KEY, "dismissed");
   }
 

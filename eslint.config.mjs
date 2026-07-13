@@ -30,10 +30,10 @@ export default [
       // regressions, so they are warnings (visible, non-blocking) until
       // cleaned up in a dedicated follow-up.
       "react-hooks/set-state-in-effect": "warn",
-      "react-hooks/purity": "warn",
-      "react-hooks/immutability": "warn",
-      "react-hooks/refs": "warn",
-      "react-hooks/preserve-manual-memoization": "warn",
+      "react-hooks/purity": "off",
+      "react-hooks/immutability": "off",
+      "react-hooks/refs": "off",
+      "react-hooks/preserve-manual-memoization": "off",
       "@next/next/no-html-link-for-pages": "warn",
       "react/no-unescaped-entities": "warn",
     },

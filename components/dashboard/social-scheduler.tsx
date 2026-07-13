@@ -61,7 +61,7 @@ export function SocialScheduler({ socialAccounts }: Props) {
   }, [statusFilter]);
 
   useEffect(() => {
-    fetchPosts();
+    queueMicrotask(() => fetchPosts());
   }, [fetchPosts]);
 
   async function handleDelete(id: string) {

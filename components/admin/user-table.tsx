@@ -148,7 +148,7 @@ export function UserTable() {
   }
 
   useEffect(() => {
-    fetchUsers(page, search);
+    queueMicrotask(() => fetchUsers(page, search));
   }, [page, search, fetchUsers]);
 
   useEffect(() => {

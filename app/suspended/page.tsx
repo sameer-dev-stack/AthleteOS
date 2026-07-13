@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function SuspendedPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#0A0A0B] px-4">
@@ -6,12 +8,12 @@ export default function SuspendedPage() {
         <p className="mt-3 text-sm text-ink-muted">
           Your account has been suspended. Please contact support.
         </p>
-        <a
+        <Link
           href="/auth/sign-in"
           className="mt-6 inline-block rounded-lg bg-white/[0.06] px-4 py-2 text-sm text-ink-muted transition-colors hover:bg-white/[0.1]"
         >
           Sign out
-        </a>
+        </Link>
       </div>
     </div>
   );

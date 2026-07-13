@@ -29,7 +29,7 @@ export function useAbTest() {
       stored = Math.random() < 0.5 ? "A" : "B";
       localStorage.setItem(AB_KEY, stored);
     }
-    setVariant(stored);
+    queueMicrotask(() => setVariant(stored));
   }, []);
 
   return {

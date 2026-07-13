@@ -41,17 +41,16 @@ export function TypingText({
   }, [currentText, currentWordIndex, isDeleting, words, pauseDuration]);
 
   useEffect(() => {
-    if (prefersReducedMotion) {
-      setCurrentText(words[0]);
-      return;
-    }
+    if (prefersReducedMotion) return;
     const timeout = setTimeout(tick, isDeleting ? deleteSpeed : speed);
     return () => clearTimeout(timeout);
   }, [tick, isDeleting, speed, deleteSpeed, prefersReducedMotion, words]);
 
+  const displayText = prefersReducedMotion ? words[0] : currentText;
+
   return (
     <span className={className}>
-      {currentText}
+      {displayText}
       <span className="ml-0.5 inline-block w-[2px] animate-pulse-soft bg-accent" />
     </span>
   );

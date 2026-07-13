@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { BarChart3, Eye, MousePointerClick, Globe, ExternalLink, MessageCircle, DollarSign, Download, FileText, Calendar, ArrowRightLeft, Smartphone, Monitor, Tablet, TrendingUp, Link2, Mail, Clock, Trash2, Send, X } from "lucide-react";
 import {
@@ -89,8 +90,10 @@ export function AnalyticsPanel({ athleteId, themeAccent = "#C6FF3D" }: Props) {
       });
     };
 
-    setLoading(true);
-    setError(null);
+    queueMicrotask(() => {
+      setLoading(true);
+      setError(null);
+    });
     fetchData();
     const pollInterval = setInterval(fetchData, 30000);
 
@@ -517,12 +520,12 @@ export function AnalyticsPanel({ athleteId, themeAccent = "#C6FF3D" }: Props) {
                   Views, clicks, and visitor data will appear here once people start viewing your public card.
                 </p>
                 <div className="mt-4 flex justify-center gap-3">
-                  <a
+                  <Link
                     href="/dashboard/profile"
                     className="rounded-lg bg-accent/10 px-4 py-2 text-xs font-semibold text-accent transition-colors hover:bg-accent/20"
                   >
                     View your card
-                  </a>
+                  </Link>
                 </div>
                 <div className="mt-6 mx-auto max-w-xs rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
                   <p className="text-[10px] uppercase tracking-wider text-ink-dim mb-3">What you will see</p>
