@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn, signInWithGoogle, resendConfirmationEmail } from "@/lib/actions/auth";
@@ -36,7 +37,7 @@ function SubmitButton() {
 
 export default function SignInPage() {
   const router = useRouter();
-  const [state, formAction] = useFormState(signIn, {
+  const [state, formAction] = useActionState(signIn, {
     ok: false,
     message: "",
   });

@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { ArrowRight, Check, AlertCircle, Lock, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
@@ -36,7 +37,7 @@ function SubmitButton() {
 }
 
 export function FinalCTA() {
-  const [state, formAction] = useFormState(joinWaitlist, initialState);
+  const [state, formAction] = useActionState(joinWaitlist, initialState);
   const submitted = state.ok;
   const sectionRef = useRef<HTMLDivElement>(null);
   const [spotsClaimed, setSpotsClaimed] = useState(0);

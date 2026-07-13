@@ -23,8 +23,8 @@ async function hashIp(ip: string): Promise<string | null> {
   return createHash("sha256").update(`${IP_HASH_SECRET}:${ip}`).digest("hex");
 }
 
-function getClientIp(): string {
-  const h = headers();
+async function getClientIp(): Promise<string> {
+  const h = await headers();
   const forwarded = h.get("x-forwarded-for");
   if (forwarded) {
     return forwarded.split(",")[0].trim();
@@ -36,12 +36,12 @@ function getClientIp(): string {
   return "unknown";
 }
 
-function getUserAgent(): string | null {
-  return headers().get("user-agent");
+async function getUserAgent(): Promise<string | null> {
+  return (await headers()).get("user-agent");
 }
 
-function getReferrer(): string | null {
-  return headers().get("referer");
+async function getReferrer(): Promise<string | null> {
+  return (await headers()).get("referer");
 }
 
 function parseReferrer(ref: string | null): string {
@@ -78,7 +78,7 @@ export async function trackView(athleteId: string): Promise<ViewResult> {
 
   try {
     const supabase = getSupabaseServiceRole();
-    const ip = getClientIp();
+    const ip = await getClientIp();
     const viewerIpHash = await hashIp(ip);
 
     const now = new Date();
@@ -98,12 +98,12 @@ export async function trackView(athleteId: string): Promise<ViewResult> {
       }
     }
 
-    const h = headers();
+    const h = await headers();
     const { error } = await supabase.from("page_views").insert({
       athlete_id: athleteId,
       viewer_ip_hash: viewerIpHash,
-      referrer: getReferrer(),
-      user_agent: getUserAgent(),
+      referrer: await getReferrer(),
+      user_agent: await getUserAgent(),
       country: h.get("x-vercel-ip-country"),
       city: h.get("x-vercel-ip-city"),
     });
@@ -143,7 +143,7 @@ export async function trackLinkClick(
 
   try {
     const supabase = getSupabaseServiceRole();
-    const ip = getClientIp();
+    const ip = await getClientIp();
     const viewerIpHash = await hashIp(ip);
 
     const { error } = await supabase.from("link_clicks").insert({
@@ -151,7 +151,7 @@ export async function trackLinkClick(
       link_label: linkLabel,
       link_url: linkUrl,
       viewer_ip_hash: viewerIpHash,
-      referrer: getReferrer(),
+      referrer: await getReferrer(),
     });
 
     if (error) {

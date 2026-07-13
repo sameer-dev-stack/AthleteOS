@@ -5,9 +5,9 @@ export const runtime = "nodejs";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { token: string } }
+  { params }: { params: Promise<{ token: string }> }
 ) {
-  const { token } = params;
+  const { token } = await params;
   if (!token || typeof token !== "string") {
     return NextResponse.json({ error: "Invalid token" }, { status: 400 });
   }

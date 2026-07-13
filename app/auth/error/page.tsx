@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 
-export default function AuthErrorPage({
+export default async function AuthErrorPage({
   searchParams,
 }: {
-  searchParams: { message?: string };
+  searchParams: Promise<{ message?: string }>;
 }) {
+  const { message: rawMessage } = await searchParams;
   const message =
-    searchParams.message ?? "Something went wrong during sign-in.";
+    rawMessage ?? "Something went wrong during sign-in.";
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg px-4">

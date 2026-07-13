@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signUp, signInWithGoogle } from "@/lib/actions/auth";
@@ -43,7 +44,7 @@ const PERKS = [
 
 export default function SignUpPage() {
   const router = useRouter();
-  const [state, formAction] = useFormState(signUp, {
+  const [state, formAction] = useActionState(signUp, {
     ok: false,
     message: "",
   });

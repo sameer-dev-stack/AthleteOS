@@ -4,9 +4,10 @@ import FanSubscribeClient from "./client";
 export default async function FanSubscribePage({
   params,
 }: {
-  params: { tierId: string };
+  params: Promise<{ tierId: string }>;
 }) {
-  const result = await getTierForSubscription(params.tierId);
+  const { tierId } = await params;
+  const result = await getTierForSubscription(tierId);
 
   if (!result.ok || !result.tier) {
     return (

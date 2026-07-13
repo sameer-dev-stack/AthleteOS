@@ -83,14 +83,14 @@ let mockAuditLog: any[] = [
 
 export async function GET(
   request: Request,
-  { params }: { params: { adminPath: string[] } }
+  { params }: { params: Promise<{ adminPath: string[] }> }
 ) {
   const isAuthorized = await verifyAdminAuth();
   if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const path = params.adminPath;
+  const path = (await params).adminPath;
   const url = new URL(request.url);
 
   // 1. GET /api/admin/profiles
@@ -426,14 +426,14 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { adminPath: string[] } }
+  { params }: { params: Promise<{ adminPath: string[] }> }
 ) {
   const isAuthorized = await verifyAdminAuth();
   if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const path = params.adminPath;
+  const path = (await params).adminPath;
 
   // 10. PATCH /api/admin/profiles/:id
   if (path[0] === "profiles" && path.length === 2) {
@@ -550,14 +550,14 @@ export async function PATCH(
 
 export async function POST(
   request: Request,
-  { params }: { params: { adminPath: string[] } }
+  { params }: { params: Promise<{ adminPath: string[] }> }
 ) {
   const isAuthorized = await verifyAdminAuth();
   if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const path = params.adminPath;
+  const path = (await params).adminPath;
 
   // 12. POST /api/admin/platform/feature-flags
   if (path[0] === "platform" && path[1] === "feature-flags") {
