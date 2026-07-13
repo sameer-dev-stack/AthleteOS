@@ -73,12 +73,12 @@ export async function GET(req: NextRequest) {
         const linkClicks = clicksRes.count || 0;
         const tipsTotal = (tipsRes.data || []).reduce((acc: number, t: { amount: number }) => acc + t.amount, 0) / 100;
         
-        const metricsRow = nilRes.data?.[0] || {};
-        const nilScore = metricsRow.nil_score || null;
-        const followers = metricsRow.followers_total || 0;
-        const er = metricsRow.engagement_rate || 0;
-        const followerDelta = metricsRow.follower_delta_percent || 0;
-        const engagementDelta = metricsRow.engagement_delta_percent || 0;
+        const metricsRow = nilRes.data?.[0];
+        const nilScore = metricsRow?.nil_score || null;
+        const followers = metricsRow?.followers_total || 0;
+        const er = metricsRow?.engagement_rate || 0;
+        const followerDelta = metricsRow?.follower_delta_percent || 0;
+        const engagementDelta = metricsRow?.engagement_delta_percent || 0;
 
         const memory = memoryRes.data;
         const aiUsed = quotaRes.data?.used_count || 0;
@@ -206,7 +206,11 @@ Rules:
             followerDelta,
             engagementRate: er,
             engagementDelta,
-            rates,
+            rates: {
+              post: rates.POST,
+              appearance: rates.APPEARANCE,
+              campaign: rates.CAMPAIGN,
+            },
             aiInsight,
           });
 
