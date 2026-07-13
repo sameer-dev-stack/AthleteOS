@@ -235,7 +235,7 @@ See §2 for the full table. Notable findings:
 | Dependency | Criticality | Notes |
 |---|---|---|
 | `@google/generative-ai` | Low | **Declared but unused.** All AI calls go through `lib/ai.ts` → `api.xiaomimimo.com` via `MIMO_API_KEY`. Safe to remove; `GEMINI_*` env vars are misleading/dead. |
-| `stripe` | Critical | Subscriptions + Connect. API version pinned `2026-05-27.dahlia`. |
+| `stripe` | Critical | Subscriptions + Connect. API version pinned `2026-06-24.dahlia` (set in `lib/stripe.ts`, `app/api/stripe/webhook/route.ts`, `app/api/stripe/diagnose/route.ts`). |
 | `@supabase/ssr` + `supabase-js` | Critical | Core backend. |
 | `framer-motion` | Medium | Client-only; large. Used widely. |
 | `zod` | High | Input validation in 20 action files. |
