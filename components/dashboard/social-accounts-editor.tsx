@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Link2, Trash2, Plus, Instagram, Twitter, Youtube, Radio, RefreshCw, Check, Unplug, Loader2, AlertCircle, Clock } from "lucide-react";
+import { Link2, Trash2, Plus, Instagram, Twitter, Youtube, Radio, RefreshCw, Check, Unplug, Loader2, AlertCircle, Clock, AlertTriangle } from "lucide-react";
 import {
   SocialAccount,
   upsertSocialAccount,
@@ -39,6 +39,7 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
   const [connectHandle, setConnectHandle] = useState("");
   const [connectLoading, setConnectLoading] = useState(false);
   const [privateAccountError, setPrivateAccountError] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   // Track which platform is in the async PENDING / verifying state
   const [verifyingPlatform, setVerifyingPlatform] = useState<"instagram" | "tiktok" | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -78,6 +79,13 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
     return stopPolling;
   }, [verifyingPlatform, onUpdate]);
 
+  // Auto-dismiss the toast after 5 seconds
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 5000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
   // When accounts refresh, check if the verifying platform has settled
   useEffect(() => {
     if (!verifyingPlatform) return;
@@ -96,7 +104,8 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
     } else if (status === "ERROR") {
       stopPolling();
       setVerifyingPlatform(null);
-      setError("Verification failed. Please try again.");
+      setActiveConnectPlatform(null);
+      setToast({ message: "Scraper task failed. Please verify the handle spelling and try again.", type: "error" });
     }
   }, [accounts, verifyingPlatform]);
 
@@ -107,6 +116,8 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
     setConnectLoading(true);
     setError(null);
     setPrivateAccountError(false);
+    // Instantly transition UI into the verifying state (5s poll handles resolution)
+    setVerifyingPlatform(activeConnectPlatform);
 
     try {
       const res = await queueSocialScrape(activeConnectPlatform, connectHandle.trim());
@@ -114,18 +125,25 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
         setConnectHandle("");
         if (res.status === "VERIFIED") {
           // Dev sync path resolved immediately
+          stopPolling();
+          setVerifyingPlatform(null);
           setActiveConnectPlatform(null);
           onUpdate();
         } else {
-          // Production: enter polling state
-          setVerifyingPlatform(activeConnectPlatform);
+          // Production: polling interval is already active via verifyingPlatform
           onUpdate();
         }
       } else {
+        stopPolling();
+        setVerifyingPlatform(null);
+        setActiveConnectPlatform(null);
         setError(res.error || `Failed to queue ${activeConnectPlatform} verification`);
       }
-    } catch {
-      setError("An unexpected error occurred during verification");
+    } catch (err) {
+      stopPolling();
+      setVerifyingPlatform(null);
+      setActiveConnectPlatform(null);
+      setError(err instanceof Error ? err.message : "An unexpected error occurred during verification");
     } finally {
       setConnectLoading(false);
     }
@@ -487,6 +505,19 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
       <p className="text-[9px] text-white/30 leading-snug mt-4 pt-4 border-t border-white/[0.04]">
         Connected accounts auto-sync follower counts. Manual entries can be added below for other platforms.
       </p>
+
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium shadow-2xl transition-all ${
+            toast.type === "success"
+              ? "border-accent/20 bg-accent/10 text-accent"
+              : "border-red-500/20 bg-red-500/10 text-red-400"
+          }`}
+        >
+          {toast.type === "success" ? <Check className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
+          <span className="text-xs font-bold">{toast.message}</span>
+        </div>
+      )}
     </div>
   );
 }

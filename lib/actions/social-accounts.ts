@@ -217,7 +217,9 @@ export async function queueSocialScrape(
     if (!user) return { ok: false, error: "Not authenticated" };
 
     const APIFY_API_KEY = process.env.APIFY_API_KEY;
-    if (!APIFY_API_KEY) return { ok: false, error: "APIFY_API_KEY is not configured." };
+    if (!APIFY_API_KEY) {
+      throw new Error("Missing APIFY_API_KEY in server environment variables.");
+    }
 
     const cleanHandle = handle.trim().replace(/^@/, "");
     if (!cleanHandle) return { ok: false, error: "Invalid username handle" };

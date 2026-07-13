@@ -5,7 +5,24 @@
 
 ---
 
-## 2026-07-13 — Automation & Background Processing Engine: Verification + Gaps Closed
+## 2026-07-13 — Valuation Engine: Server-Side APIFY Key Encapsulation + Frontend Polling Fix
+
+### What changed
+- **`lib/actions/social-accounts.ts`** — `queueSocialScrape` now throws `"Missing APIFY_API_KEY in server environment variables."` when `process.env.APIFY_API_KEY` is absent (was a soft returned error). Token is injected only as a `?token=` query param on the Apify actor run fetch — never returned to the client.
+- **`app/api/webhooks/apify/route.ts`** — Confirmed secondary dataset back-channel fetch uses `process.env.APIFY_API_KEY` as a `?token=` query param; key never leaves the server.
+- **`components/dashboard/social-accounts-editor.tsx`** — Connect flow now transitions to `verifying` instantly on submit; 5s `useEffect` poll interval reads `verification_status` via `onUpdate()` → `getSocialAccounts()`. All three terminal states (VERIFIED / PRIVATE_ACCOUNT / ERROR) clear the polling timer. ERROR now surfaces the exact toast: "Scraper task failed. Please verify the handle spelling and try again." Added auto-dismissing Toast.
+- **`components/motion/counter.tsx`** — Fixed pre-existing build-breaking `useEffect` import to pass `npm run build`.
+
+### Why
+Protect Apify API quota (key must never reach the browser) and prevent the verification UI from hanging or leaking interval timers.
+
+### Files touched
+`lib/actions/social-accounts.ts`, `app/api/webhooks/apify/route.ts`, `components/dashboard/social-accounts-editor.tsx`, `components/motion/counter.tsx`
+
+### Commit
+(pending push)
+
+---
 
 ### What changed
 - **`app/api/cron/weekly-briefing/route.ts`** — Added Pro/Elite-only tier gate before the zero-activity skip. Free-tier athletes are now skipped with `results.skipped++` before any AI or email work runs.

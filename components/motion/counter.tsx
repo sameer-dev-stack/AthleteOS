@@ -8,7 +8,8 @@ import {
   useReducedMotion,
   useTransform,
 } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useEffect } from "react";
+import { useMounted } from "@/lib/hooks/use-mounted";
 
 export function Counter({
   to,
@@ -28,9 +29,7 @@ export function Counter({
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "0px 0px -10% 0px" });
   const prefersReducedMotion = useReducedMotion();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useMounted();
 
   const raw = useMotionValue(prefersReducedMotion ? to : 0);
   const spring = useSpring(raw, {
