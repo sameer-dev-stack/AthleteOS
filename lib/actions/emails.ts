@@ -141,6 +141,17 @@ export type WeeklyBriefingData = {
   daysOnPlatform: number;
   newInquiries: number;
   fanSubscribers: number;
+  // Dynamic metrics & rates
+  followersTotal: number;
+  followerDelta: number;
+  engagementRate: number;
+  engagementDelta: number;
+  rates: {
+    post: { min: number; target: number; max: number };
+    appearance: { min: number; target: number; max: number };
+    campaign: { min: number; target: number; max: number };
+  };
+  aiInsight: string;
 };
 
 export async function sendWeeklyBriefing(
@@ -164,6 +175,12 @@ export async function sendWeeklyBriefing(
     daysOnPlatform,
     newInquiries,
     fanSubscribers,
+    followersTotal,
+    followerDelta,
+    engagementRate,
+    engagementDelta,
+    rates,
+    aiInsight,
   } = data;
 
   const scoreText = nilScore !== null ? `${nilScore}/100` : "Not calculated";
@@ -212,9 +229,23 @@ export async function sendWeeklyBriefing(
                     </td>
                   </tr>
 
-                  <!-- Stats Grid -->
+                  <!-- AI Coach Callout Insight -->
+                  ${aiInsight ? `
                   <tr>
                     <td style="padding:0 40px 30px;">
+                      <div style="background-color:rgba(198,255,61,0.04);border-radius:12px;border:1px solid rgba(198,255,61,0.15);padding:16px 20px;">
+                        <span style="font-size:10px;color:#C6FF3D;font-weight:900;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;">Tailored AI Coach Insight</span>
+                        <p style="color:#FFFFFF;font-size:13.5px;line-height:1.5;margin:0;font-style:italic;">
+                          "${escapeHtml(aiInsight)}"
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                  ` : ""}
+
+                  <!-- Stats Grid -->
+                  <tr>
+                    <td style="padding:0 40px 20px;">
                       <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#16161A;border-radius:12px;border:1px solid rgba(255,255,255,0.04);padding:20px;">
                         <tr>
                           <td width="33%" align="center" style="border-right:1px solid rgba(255,255,255,0.06);padding:10px 0;">
@@ -229,6 +260,59 @@ export async function sendWeeklyBriefing(
                             <div style="font-size:11px;color:#88888A;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Tips Earned</div>
                             <div style="font-size:22px;color:#FFFFFF;font-weight:900;">$${tipsTotal.toFixed(2)}</div>
                           </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <!-- Audience & Engagement Row -->
+                  <tr>
+                    <td style="padding:0 40px 20px;">
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#16161A;border-radius:12px;border:1px solid rgba(255,255,255,0.04);padding:16px 20px;">
+                        <tr>
+                          <td width="50%" align="center" style="border-right:1px solid rgba(255,255,255,0.06);padding:8px 0;">
+                            <div style="font-size:11px;color:#88888A;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Total Followers</div>
+                            <div style="font-size:18px;color:#FFFFFF;font-weight:900;">${followersTotal.toLocaleString()}</div>
+                            ${followerDelta !== 0 ? `
+                              <div style="font-size:11px;color:${followerDelta >= 0 ? "#C6FF3D" : "#FF6B6B"};font-weight:700;margin-top:2px;">
+                                ${followerDelta >= 0 ? "+" : ""}${followerDelta.toFixed(1)}% this week
+                              </div>
+                            ` : ""}
+                          </td>
+                          <td width="50%" align="center" style="padding:8px 0;">
+                            <div style="font-size:11px;color:#88888A;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Engagement Rate</div>
+                            <div style="font-size:18px;color:#FFFFFF;font-weight:900;">${(engagementRate * 100).toFixed(1)}%</div>
+                            ${engagementDelta !== 0 ? `
+                              <div style="font-size:11px;color:${engagementDelta >= 0 ? "#C6FF3D" : "#FF6B6B"};font-weight:700;margin-top:2px;">
+                                ${engagementDelta >= 0 ? "+" : ""}${engagementDelta.toFixed(1)}% this week
+                              </div>
+                            ` : ""}
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <!-- Suggested NIL Rates Block -->
+                  <tr>
+                    <td style="padding:0 40px 20px;">
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#16161A;border-radius:12px;border:1px solid rgba(255,255,255,0.04);padding:20px;">
+                        <tr>
+                          <td colspan="2" style="padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.06);">
+                            <span style="font-size:12px;color:#88888A;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">SUGGESTED NIL RATES</span>
+                          </td>
+                        </tr>
+                        <tr style="color:#FFFFFF;font-size:13px;">
+                          <td style="padding-top:12px;">Social Media Post:</td>
+                          <td align="right" style="padding-top:12px;font-weight:700;color:#C6FF3D;">$${rates.post.min.toLocaleString()} - $${rates.post.max.toLocaleString()}</td>
+                        </tr>
+                        <tr style="color:#FFFFFF;font-size:13px;">
+                          <td style="padding-top:8px;">In-Person Appearance:</td>
+                          <td align="right" style="padding-top:8px;font-weight:700;color:#FFFFFF;">$${rates.appearance.min.toLocaleString()} - $${rates.appearance.max.toLocaleString()}</td>
+                        </tr>
+                        <tr style="color:#FFFFFF;font-size:13px;">
+                          <td style="padding-top:8px;">Monthly Campaign:</td>
+                          <td align="right" style="padding-top:8px;font-weight:700;color:#FFFFFF;">$${rates.campaign.min.toLocaleString()} - $${rates.campaign.max.toLocaleString()}</td>
                         </tr>
                       </table>
                     </td>
@@ -724,3 +808,67 @@ export async function sendTeamInviteEmail(
     return { ok: false, error: err instanceof Error ? err.message : "Failed to send email" };
   }
 }
+
+export async function sendQuotaWarningEmail(
+  email: string,
+  firstName: string,
+  remaining: number,
+  limit: number
+): Promise<{ ok: boolean; error?: string }> {
+  if (!RESEND_API_KEY) {
+    return { ok: false, error: "RESEND_API_KEY is not set" };
+  }
+
+  try {
+    const { Resend } = await import("resend");
+    const resend = new Resend(RESEND_API_KEY);
+
+    await resend.emails.send({
+      from: "AthleteOS <onboarding@resend.dev>",
+      to: email,
+      subject: "Action Required: AthleteOS AI Credits Depleted",
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin:0;padding:0;background-color:#0A0A0B;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0A0A0B;padding:40px 20px;">
+            <tr>
+              <td align="center">
+                <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background-color:#111113;border-radius:16px;border:1px solid rgba(255,255,255,0.06);overflow:hidden;">
+                  <tr>
+                    <td style="padding:40px 32px 32px;">
+                      <div style="margin-bottom:24px;">
+                        <span style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:13px;padding:4px 10px;border-radius:6px;letter-spacing:0.5px;">ATHLETEOS</span>
+                      </div>
+                      <h1 style="color:#FFFFFF;font-size:20px;font-weight:700;margin:0 0 16px;line-height:1.3;">Your AI Credits are Depleted</h1>
+                      <p style="color:#88888A;font-size:14px;line-height:1.6;margin:0 0 24px;">
+                        Hey ${escapeHtml(firstName)}, your weekly briefing email was skipped this week because your AI quota is low or at zero (${remaining}/${limit} remaining).
+                      </p>
+                      <p style="color:#88888A;font-size:14px;line-height:1.6;margin:0 0 24px;">
+                        We require at least 2 credits to run the data analysis and generate your brand insights.
+                      </p>
+                      <a href="${SITE_URL || "https://athlete-os-vert.vercel.app"}/dashboard/settings" style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;letter-spacing:-0.1px;">
+                        Upgrade Plan or Buy Credits
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `,
+    });
+
+    return { ok: true };
+  } catch (err) {
+    console.error("[resend] quota warning email failed", err);
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to send warning email" };
+  }
+}
+

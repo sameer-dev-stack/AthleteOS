@@ -10,8 +10,16 @@ export type SocialAccount = {
   platform: string;
   handle: string;
   followers: number;
+  engagement_rate: number;
+  average_likes: number;
+  average_comments: number;
+  average_views: number;
+  average_shares: number;
+  total_engagements: number;
   is_connected: boolean;
   profile_url: string | null;
+  verification_status: string | null;
+  last_scraped_at: string | null;
   updated_at: string;
 };
 
@@ -29,7 +37,9 @@ export async function getSocialAccounts(): Promise<{ ok: boolean; data?: SocialA
 
     const { data, error } = await supabase
       .from("social_accounts")
-      .select("id, profile_id, platform, handle, followers, is_connected, profile_url, updated_at")
+      .select(
+        "id, profile_id, platform, handle, followers, engagement_rate, average_likes, average_comments, average_views, average_shares, total_engagements, is_connected, profile_url, verification_status, last_scraped_at, updated_at"
+      )
       .eq("profile_id", user.id)
       .order("followers", { ascending: false });
 
@@ -194,5 +204,121 @@ export async function refreshSocialFollowers(id: string): Promise<{ ok: boolean;
   } catch (err: unknown) {
     console.error("refreshSocialFollowers unexpected error:", err);
     return { ok: false, error: "An unexpected error occurred" };
+  }
+}
+
+export async function queueSocialScrape(
+  platform: "instagram" | "tiktok",
+  handle: string
+): Promise<{ ok: boolean; status?: string; error?: string }> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { ok: false, error: "Not authenticated" };
+
+    const APIFY_API_KEY = process.env.APIFY_API_KEY;
+    if (!APIFY_API_KEY) return { ok: false, error: "APIFY_API_KEY is not configured." };
+
+    const cleanHandle = handle.trim().replace(/^@/, "");
+    if (!cleanHandle) return { ok: false, error: "Invalid username handle" };
+
+    // Insert / update a PENDING row immediately so the UI can show the pending state
+    const { error: upsertErr } = await supabase
+      .from("social_accounts")
+      .upsert(
+        {
+          profile_id: user.id,
+          platform,
+          handle: `@${cleanHandle}`,
+          is_connected: false,
+          verification_status: "PENDING",
+          profile_url:
+            platform === "instagram"
+              ? `https://instagram.com/${cleanHandle}`
+              : `https://tiktok.com/@${cleanHandle}`,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "profile_id, platform" }
+      );
+
+    if (upsertErr) {
+      return { ok: false, error: upsertErr.message };
+    }
+
+    const actorId =
+      platform === "instagram"
+        ? "apify~instagram-scraper"
+        : "clockworks~tiktok-profile-scraper";
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+    const isLocal = appUrl.includes("localhost") || appUrl.includes("127.0.0.1");
+
+    const body: Record<string, unknown> =
+      platform === "instagram"
+        ? { usernames: [cleanHandle], resultsLimit: 12 }
+        : {
+            profiles: [cleanHandle],
+            resultsPerPage: 12,
+            profileScrapeSections: ["videos"],
+            proxyConfiguration: {
+              useApifyProxy: true,
+              apifyProxyGroups: ["RESIDENTIAL"],
+            },
+          };
+
+    if (isLocal) {
+      // Dev fallback: fire sync actor so we get results without needing a public webhook URL.
+      // Production always uses the async webhook path below.
+      const syncUrl = `https://api.apify.com/v2/acts/${actorId}/run-sync-get-dataset-items?token=${APIFY_API_KEY}`;
+      const syncRes = await fetch(syncUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const items = syncRes.ok ? await syncRes.json() : [];
+      // Re-use the webhook processing logic inline for local dev
+      const { processApifyDataset } = await import("@/lib/apify-processor");
+      await processApifyDataset(platform, cleanHandle, user.id, items);
+      revalidatePath("/dashboard/nil");
+      return { ok: true, status: "VERIFIED" };
+    }
+
+    // Production: non-blocking actor run with webhook callback
+    const webhookUrl = `${appUrl}/api/webhooks/apify?platform=${platform}&handle=${encodeURIComponent(cleanHandle)}&userId=${user.id}`;
+
+    const webhooks = encodeURIComponent(
+      JSON.stringify([
+        {
+          eventTypes: ["ACTOR.RUN.SUCCEEDED", "ACTOR.RUN.FAILED"],
+          requestUrl: webhookUrl,
+        },
+      ])
+    );
+
+    const runRes = await fetch(
+      `https://api.apify.com/v2/acts/${actorId}/runs?token=${APIFY_API_KEY}&webhooks=${webhooks}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }
+    );
+
+    if (!runRes.ok) {
+      const errText = await runRes.text();
+      console.error("[queueSocialScrape] Apify actor run failed:", errText);
+      await supabase
+        .from("social_accounts")
+        .update({ verification_status: "ERROR" })
+        .eq("profile_id", user.id)
+        .eq("platform", platform);
+      return { ok: false, error: "Failed to start verification task" };
+    }
+
+    revalidatePath("/dashboard/nil");
+    return { ok: true, status: "QUEUED" };
+  } catch (err: unknown) {
+    console.error("queueSocialScrape unexpected error:", err);
+    return { ok: false, error: err instanceof Error ? err.message : "An unexpected error occurred" };
   }
 }

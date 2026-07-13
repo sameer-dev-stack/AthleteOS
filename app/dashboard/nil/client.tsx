@@ -234,6 +234,8 @@ export function NilDashboardClient({
             tipsAmount={metrics?.tips_amount || 0}
             followersTotal={metrics?.followers_total || socialAccounts.reduce((acc, a) => acc + (a.followers || 0), 0)}
             themeAccent={themeAccent}
+            followerDelta={metrics?.follower_delta_percent}
+            engagementDelta={metrics?.engagement_delta_percent}
           />
 
           {/* Core valuation layout grid */}

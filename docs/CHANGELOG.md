@@ -5,6 +5,104 @@
 
 ---
 
+## 2026-07-13 — NIL Value Engine Integration: Asynchronous Scrapers, Bounded ER valuation, and Quota Gated Briefings
+
+### What changed
+- **`supabase/migrations/20260713_nil_apify.sql`** (NEW) — Added platform metrics (`engagement_rate`, `average_likes/comments/views/shares`), delta trends (`follower_delta_percent`, `engagement_delta_percent`), `last_scraped_at`, and `verification_status` columns to `social_accounts` and `nil_value_metrics` tables.
+- **`lib/nil-score.ts`** — Replaced direct linear follower-engagement rates multiplication with a Cost-Per-Follower ($25 CPM) baseline scaled by a clamped (0.7x–1.5x) engagement modifier and sport weights.
+- **`lib/apify-processor.ts`** (NEW) — Created a shared processor module to extract scraped followers/likes/comments/shares/views, calculate true cross-platform engagement rate (`total_engagements / followers`), detect private profiles, and save results.
+- **`app/api/webhooks/apify/route.ts`** (NEW) — Created an endpoint callback verified by re-fetching Apify dataset contents directly via task run references.
+- **`lib/actions/social-accounts.ts`** — Replaced synchronous actor execution with async `queueSocialScrape` server action; extended `SocialAccount` type.
+- **`components/dashboard/social-accounts-editor.tsx`** — Wired async scraping to text input buttons, implemented a 5-second verification status polling cycle, and added a visual loading overlay and strict public-account blocking notice.
+- **`lib/nil-engine-internal.ts`** (NEW) — Refactored the core calculation pipeline to perform Supabase calls using a service role admin client.
+- **`lib/actions/nil-engine.ts`** — Refactored user-authenticated server action to delegate execution to the internal engine helper.
+- **`components/dashboard/nil-metrics-strip.tsx`** — Integrated follower and engagement delta percentage metrics with proper electric lime / red visual trend indications.
+- **`app/dashboard/nil/client.tsx`** — Wired raw metric delta parameters into `NilMetricsStrip`.
+- **`app/api/cron/poll-social/route.ts`** (NEW) — Added background daily cron polling handler.
+- **`lib/actions/emails.ts`** — Extended briefing email template with dynamic suggested rate lists, follower/engagement deltas, and the AI coach insight; added `sendQuotaWarningEmail`.
+- **`app/api/cron/weekly-briefing/route.ts`** — Wired credits remaining checks ($\ge 2$ credits gates insight generation and 2-credit deduction; $< 2$ credits skips briefing and sends warning email).
+- **`docs/COMPONENTS.md`** — Updated component references with `SocialAccountsEditor` and `NilMetricsStrip`.
+
+### Why
+To build startup-grade dynamic NIL rate calculations powered by real-time scrapers, resolve Vercel server timeouts by migrating connection verification to a non-blocking webhook callback, prevent rate devaluation from low engagement via bounded ER premium/discount multipliers, bypass TikTok blocks using residential proxies, and securely gate weekly coaching briefings under user credit limits.
+
+### Files touched
+- `supabase/migrations/20260713_nil_apify.sql`
+- `lib/nil-score.ts`
+- `lib/apify-processor.ts`
+- `app/api/webhooks/apify/route.ts`
+- `lib/actions/social-accounts.ts`
+- `components/dashboard/social-accounts-editor.tsx`
+- `lib/nil-engine-internal.ts`
+- `lib/actions/nil-engine.ts`
+- `components/dashboard/nil-metrics-strip.tsx`
+- `app/dashboard/nil/client.tsx`
+- `app/api/cron/poll-social/route.ts`
+- `lib/actions/emails.ts`
+- `app/api/cron/weekly-briefing/route.ts`
+- `docs/COMPONENTS.md`
+
+### Commit
+- Pending push to `origin/main`.
+
+---
+
+## 2026-07-13 — Upgrade Stage 5: @supabase/ssr 0.10 → 0.12.0
+
+### What changed
+- **`package.json`** — `@supabase/ssr` `^0.10.3` → `^0.12.0`; resolved `@supabase/supabase-js` 2.110.2.
+- No source changes: `lib/supabase/server.ts` and `lib/supabase/middleware.ts` already use the `getAll`/`setAll` cookie adapter (stable across 0.10–0.12). Auth callback (`app/auth/callback/route.ts:16`) and middleware (`lib/supabase/middleware.ts:32`) use `getUser()` not `getSession()` — RLS-safe.
+
+### Why
+Stage 5 of the staged major-version upgrade. 0.12.0 changed cookie serialization (known RLS footgun); verified the adapter + `getUser()` path still works. Build clean.
+
+### Files touched
+- `package.json`, `package-lock.json`
+
+### Commit
+- `8cd444e` on `upgrade/next16-react19-2026-07` (pushed).
+
+---
+
+## 2026-07-13 — Upgrade Stage 4: Stripe SDK pinned to v22 + apiVersion sync
+
+### What changed
+- **`package.json`** — `stripe` `^22.2.0` → `^22.12.1` resolved to `22.3.1`.
+- **`lib/stripe.ts:11`, `app/api/stripe/webhook/route.ts:21`, `app/api/stripe/diagnose/route.ts:56`** — `apiVersion` pin synced `2026-05-27.dahlia` → `2026-06-24.dahlia` (the version stripe 22.3.1's types expect). `typescript: true` kept in `lib/stripe.ts` so mismatches fail the build.
+- **`docs/PROJECT.md`** — current-state note updated to the new pin.
+
+### Why
+Stage 4 of the staged upgrade. The apiVersion MUST be set in all three Stripe constructors or the SDK silently downgrades. Build caught a type error (`2026-05-27.dahlia` not assignable to `2026-06-24.dahlia`) and was fixed.
+
+### Files touched
+- `package.json`, `package-lock.json`, `lib/stripe.ts`, `app/api/stripe/webhook/route.ts`, `app/api/stripe/diagnose/route.ts`, `docs/PROJECT.md`
+
+### Commit
+- `90e74f5` on `upgrade/next16-react19-2026-07` (pushed).
+
+---
+
+## 2026-07-13 — Upgrade Stage 3: Next.js 15.5 → 16.2 (Turbopack) + ESLint 9 CLI + Sentry
+
+### What changed
+- **`package.json`** — `next` `15.5.20` → `16.2.10`; `eslint-config-next` → `16.2.10`; `eslint` `8.57.1` → `^9.18.0`.
+- **`eslint.config.mjs`** (NEW) — `next lint` removed in Next 16; migrated to ESLint CLI flat config (`eslint-config-next/core-web-vitals`) via `@next/codemod next-lint-to-eslint-cli`. Added `ignores` for build/generated dirs + a rules override that demotes react-hooks v5 / @next new rules to `warn` to preserve pre-upgrade lint parity (0 errors baseline).
+- **`instrumentation-client.ts`** (NEW) — client `Sentry.init` moved here (Turbopack ignores `sentry.client.config.ts`, deleted).
+- **`instrumentation.ts`** — added `export const onRequestError = Sentry.captureRequestError;`.
+- **`next.config.mjs`** — removed dead `webpack` cache hack (ignored under Turbopack).
+- **`tsconfig.json`** — auto-rewritten by Next 16 build (`.next/dev/types` added for Turbopack).
+
+### Why
+Stage 3 of the staged upgrade. Next 16 makes Turbopack the default bundler and removes `next lint`. Sentry 10.x needs the `instrumentation-client.ts` + `onRequestError` hook under Turbopack.
+
+### Files touched
+- `package.json`, `package-lock.json`, `next-env.d.ts`, `tsconfig.json`, `eslint.config.mjs` (new), `instrumentation.ts`, `instrumentation-client.ts` (new), `sentry.client.config.ts` (deleted), `next.config.mjs`, `docs/CHANGELOG.md`
+
+### Commit
+- `79a1c76` on `upgrade/next16-react19-2026-07` (pushed). Lint 0 errors (147 warnings, parity), build clean.
+
+---
+
 ## 2026-07-13 — Upgrade Stage 1+2: Next.js 14.2 → 15.5.20 + React 18 → 19.2
 
 ### What changed

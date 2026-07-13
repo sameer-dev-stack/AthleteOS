@@ -1,0 +1,6 @@
+{
+  "name": "AthleteOS Authentication Portal",
+  "description": "Complete authentication frontend suite for AthleteOS featuring sign in, sign up, password recovery, verification, and interactive session management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -410,6 +410,78 @@ function computeCompetitorComparison(
 }
 
 // ---------------------------------------------------------------------------
+// Rate calculation helpers
+// ---------------------------------------------------------------------------
+
+export type SportType = "football" | "basketball" | "baseball" | "softball" | "soccer" | "olympic" | "other";
+export type DeliverableType = "POST" | "APPEARANCE" | "CAMPAIGN";
+
+const SPORT_MULTIPLIERS: Record<SportType, number> = {
+  football: 1.5,
+  basketball: 1.5,
+  baseball: 1.2,
+  softball: 1.2,
+  soccer: 1.1,
+  olympic: 1.0,
+  other: 1.0,
+};
+
+const DELIVERABLE_MODIFIERS: Record<DeliverableType, { floor: number; target: number; ceiling: number }> = {
+  POST: { floor: 0.15, target: 0.25, ceiling: 0.40 },
+  APPEARANCE: { floor: 0.50, target: 1.00, ceiling: 1.50 },
+  CAMPAIGN: { floor: 2.00, target: 4.00, ceiling: 6.00 },
+};
+
+const FALLBACK_RATES: Record<DeliverableType, RateRange> = {
+  POST: { min: 30, target: 50, max: 80 },
+  APPEARANCE: { min: 88, target: 175, max: 263 },
+  CAMPAIGN: { min: 175, target: 350, max: 525 },
+};
+
+/**
+ * Corrected valuation formula.
+ * Uses a $25 CPM baseline, with ER scaled as a bounded modifier (0.7x–1.5x)
+ * relative to a 3% market benchmark — so low engagement can't collapse valuations.
+ */
+export function calculateDeliverableRates(
+  totalFollowers: number,
+  engagementRate: number,
+  sport: string | null
+): { POST: RateRange; APPEARANCE: RateRange; CAMPAIGN: RateRange } {
+  if (!totalFollowers || totalFollowers === 0) {
+    return { POST: FALLBACK_RATES.POST, APPEARANCE: FALLBACK_RATES.APPEARANCE, CAMPAIGN: FALLBACK_RATES.CAMPAIGN };
+  }
+
+  const category = classifySport(sport) as SportType;
+  const sportMult = SPORT_MULTIPLIERS[category] ?? 1.0;
+
+  // $25 CPM baseline: $0.025 value per follower
+  const baseValue = totalFollowers * 0.025;
+
+  // Clamp ER modifier: 3% is market baseline (1.0x). Floor 0.7x, cap 1.5x.
+  // A 0.5% ER athlete gets 0.7x (not near-zero). A 10% ER athlete gets 1.5x.
+  const erBaseline = 0.03;
+  const erModifier = engagementRate > 0 ? Math.max(0.7, Math.min(1.5, engagementRate / erBaseline)) : 1.0;
+
+  const adjustedBase = baseValue * erModifier * sportMult;
+
+  const calc = (type: DeliverableType): RateRange => {
+    const mods = DELIVERABLE_MODIFIERS[type];
+    return {
+      min: Math.max(FALLBACK_RATES[type].min, Math.round(adjustedBase * mods.floor)),
+      target: Math.max(FALLBACK_RATES[type].target, Math.round(adjustedBase * mods.target)),
+      max: Math.max(FALLBACK_RATES[type].max, Math.round(adjustedBase * mods.ceiling)),
+    };
+  };
+
+  return {
+    POST: calc("POST"),
+    APPEARANCE: calc("APPEARANCE"),
+    CAMPAIGN: calc("CAMPAIGN"),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Core scoring engine
 // ---------------------------------------------------------------------------
 
@@ -512,28 +584,15 @@ export function computeNilScoreAndRates(
   else if (nilScore > 40) label = "Established";
   else if (nilScore > 20) label = "Growing";
 
-  // Calculate pricing rates based on bands
-  let post: RateRange = { min: 25, target: 50, max: 75 };
-  let appearance: RateRange = { min: 100, target: 175, max: 250 };
-  let campaign: RateRange = { min: 200, target: 350, max: 500 };
-
-  if (nilScore > 80) {
-    post = { min: 2500, target: 6000, max: 10000 };
-    appearance = { min: 7500, target: 16000, max: 25000 };
-    campaign = { min: 15000, target: 32000, max: 50000 };
-  } else if (nilScore > 60) {
-    post = { min: 750, target: 1600, max: 2500 };
-    appearance = { min: 2000, target: 4750, max: 7500 };
-    campaign = { min: 5000, target: 10000, max: 15000 };
-  } else if (nilScore > 40) {
-    post = { min: 250, target: 500, max: 750 };
-    appearance = { min: 750, target: 1350, max: 2000 };
-    campaign = { min: 1500, target: 3250, max: 5000 };
-  } else if (nilScore > 20) {
-    post = { min: 75, target: 160, max: 250 };
-    appearance = { min: 250, target: 500, max: 750 };
-    campaign = { min: 500, target: 1000, max: 1500 };
-  }
+  // Calculate pricing rates using corrected CPM-baseline formula
+  const deliverableRates = calculateDeliverableRates(
+    metrics.followers_total || 0,
+    metrics.engagement_rate || 0,
+    profile.sport
+  );
+  const post = deliverableRates.POST;
+  const appearance = deliverableRates.APPEARANCE;
+  const campaign = deliverableRates.CAMPAIGN;
 
   const breakdown = {
     cardPerformance: Math.round(cardPerformanceRaw),

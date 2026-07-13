@@ -9,6 +9,8 @@ type Props = {
   tipsAmount: number;
   followersTotal: number;
   themeAccent: string;
+  followerDelta?: number;
+  engagementDelta?: number;
 };
 
 export function NilMetricsStrip({
@@ -18,6 +20,8 @@ export function NilMetricsStrip({
   tipsAmount,
   followersTotal,
   themeAccent,
+  followerDelta,
+  engagementDelta,
 }: Props) {
   const stats = [
     {
@@ -34,6 +38,7 @@ export function NilMetricsStrip({
       label: "Click-Through",
       value: `${(clickThroughRate * 100).toFixed(1)}%`,
       icon: TrendingUp,
+      delta: engagementDelta,
     },
     {
       label: "Tips Earned",
@@ -44,6 +49,7 @@ export function NilMetricsStrip({
       label: "Followers",
       value: followersTotal.toLocaleString(),
       icon: Users,
+      delta: followerDelta,
     },
   ];
 
@@ -62,9 +68,17 @@ export function NilMetricsStrip({
               </span>
               <Icon className="h-3.5 w-3.5" style={{ color: themeAccent }} />
             </div>
-            <span className="text-lg font-black text-white tracking-tight mt-2">
-              {stat.value}
-            </span>
+            
+            <div className="flex items-baseline justify-between w-full mt-2">
+              <span className="text-lg font-black text-white tracking-tight">
+                {stat.value}
+              </span>
+              {stat.delta !== undefined && stat.delta !== 0 && (
+                <span className={`text-[10px] font-bold ${stat.delta > 0 ? "text-[#C6FF3D]" : "text-red-400"}`}>
+                  {stat.delta > 0 ? `+${stat.delta.toFixed(1)}%` : `${stat.delta.toFixed(1)}%`}
+                </span>
+              )}
+            </div>
           </div>
         );
       })}

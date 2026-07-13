@@ -860,6 +860,27 @@ Full settings interface with 7 collapsible accordion sections: Account, Appearan
 - **State:** `openSection`, `toast`, `accent`, `darkModePref`, `emailPrefs`, `newPassword`, `confirmPassword`, `showPassword`, `deleteStep`, `deleteConfirmText`
 - **Features:** Accent color picker, email notification toggles, password change, data export (JSON), 3-step account deletion, toast notifications
 
+### `<SocialAccountsEditor>` — `components/dashboard/social-accounts-editor.tsx`
+Handles linking and status management of social network profiles (Instagram, TikTok, Twitter/X, YouTube). Connected platforms run asynchronous Apify scraping jobs with status polling. Private accounts trigger public profile warnings.
+- **Used by:** `app/dashboard/nil/client.tsx`
+- **Props:**
+  - `accounts: SocialAccount[]` — connected accounts list
+  - `themeAccent: string` — electric lime accent color
+  - `onUpdate: () => void` — refresh callback
+
+### `<NilMetricsStrip>` — `components/dashboard/nil-metrics-strip.tsx`
+Displays analytics metrics cards (Views, Clicks, CTR, Tips Earned, Followers) with green/red trend delta indicators showing week-over-week growth or decline.
+- **Used by:** `app/dashboard/nil/client.tsx`
+- **Props:**
+  - `cardViews: number`
+  - `linkClicks: number`
+  - `clickThroughRate: number`
+  - `tipsAmount: number`
+  - `followersTotal: number`
+  - `themeAccent: string`
+  - `followerDelta?: number`
+  - `engagementDelta?: number`
+
 ---
 
 ## UI Components (`components/ui/`)

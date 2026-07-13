@@ -9,6 +9,14 @@
       "branchOwned": true,
       "autoNameSessionId": "ses_0aefb0a39ffegU3h4GyezrvYox",
       "autoNamePromptCount": 4
+    },
+    "wt-1783877139533-1": {
+      "branch": "aeolian-pin",
+      "path": "d:\\Projects\\AthleteOS-main\\.kilo\\worktrees\\aeolian-pin",
+      "parentBranch": "main",
+      "createdAt": "2026-07-12T17:25:39.533Z",
+      "remote": "origin",
+      "branchOwned": true
     }
   },
   "sessions": {
@@ -19,17 +27,20 @@
     "ses_0ab020541ffevEONfRtVw4k4sX": {
       "worktreeId": null,
       "createdAt": "2026-07-12T06:22:38.888Z"
+    },
+    "ses_0a8a2f521ffeX2yMaNTKM1Jb3j": {
+      "worktreeId": "wt-1783877139533-1",
+      "createdAt": "2026-07-12T17:25:44.034Z"
     }
   },
   "tabOrder": {
     "local": [
-      "ses_0afa321efffe7Sj9uh9Djho9Xi",
-      "pending:2",
-      "ses_0ab020541ffevEONfRtVw4k4sX"
+      "pending:1"
     ]
   },
   "worktreeOrder": [
-    "wt-1783770699102-1"
+    "wt-1783770699102-1",
+    "wt-1783877139533-1"
   ],
   "sessionsCollapsed": true
 }

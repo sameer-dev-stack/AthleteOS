@@ -21,6 +21,8 @@ export type NILMetricsRow = {
   tips_count: number;
   followers_total: number;
   engagement_rate: number;
+  follower_delta_percent?: number;
+  engagement_delta_percent?: number;
   nil_score: number;
   computed_at: string;
 };
@@ -50,145 +52,13 @@ export async function computeAndSaveMetrics(
     if (!user) return { ok: false, error: "Not authenticated" };
     if (user.id !== profileId) return { ok: false, error: "Not authorized" };
 
-    // Get athlete profile details
-    const { data: profile, error: profileErr } = await supabase
-      .from("profiles")
-      .select("sport, school, position")
-      .eq("id", profileId)
-      .single();
-
-    if (profileErr || !profile) {
-      return { ok: false, error: profileErr?.message || "Profile not found" };
-    }
-
-    // Use service role for analytics queries to bypass RLS
     const admin = createServiceClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    const { start, end } = getRangeDates();
-
-    // Query card views (page_views table)
-    const { count: cardViews, error: viewsErr } = await admin
-      .from("page_views")
-      .select("id", { count: "exact", head: true })
-      .eq("athlete_id", profileId)
-      .gte("created_at", `${start}T00:00:00.000Z`);
-
-    if (viewsErr) {
-      return { ok: false, error: `Failed to query page_views: ${viewsErr.message}` };
-    }
-
-    // Query link clicks (link_clicks table)
-    const { count: linkClicks, error: clicksErr } = await admin
-      .from("link_clicks")
-      .select("id", { count: "exact", head: true })
-      .eq("athlete_id", profileId)
-      .gte("created_at", `${start}T00:00:00.000Z`);
-
-    if (clicksErr) {
-      return { ok: false, error: `Failed to query link_clicks: ${clicksErr.message}` };
-    }
-
-    // Query tips (tips table)
-    const { data: tipsData, error: tipsErr } = await admin
-      .from("tips")
-      .select("amount")
-      .eq("athlete_id", profileId)
-      .eq("status", "succeeded")
-      .gte("created_at", `${start}T00:00:00.000Z`);
-
-    if (tipsErr) {
-      return { ok: false, error: `Failed to query tips: ${tipsErr.message}` };
-    }
-
-    const tipsCount = tipsData?.length || 0;
-    // tips amount in cents in database, convert to dollars
-    const tipsAmountCents = tipsData?.reduce((acc, row) => acc + (row.amount || 0), 0) || 0;
-    const tipsAmount = tipsAmountCents / 100;
-
-    // Fetch total social followers from social_accounts table
-    const socialResult = await getSocialAccounts();
-    const socialAccounts = socialResult.ok ? socialResult.data || [] : [];
-    const followersTotal = socialAccounts.reduce((acc, account) => acc + (account.followers || 0), 0);
-
-    // Calculate CTR
-    const viewsNum = cardViews || 0;
-    const clicksNum = linkClicks || 0;
-    const clickThroughRate = viewsNum > 0 ? clicksNum / viewsNum : 0;
-
-    // ponytail: engagement_rate is a placeholder (0.05) until real per-platform
-    // engagement data lands from the social APIs. social_accounts has no
-    // engagement column yet, so this is not real measured data.
-    const engagementRate = socialAccounts.length > 0 ? 0.05 : 0;
-
-    // Compute score & rates
-    const metricsInput: NILMetrics = {
-      card_views: viewsNum,
-      link_clicks: clicksNum,
-      click_through_rate: clickThroughRate,
-      tips_amount: tipsAmount,
-      tips_count: tipsCount,
-      followers_total: followersTotal,
-      engagement_rate: engagementRate,
-    };
-
-    const profileInput: NILProfile = {
-      sport: profile.sport,
-      school: profile.school,
-      position: profile.position,
-    };
-
-    const scoreResult = computeNilScoreAndRates(metricsInput, profileInput);
-
-    // Write/update nil_value_metrics table
-    const { data, error } = await admin
-      .from("nil_value_metrics")
-      .upsert(
-        {
-          profile_id: profileId,
-          period_start: start,
-          period_end: end,
-          card_views: viewsNum,
-          link_clicks: clicksNum,
-          click_through_rate: clickThroughRate,
-          tips_amount: tipsAmount,
-          tips_count: tipsCount,
-          followers_total: followersTotal,
-          engagement_rate: engagementRate,
-          nil_score: scoreResult.nilScore,
-          computed_at: new Date().toISOString(),
-        },
-        { onConflict: "profile_id, period_start, period_end" }
-      )
-      .select()
-      .single();
-
-    if (error) {
-      console.error("[nil-engine] Error upserting nil_value_metrics:", error.message);
-      return { ok: false, error: error.message };
-    }
-
-    // Persist a rolling history row so the NIL score trend is retained
-    // across recalcs (nil_value_metrics keeps only the latest snapshot).
-    const { error: historyErr } = await admin
-      .from("nil_score_history")
-      .insert({
-        profile_id: profileId,
-        nil_score: scoreResult.nilScore,
-        label: scoreResult.label,
-        breakdown_json: scoreResult.breakdown,
-        computed_at: new Date().toISOString(),
-      });
-
-    if (historyErr) {
-      console.error("[nil-engine] Error inserting nil_score_history:", historyErr.message);
-      return { ok: false, error: historyErr.message };
-    }
-
-    revalidatePath("/dashboard/nil");
-    return { ok: true, data: data as NILMetricsRow };
+    const { computeAndSaveMetricsInternal } = await import("@/lib/nil-engine-internal");
+    return computeAndSaveMetricsInternal(admin, profileId);
   } catch (err: unknown) {
     console.error("[nil-engine] computeAndSaveMetrics unexpected error:", err);
     const message = err instanceof Error ? err.message : "An unexpected error occurred";
