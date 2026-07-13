@@ -13,7 +13,6 @@ export async function processApifyDataset(
   platform: "instagram" | "tiktok",
   handle: string,
   userId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   items: any[]
 ): Promise<{ ok: boolean; status: string; error?: string }> {
   const admin = createServiceClient(

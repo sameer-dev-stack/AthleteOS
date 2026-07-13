@@ -11,8 +11,8 @@ ALTER TABLE public.social_accounts ADD COLUMN IF NOT EXISTS average_shares NUMER
 ALTER TABLE public.social_accounts ADD COLUMN IF NOT EXISTS total_engagements NUMERIC NOT NULL DEFAULT 0;
 -- Tracks when the last successful Apify scrape ran (used by cron to gate polling frequency)
 ALTER TABLE public.social_accounts ADD COLUMN IF NOT EXISTS last_scraped_at TIMESTAMPTZ DEFAULT NULL;
--- Tracks async verification state: NULL | PENDING | VERIFIED | PRIVATE_ACCOUNT | ERROR
-ALTER TABLE public.social_accounts ADD COLUMN IF NOT EXISTS verification_status TEXT DEFAULT NULL;
+-- Tracks async verification state: PENDING | VERIFIED | PRIVATE_ACCOUNT | ERROR | UNVERIFIED
+ALTER TABLE public.social_accounts ADD COLUMN IF NOT EXISTS verification_status TEXT DEFAULT 'UNVERIFIED';
 
 -- 2. Extend nil_value_metrics table
 ALTER TABLE public.nil_value_metrics ADD COLUMN IF NOT EXISTS follower_delta_percent NUMERIC NOT NULL DEFAULT 0;

@@ -253,6 +253,7 @@ export function NilDashboardClient({
                 accounts={socialAccounts}
                 themeAccent={themeAccent}
                 onUpdate={handleSocialUpdate}
+                plan={quotaState.plan}
               />
             </div>
 

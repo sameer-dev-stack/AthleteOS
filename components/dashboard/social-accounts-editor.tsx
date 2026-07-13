@@ -15,6 +15,7 @@ type Props = {
   accounts: SocialAccount[];
   themeAccent: string;
   onUpdate: () => void;
+  plan?: "free" | "pro" | "elite";
 };
 
 const PLATFORMS = [
@@ -25,7 +26,7 @@ const PLATFORMS = [
   { value: "other", label: "Other Platform", icon: Link2, oauth: false, color: "#888888" },
 ];
 
-export function SocialAccountsEditor({ accounts, themeAccent, onUpdate }: Props) {
+export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: Props) {
   const [platform, setPlatform] = useState("instagram");
   const [handle, setHandle] = useState("");
   const [followers, setFollowers] = useState("");
@@ -271,14 +272,27 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate }: Props)
           <div className="grid grid-cols-2 gap-2 mb-6">
             {PLATFORMS.filter((p) => p.oauth).map((p) => {
               const isLinked = connectedPlatforms.has(p.value);
+              const isLocked = p.value === "tiktok" && plan === "free";
               return (
                 <button
                   key={p.value}
-                  onClick={() => (isLinked ? handleDisconnect(accounts.find((a) => a.platform === p.value)!.id) : handleOAuthConnect(p.value as any))}
+                  onClick={() => {
+                    if (isLocked) {
+                      setError("TikTok connection is only available on Pro or Elite plans.");
+                      return;
+                    }
+                    if (isLinked) {
+                      handleDisconnect(accounts.find((a) => a.platform === p.value)!.id);
+                    } else {
+                      handleOAuthConnect(p.value as any);
+                    }
+                  }}
                   disabled={loading || disconnectingId === accounts.find((a) => a.platform === p.value)?.id}
                   className={`flex items-center gap-2 rounded-xl px-3 py-2.5 border text-xs font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
                     isLinked
                       ? "border-green-500/20 bg-green-500/5 text-green-400"
+                      : isLocked
+                      ? "border-white/[0.04] bg-[#16161A]/50 text-white/30 cursor-not-allowed"
                       : "border-white/[0.08] bg-[#16161A] text-white/70 hover:bg-[#1a1a1e] hover:text-white"
                   }`}
                 >
@@ -289,32 +303,34 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate }: Props)
                   ) : (
                     <p.icon className="h-3.5 w-3.5" />
                   )}
-                  <span>{isLinked ? `Connected` : `Connect ${p.label}`}</span>
+                  <span>{isLinked ? `Connected` : isLocked ? `TikTok (Pro)` : `Connect ${p.label}`}</span>
                 </button>
               );
             })}
           </div>
         )}
 
-        {/* Private Account Blocking Notification */}
+        {/* Private Account Blocking Modal */}
         {privateAccountError && (
-          <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 space-y-3 mb-6 animate-pulse">
-            <div className="flex items-start gap-2.5">
-              <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <h5 className="text-xs font-bold text-red-400">Public Profile Required</h5>
-                <p className="text-[10px] text-red-400/80 mt-1 leading-relaxed">
-                  Please make your account public permanently. AthleteOS requires a public profile to verify metrics and calculate suggested NIL rates. No manual entry is supported.
-                </p>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <div className="w-full max-w-sm rounded-2xl border border-red-500/20 bg-[#16161A] p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-red-500/10 p-2 text-red-400">
+                  <AlertCircle className="h-6 w-6" />
+                </div>
+                <h4 className="text-sm font-bold text-white uppercase tracking-wider">Public Profile Required</h4>
               </div>
-            </div>
-            <div className="flex justify-end">
-              <button
-                onClick={() => setPrivateAccountError(false)}
-                className="text-[10px] font-bold text-red-400 hover:text-red-300 uppercase tracking-wider"
-              >
-                Acknowledge
-              </button>
+              <p className="text-xs text-white/70 leading-relaxed">
+                Please make your account public permanently. AthleteOS requires a public profile to verify metrics and calculate suggested NIL rates. No manual entry is supported.
+              </p>
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={() => setPrivateAccountError(false)}
+                  className="w-full rounded-xl py-2.5 bg-red-500 text-white hover:bg-red-600 active:scale-95 transition-all text-xs font-bold uppercase tracking-wider"
+                >
+                  Acknowledge
+                </button>
+              </div>
             </div>
           </div>
         )}

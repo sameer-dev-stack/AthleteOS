@@ -267,18 +267,35 @@ export async function queueSocialScrape(
           };
 
     if (isLocal) {
-      // Dev fallback: fire sync actor so we get results without needing a public webhook URL.
+      // Dev fallback: process a mock synchronous payload inline to support disconnected local debugging.
       // Production always uses the async webhook path below.
-      const syncUrl = `https://api.apify.com/v2/acts/${actorId}/run-sync-get-dataset-items?token=${APIFY_API_KEY}`;
-      const syncRes = await fetch(syncUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const items = syncRes.ok ? await syncRes.json() : [];
-      // Re-use the webhook processing logic inline for local dev
+      const mockItems = [
+        {
+          owner: {
+            followersCount: 15400,
+            isPrivate: false,
+            fullName: "Local Test Athlete",
+            profilePicUrl: null,
+          },
+          authorMeta: {
+            fans: 15400,
+            private: false,
+            nickName: "Local Test Athlete",
+            avatar: null,
+          },
+          likesCount: 350,
+          commentsCount: 25,
+          stats: {
+            diggCount: 400,
+            commentCount: 30,
+            shareCount: 15,
+            playCount: 5000,
+          },
+        },
+      ];
+
       const { processApifyDataset } = await import("@/lib/apify-processor");
-      await processApifyDataset(platform, cleanHandle, user.id, items);
+      await processApifyDataset(platform, cleanHandle, user.id, mockItems);
       revalidatePath("/dashboard/nil");
       return { ok: true, status: "VERIFIED" };
     }

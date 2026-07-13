@@ -43,7 +43,28 @@ To build startup-grade dynamic NIL rate calculations powered by real-time scrape
 - `docs/COMPONENTS.md`
 
 ### Commit
-- Pending push to `origin/main`.
+- `fix: JSX ternary in social-accounts-editor, wire plan prop, remove stale eslint-disable`
+
+---
+
+## 2026-07-13 — NIL Value Engine: Post-build Fixes & Verification
+
+### What changed
+- **`components/dashboard/social-accounts-editor.tsx`** — Fixed broken JSX ternary expression introduced by a merge artifact (stray `{/* OAuth Connect Buttons */}` comment and duplicate `{activeConnectPlatform ?` block collapsed into a single correct `: activeConnectPlatform ?` chain).
+- **`app/dashboard/nil/client.tsx`** — Wired missing `plan` prop through to `SocialAccountsEditor` so the TikTok Free-tier lock activates at render time.
+- **`lib/apify-processor.ts`** — Removed stale `// eslint-disable-next-line @typescript-eslint/no-explicit-any` directive flagged as unused by ESLint (rule already disabled at config level).
+
+### Why
+Post-build verification pass after the NIL Engine integration. `tsc --noEmit` clean, `npm run lint` 0 errors (148 pre-existing warnings in motion primitives), `npm run build` succeeded — all 64 routes generated.
+
+### Files touched
+- `components/dashboard/social-accounts-editor.tsx`
+- `app/dashboard/nil/client.tsx`
+- `lib/apify-processor.ts`
+- `docs/CHANGELOG.md`
+
+### Commit
+- `fix: JSX ternary in social-accounts-editor, wire plan prop, remove stale eslint-disable`
 
 ---
 
