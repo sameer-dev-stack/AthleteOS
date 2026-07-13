@@ -69,15 +69,6 @@ const nextConfig = {
   async rewrites() {
     return [];
   },
-  webpack: (config, { dev, isServer }) => {
-    // ponytail: Node 24 + Sentry plugin rewrite .next/cache; the on-disk
-    // PackFile cache serializes corrupt chunks (dev server serves 404 for its
-    // own _next/static JS -> blank page). Force in-memory cache on dev only.
-    if (dev) {
-      config.cache = false;
-    }
-    return config;
-  },
 };
 
 export default withSentryConfig(nextConfig, {

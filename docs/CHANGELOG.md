@@ -5,6 +5,34 @@
 
 ---
 
+## 2026-07-13 — Upgrade Stage 1+2: Next.js 14.2 → 15.5.20 + React 18 → 19.2
+
+### What changed
+1. **`package.json`** — `next` 14.2.35 → 15.5.20, `eslint-config-next` → 15.5.20; `react`/`react-dom` 19.2.x, `@types/react`/`@types/react-dom` ^19; `framer-motion` → ^11.18.2 (React 19 type compat).
+2. **`app/auth/sign-in/page.tsx`, `app/auth/sign-up/page.tsx`, `components/final-cta.tsx`** — `useFormState` → `useActionState` (imported from `"react"`, keep `useFormStatus` from `"react-dom"`).
+3. **`app/page.tsx` + NEW `components/landing-sections.tsx`** — Next 15 hard-blocks `dynamic(..., { ssr: false })` in Server Components; moved those 13 dynamic imports into a new `"use client"` `LandingSections` wrapper, preserving order and `ssr: false` behavior.
+4. **`app/[username]/page.tsx`, `app/r/[code]/page.tsx`** — already `Promise<{...}>` params with `await` (forward-compatible).
+5. **`app/fan/subscribe/[tierId]/page.tsx`** — `params` typed `Promise<{ tierId }>` + `await params`.
+6. **`app/auth/error/page.tsx`** — `searchParams` typed `Promise<{ message? }>`; component made `async`; awaits `searchParams`.
+7. **`app/api/admin/[...adminPath]/route.ts`, `app/api/analytics-report/[token]/route.ts`** — route-handler `params` typed `Promise<...>` + `await params`.
+8. **`lib/actions/analytics.ts`** — `headers()` is async in Next 15; `getClientIp`/`getUserAgent`/`getReferrer` made `async`, callers awaited.
+9. **`lib/supabase/server.ts`, `lib/actions/auth.ts`, `app/r/[code]/page.tsx`** — `cookies()`/`headers()` already awaited (forward-compatible, no change).
+
+### Why
+React 19 cannot compile on Next 14 (Next 14's server runtime does not expose `useActionState` during prerender), so Stages 1 (React 19) and 2 (Next 15) are coupled and delivered as one commit. This is the midpoint of a staged major-version upgrade (Next 16 + Stripe + Supabase still pending) requested to be one revertible commit per stage.
+
+### Files touched
+- `package.json`, `package-lock.json`, `next-env.d.ts`
+- `app/page.tsx`, `components/landing-sections.tsx` (new)
+- `app/[username]/page.tsx`, `app/r/[code]/page.tsx`, `app/fan/subscribe/[tierId]/page.tsx`, `app/auth/error/page.tsx`, `app/auth/sign-in/page.tsx`, `app/auth/sign-up/page.tsx`
+- `app/api/admin/[...adminPath]/route.ts`, `app/api/analytics-report/[token]/route.ts`
+- `components/final-cta.tsx`, `lib/actions/analytics.ts`
+
+### Commit
+- `31dc22a` on branch `upgrade/next16-react19-2026-07` (pushed to origin). lint clean (3 pre-existing `<img>` warnings), build clean. Stages 3–5 (Next 16, Stripe, Supabase) pending.
+
+---
+
 ## 2026-07-12 — Create-account: full-screen loading + exact confirmation copy
 
 ### What changed
