@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Link2, Trash2, Plus, Instagram, Twitter, Youtube, Radio, RefreshCw, Check, Unplug, Loader2, AlertCircle, Clock, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link2, Trash2, Plus, Instagram, Twitter, Youtube, Radio, RefreshCw, Check, Loader2, AlertCircle, AlertTriangle } from "lucide-react";
 import {
   SocialAccount,
   upsertSocialAccount,
@@ -38,11 +38,21 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
   const [activeConnectPlatform, setActiveConnectPlatform] = useState<"instagram" | "tiktok" | null>(null);
   const [connectHandle, setConnectHandle] = useState("");
   const [connectLoading, setConnectLoading] = useState(false);
-  const [privateAccountError, setPrivateAccountError] = useState(false);
+  const [submitting, setSubmitting] = useState<"instagram" | "tiktok" | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-  // Track which platform is in the async PENDING / verifying state
-  const [verifyingPlatform, setVerifyingPlatform] = useState<"instagram" | "tiktok" | null>(null);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // PRIVATE_ACCOUNT blocking modal state + the platform/handle needed to retry
+  const [privateAccount, setPrivateAccount] = useState<{ platform: string; handle: string } | null>(null);
+  const [dismissedPrivate, setDismissedPrivate] = useState<string | null>(null);
+
+  const pendingPlatforms = accounts
+    .filter((a) => a.verification_status === "PENDING")
+    .map((a) => a.platform);
+  const isVerifying = (p: string) => submitting === p || pendingPlatforms.includes(p);
+
+  const connectedPlatforms = new Set(
+    accounts.filter((a) => a.is_connected).map((a) => a.platform)
+  );
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -51,33 +61,19 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
       window.history.replaceState({}, "", "/dashboard/nil");
     }
     if (params.get("error")) {
-      setError(params.get("error")?.replace(/-/g, " ") || "Connection failed");
+      queueMicrotask(() =>
+        setError(params.get("error")?.replace(/-/g, " ") || "Connection failed")
+      );
       window.history.replaceState({}, "", "/dashboard/nil");
     }
   }, [onUpdate]);
 
-  const handleOAuthConnect = (platformValue: "instagram" | "tiktok") => {
-    setActiveConnectPlatform(platformValue);
-    setConnectHandle("");
-    setError(null);
-    setPrivateAccountError(false);
-  };
-
-  const stopPolling = () => {
-    if (pollRef.current) {
-      clearInterval(pollRef.current);
-      pollRef.current = null;
-    }
-  };
-
-  // Poll every 5s while a platform is in PENDING state
+  // Poll every 5s while any platform is PENDING so the UI can react to resolution
   useEffect(() => {
-    if (!verifyingPlatform) return;
-    pollRef.current = setInterval(() => {
-      onUpdate();
-    }, 5000);
-    return stopPolling;
-  }, [verifyingPlatform, onUpdate]);
+    if (pendingPlatforms.length === 0) return;
+    const id = setInterval(() => onUpdate(), 5000);
+    return () => clearInterval(id);
+  }, [pendingPlatforms.join(","), onUpdate]);
 
   // Auto-dismiss the toast after 5 seconds
   useEffect(() => {
@@ -86,28 +82,23 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
     return () => clearTimeout(t);
   }, [toast]);
 
-  // When accounts refresh, check if the verifying platform has settled
+  // Intercept terminal backend states (PRIVATE_ACCOUNT / ERROR) when accounts refresh
   useEffect(() => {
-    if (!verifyingPlatform) return;
-    const account = accounts.find((a) => a.platform === verifyingPlatform);
-    if (!account) return;
-    const status = account.verification_status;
-    if (status === "VERIFIED") {
-      stopPolling();
-      setVerifyingPlatform(null);
-      setActiveConnectPlatform(null);
-    } else if (status === "PRIVATE_ACCOUNT") {
-      stopPolling();
-      setVerifyingPlatform(null);
-      setActiveConnectPlatform(null);
-      setPrivateAccountError(true);
-    } else if (status === "ERROR") {
-      stopPolling();
-      setVerifyingPlatform(null);
-      setActiveConnectPlatform(null);
+    const priv = accounts.find((a) => a.verification_status === "PRIVATE_ACCOUNT");
+    if (priv && !privateAccount && dismissedPrivate !== priv.handle) {
+      setPrivateAccount({ platform: priv.platform, handle: priv.handle.replace(/^@/, "") });
+    }
+    const errored = accounts.find((a) => a.verification_status === "ERROR");
+    if (errored && !toast) {
       setToast({ message: "Scraper task failed. Please verify the handle spelling and try again.", type: "error" });
     }
-  }, [accounts, verifyingPlatform]);
+  }, [accounts, privateAccount, dismissedPrivate, toast]);
+
+  const handleOAuthConnect = (platformValue: "instagram" | "tiktok") => {
+    setActiveConnectPlatform(platformValue);
+    setConnectHandle("");
+    setError(null);
+  };
 
   const handleQueueScrape = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,37 +106,45 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
 
     setConnectLoading(true);
     setError(null);
-    setPrivateAccountError(false);
-    // Instantly transition UI into the verifying state (5s poll handles resolution)
-    setVerifyingPlatform(activeConnectPlatform);
+    setSubmitting(activeConnectPlatform);
 
     try {
       const res = await queueSocialScrape(activeConnectPlatform, connectHandle.trim());
       if (res.ok) {
         setConnectHandle("");
-        if (res.status === "VERIFIED") {
-          // Dev sync path resolved immediately
-          stopPolling();
-          setVerifyingPlatform(null);
-          setActiveConnectPlatform(null);
-          onUpdate();
-        } else {
-          // Production: polling interval is already active via verifyingPlatform
-          onUpdate();
-        }
-      } else {
-        stopPolling();
-        setVerifyingPlatform(null);
         setActiveConnectPlatform(null);
+        if (res.status !== "VERIFIED") onUpdate();
+      } else {
         setError(res.error || `Failed to queue ${activeConnectPlatform} verification`);
       }
     } catch (err) {
-      stopPolling();
-      setVerifyingPlatform(null);
-      setActiveConnectPlatform(null);
       setError(err instanceof Error ? err.message : "An unexpected error occurred during verification");
     } finally {
       setConnectLoading(false);
+      setSubmitting(null);
+    }
+  };
+
+  const handleRetry = async () => {
+    if (!privateAccount) return;
+    const { platform: p, handle: h } = privateAccount;
+    setPrivateAccount(null);
+    setDismissedPrivate(null);
+    setError(null);
+    setConnectLoading(true);
+    setSubmitting(p as "instagram" | "tiktok");
+    try {
+      const res = await queueSocialScrape(p as "instagram" | "tiktok", h);
+      if (res.ok) {
+        if (res.status !== "VERIFIED") onUpdate();
+      } else {
+        setError(res.error || "Failed to retry verification");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred during verification");
+    } finally {
+      setConnectLoading(false);
+      setSubmitting(null);
     }
   };
 
@@ -182,6 +181,23 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Clear this account mapping from your profile?")) return;
+    setLoading(true);
+    try {
+      const res = await deleteSocialAccount(id);
+      if (res.ok) {
+        onUpdate();
+      } else {
+        alert(res.error || "Failed to clear social account");
+      }
+    } catch {
+      alert("Failed to clear social account");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!handle.trim() || !followers) return;
@@ -212,26 +228,7 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to remove this social account?")) return;
-    setLoading(true);
-    try {
-      const res = await deleteSocialAccount(id);
-      if (res.ok) {
-        onUpdate();
-      } else {
-        alert(res.error || "Failed to delete social account");
-      }
-    } catch {
-      alert("Failed to delete social account");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const connectedPlatforms = new Set(
-    accounts.filter((a) => a.is_connected).map((a) => a.platform)
-  );
+  const manualFormDisabled = loading || pendingPlatforms.length > 0;
 
   return (
     <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-6 h-full flex flex-col justify-between">
@@ -241,17 +238,8 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
           <h3 className="text-sm font-bold text-white/90">Social Network Setup</h3>
         </div>
 
-        {/* Connect flow: input form, verifying banner, or idle connect buttons */}
-        {verifyingPlatform ? (
-          <div className="rounded-xl border border-white/[0.08] bg-[#16161A] p-4 mb-6 flex items-center gap-3">
-            <Clock className="h-4 w-4 text-white/40 flex-shrink-0 animate-pulse" />
-            <div className="flex-1">
-              <p className="text-xs font-bold text-white/80">Verifying {verifyingPlatform}</p>
-              <p className="text-[10px] text-white/40 mt-0.5">Checking your profile and computing engagement metrics...</p>
-            </div>
-            <Loader2 className="h-3.5 w-3.5 text-white/30 animate-spin flex-shrink-0" />
-          </div>
-        ) : activeConnectPlatform ? (
+        {/* Connect flow: input form or idle connect buttons */}
+        {activeConnectPlatform ? (
           <form onSubmit={handleQueueScrape} className="space-y-3 p-3.5 rounded-xl border border-white/[0.08] bg-[#16161A] mb-6">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-bold text-white uppercase tracking-wider">Connect {activeConnectPlatform}</span>
@@ -291,6 +279,13 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
             {PLATFORMS.filter((p) => p.oauth).map((p) => {
               const isLinked = connectedPlatforms.has(p.value);
               const isLocked = p.value === "tiktok" && plan === "free";
+              const verifying = isVerifying(p.value);
+              const pendingAccount = accounts.find(
+                (a) => a.platform === p.value && a.verification_status === "PENDING"
+              );
+              const verifyLabel = pendingAccount
+                ? `Verifying ${pendingAccount.handle}...`
+                : "Verifying...";
               return (
                 <button
                   key={p.value}
@@ -305,48 +300,67 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
                       handleOAuthConnect(p.value as any);
                     }
                   }}
-                  disabled={loading || disconnectingId === accounts.find((a) => a.platform === p.value)?.id}
-                  className={`flex items-center gap-2 rounded-xl px-3 py-2.5 border text-xs font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 ${
-                    isLinked
+                  disabled={isLocked || verifying || disconnectingId === accounts.find((a) => a.platform === p.value)?.id}
+                  className={`flex items-center gap-2 rounded-xl px-3 py-2.5 border text-xs font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:cursor-not-allowed ${
+                    verifying
+                      ? "border-amber-500/20 bg-amber-500/5 text-amber-400"
+                      : isLinked
                       ? "border-green-500/20 bg-green-500/5 text-green-400"
                       : isLocked
-                      ? "border-white/[0.04] bg-[#16161A]/50 text-white/30 cursor-not-allowed"
+                      ? "border-white/[0.04] bg-[#16161A]/50 text-white/30"
                       : "border-white/[0.08] bg-[#16161A] text-white/70 hover:bg-[#1a1a1e] hover:text-white"
                   }`}
                 >
-                  {disconnectingId === accounts.find((a) => a.platform === p.value)?.id ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  {verifying ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin flex-shrink-0" />
                   ) : isLinked ? (
                     <Check className="h-3.5 w-3.5" />
                   ) : (
                     <p.icon className="h-3.5 w-3.5" />
                   )}
-                  <span>{isLinked ? `Connected` : isLocked ? `TikTok (Pro)` : `Connect ${p.label}`}</span>
+                  <span className="truncate">
+                    {verifying ? verifyLabel : isLinked ? `Connected` : isLocked ? `TikTok (Pro)` : `Connect ${p.label}`}
+                  </span>
                 </button>
               );
             })}
           </div>
         )}
 
-        {/* Private Account Blocking Modal */}
-        {privateAccountError && (
+        {/* PRIVATE_ACCOUNT Blocking Modal */}
+        {privateAccount && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
             <div className="w-full max-w-sm rounded-2xl border border-red-500/20 bg-[#16161A] p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
               <div className="flex items-center gap-3">
                 <div className="rounded-lg bg-red-500/10 p-2 text-red-400">
                   <AlertCircle className="h-6 w-6" />
                 </div>
-                <h4 className="text-sm font-bold text-white uppercase tracking-wider">Public Profile Required</h4>
+                <h4 className="text-sm font-bold text-white uppercase tracking-wider">
+                  ⚠️ Action Required: Public Profile Needed
+                </h4>
               </div>
               <p className="text-xs text-white/70 leading-relaxed">
-                Please make your account public permanently. AthleteOS requires a public profile to verify metrics and calculate suggested NIL rates. No manual entry is supported.
+                AthleteOS requires a public account to securely aggregate engagement analytics and verify your
+                suggested market value. Please temporarily switch your profile to public in your app settings and
+                click Retry Sync.
               </p>
-              <div className="flex justify-end pt-2">
+              <div className="flex items-center justify-between gap-3 pt-2">
                 <button
-                  onClick={() => setPrivateAccountError(false)}
-                  className="w-full rounded-xl py-2.5 bg-red-500 text-white hover:bg-red-600 active:scale-95 transition-all text-xs font-bold uppercase tracking-wider"
+                  onClick={handleRetry}
+                  disabled={connectLoading}
+                  className="rounded-xl px-4 py-2.5 bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all text-xs font-bold uppercase tracking-wider flex items-center gap-2"
                 >
-                  Acknowledge
+                  {connectLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                  Retry Verification
+                </button>
+                <button
+                  onClick={() => {
+                    setDismissedPrivate(privateAccount.handle);
+                    setPrivateAccount(null);
+                  }}
+                  className="text-[11px] text-white/40 hover:text-white uppercase font-bold tracking-wider underline-offset-4 hover:underline"
+                >
+                  Dismiss
                 </button>
               </div>
             </div>
@@ -359,6 +373,9 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
             {accounts.map((account) => {
               const platformMeta = PLATFORMS.find((p) => p.value === account.platform);
               const PlatformIcon = platformMeta?.icon || Link2;
+              const status = account.verification_status;
+              const isPending = status === "PENDING";
+              const isVerified = account.is_connected || status === "VERIFIED";
 
               return (
                 <div
@@ -369,24 +386,37 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
                     <div
                       className="h-7 w-7 rounded-lg border flex items-center justify-center flex-shrink-0"
                       style={{
-                        backgroundColor: account.is_connected ? `${platformMeta?.color}10` : "rgba(255,255,255,0.02)",
-                        borderColor: account.is_connected ? `${platformMeta?.color}30` : "rgba(255,255,255,0.08)",
+                        backgroundColor: isVerified ? `${platformMeta?.color}10` : "rgba(255,255,255,0.02)",
+                        borderColor: isVerified ? `${platformMeta?.color}30` : "rgba(255,255,255,0.08)",
                       }}
                     >
-                      <PlatformIcon
-                        className="h-3.5 w-3.5"
-                        style={{ color: account.is_connected ? platformMeta?.color : "rgba(255,255,255,0.6)" }}
-                      />
+                      {isPending ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-400" />
+                      ) : (
+                        <PlatformIcon
+                          className="h-3.5 w-3.5"
+                          style={{ color: isVerified ? platformMeta?.color : "rgba(255,255,255,0.6)" }}
+                        />
+                      )}
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         <p className="text-xs font-bold text-white leading-tight truncate">
                           {account.handle}
                         </p>
-                        {account.is_connected && (
-                          <span className="inline-flex items-center gap-0.5 rounded-full bg-green-500/10 px-1.5 py-px text-[9px] font-bold text-green-400 border border-green-500/20">
-                            <span className="h-1 w-1 rounded-full bg-green-400" />
-                            LIVE
+                        {isPending && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-1.5 py-px text-[9px] font-bold text-amber-400 border border-amber-500/20">
+                            <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                            🔄 Syncing...
+                          </span>
+                        )}
+                        {isVerified && (
+                          <span
+                            className="inline-flex items-center gap-0.5 rounded-full bg-accent/10 px-1.5 py-px text-[9px] font-bold border border-accent/20"
+                            style={{ color: themeAccent, borderColor: `${themeAccent}30` }}
+                          >
+                            <Check className="h-2.5 w-2.5" />
+                            ✓ Verified
                           </span>
                         )}
                       </div>
@@ -397,34 +427,29 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
                   </div>
 
                   <div className="flex items-center gap-1">
-                    {account.is_connected && (
-                      <button
-                        onClick={() => handleRefresh(account.id)}
-                        disabled={refreshingId === account.id}
-                        className="p-1.5 rounded-lg border border-white/[0.04] text-white/20 hover:text-white/60 hover:bg-white/[0.04] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-                        title="Refresh follower count"
-                      >
-                        <RefreshCw className={`h-3.5 w-3.5 ${refreshingId === account.id ? "animate-spin" : ""}`} />
-                      </button>
-                    )}
-                    {account.is_connected ? (
-                      <button
-                        onClick={() => handleDisconnect(account.id)}
-                        disabled={loading}
-                        className="p-1.5 rounded-lg border border-white/[0.04] text-white/20 hover:text-yellow-400 hover:bg-yellow-500/10 hover:border-yellow-500/20 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500/50"
-                        title="Disconnect account"
-                      >
-                        <Unplug className="h-3.5 w-3.5" />
-                      </button>
+                    {isPending ? (
+                      <span className="text-[9px] text-amber-400/70 uppercase tracking-wider px-1">Syncing</span>
                     ) : (
-                      <button
-                        onClick={() => handleDelete(account.id)}
-                        disabled={loading}
-                        className="p-1.5 rounded-lg border border-white/[0.04] text-white/20 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
-                        title="Remove account"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      <>
+                        {isVerified && (
+                          <button
+                            onClick={() => handleRefresh(account.id)}
+                            disabled={refreshingId === account.id}
+                            className="p-1.5 rounded-lg border border-white/[0.04] text-white/20 hover:text-white/60 hover:bg-white/[0.04] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+                            title="Refresh follower count"
+                          >
+                            <RefreshCw className={`h-3.5 w-3.5 ${refreshingId === account.id ? "animate-spin" : ""}`} />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDelete(account.id)}
+                          disabled={loading}
+                          className="p-1.5 rounded-lg border border-white/[0.04] text-white/20 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
+                          title="Clear account mapping"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -447,7 +472,7 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
               <select
                 value={platform}
                 onChange={(e) => setPlatform(e.target.value)}
-                disabled={loading}
+                disabled={manualFormDisabled}
                 className="w-full text-xs bg-[#16161A] border border-white/[0.08] rounded-xl px-3 py-2 text-white/80 focus:outline-none focus:border-white/25 transition-colors"
               >
                 {PLATFORMS.map((p) => (
@@ -466,7 +491,7 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
                 placeholder="2500"
                 value={followers}
                 onChange={(e) => setFollowers(e.target.value)}
-                disabled={loading}
+                disabled={manualFormDisabled}
                 required
                 min="0"
                 className="w-full text-xs bg-[#16161A] border border-white/[0.08] rounded-xl px-3 py-2 text-white placeholder-white/20 focus:outline-none focus:border-white/25 focus-visible:ring-2 focus-visible:ring-accent/30 transition-colors"
@@ -484,14 +509,15 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
                 placeholder="@nike_athlete"
                 value={handle}
                 onChange={(e) => setHandle(e.target.value)}
-                disabled={loading}
+                disabled={manualFormDisabled}
                 required
                 className="flex-1 text-xs bg-[#16161A] border border-white/[0.08] rounded-xl px-3 py-2 text-white placeholder-white/20 focus:outline-none focus:border-white/25 focus-visible:ring-2 focus-visible:ring-accent/30 transition-colors"
               />
               <button
                 type="submit"
-                disabled={loading || !handle || !followers}
+                disabled={manualFormDisabled || !handle || !followers}
                 className="rounded-xl px-3 py-2 bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                title={pendingPlatforms.length > 0 ? "Wait for sync to finish" : undefined}
               >
                 <Plus className="h-4 w-4" />
               </button>

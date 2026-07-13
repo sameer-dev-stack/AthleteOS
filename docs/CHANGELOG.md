@@ -5,7 +5,22 @@
 
 ---
 
-## 2026-07-13 — Valuation Engine: Server-Side APIFY Key Encapsulation + Frontend Polling Fix
+## 2026-07-13 — Social Network Setup: Per-Platform Async States + Rate-Table Blur
+
+### What changed
+- **`components/dashboard/social-accounts-editor.tsx`** — Replaced single `verifyingPlatform` with per-platform PENDING tracking. Connect Instagram/TikTok buttons now show a spinning ring + "Verifying @handle..." and are disabled while that platform is PENDING (prevents double-submit / quota waste). Manual Handle/Username form is disabled while any platform syncs. Account list maps PENDING → amber "🔄 Syncing..." badge, VERIFIED → lime "✓ Verified" badge + follower count + trash icon to clear mapping. PRIVATE_ACCOUNT now triggers a strict blocking modal ("⚠️ Action Required: Public Profile Needed") with [Retry Verification] (re-runs `queueSocialScrape`) and [Dismiss].
+- **`app/dashboard/nil/client.tsx`** — Added `RateTableBlock` wrapper that overlays a glassmorphism blur + "Tuning valuation metrics... updates live automatically." on the Suggested NIL Rates table while any account is PENDING; clears instantly on VERIFIED.
+
+### Why
+Support the background Apify worker pattern (PENDING/VERIFIED/PRIVATE_ACCOUNT) with non-blocking UI, honest quota protection, and smooth rate-table hydration.
+
+### Files touched
+`components/dashboard/social-accounts-editor.tsx`, `app/dashboard/nil/client.tsx`
+
+### Commit
+(pending push)
+
+---
 
 ### What changed
 - **`lib/actions/social-accounts.ts`** — `queueSocialScrape` now throws `"Missing APIFY_API_KEY in server environment variables."` when `process.env.APIFY_API_KEY` is absent (was a soft returned error). Token is injected only as a `?token=` query param on the Apify actor run fetch — never returned to the client.

@@ -16,6 +16,33 @@ import { NilDealChecker } from "@/components/dashboard/nil-deal-checker";
 import { SocialAccountsEditor } from "@/components/dashboard/social-accounts-editor";
 import { SmartAiActions } from "@/components/dashboard/smart-ai-actions";
 
+// Wraps the Suggested NIL Rates table with a glassmorphism blur while any
+// social account is mid-sync (PENDING). Clears automatically once VERIFIED.
+function RateTableBlock({
+  rates,
+  plan,
+  themeAccent,
+  blurred,
+}: {
+  rates: ReturnType<typeof computeNilScoreAndRates>["rates"];
+  plan: string;
+  themeAccent: string;
+  blurred: boolean;
+}) {
+  return (
+    <div className="relative">
+      <NilRateTable rates={rates} plan={plan} themeAccent={themeAccent} />
+      {blurred && (
+        <div className="absolute inset-0 z-10 rounded-2xl bg-[#0A0A0C]/30 backdrop-blur-md flex items-center justify-center p-4">
+          <p className="text-[10px] text-white/60 text-center leading-relaxed">
+            Tuning valuation metrics... updates live automatically.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 type Props = {
   profile: Profile;
   initialMetrics: NILMetricsRow | null;
@@ -47,7 +74,7 @@ export function NilDashboardClient({
   // Load personalized knowledge breakdown on mount (non-blocking)
   useEffect(() => {
     let cancelled = false;
-    setBreakdownLoading(true);
+    queueMicrotask(() => setBreakdownLoading(true));
     getNilValueBreakdown(profile.id)
       .then((res) => {
         if (cancelled) return;
@@ -137,6 +164,9 @@ export function NilDashboardClient({
   // If no metrics ever computed, show an empty state panel
   const showEmptyState = !metrics && socialAccounts.length === 0;
 
+  // While any social account is mid-sync, blur the valuation table (cleared automatically on VERIFIED)
+  const anyPending = socialAccounts.some((a) => a.verification_status === "PENDING");
+
   return (
     <div className="space-y-8">
       {/* Page Header */}
@@ -213,7 +243,7 @@ export function NilDashboardClient({
               Connect accounts and we tune this to your real reach. Athletes in{" "}
               <span className="text-white/80">{profile.sport || "your sport"}</span> typically land in these ranges:
             </p>
-            <NilRateTable rates={scoreDetails.rates} plan={quotaState.plan} themeAccent={themeAccent} />
+              <RateTableBlock rates={scoreDetails.rates} plan={quotaState.plan} themeAccent={themeAccent} blurred={anyPending} />
           </div>
 
           <div className="w-full max-w-md">
@@ -259,11 +289,7 @@ export function NilDashboardClient({
 
             {/* Column 2: Rates + Deal checker */}
             <div className="space-y-6">
-              <NilRateTable
-                rates={scoreDetails.rates}
-                plan={quotaState.plan}
-                themeAccent={themeAccent}
-              />
+            <RateTableBlock rates={scoreDetails.rates} plan={quotaState.plan} themeAccent={themeAccent} blurred={anyPending} />
               <NilDealChecker
                 plan={quotaState.plan}
                 themeAccent={themeAccent}
