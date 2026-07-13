@@ -67,9 +67,9 @@ export function Footer() {
       {/* Top hairline accent */}
       <div className="absolute inset-x-0 top-0 mx-auto h-px max-w-md bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
 
-      <div className="container-wide pt-20 sm:pt-28">
+      <div className="container-wide pt-12 sm:pt-16">
         {/* Mini CTA strip */}
-        <div className="flex flex-col items-start justify-between gap-6 border-b border-white/[0.05] pb-14 sm:flex-row sm:items-end">
+        <div className="flex flex-col items-start justify-between gap-6 border-b border-white/[0.05] pb-10 sm:flex-row sm:items-end">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-ink-dim">
               Still scrolling?
@@ -98,7 +98,7 @@ export function Footer() {
         </div>
 
         {/* Main grid */}
-        <div className="grid gap-14 py-16 lg:grid-cols-12 lg:gap-10">
+        <div className="grid gap-12 py-12 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-4">
             <Link href="/" className="inline-flex items-center gap-2.5">
               <Logo />
@@ -238,7 +238,7 @@ function ParallaxWordmark() {
           <div
             className="text-center font-display font-extrabold leading-[0.85] tracking-tighter"
             style={{
-              fontSize: "clamp(4rem, 22vw, 22rem)",
+              fontSize: "clamp(2.5rem, 11vw, 9rem)",
               backgroundImage:
                 "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 60%, transparent 100%)",
               WebkitBackgroundClip: "text",
@@ -256,7 +256,7 @@ function ParallaxWordmark() {
             aria-hidden
             className="pointer-events-none absolute inset-0 text-center font-display font-extrabold leading-[0.85] tracking-tighter transition-opacity duration-700"
             style={{
-              fontSize: "clamp(4rem, 22vw, 22rem)",
+              fontSize: "clamp(2.5rem, 11vw, 9rem)",
               backgroundImage:
                 "linear-gradient(180deg, rgba(198,255,61,0.18) 0%, rgba(198,255,61,0.02) 60%, transparent 100%)",
               WebkitBackgroundClip: "text",
