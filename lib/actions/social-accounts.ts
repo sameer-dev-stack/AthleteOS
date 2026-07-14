@@ -16,7 +16,6 @@ export type SocialAccount = {
   average_views: number;
   average_shares: number;
   total_engagements: number;
-  profile_url: string | null;
   verification_status: string | null;
   last_scraped_at: string | null;
   updated_at: string;
@@ -37,7 +36,7 @@ export async function getSocialAccounts(): Promise<{ ok: boolean; data?: SocialA
     const { data, error } = await supabase
       .from("social_accounts")
       .select(
-        "id, profile_id, platform, handle, followers, engagement_rate, average_likes, average_comments, average_views, average_shares, total_engagements, profile_url, verification_status, last_scraped_at, updated_at"
+        "id, profile_id, platform, handle, followers, engagement_rate, average_likes, average_comments, average_views, average_shares, total_engagements, verification_status, last_scraped_at, updated_at"
       )
       .eq("profile_id", user.id)
       .order("followers", { ascending: false });
@@ -85,7 +84,7 @@ export async function upsertSocialAccount(
         },
         { onConflict: "profile_id, platform" }
       )
-      .select("id, profile_id, platform, handle, followers, profile_url, verification_status, updated_at")
+      .select("id, profile_id, platform, handle, followers, verification_status, updated_at")
       .single();
 
     if (error) {
@@ -232,10 +231,6 @@ export async function queueSocialScrape(
           platform,
           handle: `@${cleanHandle}`,
           verification_status: "PENDING",
-          profile_url:
-            platform === "instagram"
-              ? `https://instagram.com/${cleanHandle}`
-              : `https://tiktok.com/@${cleanHandle}`,
           updated_at: new Date().toISOString(),
         },
         { onConflict: "profile_id, platform" }

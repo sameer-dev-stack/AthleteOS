@@ -54,7 +54,6 @@ export async function GET(request: Request) {
         access_token: accessToken,
         verification_status: "VERIFIED",
         platform_user_id: profileData.id,
-        profile_url: igData.profile_picture_url || null,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "profile_id, platform" }

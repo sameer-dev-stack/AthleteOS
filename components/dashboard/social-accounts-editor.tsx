@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Link2, Trash2, Plus, Instagram, Twitter, Youtube, Radio, RefreshCw, Check, Loader2, AlertCircle, AlertTriangle } from "lucide-react";
+import { Link2, Trash2, Instagram, Twitter, Youtube, Radio, RefreshCw, Check, Loader2, AlertCircle, AlertTriangle } from "lucide-react";
 import {
   SocialAccount,
   deleteSocialAccount,
@@ -26,9 +26,6 @@ const PLATFORMS = [
 ];
 
 export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: Props) {
-  const [platform, setPlatform] = useState<"instagram" | "tiktok">("instagram");
-  const [handle, setHandle] = useState("");
-  const [manualLoading, setManualLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshingId, setRefreshingId] = useState<string | null>(null);
@@ -193,35 +190,6 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
     }
   };
 
-  // Manual entry now routes through the verified Apify scraper — no self-reported
-  // follower counts. Only Instagram/TikTok are scrapeable, so the form is limited to those.
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!handle.trim()) return;
-
-    setManualLoading(true);
-    setError(null);
-    setSubmitting(platform);
-
-    try {
-      const res = await queueSocialScrape(platform, handle.trim());
-      if (res.ok) {
-        setHandle("");
-        if (res.status !== "VERIFIED") onUpdate();
-      } else {
-        setError(res.error || `Failed to queue ${platform} verification`);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred during verification");
-    } finally {
-      setManualLoading(false);
-      setSubmitting(null);
-    }
-  };
-
-  const manualFormDisabled =
-    manualLoading || loading || submitting !== null || pendingPlatforms.length > 0;
-
   return (
     <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-6 h-full flex flex-col justify-between">
       <div>
@@ -317,6 +285,10 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
               );
             })}
           </div>
+        )}
+
+        {error && !activeConnectPlatform && (
+          <p className="text-[10px] text-red-400 -mt-3 mb-6 font-medium">{error}</p>
         )}
 
         {/* PRIVATE_ACCOUNT Blocking Modal */}
@@ -489,52 +461,9 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
           </div>
         ) : (
           <div className="text-center py-6 text-white/20 text-xs italic mb-4">
-            No social profiles configured yet. Connect a platform or add one manually below.
+            No social profiles configured yet. Connect a platform above to get started.
           </div>
         )}
-
-        {/* Add Account Form — handle-only, routed through the verified Apify scraper */}
-        <form onSubmit={handleSubmit} className="space-y-3 pt-4 border-t border-white/[0.04]">
-          <div>
-            <label className="block text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1">
-              Platform
-            </label>
-            <select
-              value={platform}
-              onChange={(e) => setPlatform(e.target.value as "instagram" | "tiktok")}
-              disabled={manualFormDisabled}
-              className="w-full text-xs bg-[#16161A] border border-white/[0.08] rounded-xl px-3 py-2 text-white/80 focus:outline-none focus:border-white/25 transition-colors"
-            >
-              {PLATFORMS.filter((p) => p.oauth).map((p) => (
-                <option key={p.value} value={p.value}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Public profile URL or @handle"
-              value={handle}
-              onChange={(e) => setHandle(e.target.value)}
-              disabled={manualFormDisabled}
-              required
-              className="flex-1 text-xs bg-[#16161A] border border-white/[0.08] rounded-xl px-3 py-2 text-white placeholder-white/20 focus:outline-none focus:border-white/25 focus-visible:ring-2 focus-visible:ring-accent/30 transition-colors"
-            />
-            <button
-              type="submit"
-              disabled={manualFormDisabled || !handle}
-              className="rounded-xl px-3 py-2 bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-              title={pendingPlatforms.length > 0 ? "Wait for sync to finish" : undefined}
-            >
-              {manualLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            </button>
-          </div>
-
-          {error && <p className="text-[10px] text-red-400 mt-1 font-medium">{error}</p>}
-        </form>
       </div>
 
       <p className="text-[9px] text-white/30 leading-snug mt-4 pt-4 border-t border-white/[0.04]">

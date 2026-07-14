@@ -56,7 +56,6 @@ export async function GET(request: Request) {
         access_token: accessToken,
         verification_status: "VERIFIED",
         platform_user_id: openId,
-        profile_url: userInfo?.avatar_url || null,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "profile_id, platform" }
