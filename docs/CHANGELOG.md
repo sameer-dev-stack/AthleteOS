@@ -5,7 +5,22 @@
 
 ---
 
-## 2026-07-13 — Social Network Setup: Per-Platform Async States + Rate-Table Blur
+## 2026-07-13 — NIL Empty State: Locked Rates, Scraper-Only Onboarding, Flattened Layout
+
+### What changed
+- **`app/dashboard/nil/client.tsx`** — `RateTableBlock` now shows a locked preview (padlock + "Connect a public Instagram or TikTok account below to unlock your personalized, verified suggested rates.") when zero verified channels exist; keeps the "Tuning valuation metrics..." blur during PENDING. "Recalculate NIL Score" is disabled (grayed, `opacity-40`, tooltip "Connect at least one social media account to calculate your score.") until `hasVerified`. Empty state flattened: removed the nested outer card; intro, onboarding step guide (flat borders-only card), rates, and Social Network Setup now sit directly on the canvas.
+- **`components/dashboard/social-accounts-editor.tsx`** — Removed the manual "Follower Count" input. The Add Account form now collects only platform (Instagram/TikTok) + @handle and submits via `queueSocialScrape` (verified channel) instead of `upsertSocialAccount`. Follower counts only populate after the scraper completes. Footer copy updated.
+
+### Why
+Eliminate unverified self-reported stats, lock valuation views behind a real verified connection, and clean up the nested container hierarchy.
+
+### Files touched
+`app/dashboard/nil/client.tsx`, `components/dashboard/social-accounts-editor.tsx`
+
+### Commit
+(pending push)
+
+---
 
 ### What changed
 - **`components/dashboard/social-accounts-editor.tsx`** — Replaced single `verifyingPlatform` with per-platform PENDING tracking. Connect Instagram/TikTok buttons now show a spinning ring + "Verifying @handle..." and are disabled while that platform is PENDING (prevents double-submit / quota waste). Manual Handle/Username form is disabled while any platform syncs. Account list maps PENDING → amber "🔄 Syncing..." badge, VERIFIED → lime "✓ Verified" badge + follower count + trash icon to clear mapping. PRIVATE_ACCOUNT now triggers a strict blocking modal ("⚠️ Action Required: Public Profile Needed") with [Retry Verification] (re-runs `queueSocialScrape`) and [Dismiss].

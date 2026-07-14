@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { TrendingUp, RefreshCw, AlertCircle, ArrowUpRight } from "lucide-react";
+import { TrendingUp, RefreshCw, AlertCircle, Lock } from "lucide-react";
 import { Profile } from "@/lib/actions/profile";
 import { NILMetricsRow, runNilValueEngine, getNilMetrics } from "@/lib/actions/nil-engine";
 import { getNilValueBreakdown, type NilBreakdown } from "@/lib/actions/athlete-knowledge";
@@ -16,23 +16,36 @@ import { NilDealChecker } from "@/components/dashboard/nil-deal-checker";
 import { SocialAccountsEditor } from "@/components/dashboard/social-accounts-editor";
 import { SmartAiActions } from "@/components/dashboard/smart-ai-actions";
 
-// Wraps the Suggested NIL Rates table with a glassmorphism blur while any
-// social account is mid-sync (PENDING). Clears automatically once VERIFIED.
+// Wraps the Suggested NIL Rates table. While accounts sync (PENDING) it shows a
+// glassmorphism "tuning" blur; when zero verified channels exist it shows a
+// locked preview with a padlock + unlock copy. Both clear once VERIFIED.
 function RateTableBlock({
   rates,
   plan,
   themeAccent,
   blurred,
+  locked,
 }: {
   rates: ReturnType<typeof computeNilScoreAndRates>["rates"];
   plan: string;
   themeAccent: string;
   blurred: boolean;
+  locked: boolean;
 }) {
   return (
     <div className="relative">
       <NilRateTable rates={rates} plan={plan} themeAccent={themeAccent} />
-      {blurred && (
+      {locked && (
+        <div className="absolute inset-0 z-10 rounded-2xl bg-[#0A0A0C]/40 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center gap-3">
+          <div className="rounded-full bg-white/[0.04] border border-white/[0.1] p-3">
+            <Lock className="h-6 w-6 text-white/60" />
+          </div>
+          <p className="text-[11px] text-white/60 leading-relaxed max-w-[18rem]">
+            Connect a public Instagram or TikTok account below to unlock your personalized, verified suggested rates.
+          </p>
+        </div>
+      )}
+      {!locked && blurred && (
         <div className="absolute inset-0 z-10 rounded-2xl bg-[#0A0A0C]/30 backdrop-blur-md flex items-center justify-center p-4">
           <p className="text-[10px] text-white/60 text-center leading-relaxed">
             Tuning valuation metrics... updates live automatically.
@@ -167,6 +180,11 @@ export function NilDashboardClient({
   // While any social account is mid-sync, blur the valuation table (cleared automatically on VERIFIED)
   const anyPending = socialAccounts.some((a) => a.verification_status === "PENDING");
 
+  // True once at least one verified (connected) social channel exists
+  const hasVerified = socialAccounts.some(
+    (a) => a.is_connected || a.verification_status === "VERIFIED"
+  );
+
   return (
     <div className="space-y-8">
       {/* Page Header */}
@@ -185,8 +203,9 @@ export function NilDashboardClient({
 
         <button
           onClick={handleRefresh}
-          disabled={loading}
-          className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider rounded-xl px-5 py-2.5 bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
+          disabled={loading || !hasVerified}
+          title={!hasVerified ? "Connect at least one social media account to calculate your score." : undefined}
+          className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider rounded-xl px-5 py-2.5 bg-white text-black hover:bg-white/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg"
         >
           {loading ? (
             <>
@@ -213,46 +232,48 @@ export function NilDashboardClient({
       )}
 
       {showEmptyState ? (
-        <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-12 text-center max-w-2xl mx-auto flex flex-col items-center justify-center">
-          <div className="h-14 w-14 rounded-full bg-white/[0.02] border border-white/[0.08] flex items-center justify-center mb-6">
-            <TrendingUp className="h-6 w-6 text-white/30" />
-          </div>
-          <h2 className="text-lg font-bold text-white mb-2">No NIL Valuation Setup Yet</h2>
-          <p className="text-xs text-white/40 max-w-md mb-6 leading-relaxed">
-            Configure your social network connections (Instagram, TikTok, YouTube, Twitter) and recalculate to build your first NIL Score and recommended price ranges.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg mb-8">
-            <div className="text-left bg-[#0A0A0C] border border-white/[0.04] p-4 rounded-xl">
-              <h5 className="text-xs font-bold text-white mb-1">1. Add Followers</h5>
-              <p className="text-[10px] text-white/40">Enter handles and network follower counts to establish audience reach.</p>
+        <div className="space-y-8">
+          {/* Intro — flat, no container card */}
+          <div className="text-center max-w-2xl mx-auto">
+            <div className="h-14 w-14 rounded-full bg-white/[0.02] border border-white/[0.08] flex items-center justify-center mb-6 mx-auto">
+              <TrendingUp className="h-6 w-6 text-white/30" />
             </div>
-            <div className="text-left bg-[#0A0A0C] border border-white/[0.04] p-4 rounded-xl">
-              <h5 className="text-xs font-bold text-white mb-1">2. Run Analysis</h5>
-              <p className="text-[10px] text-white/40">Our algorithm combines reach, CTR, tips, and sport division context.</p>
-            </div>
-          </div>
-
-          {/* Baseline market-value preview — shows core value immediately, even before data */}
-          <div className="w-full max-w-lg rounded-2xl border border-white/[0.06] bg-[#0A0A0C] p-5 text-left">
-            <div className="flex items-center justify-between mb-1">
-              <h5 className="text-xs font-bold text-white uppercase tracking-wider">Your Baseline Market Value</h5>
-              <span className="text-[10px] text-white/40">based on your sport</span>
-            </div>
-            <p className="text-[11px] text-white/50 mb-4 leading-relaxed">
-              Connect accounts and we tune this to your real reach. Athletes in{" "}
-              <span className="text-white/80">{profile.sport || "your sport"}</span> typically land in these ranges:
+            <h2 className="text-lg font-bold text-white mb-2">No NIL Valuation Setup Yet</h2>
+            <p className="text-xs text-white/40 leading-relaxed">
+              Connect a public Instagram or TikTok account to verify your audience and unlock your personalized, verified NIL rates.
             </p>
-              <RateTableBlock rates={scoreDetails.rates} plan={quotaState.plan} themeAccent={themeAccent} blurred={anyPending} />
           </div>
 
-          <div className="w-full max-w-md">
-            <SocialAccountsEditor
-              accounts={socialAccounts}
-              themeAccent={themeAccent}
-              onUpdate={handleSocialUpdate}
-            />
+          {/* Onboarding step guide — flat borders-only accent card */}
+          <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="text-left border border-white/[0.06] rounded-xl p-4">
+                <h5 className="text-xs font-bold text-white mb-1">1. Connect a Public Profile</h5>
+                <p className="text-[10px] text-white/40">Link your Instagram or TikTok handle so our engine can verify real engagement.</p>
+              </div>
+              <div className="text-left border border-white/[0.06] rounded-xl p-4">
+                <h5 className="text-xs font-bold text-white mb-1">2. Unlock Verified Rates</h5>
+                <p className="text-[10px] text-white/40">We calculate your market value and recommended price ranges automatically.</p>
+              </div>
+            </div>
           </div>
+
+          {/* Suggested NIL Rates — locked preview, direct block on the canvas */}
+          <RateTableBlock
+            rates={scoreDetails.rates}
+            plan={quotaState.plan}
+            themeAccent={themeAccent}
+            blurred={anyPending}
+            locked={!hasVerified}
+          />
+
+          {/* Social Network Setup — direct block on the canvas */}
+          <SocialAccountsEditor
+            accounts={socialAccounts}
+            themeAccent={themeAccent}
+            onUpdate={handleSocialUpdate}
+            plan={quotaState.plan}
+          />
         </div>
       ) : (
         <div className="space-y-6">
@@ -289,7 +310,13 @@ export function NilDashboardClient({
 
             {/* Column 2: Rates + Deal checker */}
             <div className="space-y-6">
-            <RateTableBlock rates={scoreDetails.rates} plan={quotaState.plan} themeAccent={themeAccent} blurred={anyPending} />
+              <RateTableBlock
+                rates={scoreDetails.rates}
+                plan={quotaState.plan}
+                themeAccent={themeAccent}
+                blurred={anyPending}
+                locked={!hasVerified}
+              />
               <NilDealChecker
                 plan={quotaState.plan}
                 themeAccent={themeAccent}
