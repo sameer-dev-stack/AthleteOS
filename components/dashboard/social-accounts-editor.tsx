@@ -50,7 +50,7 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
   const isVerifying = (p: string) => submitting === p || pendingPlatforms.includes(p);
 
   const connectedPlatforms = new Set(
-    accounts.filter((a) => a.is_connected).map((a) => a.platform)
+    accounts.filter((a) => a.verification_status === "VERIFIED").map((a) => a.platform)
   );
 
   useEffect(() => {
@@ -367,7 +367,7 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
               const PlatformIcon = platformMeta?.icon || Link2;
               const status = account.verification_status;
               const isPending = status === "PENDING";
-              const isVerified = account.is_connected || status === "VERIFIED";
+              const isVerified = status === "VERIFIED";
               const isPrivate = status === "PRIVATE_ACCOUNT";
 
               return (

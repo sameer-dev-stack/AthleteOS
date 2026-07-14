@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useReducedMotion } from "framer-motion";
+import { useMounted } from "@/lib/hooks/use-mounted";
 
 export function TypingText({
   words,
@@ -17,6 +18,7 @@ export function TypingText({
   pauseDuration?: number;
 }) {
   const prefersReducedMotion = useReducedMotion();
+  const mounted = useMounted();
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [currentText, setCurrentText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -46,12 +48,19 @@ export function TypingText({
     return () => clearTimeout(timeout);
   }, [tick, isDeleting, speed, deleteSpeed, prefersReducedMotion, words]);
 
-  const displayText = prefersReducedMotion ? words[0] : currentText;
+  const displayText = mounted && prefersReducedMotion ? words[0] : currentText;
+
+  const widest = words.reduce((a, b) => (b.length > a.length ? b : a), "");
 
   return (
-    <span className={className}>
-      {displayText}
-      <span className="ml-0.5 inline-block w-[2px] animate-pulse-soft bg-accent" />
+    <span className={`relative inline-block whitespace-nowrap ${className}`}>
+      <span aria-hidden className="invisible">
+        {widest}
+      </span>
+      <span className="absolute left-0 top-0 whitespace-nowrap">
+        {displayText}
+        <span className="ml-0.5 inline-block w-[2px] animate-pulse-soft bg-accent" />
+      </span>
     </span>
   );
 }

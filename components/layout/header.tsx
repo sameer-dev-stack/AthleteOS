@@ -107,7 +107,8 @@ export function Header({ profile, email }: HeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-14 w-full items-center border-b border-white/[0.06] bg-[#0A0A0F]/80 backdrop-blur-md px-4 md:px-6 md:pl-[240px]">
+      <header className="sticky top-0 z-30 h-14 w-full border-b border-white/[0.06] bg-[#0A0A0F]/80 backdrop-blur-md md:pl-[240px]">
+        <div className="flex h-full items-center w-full max-w-7xl mx-auto px-4 md:px-8">
         {/* Left: Breadcrumb */}
         <nav className="flex items-center gap-1.5 min-w-0 flex-1">
           {/* Mobile hamburger */}
@@ -129,11 +130,11 @@ export function Header({ profile, email }: HeaderProps) {
                   <>
                     <Link
                       href={crumb.href}
-                      className="text-white/40 hover:text-white/70 transition-colors truncate max-w-[120px]"
+                      className="font-medium text-white/40 hover:text-white/70 transition-colors truncate max-w-[120px]"
                     >
                       {crumb.label}
                     </Link>
-                    <ChevronRight className="h-3 w-3 text-white/20 flex-shrink-0" />
+                    <span className="text-white/20 select-none flex-shrink-0" aria-hidden="true">/</span>
                   </>
                 )}
               </li>
@@ -258,6 +259,7 @@ export function Header({ profile, email }: HeaderProps) {
               </div>
             )}
           </div>
+        </div>
         </div>
       </header>
 

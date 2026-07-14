@@ -34,13 +34,13 @@ export async function GET(req: NextRequest) {
 
     const admin = getAdmin();
     const APIFY_API_KEY = process.env.APIFY_API_KEY;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || "";
 
     if (!APIFY_API_KEY) {
       return NextResponse.json({ error: "APIFY_API_KEY not configured" }, { status: 500 });
     }
     if (!appUrl) {
-      return NextResponse.json({ error: "NEXT_PUBLIC_APP_URL not configured" }, { status: 500 });
+      return NextResponse.json({ error: "NEXT_PUBLIC_APP_URL or NEXT_PUBLIC_SITE_URL not configured" }, { status: 500 });
     }
 
     // Fetch all connected social accounts and join with profiles
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
           suspended
         )
       `)
-      .eq("is_connected", true);
+      .eq("verification_status", "VERIFIED");
 
     if (accountsErr) {
       console.error("[cron/poll-social] Database error fetching accounts:", accountsErr.message);

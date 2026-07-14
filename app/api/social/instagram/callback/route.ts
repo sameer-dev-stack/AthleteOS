@@ -52,7 +52,7 @@ export async function GET(request: Request) {
         handle: profileData.username || "",
         followers: igData.followers_count || 0,
         access_token: accessToken,
-        is_connected: true,
+        verification_status: "VERIFIED",
         platform_user_id: profileData.id,
         profile_url: igData.profile_picture_url || null,
         updated_at: new Date().toISOString(),

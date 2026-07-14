@@ -16,7 +16,6 @@ export type SocialAccount = {
   average_views: number;
   average_shares: number;
   total_engagements: number;
-  is_connected: boolean;
   profile_url: string | null;
   verification_status: string | null;
   last_scraped_at: string | null;
@@ -38,7 +37,7 @@ export async function getSocialAccounts(): Promise<{ ok: boolean; data?: SocialA
     const { data, error } = await supabase
       .from("social_accounts")
       .select(
-        "id, profile_id, platform, handle, followers, engagement_rate, average_likes, average_comments, average_views, average_shares, total_engagements, is_connected, profile_url, verification_status, last_scraped_at, updated_at"
+        "id, profile_id, platform, handle, followers, engagement_rate, average_likes, average_comments, average_views, average_shares, total_engagements, profile_url, verification_status, last_scraped_at, updated_at"
       )
       .eq("profile_id", user.id)
       .order("followers", { ascending: false });
@@ -86,7 +85,7 @@ export async function upsertSocialAccount(
         },
         { onConflict: "profile_id, platform" }
       )
-      .select("id, profile_id, platform, handle, followers, is_connected, profile_url, updated_at")
+      .select("id, profile_id, platform, handle, followers, profile_url, verification_status, updated_at")
       .single();
 
     if (error) {
@@ -137,7 +136,7 @@ export async function disconnectSocialAccount(id: string): Promise<{ ok: boolean
       .from("social_accounts")
       .update({
         access_token: null,
-        is_connected: false,
+        verification_status: null,
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
@@ -232,7 +231,6 @@ export async function queueSocialScrape(
           profile_id: user.id,
           platform,
           handle: `@${cleanHandle}`,
-          is_connected: false,
           verification_status: "PENDING",
           profile_url:
             platform === "instagram"
@@ -252,7 +250,7 @@ export async function queueSocialScrape(
         ? "apify~instagram-scraper"
         : "clockworks~tiktok-profile-scraper";
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || "";
     const isLocal = appUrl.includes("localhost") || appUrl.includes("127.0.0.1");
 
     const body: Record<string, unknown> =

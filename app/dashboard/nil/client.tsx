@@ -186,7 +186,7 @@ export function NilDashboardClient({
 
   // True once at least one verified (connected) social channel exists
   const hasVerified = socialAccounts.some(
-    (a) => a.is_connected || a.verification_status === "VERIFIED"
+    (a) => a.verification_status === "VERIFIED"
   );
 
   return (

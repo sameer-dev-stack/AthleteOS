@@ -96,7 +96,7 @@ export async function computeAndSaveMetricsInternal(
       .from("social_accounts")
       .select("followers, total_engagements")
       .eq("profile_id", profileId)
-      .eq("is_connected", true);
+      .eq("verification_status", "VERIFIED");
 
     const activeSocialAccounts = socialErr ? [] : socialAccounts || [];
     const followersTotal = activeSocialAccounts.reduce((acc, account) => acc + (account.followers || 0), 0);

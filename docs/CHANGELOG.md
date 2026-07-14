@@ -5,6 +5,23 @@
 
 ---
 
+## 2026-07-14 — Fix: Apify webhook callback URL fell back to relative path when NEXT_PUBLIC_APP_URL unset
+
+### What changed
+- **`lib/actions/social-accounts.ts`** — `appUrl` now falls back to `NEXT_PUBLIC_SITE_URL` (then `""`) when `NEXT_PUBLIC_APP_URL` is unset.
+- **`app/api/cron/poll-social/route.ts`** — same fallback; updated the missing-config error message accordingly.
+
+### Why
+`NEXT_PUBLIC_APP_URL` is not set in the environment, so the Apify webhook was registered with a relative URL (`/api/webhooks/apify?...`). Apify requires an absolute URL, so the callback never fired and accounts stayed stuck on PENDING (rate-table blur never cleared). The rest of the codebase already standardizes on `NEXT_PUBLIC_SITE_URL`, which is set.
+
+### Files touched
+`lib/actions/social-accounts.ts`, `app/api/cron/poll-social/route.ts`
+
+### Commit
+(pending push)
+
+---
+
 ## 2026-07-13 — Async NIL Engine: LINK Handler, List States, PRIVATE_ACCOUNT Row + Smooth Rate Reveal
 
 ### What changed

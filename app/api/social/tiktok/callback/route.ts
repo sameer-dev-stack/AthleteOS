@@ -54,7 +54,7 @@ export async function GET(request: Request) {
         handle: userInfo?.display_name || "",
         followers: userInfo?.follower_count || 0,
         access_token: accessToken,
-        is_connected: true,
+        verification_status: "VERIFIED",
         platform_user_id: openId,
         profile_url: userInfo?.avatar_url || null,
         updated_at: new Date().toISOString(),
