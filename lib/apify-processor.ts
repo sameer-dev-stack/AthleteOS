@@ -33,7 +33,8 @@ export async function processApifyDataset(
 
   if (platform === "instagram") {
     const owner = firstItem.owner;
-    const isPrivate = firstItem.isPrivate || owner?.isPrivate || false;
+    const isPrivate =
+      firstItem.private ?? firstItem.isPrivate ?? owner?.isPrivate ?? false;
 
     if (isPrivate) {
       await admin
@@ -44,13 +45,21 @@ export async function processApifyDataset(
       return { ok: false, status: "PRIVATE_ACCOUNT" };
     }
 
-    const followers: number = owner?.followersCount || firstItem.followersCount || 0;
+    const followers: number =
+      firstItem.followersCount ?? owner?.followersCount ?? 0;
+
+    // resultsType "details" nests recent posts under latestPosts; fall back to
+    // treating dataset items themselves as posts (posts mode / dev mock payloads).
+    const posts =
+      Array.isArray(firstItem.latestPosts) && firstItem.latestPosts.length > 0
+        ? firstItem.latestPosts
+        : items;
 
     let totalLikes = 0;
     let totalComments = 0;
     let postCount = 0;
 
-    for (const item of items) {
+    for (const item of posts) {
       if (item.likesCount !== undefined || item.commentsCount !== undefined) {
         totalLikes += item.likesCount || 0;
         totalComments += item.commentsCount || 0;

@@ -251,7 +251,16 @@ export async function queueSocialScrape(
 
     const body: Record<string, unknown> =
       platform === "instagram"
-        ? { usernames: [cleanHandle], resultsLimit: 12 }
+        ? {
+            directUrls: [`https://www.instagram.com/${cleanHandle}/`],
+            resultsType: "details",
+            resultsLimit: 12,
+            addParentData: false,
+            proxyConfiguration: {
+              useApifyProxy: true,
+              apifyProxyGroups: ["RESIDENTIAL"],
+            },
+          }
         : {
             profiles: [cleanHandle],
             resultsPerPage: 12,
