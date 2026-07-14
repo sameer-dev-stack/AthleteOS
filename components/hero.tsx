@@ -45,7 +45,7 @@ export function Hero() {
                 <span className="text-ink">Your entire </span>
                 <span className="relative inline-block">
                   <TypingText
-                    words={["NIL business.", "brand.", "empire.", "legacy."]}
+                    words={["brand.", "empire.", "legacy.", "NIL business."]}
                     className="text-accent"
                     speed={70}
                     deleteSpeed={40}

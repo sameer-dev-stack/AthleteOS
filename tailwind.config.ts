@@ -86,6 +86,10 @@ const config: Config = {
           "0%, 100%": { backgroundPosition: "0% 50%" },
           "50%": { backgroundPosition: "100% 50%" },
         },
+        "blink": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0" },
+        },
       },
       animation: {
         "fade-up": "fade-up 0.6s ease-out forwards",
@@ -96,6 +100,7 @@ const config: Config = {
         "orb-2": "orb-2 22s ease-in-out infinite",
         "float-y": "float-y 5s ease-in-out infinite",
         "gradient-shift": "gradient-shift 8s ease-in-out infinite",
+        "blink": "blink 1s step-end infinite",
       },
     },
   },
