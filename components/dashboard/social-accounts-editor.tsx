@@ -104,52 +104,43 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
     setError(null);
   };
 
+  // Shared fire-and-forget dispatch: write PENDING, trigger the Apify scraper,
+  // and let the 5s poll resolve the record. No blocking / no server timeout.
+  const startScrape = async (p: "instagram" | "tiktok", h: string) => {
+    setError(null);
+    setSubmitting(p);
+    try {
+      const res = await queueSocialScrape(p, h);
+      if (!res.ok) {
+        setError(res.error || `Failed to queue ${p} verification`);
+      } else if (res.status !== "VERIFIED") {
+        onUpdate();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred during verification");
+    } finally {
+      setSubmitting(null);
+    }
+  };
+
   const handleQueueScrape = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activeConnectPlatform || !connectHandle.trim()) return;
 
     setConnectLoading(true);
-    setError(null);
-    setSubmitting(activeConnectPlatform);
-
-    try {
-      const res = await queueSocialScrape(activeConnectPlatform, connectHandle.trim());
-      if (res.ok) {
-        setConnectHandle("");
-        setActiveConnectPlatform(null);
-        if (res.status !== "VERIFIED") onUpdate();
-      } else {
-        setError(res.error || `Failed to queue ${activeConnectPlatform} verification`);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred during verification");
-    } finally {
-      setConnectLoading(false);
-      setSubmitting(null);
-    }
+    // Instantly collapse the input and transition the handle into the PENDING list
+    setConnectHandle("");
+    setActiveConnectPlatform(null);
+    await startScrape(activeConnectPlatform, connectHandle.trim());
+    setConnectLoading(false);
   };
 
-  const handleRetry = async () => {
+  const handleRetry = () => {
     if (!privateAccount) return;
     const { platform: p, handle: h } = privateAccount;
     setPrivateAccount(null);
     setDismissedPrivate(null);
-    setError(null);
-    setConnectLoading(true);
-    setSubmitting(p as "instagram" | "tiktok");
-    try {
-      const res = await queueSocialScrape(p as "instagram" | "tiktok", h);
-      if (res.ok) {
-        if (res.status !== "VERIFIED") onUpdate();
-      } else {
-        setError(res.error || "Failed to retry verification");
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred during verification");
-    } finally {
-      setConnectLoading(false);
-      setSubmitting(null);
-    }
+    startScrape(p as "instagram" | "tiktok", h);
   };
 
   const handleRefresh = async (id: string) => {
@@ -377,6 +368,7 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
               const status = account.verification_status;
               const isPending = status === "PENDING";
               const isVerified = account.is_connected || status === "VERIFIED";
+              const isPrivate = status === "PRIVATE_ACCOUNT";
 
               return (
                 <div
@@ -387,12 +379,22 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
                     <div
                       className="h-7 w-7 rounded-lg border flex items-center justify-center flex-shrink-0"
                       style={{
-                        backgroundColor: isVerified ? `${platformMeta?.color}10` : "rgba(255,255,255,0.02)",
-                        borderColor: isVerified ? `${platformMeta?.color}30` : "rgba(255,255,255,0.08)",
+                        backgroundColor: isVerified
+                          ? `${platformMeta?.color}10`
+                          : isPrivate
+                          ? "rgba(239,68,68,0.08)"
+                          : "rgba(255,255,255,0.02)",
+                        borderColor: isVerified
+                          ? `${platformMeta?.color}30`
+                          : isPrivate
+                          ? "rgba(239,68,68,0.3)"
+                          : "rgba(255,255,255,0.08)",
                       }}
                     >
                       {isPending ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-400" />
+                      ) : isPrivate ? (
+                        <AlertCircle className="h-3.5 w-3.5 text-red-400" />
                       ) : (
                         <PlatformIcon
                           className="h-3.5 w-3.5"
@@ -408,7 +410,7 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
                         {isPending && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-1.5 py-px text-[9px] font-bold text-amber-400 border border-amber-500/20">
                             <Loader2 className="h-2.5 w-2.5 animate-spin" />
-                            🔄 Syncing...
+                            🔄 Syncing details....
                           </span>
                         )}
                         {isVerified && (
@@ -417,7 +419,13 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
                             style={{ color: themeAccent, borderColor: `${themeAccent}30` }}
                           >
                             <Check className="h-2.5 w-2.5" />
-                            ✓ Verified
+                            ✓ Connected
+                          </span>
+                        )}
+                        {isPrivate && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-1.5 py-px text-[9px] font-bold text-red-400 border border-red-500/20">
+                            <AlertCircle className="h-2.5 w-2.5" />
+                            ⚠️ Private Profile Detected
                           </span>
                         )}
                       </div>
@@ -430,6 +438,28 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
                   <div className="flex items-center gap-1">
                     {isPending ? (
                       <span className="text-[9px] text-amber-400/70 uppercase tracking-wider px-1">Syncing</span>
+                    ) : isPrivate ? (
+                      <>
+                        <button
+                          onClick={() =>
+                            startScrape(
+                              account.platform as "instagram" | "tiktok",
+                              account.handle.replace(/^@/, "")
+                            )
+                          }
+                          className="text-[10px] font-bold uppercase tracking-wider text-white/80 hover:text-white px-1.5 py-1 rounded-lg border border-white/[0.08] hover:bg-white/[0.04] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+                        >
+                          Retry
+                        </button>
+                        <button
+                          onClick={() => handleDelete(account.id)}
+                          disabled={loading}
+                          className="p-1.5 rounded-lg border border-white/[0.04] text-white/20 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
+                          title="Clear account mapping"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </>
                     ) : (
                       <>
                         {isVerified && (

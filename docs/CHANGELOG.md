@@ -5,7 +5,22 @@
 
 ---
 
-## 2026-07-13 — NIL Empty State: Locked Rates, Scraper-Only Onboarding, Flattened Layout
+## 2026-07-13 — Async NIL Engine: LINK Handler, List States, PRIVATE_ACCOUNT Row + Smooth Rate Reveal
+
+### What changed
+- **`components/dashboard/social-accounts-editor.tsx`** — Refactored the LINK flow into a shared `startScrape(p, h)` fire-and-forget dispatch. Clicking LINK instantly collapses the input, clears it, and transitions the handle into the local PENDING list (amber 🔄 Syncing details....). Active connection states now render from `social_accounts`: PENDING → pulsing badge, VERIFIED → "✓ Connected" + follower count, and a new PRIVATE_ACCOUNT row with a "⚠️ Private Profile Detected" warning badge + in-list Retry (also re-triggers `queueSocialScrape`). 5s poll runs only while a PENDING record exists and self-clears on resolution.
+- **`app/dashboard/nil/client.tsx`** — Rate-table blur copy updated to "Our engine is validating your metrics and calculating your target CPM market value..." and the overlay now stays mounted and transitions opacity/blur for a smooth reveal once VERIFIED.
+
+### Why
+Wire the UI LINK action to the distributed async Apify cycle (DB marker → fire-and-forget server action → webhook → 5s poll resolution) without blocking or server timeouts.
+
+### Files touched
+`components/dashboard/social-accounts-editor.tsx`, `app/dashboard/nil/client.tsx`
+
+### Commit
+(pending push)
+
+---
 
 ### What changed
 - **`app/dashboard/nil/client.tsx`** — `RateTableBlock` now shows a locked preview (padlock + "Connect a public Instagram or TikTok account below to unlock your personalized, verified suggested rates.") when zero verified channels exist; keeps the "Tuning valuation metrics..." blur during PENDING. "Recalculate NIL Score" is disabled (grayed, `opacity-40`, tooltip "Connect at least one social media account to calculate your score.") until `hasVerified`. Empty state flattened: removed the nested outer card; intro, onboarding step guide (flat borders-only card), rates, and Social Network Setup now sit directly on the canvas.

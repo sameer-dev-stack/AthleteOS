@@ -45,13 +45,17 @@ function RateTableBlock({
           </p>
         </div>
       )}
-      {!locked && blurred && (
-        <div className="absolute inset-0 z-10 rounded-2xl bg-[#0A0A0C]/30 backdrop-blur-md flex items-center justify-center p-4">
-          <p className="text-[10px] text-white/60 text-center leading-relaxed">
-            Tuning valuation metrics... updates live automatically.
-          </p>
-        </div>
-      )}
+      <div
+        className={`absolute inset-0 z-10 rounded-2xl flex items-center justify-center p-4 transition-all duration-500 ${
+          blurred && !locked
+            ? "bg-[#0A0A0C]/30 backdrop-blur-md opacity-100"
+            : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <p className="text-[10px] text-white/60 text-center leading-relaxed max-w-[16rem]">
+          Our engine is validating your metrics and calculating your target CPM market value...
+        </p>
+      </div>
     </div>
   );
 }
