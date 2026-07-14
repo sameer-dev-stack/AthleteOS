@@ -215,8 +215,9 @@ export async function queueSocialScrape(
     if (!user) return { ok: false, error: "Not authenticated" };
 
     const APIFY_API_KEY = process.env.APIFY_API_KEY;
-    if (!APIFY_API_KEY) {
-      throw new Error("Missing APIFY_API_KEY in server environment variables.");
+    if (!APIFY_API_KEY || APIFY_API_KEY.trim() === "") {
+      console.error("=== APIFY CONFIG ERROR === APIFY_API_KEY is undefined or empty on the server.");
+      return { ok: false, error: "Configuration Error: Apify API token is completely empty on the server." };
     }
 
     const cleanHandle = handle.trim().replace(/^@/, "");
@@ -307,30 +308,65 @@ export async function queueSocialScrape(
       ])
     );
 
-    const runRes = await fetch(
-      `https://api.apify.com/v2/acts/${actorId}/runs?token=${APIFY_API_KEY}&webhooks=${webhooks}`,
-      {
+    const apifyEndpoint = `https://api.apify.com/v2/acts/${actorId}/runs?token=${APIFY_API_KEY}&webhooks=${webhooks}`;
+
+    let runRes: Response;
+    try {
+      runRes = await fetch(apifyEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
-      }
-    );
-
-    if (!runRes.ok) {
-      const errText = await runRes.text();
-      console.error("[queueSocialScrape] Apify actor run failed:", errText);
+      });
+    } catch (err) {
+      const e = err as Error;
+      console.error("=== APIFY TRIGGER FAILURE ===", {
+        phase: "network",
+        actorId,
+        webhookUrl,
+        error: e?.message,
+        stack: e?.stack,
+      });
       await supabase
         .from("social_accounts")
         .update({ verification_status: "ERROR" })
         .eq("profile_id", user.id)
         .eq("platform", platform);
-      return { ok: false, error: "Failed to start verification task" };
+      return { ok: false, error: `Could not reach Apify: ${e?.message || "network error"}` };
+    }
+
+    if (!runRes.ok) {
+      const errText = await runRes.text();
+      console.error("=== APIFY TRIGGER FAILURE ===", {
+        phase: "response",
+        status: runRes.status,
+        actorId,
+        webhookUrl,
+        body: errText,
+      });
+      await supabase
+        .from("social_accounts")
+        .update({ verification_status: "ERROR" })
+        .eq("profile_id", user.id)
+        .eq("platform", platform);
+
+      const detail =
+        runRes.status === 401
+          ? "Apify rejected the request (401 Unauthorized) — verify APIFY_API_KEY."
+          : runRes.status === 404
+          ? `Apify actor "${actorId}" not found (404) — verify the actor/task ID.`
+          : `Apify request failed (${runRes.status}).`;
+      return { ok: false, error: detail };
     }
 
     revalidatePath("/dashboard/nil");
     return { ok: true, status: "QUEUED" };
   } catch (err: unknown) {
-    console.error("queueSocialScrape unexpected error:", err);
-    return { ok: false, error: err instanceof Error ? err.message : "An unexpected error occurred" };
+    const e = err as Error;
+    console.error("=== APIFY TRIGGER FAILURE ===", {
+      phase: "unexpected",
+      error: e?.message,
+      stack: e?.stack,
+    });
+    return { ok: false, error: e?.message || "An unexpected error occurred" };
   }
 }
