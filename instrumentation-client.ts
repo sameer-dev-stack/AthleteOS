@@ -13,3 +13,5 @@ Sentry.init({
     "AbortError",
   ],
 });
+
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

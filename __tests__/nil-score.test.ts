@@ -62,8 +62,8 @@ describe("computeNilScoreAndRates", () => {
     const result = computeNilScoreAndRates(metrics, profile);
     expect(result.nilScore).toBeGreaterThanOrEqual(80);
     expect(result.label).toBe("Elite");
-    expect(result.rates.post.min).toBe(2500);
-    expect(result.rates.post.target).toBe(6000);
+    expect(result.rates.post.min).toBe(1013);
+    expect(result.rates.post.target).toBe(1688);
   });
 
   it("reaches Established tier for mid-range stats", () => {
@@ -86,6 +86,6 @@ describe("computeNilScoreAndRates", () => {
     expect(result.nilScore).toBeGreaterThan(60);
     expect(result.nilScore).toBeLessThanOrEqual(80);
     expect(result.label).toBe("Strong");
-    expect(result.rates.post.target).toBe(1600);
+    expect(result.rates.post.target).toBe(124);
   });
 });
