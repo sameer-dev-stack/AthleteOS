@@ -6,7 +6,6 @@ import { updateProfile, updateTheme, type Profile } from "@/lib/actions/profile"
 import { EmptyState } from "./empty-state";
 import { ThemePicker } from "./theme-picker";
 import { AvatarUpload } from "@/components/avatar-upload";
-import { CoverImageUpload } from "@/components/cover-image-upload";
 import { getStatTemplatesForSport } from "@/lib/sport-stat-templates";
 
 type Tab = "bio" | "stats" | "links" | "social" | "highlights" | "contact" | "theme";
@@ -381,7 +380,6 @@ function BioEditor({
   const [avatarSaving, setAvatarSaving] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatar_url);
-  const [coverUrl, setCoverUrl] = useState<string | null>(profile.cover_url ?? null);
 
   async function handleAvatarUpload(newUrl: string) {
     setAvatarUrl(newUrl);
@@ -427,23 +425,6 @@ function BioEditor({
           </div>
         </div>
       </div>
-
-      {/* Divider */}
-      <div className="h-px bg-white/[0.06]" />
-
-      {/* Cover Image */}
-      <CoverImageUpload
-        currentUrl={coverUrl}
-        userId={profile.id}
-        onUpload={async (url) => {
-          setCoverUrl(url);
-          await updateProfile({ cover_url: url });
-        }}
-        onRemove={async () => {
-          setCoverUrl(null);
-          await updateProfile({ cover_url: null });
-        }}
-      />
 
       {/* Divider */}
       <div className="h-px bg-white/[0.06]" />

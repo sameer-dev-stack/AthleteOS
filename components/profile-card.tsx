@@ -245,22 +245,8 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
               style={{ background: `linear-gradient(90deg, transparent 5%, ${accent}50 50%, transparent 95%)` }}
             />
 
-            {/* Cover Image */}
-            {profile.cover_url && (
-              <div className="relative h-20 w-full flex-shrink-0 overflow-hidden">
-                <Image
-                  src={profile.cover_url}
-                  alt="Cover"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#111115]/60 to-[#111115]" />
-              </div>
-            )}
-
             {/* ── Photo Hero (66%) ─────────────────── */}
-            <div className="relative flex-shrink-0" style={{ height: profile.cover_url ? "calc(52% - 80px)" : "52%" }}>
+            <div className="relative flex-shrink-0" style={{ height: "52%" }}>
               {photos.length > 0 ? (
                 <>
                   {photos.map((url, i) => (
