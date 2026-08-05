@@ -5,7 +5,26 @@
 
 ---
 
-## 2026-08-05 — Platform-collected tipping: 48h withdrawal requests (replaces Stripe Connect)
+## 2026-08-05 — Redesign athlete public card front face
+
+### What changed
+- **`components/profile-card.tsx`** — Reorganized the card's front face into a calm, single-hierarchy layout that still uses only the single accent color.
+  - Removed the redundant green "Active" ping and the duplicate floating "Verified" badge over the photo (verified now shows only once, inline next to the name).
+  - Identity block: name bumped to `text-[26px] font-black tracking-[-0.03em]`, verified check render as a small accent-tinted circular `CheckIcon`; sport/position/school joined with a spaced middot; class rendered as an uppercase accent chip; views/followers moved under the name with accent-tinted icons.
+  - Replaced the separate "NIL Score Badge" + "Stats Row" with one unified accent "Stats Strip" grid (`nilScore` if present + up to 3 stat cells) in a sheet container (`#17171b`, `rgba(255,255,255,0.07)` border, soft shadow). Cells: icon + label above, `getNilLabel` sublabel for NIL, 20px black value.
+
+- This summary is intentionally brief. The card still renders NIL value, stats, highlight video pills, back face (About / Links / Highlights / membership tiers / Contact + Send Inquiry + Tipping), and flip hint.
+
+### Why
+User-feedback "card looks ugly and unorganized, no human satisfaction". Multiple competing badges/chips (Verified badge + NIL badge + stat rows) were fighting for attention on the photo and identity area. Pull goals: one accent-glow identity, one stats unit trick away, everything serves the athlete's name.
+
+### Files touched
+- `components/profile-card.tsx`
+
+### Commit
+- (pending)
+
+---
 
 ### What changed
 - **`lib/actions/stripe.ts`** — Rewritten. Only `createTipSession` remains. Tips are now collected into AthleteOS's own Stripe account (`mode: "payment"`, `line_items[0].price_data`), no `transfer_data`, no `application_fee`, no Connect. Removed `createConnectOnboarding`, `getPayoutBalance`, `PayoutBalance`.

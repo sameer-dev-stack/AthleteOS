@@ -103,6 +103,10 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
     return true;
   }).slice(0, 3);
 
+  const statCells = (nilScore !== null && nilScore > 0 ? 1 : 0) + stats.length;
+  const cols = statCells === 1 ? "grid-cols-1" : statCells === 2 ? "grid-cols-2" : "grid-cols-3";
+  const hasStatBorder = (idx: number) => idx > 0 ? "border-l border-white/[0.07]" : "";
+
   const links = (profile.links ?? []).slice(0, 6);
   const maxVisibleLinks = 2;
   const displayedLinks = linksExpanded ? links : links.slice(0, maxVisibleLinks);
@@ -345,17 +349,8 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
                 </div>
               )}
 
-              {/* Verified + plan badges overlay */}
+              {/* Plan badge overlay */}
               <div className="absolute bottom-[30%] right-3 flex flex-col items-end gap-1 z-10">
-                {profile.is_verified && (
-                  <div
-                    className="flex items-center gap-1 rounded-full px-2 py-0.5 backdrop-blur-md"
-                    style={{ background: `${accent}18`, border: `1px solid ${accent}30` }}
-                  >
-                    <CheckIcon className="h-2.5 w-2.5" style={{ color: accent }} />
-                    <span className="text-[8px] font-bold" style={{ color: accent }}>Verified</span>
-                  </div>
-                )}
                 {resolvePlan(profile.plan, profile.extended_pro_until) !== "free" && (
                   <div
                     className="flex items-center gap-1 rounded-full px-2 py-0.5 backdrop-blur-md"
@@ -371,125 +366,90 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
             </div>
 
             {/* ── Identity ─────────────────────────── */}
-            <div className="flex-shrink-0 px-4 -mt-3 relative z-10">
+            <div className="flex-shrink-0 px-5 -mt-4 relative z-10">
               <div className="flex items-center gap-2">
-                <h1 className="text-[24px] font-black tracking-[-0.03em] leading-none text-white truncate">
+                <h1 className="text-[26px] font-black tracking-[-0.03em] leading-none text-white truncate">
                   {displayName}
                 </h1>
-                <div className="flex items-center gap-1">
-                  <span className="relative h-2 w-2 rounded-full bg-emerald-400">
-                    <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75"></span>
-                  </span>
-                  <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">Active</span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 mt-1.5">
-                {(profile.sport || profile.position) && (
+                {profile.is_verified && (
                   <span
-                    className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide"
-                    style={{
-                      background: `${accent}10`,
-                      border: `1px solid ${accent}22`,
-                      color: accent,
-                    }}
+                    className="flex-shrink-0 flex h-4 w-4 items-center justify-center rounded-full"
+                    style={{ background: `${accent}18`, border: `1px solid ${accent}35` }}
                   >
-                    {[profile.sport, profile.position].filter(Boolean).join(" · ")}
-                  </span>
-                )}
-                {profile.school && (
-                  <span className="text-[10px] text-white/40 font-medium truncate">
-                    {profile.school}{classLabel ? ` · ${classLabel}` : ""}
+                    <CheckIcon className="h-2.5 w-2.5" style={{ color: accent }} />
                   </span>
                 )}
               </div>
 
-              <div className="flex items-center gap-3 mt-2">
-                {totalViews > 0 && (
-                  <div className="flex items-center gap-1">
-                    <Eye className="h-3 w-3 text-white/30" />
-                    <span className="text-[10px] text-white/40 font-medium">
+              <div className="flex items-center gap-1.5 mt-2">
+                <span className="text-[12px] text-white/45 font-medium truncate">
+                  {[profile.sport, profile.position, profile.school].filter(Boolean).join("  ·  ")}
+                </span>
+                {classLabel && (
+                  <span
+                    className="ml-0.5 flex-shrink-0 inline-flex items-center rounded-md px-1.5 py-0.5 text-[8px] font-black tracking-wider uppercase"
+                    style={{ background: `${accent}14`, color: accent, border: `1px solid ${accent}28` }}
+                  >
+                    {classLabel}
+                  </span>
+                )}
+              </div>
+
+              {(totalViews > 0 || totalFollowers > 0) && (
+                <div className="flex items-center gap-3 mt-2">
+                  {totalViews > 0 && (
+                    <span className="flex items-center gap-1 text-[10px] text-white/30 font-medium">
+                      <Eye className="h-3 w-3" style={{ color: `${accent}50` }} />
                       {totalViews.toLocaleString()} views
                     </span>
-                  </div>
-                )}
-                {totalFollowers > 0 && (
-                  <div className="flex items-center gap-1">
-                    <Users className="h-3 w-3 text-white/30" />
-                    <span className="text-[10px] text-white/40 font-medium">
+                  )}
+                  {totalFollowers > 0 && (
+                    <span className="flex items-center gap-1 text-[10px] text-white/30 font-medium">
+                      <Users className="h-3 w-3" style={{ color: `${accent}50` }} />
                       {totalFollowers.toLocaleString()} followers
                     </span>
-                  </div>
-                )}
-                {profile.stats && profile.stats.length > 0 && (
-                  <div className="flex items-center gap-1">
-                    <Trophy className="h-3 w-3 text-white/30" />
-                    <span className="text-[10px] text-white/40 font-medium">
-                      {profile.stats.length} stats
-                    </span>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* ── NIL Score Badge ──────────────────── */}
-            {nilScore !== null && nilScore > 0 && (
-              <div className="flex-shrink-0 mx-4 mt-3">
+            {/* ── Stats Strip (NIL + key stats, one unit) ── */}
+            {(stats.length > 0 || (nilScore !== null && nilScore > 0)) && (
+              <div className="flex-shrink-0 mx-5 mt-4">
                 <div
-                  className="flex items-center justify-between rounded-xl px-3.5 py-2.5"
+                  className={`grid grid-flow-col auto-cols-fr items-stretch rounded-xl overflow-hidden ${cols}`}
                   style={{
-                    background: `linear-gradient(135deg, ${accent}08 0%, ${accent}03 100%)`,
-                    border: `1px solid ${accent}15`,
+                    background: "#17171b",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    boxShadow: "0 8px 24px -14px rgba(0,0,0,0.7)",
                   }}
                 >
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="h-8 w-8 rounded-lg flex items-center justify-center"
-                      style={{ background: `${accent}15` }}
-                    >
-                      <span className="text-[14px] font-black" style={{ color: accent }}>
+                  {nilScore !== null && nilScore > 0 && (
+                    <div className={`flex flex-col items-center justify-center py-3 px-1 ${hasStatBorder(0)}`}>
+                      <div className="flex items-center gap-1 mb-1">
+                        <TrendingUp className="h-2.5 w-2.5" style={{ color: `${accent}55` }} />
+                        <span className="text-[8px] font-bold uppercase tracking-widest" style={{ color: `${accent}50` }}>
+                          NIL
+                        </span>
+                      </div>
+                      <p className="text-[20px] font-black leading-none tracking-tight" style={{ color: accent }}>
                         {nilScore}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-[9px] font-bold uppercase tracking-wider" style={{ color: `${accent}60` }}>
-                        NIL Score
                       </p>
-                      <p className="text-[10px] font-semibold text-white/50">
+                      <p className="text-[7.5px] font-bold uppercase tracking-wider mt-1 text-white/40">
                         {getNilLabel(nilScore)}
                       </p>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <TrendingUp className="h-3 w-3" style={{ color: `${accent}50` }} />
-                    <span className="text-[9px] font-bold" style={{ color: `${accent}60` }}>
-                      /100
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ── Stats Row ────────────────────────── */}
-            {stats.length > 0 && (
-              <div className="flex-shrink-0 mx-4 mt-4">
-                <div
-                  className={`grid items-stretch rounded-xl overflow-hidden ${stats.length === 1 ? "grid-cols-1" : stats.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}
-                  style={{
-                    background: "#16161a",
-                    border: "1px solid rgba(255,255,255,0.06)",
-                  }}
-                >
+                  )}
                   {stats.map((stat, i) => {
                     const Ic = STAT_ICONS[stat.label.toLowerCase()] || STAT_ICONS.default;
                     return (
                       <div
                         key={stat.label}
-                        className={`flex flex-col items-center py-3 px-1 ${i < stats.length - 1 ? "border-r border-white/[0.06]" : ""}`}
+                        className={`flex flex-col items-center justify-center py-3 px-1 ${hasStatBorder((nilScore !== null && nilScore > 0 ? 1 : 0) + i)}`}
                       >
                         <div className="flex items-center gap-1 mb-1">
-                          <Ic className="h-2.5 w-2.5" style={{ color: `${accent}55` }} />
-                          <span className="text-[7px] font-bold uppercase tracking-wider" style={{ color: `${accent}45` }}>
+                          <Ic className="h-2.5 w-2.5" style={{ color: `${accent}50` }} />
+                          <span className="text-[7.5px] font-bold uppercase tracking-wider text-white/45">
                             {sanitize(stat.label)}
                           </span>
                         </div>
