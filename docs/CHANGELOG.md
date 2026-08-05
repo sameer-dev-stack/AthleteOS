@@ -5,24 +5,30 @@
 
 ---
 
-## 2026-08-05 — Redesign athlete public card front face
+## 2026-08-05 — Athlete card luxury trading-card redesign (front + back)
 
 ### What changed
-- **`components/profile-card.tsx`** — Reorganized the card's front face into a calm, single-hierarchy layout that still uses only the single accent color.
-  - Removed the redundant green "Active" ping and the duplicate floating "Verified" badge over the photo (verified now shows only once, inline next to the name).
-  - Identity block: name bumped to `text-[26px] font-black tracking-[-0.03em]`, verified check render as a small accent-tinted circular `CheckIcon`; sport/position/school joined with a spaced middot; class rendered as an uppercase accent chip; views/followers moved under the name with accent-tinted icons.
-  - Replaced the separate "NIL Score Badge" + "Stats Row" with one unified accent "Stats Strip" grid (`nilScore` if present + up to 3 stat cells) in a sheet container (`#17171b`, `rgba(255,255,255,0.07)` border, soft shadow). Cells: icon + label above, `getNilLabel` sublabel for NIL, 20px black value.
-
-- This summary is intentionally brief. The card still renders NIL value, stats, highlight video pills, back face (About / Links / Highlights / membership tiers / Contact + Send Inquiry + Tipping), and flip hint.
+- **`components/profile-card.tsx`** — Full layout revamp of the public athlete card, both faces.
+- **Front face:**
+  - Stats section is now a clean 2x2 grid (NIL + up to 3 stats) with internal hairline dividers (`cellBorder` helper); labels render up to 2 lines (`line-clamp-2`) so long labels like "SHOTS ON TARGET" are never crushed; photo hero reduced 66% → 52% to make room.
+  - Pro/Team badge moved off the photo into the top header bar next to the share icon (accent-tinted pill with filled star); floating overlay removed.
+  - Class year chip ("JR") restyled as a subtle neutral chip (`bg-white/[0.05]`, `border-white/[0.10]`) in the name row.
+  - Identity block now uses `px-6` with `space-y-4` rhythm between name, meta line, and views/followers.
+- **Back face:**
+  - Action buttons no longer squeeze into one row: "Support [Name]" (TipButton, accent gradient) is the full-width primary CTA at the bottom; "Contact" + "Send Inquiry" sit in a clean 2-column row directly above it (Inquiry goes full-width when no contact info).
+  - Social media icons moved into the scrollable content under a "Connect" header; card ShareButtons kept as a separate centered row divided by hairline rules — no more stacked duplicate icon rows.
+  - Membership tiers restyled as dark glassmorphic cards (`backdrop-blur`, `rgba(255,255,255,0.04)` bg, `0.08` border, deeper shadow), accent price, clear padding.
+  - Header and scroll content padded to `px-5`; bottom section `px-5 pb-4` so nothing bleeds against the card edge.
+- All buttons retain `transform translate-z-0` GPU acceleration + backface-visibility hidden for crisp rounded edges on hover. Dark theme, single accent `#C6FF3D` preserved, zero emojis.
 
 ### Why
-User-feedback "card looks ugly and unorganized, no human satisfaction". Multiple competing badges/chips (Verified badge + NIL badge + stat rows) were fighting for attention on the photo and identity area. Pull goals: one accent-glow identity, one stats unit trick away, everything serves the athlete's name.
+User request: card should read as a luxury, high-end sports trading card — clean 2x2 stat grid, primary CTA hierarchy, no button overflow, no duplicate icon rows, breathing room at the edges.
 
 ### Files touched
 - `components/profile-card.tsx`
 
 ### Commit
-- `6966f85`
+- (pending)
 
 ---
 

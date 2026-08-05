@@ -104,8 +104,9 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
   }).slice(0, 3);
 
   const statCells = (nilScore !== null && nilScore > 0 ? 1 : 0) + stats.length;
-  const cols = statCells === 1 ? "grid-cols-1" : statCells === 2 ? "grid-cols-2" : "grid-cols-3";
-  const hasStatBorder = (idx: number) => idx > 0 ? "border-l border-white/[0.07]" : "";
+  const cols = statCells === 1 ? "grid-cols-1" : "grid-cols-2";
+  const cellBorder = (idx: number) =>
+    `${idx === 1 || idx === 3 ? "border-l border-white/[0.07]" : ""}${idx >= 2 ? " border-t border-white/[0.07]" : ""}`.trim();
 
   const links = (profile.links ?? []).slice(0, 6);
   const maxVisibleLinks = 2;
@@ -119,6 +120,8 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
       ...s,
       href: s.prefix + encodeURIComponent(profile.social![s.key as keyof typeof profile.social]!),
     }));
+
+  const hasContact = Boolean(profile.contact_email?.trim() || profile.contact_phone?.trim());
 
   const classLabel = profile.class_year?.toLowerCase() === "freshman" ? "FR" : profile.class_year?.toLowerCase() === "sophomore" ? "SO" : profile.class_year?.toLowerCase() === "junior" ? "JR" : profile.class_year?.toLowerCase() === "senior" ? "SR" : null;
 
@@ -259,7 +262,7 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
             )}
 
             {/* ── Photo Hero (66%) ─────────────────── */}
-            <div className="relative flex-shrink-0" style={{ height: profile.cover_url ? "calc(66% - 80px)" : "66%" }}>
+            <div className="relative flex-shrink-0" style={{ height: profile.cover_url ? "calc(52% - 80px)" : "52%" }}>
               {photos.length > 0 ? (
                 <>
                   {photos.map((url, i) => (
@@ -311,6 +314,17 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
                   <span className="text-[10px] font-bold tracking-widest uppercase text-white/80">AthleteOS</span>
                 </div>
                 <div className="flex items-center gap-1.5">
+                  {resolvePlan(profile.plan, profile.extended_pro_until) !== "free" && (
+                    <div
+                      className="flex items-center gap-1 rounded-full pl-2 pr-2.5 h-7 backdrop-blur-md"
+                      style={{ background: "rgba(0,0,0,0.45)", border: "1px solid rgba(255,255,255,0.12)" }}
+                    >
+                      <Star className="h-3 w-3" style={{ color: accent }} fill={accent} />
+                      <span className="text-[9px] font-black tracking-wider" style={{ color: accent }}>
+                        {resolvePlan(profile.plan, profile.extended_pro_until) === "pro" ? "Pro" : "Team"}
+                      </span>
+                    </div>
+                  )}
                   <button
                     onClick={(e) => { e.stopPropagation(); setShowQr(true); }}
                     className="h-7 w-7 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-200 hover:scale-110"
@@ -349,75 +363,59 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
                 </div>
               )}
 
-              {/* Plan badge overlay */}
-              <div className="absolute bottom-[30%] right-3 flex flex-col items-end gap-1 z-10">
-                {resolvePlan(profile.plan, profile.extended_pro_until) !== "free" && (
-                  <div
-                    className="flex items-center gap-1 rounded-full px-2 py-0.5 backdrop-blur-md"
-                    style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
-                  >
-                    <Star className="h-2.5 w-2.5 text-white/50" />
-                    <span className="text-[8px] font-bold text-white/50">
-                      {resolvePlan(profile.plan, profile.extended_pro_until) === "pro" ? "Pro" : "Team"}
+              {/* Plan badge overlay removed — Pro/Team now lives in the top bar */}
+            </div>
+
+            {/* ── Identity ─────────────────────────── */}
+            <div className="flex-shrink-0 px-6 -mt-4 relative z-10">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-[26px] font-black tracking-[-0.03em] leading-none text-white truncate">
+                    {displayName}
+                  </h1>
+                  {profile.is_verified && (
+                    <span
+                      className="flex-shrink-0 flex h-4 w-4 items-center justify-center rounded-full"
+                      style={{ background: `${accent}18`, border: `1px solid ${accent}35` }}
+                    >
+                      <CheckIcon className="h-2.5 w-2.5" style={{ color: accent }} />
                     </span>
+                  )}
+                  {classLabel && (
+                    <span className="flex-shrink-0 inline-flex items-center rounded-md px-1.5 py-1 text-[8px] font-bold tracking-widest uppercase text-white/50 bg-white/[0.05] border border-white/[0.10]">
+                      {classLabel}
+                    </span>
+                  )}
+                </div>
+
+                <div className="text-[11.5px] text-white/45 font-medium truncate leading-none">
+                  {[profile.sport, profile.position, profile.school].filter(Boolean).join("  ·  ")}
+                </div>
+
+                {(totalViews > 0 || totalFollowers > 0) && (
+                  <div className="flex items-center gap-3">
+                    {totalViews > 0 && (
+                      <span className="flex items-center gap-1 text-[10px] text-white/35 font-medium">
+                        <Eye className="h-3 w-3" style={{ color: `${accent}50` }} />
+                        {totalViews.toLocaleString()} views
+                      </span>
+                    )}
+                    {totalFollowers > 0 && (
+                      <span className="flex items-center gap-1 text-[10px] text-white/35 font-medium">
+                        <Users className="h-3 w-3" style={{ color: `${accent}50` }} />
+                        {totalFollowers.toLocaleString()} followers
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* ── Identity ─────────────────────────── */}
-            <div className="flex-shrink-0 px-5 -mt-4 relative z-10">
-              <div className="flex items-center gap-2">
-                <h1 className="text-[26px] font-black tracking-[-0.03em] leading-none text-white truncate">
-                  {displayName}
-                </h1>
-                {profile.is_verified && (
-                  <span
-                    className="flex-shrink-0 flex h-4 w-4 items-center justify-center rounded-full"
-                    style={{ background: `${accent}18`, border: `1px solid ${accent}35` }}
-                  >
-                    <CheckIcon className="h-2.5 w-2.5" style={{ color: accent }} />
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-1.5 mt-2">
-                <span className="text-[12px] text-white/45 font-medium truncate">
-                  {[profile.sport, profile.position, profile.school].filter(Boolean).join("  ·  ")}
-                </span>
-                {classLabel && (
-                  <span
-                    className="ml-0.5 flex-shrink-0 inline-flex items-center rounded-md px-1.5 py-0.5 text-[8px] font-black tracking-wider uppercase"
-                    style={{ background: `${accent}14`, color: accent, border: `1px solid ${accent}28` }}
-                  >
-                    {classLabel}
-                  </span>
-                )}
-              </div>
-
-              {(totalViews > 0 || totalFollowers > 0) && (
-                <div className="flex items-center gap-3 mt-2">
-                  {totalViews > 0 && (
-                    <span className="flex items-center gap-1 text-[10px] text-white/30 font-medium">
-                      <Eye className="h-3 w-3" style={{ color: `${accent}50` }} />
-                      {totalViews.toLocaleString()} views
-                    </span>
-                  )}
-                  {totalFollowers > 0 && (
-                    <span className="flex items-center gap-1 text-[10px] text-white/30 font-medium">
-                      <Users className="h-3 w-3" style={{ color: `${accent}50` }} />
-                      {totalFollowers.toLocaleString()} followers
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* ── Stats Strip (NIL + key stats, one unit) ── */}
+            {/* ── Stats Grid (2x2) ─────────────────── */}
             {(stats.length > 0 || (nilScore !== null && nilScore > 0)) && (
-              <div className="flex-shrink-0 mx-5 mt-4">
+              <div className="flex-shrink-0 mx-6 mt-4">
                 <div
-                  className={`grid grid-flow-col auto-cols-fr items-stretch rounded-xl overflow-hidden ${cols}`}
+                  className={`grid ${cols} items-stretch rounded-xl overflow-hidden`}
                   style={{
                     background: "#17171b",
                     border: "1px solid rgba(255,255,255,0.07)",
@@ -425,10 +423,10 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
                   }}
                 >
                   {nilScore !== null && nilScore > 0 && (
-                    <div className={`flex flex-col items-center justify-center py-3 px-1 ${hasStatBorder(0)}`}>
-                      <div className="flex items-center gap-1 mb-1">
+                    <div className={`flex flex-col items-center justify-center px-1.5 py-2 ${cellBorder(0)}`}>
+                      <div className="flex items-center gap-1 mb-1.5">
                         <TrendingUp className="h-2.5 w-2.5" style={{ color: `${accent}55` }} />
-                        <span className="text-[8px] font-bold uppercase tracking-widest" style={{ color: `${accent}50` }}>
+                        <span className="text-[8px] font-bold uppercase tracking-wide" style={{ color: `${accent}50` }}>
                           NIL
                         </span>
                       </div>
@@ -445,11 +443,11 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
                     return (
                       <div
                         key={stat.label}
-                        className={`flex flex-col items-center justify-center py-3 px-1 ${hasStatBorder((nilScore !== null && nilScore > 0 ? 1 : 0) + i)}`}
+                        className={`flex flex-col items-center justify-center px-1.5 py-2 ${cellBorder((nilScore !== null && nilScore > 0 ? 1 : 0) + i)}`}
                       >
-                        <div className="flex items-center gap-1 mb-1">
-                          <Ic className="h-2.5 w-2.5" style={{ color: `${accent}50` }} />
-                          <span className="text-[7.5px] font-bold uppercase tracking-wider text-white/45">
+                        <div className="flex items-center gap-1 mb-1.5">
+                          <Ic className="h-2.5 w-2.5 flex-shrink-0" style={{ color: `${accent}50` }} />
+                          <span className="text-[8px] font-bold uppercase tracking-wide text-white/45 text-center leading-tight line-clamp-2">
                             {sanitize(stat.label)}
                           </span>
                         </div>
@@ -612,7 +610,7 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
             />
 
             {/* ── Header ───────────────────────────── */}
-            <div className="flex items-center justify-between px-4 pt-4 pb-2 flex-shrink-0">
+            <div className="flex items-center justify-between px-5 pt-4 pb-2 flex-shrink-0">
               <div className="flex items-center gap-2 min-w-0">
                 {profile.avatar_url ? (
                   <Image
@@ -652,7 +650,7 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
             <div className="mx-4 h-px flex-shrink-0" style={{ background: `linear-gradient(90deg, transparent, ${accent}20, transparent)` }} />
 
             {/* ── Scrollable content ────────────────── */}
-            <div className="flex-1 overflow-y-auto scrollbar-none px-4 pt-3 pb-4 space-y-3" onClick={stopFlip}>
+            <div className="flex-1 overflow-y-auto scrollbar-none px-5 pt-4 pb-4 space-y-3" onClick={stopFlip}>
 
               {/* Bio */}
               {hasValidBio && (
@@ -781,36 +779,46 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
                   </div>
                 </div>
               )}
-            </div>
-
-            {/* ── Bottom: Social + Action Buttons ─────── */}
-            <div className="mt-auto flex flex-col gap-3 w-full px-4 pb-3 flex-shrink-0" onClick={stopFlip}>
+            {/* Connect: socials + share */}
               {socialLinks.length > 0 && (
-                <div className="flex items-center justify-center gap-3">
-                  {socialLinks.map(({ key, Icon, href, color }) => (
-                    <a
-                      key={key}
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => { e.stopPropagation(); resetAutoReturn(); }}
-                      className="social-icon-btn h-8 w-8 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110 group transform translate-z-0 [backface-visibility:hidden] [will-change:transform]"
-                      style={{
-                        background: "rgba(255,255,255,0.05)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                        boxShadow: "0 0 1px transparent",
-                        outline: "1px solid transparent",
-                        WebkitBackfaceVisibility: "hidden",
-                        backfaceVisibility: "hidden",
-                        "--social-color": color,
-                      } as React.CSSProperties}
-                    >
-                      <Icon className="h-3.5 w-3.5 text-white/30 group-hover:text-white transition-colors duration-300" style={{ color: undefined }} />
-                    </a>
-                  ))}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1.5">
+                    <Heart className="h-3 w-3" style={{ color: `${accent}60` }} />
+                    <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: `${accent}50` }}>Connect</span>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-center gap-2.5 py-1">
+                    {socialLinks.map(({ key, Icon, href, color }) => (
+                      <a
+                        key={key}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => { e.stopPropagation(); resetAutoReturn(); }}
+                        className="social-icon-btn h-8 w-8 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110 group transform translate-z-0 [backface-visibility:hidden] [will-change:transform]"
+                        style={{
+                          background: "rgba(255,255,255,0.05)",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          boxShadow: "0 0 1px transparent",
+                          outline: "1px solid transparent",
+                          WebkitBackfaceVisibility: "hidden",
+                          backfaceVisibility: "hidden",
+                          "--social-color": color,
+                        } as React.CSSProperties}
+                      >
+                        <Icon className="h-3.5 w-3.5 text-white/30 group-hover:text-white transition-colors duration-300" style={{ color: undefined }} />
+                      </a>
+                    ))}
+                  </div>
                 </div>
               )}
-
+              <div className="flex items-center justify-center gap-3 pt-1">
+                <div className="h-px w-10" style={{ background: "rgba(255,255,255,0.08)" }} />
+                <ShareButtons url={publicUrl} title={`${displayName} on AthleteOS`} description={profile.bio || `Check out ${displayName}'s athlete card`} />
+                <div className="h-px w-10" style={{ background: "rgba(255,255,255,0.08)" }} />
+              </div>
+            </div>
+            {/* ── Bottom: Tiers + Actions ─────────── */}
+            <div className="mt-auto flex flex-col gap-3 w-full px-5 pb-4 pt-1 flex-shrink-0" onClick={stopFlip}>
               {/* Membership Tiers */}
               {tiers.length > 0 && (
                 <div className="w-full space-y-2">
@@ -819,33 +827,40 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
                       key={tier.id}
                       href={`/fan/subscribe/${tier.id}`}
                       onClick={(e) => { e.stopPropagation(); resetAutoReturn(); }}
-                      className="flex items-center justify-between rounded-2xl px-4 py-3 text-[13px] transition-all duration-200 hover:scale-[1.02] transform translate-z-0 [backface-visibility:hidden] [will-change:transform]"
+                      className="flex items-center justify-between gap-3 rounded-2xl px-5 py-3.5 backdrop-blur-md transform translate-z-0 [backface-visibility:hidden] [will-change:transform] transition-all duration-200 hover:border-white/[0.14]"
                       style={{
-                        background: `${accent}10`,
-                        border: `1px solid ${accent}25`,
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        boxShadow: "0 0 1px transparent, 0 8px 32px -12px rgba(0,0,0,0.5)",
+                        outline: "1px solid transparent",
+                        WebkitBackfaceVisibility: "hidden",
+                        backfaceVisibility: "hidden",
                       }}
                     >
-                      <div>
-                        <span className="font-bold" style={{ color: accent }}>{tier.name}</span>
+                      <div className="min-w-0">
+                        <span className="block text-[13px] font-bold text-white/90 leading-tight truncate">{tier.name}</span>
                         {tier.description && (
-                          <span className="ml-2 text-white/40 text-[11px]">{tier.description}</span>
+                          <span className="block text-[10px] text-white/40 truncate mt-0.5 leading-tight">{tier.description}</span>
                         )}
                       </div>
-                      <span className="font-bold text-white">${(tier.price_cents / 100).toFixed(0)}/mo</span>
+                      <span className="flex-shrink-0 text-[12px] font-black" style={{ color: accent }}>
+                        ${(tier.price_cents / 100).toFixed(0)}/mo
+                      </span>
                     </a>
                   ))}
                 </div>
               )}
 
+              {/* Contact + Inquiry (2-col) */}
               <div className="flex gap-2 w-full">
-                {(profile.contact_email?.trim() || profile.contact_phone?.trim()) && (
+                {hasContact && (
                   <button
                     onClick={(e) => { e.stopPropagation(); resetAutoReturn(); setShowContactModal(true); }}
-                    className="flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-[13px] font-black tracking-wide transition-all duration-200 hover:scale-[1.02] transform translate-z-0 [backface-visibility:hidden] [will-change:transform]"
+                    className="flex-1 flex items-center justify-center gap-2 rounded-xl px-3 py-3 text-[12px] font-black tracking-wide transition-all duration-200 hover:scale-[1.02] transform translate-z-0 [backface-visibility:hidden] [will-change:transform]"
                     style={{
                       background: "rgba(255,255,255,0.05)",
                       border: "1px solid rgba(255,255,255,0.08)",
-                      color: "rgba(255,255,255,0.5)",
+                      color: "rgba(255,255,255,0.55)",
                       boxShadow: "0 0 1px transparent",
                       outline: "1px solid transparent",
                       WebkitBackfaceVisibility: "hidden",
@@ -858,7 +873,7 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
                 )}
                 <button
                   onClick={(e) => { e.stopPropagation(); resetAutoReturn(); setShowInquiry(true); }}
-                  className="flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-[13px] font-black tracking-wide transition-all duration-200 hover:scale-[1.02] transform translate-z-0 [backface-visibility:hidden] [will-change:transform]"
+                  className={`${hasContact ? "flex-1" : "w-full"} flex items-center justify-center gap-2 rounded-xl px-3 py-3 text-[12px] font-black tracking-wide transition-all duration-200 hover:scale-[1.02] transform translate-z-0 [backface-visibility:hidden] [will-change:transform]`}
                   style={{
                     background: `${accent}15`,
                     border: `1px solid ${accent}30`,
@@ -872,18 +887,15 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
                   <Send className="h-4 w-4" />
                   Send Inquiry
                 </button>
-                <div className="flex-1" onClick={(e) => { e.stopPropagation(); resetAutoReturn(); }}>
-                  <TipButton
-                    athleteId={profile.id}
-                    athleteName={displayName}
-                    accentColor={accent}
-                  />
-                </div>
               </div>
 
-              {/* Share Buttons */}
-              <div className="flex items-center justify-center pt-2" onClick={stopFlip}>
-                <ShareButtons url={publicUrl} title={`${displayName} on AthleteOS`} description={profile.bio || `Check out ${displayName}'s athlete card`} />
+              {/* Primary CTA */}
+              <div onClick={(e) => { e.stopPropagation(); resetAutoReturn(); }}>
+                <TipButton
+                  athleteId={profile.id}
+                  athleteName={displayName}
+                  accentColor={accent}
+                />
               </div>
             </div>
 
