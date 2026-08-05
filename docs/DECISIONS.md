@@ -1018,4 +1018,41 @@ Onboarding previously required only username, full name, sport, and school; ever
 - Already-published legacy users who unpublish will be blocked from re-publishing until they fill the gaps — intended.
 - `lib/actions/profile.ts` now does one extra profile read only when `profile_published: true` is set (publish path only; normal saves unaffected).
 
+---
+
+## ADR-045 — Complete-card requirement is a deliberate friction tradeoff
+
+**Status:** Accepted — 2026-08-05
+
+**Context:**
+The what-if "high-school or content-light athletes bail out of the 6-step onboarding" is a real risk. ADR-044 made every card field required. This ADR settles the tension: the complete-card guarantee is a brand promise (no published card looks broken), and friction is the accepted price.
+
+**Decision:**
+Do not add a "publish partially" escape hatch. Mitigate the friction operationally instead: concierge onboarding for the first cohort, saved progress across steps, and clear in-step guidance. If abandonment data later shows the 6-step flow is the top churn point post-launch, revisit with data — not pre-emptively.
+
+**Consequences:**
+- What-if register line #2 and #3 CLOSED.
+- A published card is always complete, by construction.
+
+---
+
+## ADR-046 — Reject lock-in-by-manipulation (AI memory redesign)
+
+**Status:** Accepted — 2026-08-05
+
+**Context:**
+The "lock-in system" (`athlete_ai_memory`, `ai_events`, `compounding-value.tsx`) was built as a psychological engagement loop: silent behavioral telemetry, Day 7/30/90 time-gated feature unlocks, and copy warning athletes they lose their "trained copywriter config" by leaving. On review this fails the product's value test and carries a trust/reputation risk (if the telemetry pattern was ever publicized, it would read as manipulation).
+
+**Decision:**
+1. No silent behavioral telemetry shaping outputs. `ai_events` silent logging is removed; PostHog remains the product-analytics source, Sentry covers errors.
+2. No time-gated feature unlocks. Day 7/30/90 gates are removed.
+3. No scare copy about losing personalized configs.
+4. `athlete_ai_memory` is replaced by a user-owned, user-visible, user-editable "Business Facts" store (deals, rates, preferences, audience) that AI reads — the athlete sees and controls the context, which is the trust model.
+5. `compounding-value.tsx` is redesigned into a Business Dashboard that reports money moved and pipeline.
+
+**Consequences:**
+- What-if register lines #9 and #15 CLOSED.
+- Retention is chased with real value (deals, earnings, proof), not manipulation.
+- Master Plan §4/§5 build prompts inherit these constraints.
+
 

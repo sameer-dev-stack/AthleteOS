@@ -5,6 +5,25 @@
 
 ---
 
+## 2026-08-05 — Session: Master Plan draft + strategy lock setup (discussion session)
+
+### What changed
+- **New `docs/MASTER_PLAN.md`** — pre-launch strategy lock: the construct that replaces the speculative zoom. Locks facts (pre-launch, card-is-front-door, data moat = business data, no lock-in-by-manipulation), defines the core loop, proposes the wedge, first-pass cut/keep/redesign list, Business Facts moat design, what-if register (16 scenarios with resolutions), and build order with a launch gate. Status DRAFT pending founder ratification (Open Points A–D).
+- **ADR-045** — complete-card requirement is a deliberate friction tradeoff; no partial-publish escape hatch; mitigate via concierge + saved progress.
+- **ADR-046** — reject lock-in-by-manipulation: no silent telemetry, no time-gated unlocks, no scare copy; `athlete_ai_memory` → user-owned Business Facts; `compounding-value.tsx` → Business Dashboard.
+
+### Why
+Founder review: the compounding AI memory / lock-in system, pre-launch feature sprawl (50-component dashboard), and unvalidated feature assumptions were flagged as "not making sense." This session restructures around a defensible core loop and a what-if register so every build prompt is grounded before the builder agent receives it.
+
+### Files touched
+- Added: `docs/MASTER_PLAN.md`
+- Docs: `CHANGELOG.md`, `DECISIONS.md` (ADR-045, ADR-046)
+
+### Commit
+- `docs-only commit` — ratified 2026-08-05 (founder delegation; §9 resolved). Build batches follow.
+
+---
+
 ## 2026-08-05 — Make every card field required before publishing
 
 ### What changed
