@@ -5,6 +5,31 @@
 
 ---
 
+## 2026-08-05 — Batch 3: Business Facts store + AI grounding + won_at correctness
+
+### What changed
+- **NEW migration `supabase/migrations/20260805_business_facts.sql`:** `business_facts` table (owner-RLS, `profile_id` PK/`ON DELETE CASCADE`, `brand_voice`, `preferred_tone` CHECK-constrained, `min_deal_value` dollars, `deal_preferences` JSONB) + `inquiries.won_at TIMESTAMPTZ` + partial index on won deals.
+- **NEW `lib/actions/business-facts.ts`:** `getBusinessFacts()` (authenticated, `.maybeSingle()`); `saveBusinessFacts()` — Zod-validated (brandVoice max 500, tone enum, minDealValue ≥ 0, dealPreferences ⊆ 6 allowed, deduped), upsert on `profile_id`, RLS double-gate.
+- **NEW `components/dashboard/business-profile-panel.tsx`:** collapsible "Business Profile" card at the top of the Deal Room (`inquiry-inbox.tsx`): brand voice textarea, tone select, min deal floor input, deal-type toggle chips; save → `saveBusinessFacts`; skeleton loading, inline errors, "Saved" confirmation; empty-state hint "Set your business profile — it powers your AI."
+- **AI grounding swap (ADR-048):** `getAiMemory` → `getBusinessFacts` in `lib/actions/ai.ts` (`getEnrichedMemoryContext`), `ai-content.ts`, `quick-ai.ts`. `lib/ai.ts` `AIMemoryContext` extended (`brand_voice`, `min_deal_value`, `deal_preferences`) and `buildMemoryBlock` now emits a "Business Facts & Style Profile" prompt block instead of the "learned from your history" memory block. **`lib/actions/ai-memory.ts` deleted** (0 importers). `recordToolEvent` stub in ai.ts deleted; stale `recordAiEvent` comment in `athlete-knowledge.ts` removed. Repo grep: 0 occurrences of `getAiMemory`/`ai-memory`/`recordToolEvent`/`recordAiEvent` in code. DB tables `ai_events`/`athlete_ai_memory` and `gdpr.ts` untouched.
+- **`won_at` correctness (inquiries + business):** `updateInquiryStatus` sets `won_at = now()` on transition TO 'won', clears it leaving 'won'. `getBusinessSummary` "won deals this week" windows on `won_at`, falling back to `created_at` for legacy rows — the metric now measures when deals were won, not when inquiries arrived.
+- **`<BusinessDashboard>`:** `themeAccent` prop now applied to the TrendingUp icon so custom card themes render on Business Overview.
+- **Verification:** 46/46 unit tests; `npm run lint` 0 errors, 1 pre-existing warning (`profile-card.tsx`); `npm run build` green 12.5s.
+
+### Why
+Third ratified batch of MASTER_PLAN (§8 step 4): the AI read surface now grounds on user-owned, user-editable Business Facts — no silent inference (ADR-046/048) — and the weekly revenue metric is semantically correct. This completes the pre-launch data/AI slice; next is the launch gate.
+
+### Files touched
+- Added: `supabase/migrations/20260805_business_facts.sql`, `lib/actions/business-facts.ts`, `components/dashboard/business-profile-panel.tsx`
+- Deleted: `lib/actions/ai-memory.ts`
+- Edited: `lib/ai.ts`, `lib/actions/{ai,ai-content,quick-ai,business,inquiries,athlete-knowledge}.ts`, `components/dashboard/{inquiry-inbox,business-dashboard}.tsx`
+- Docs: `CHANGELOG.md`, `DECISIONS.md` (ADR-048)
+
+### Commit
+Recorded at push (this session)
+
+---
+
 ## 2026-08-05 — Batch 2: retire silent telemetry, ship Business Dashboard, fix landing copy
 
 ### What changed

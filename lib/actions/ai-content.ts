@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { callGemini } from "@/lib/ai";
 import { getAiQuota, recordAiUsage } from "@/lib/actions/ai-usage";
 import { getMyProfile } from "@/lib/actions/profile";
-import { getAiMemory } from "@/lib/actions/ai-memory";
+import { getBusinessFacts } from "@/lib/actions/business-facts";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -98,9 +98,10 @@ export async function generateContent(formData: {
   const profileRes = await getMyProfile();
   const profile = profileRes.ok ? profileRes.data : null;
 
-  const memory = await getAiMemory();
-  const memoryInstructions = memory
-    ? `Preferred tone: ${memory.preferred_tone}. Output length preference: ${memory.preferred_output_length}.`
+  const factsRes = await getBusinessFacts();
+  const facts = factsRes.ok ? factsRes.data : null;
+  const memoryInstructions = facts
+    ? `Preferred tone: ${facts.preferred_tone}.${facts.brand_voice ? ` Brand voice: ${facts.brand_voice}.` : ""}`
     : "Tone: confident.";
 
   const config = CONTENT_TYPES[parsed.data.contentType];

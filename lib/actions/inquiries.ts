@@ -115,7 +115,7 @@ export async function updateInquiryStatus(
 
   const { data: inquiry } = await supabase
     .from("inquiries")
-    .select("athlete_id")
+    .select("athlete_id, status, won_at")
     .eq("id", parsed.data.inquiryId)
     .single();
 
@@ -124,6 +124,13 @@ export async function updateInquiryStatus(
   const updates: Record<string, unknown> = { status: parsed.data.status };
   if (parsed.data.dealValue !== undefined) {
     updates.deal_value = parsed.data.dealValue;
+  }
+
+  // Manage won_at timestamp: set on transition TO 'won', clear on transition AWAY FROM 'won'
+  if (parsed.data.status === "won" && inquiry.status !== "won") {
+    updates.won_at = new Date().toISOString();
+  } else if (parsed.data.status !== "won" && inquiry.status === "won") {
+    updates.won_at = null;
   }
 
   const { error } = await supabase

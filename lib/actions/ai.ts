@@ -14,22 +14,26 @@ import {
 } from "@/lib/ai";
 import { getAiQuota, recordAiUsage } from "@/lib/actions/ai-usage";
 import { getMyProfile } from "@/lib/actions/profile";
-import { getAiMemory } from "@/lib/actions/ai-memory";
+import { getBusinessFacts } from "@/lib/actions/business-facts";
 import { recordLearningEvent, getAthleteKnowledge } from "@/lib/actions/athlete-knowledge";
 
-// ── Enriched memory context (memory + knowledge in parallel) ─────────────────
+// ── Enriched memory context (business facts + knowledge in parallel) ─────────
 
 async function getEnrichedMemoryContext(): Promise<import("@/lib/ai").AIMemoryContext | undefined> {
-  const [memory, knowledge] = await Promise.all([getAiMemory(), getAthleteKnowledge()]);
+  const [factsRes, knowledge] = await Promise.all([getBusinessFacts(), getAthleteKnowledge()]);
+  const facts = factsRes?.ok ? factsRes.data : null;
 
   return {
-    preferred_tone: memory?.preferred_tone || "confident",
-    preferred_output_length: memory?.preferred_output_length || "medium",
-    tools_used_count: memory?.tools_used_count || {},
-    outputs_saved_count: memory?.outputs_saved_count || 0,
-    outputs_regenerated_count: memory?.outputs_regenerated_count || 0,
-    outputs_ignored_count: memory?.outputs_ignored_count || 0,
-    last_used_tool: memory?.last_used_tool || null,
+    preferred_tone: facts?.preferred_tone || "confident",
+    preferred_output_length: "medium",
+    tools_used_count: {},
+    outputs_saved_count: 0,
+    outputs_regenerated_count: 0,
+    outputs_ignored_count: 0,
+    last_used_tool: null,
+    brand_voice: facts?.brand_voice || null,
+    min_deal_value: facts?.min_deal_value || null,
+    deal_preferences: facts?.deal_preferences || [],
     athleteKnowledge: knowledge
       ? {
           content_themes: knowledge.content_themes,
@@ -63,12 +67,6 @@ async function checkQuota(): Promise<
     return { allowed: false, quota, error: upgradeMsg };
   }
   return { allowed: true, quota };
-}
-
-// ── Event recording helpers — called from client components ──────────────────
-
-export async function recordToolEvent(): Promise<void> {
-  // Deprecated stub per ADR-046
 }
 
 // ── Bio Generator ─────────────────────────────────────────────────────────────

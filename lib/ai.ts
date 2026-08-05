@@ -10,6 +10,9 @@ export type AIMemoryContext = {
   outputs_regenerated_count: number;
   outputs_ignored_count: number;
   last_used_tool: string | null;
+  brand_voice?: string | null;
+  min_deal_value?: number | null;
+  deal_preferences?: string[];
   // Optional: enriched from athlete_knowledge table
   athleteKnowledge?: {
     content_themes?: string[];
@@ -76,16 +79,12 @@ type GenerateRateOptions = {
 // ── Memory block builder ──────────────────────────────────────────────────────
 
 function buildMemoryBlock(ctx: AIMemoryContext): string {
-  const topTools = Object.entries(ctx.tools_used_count)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map(([tool, count]) => `${tool} (${count} uses)`)
-    .join(", ");
-
-  const totalOutputs = ctx.outputs_saved_count + ctx.outputs_regenerated_count + ctx.outputs_ignored_count;
-  const saveRate = totalOutputs > 0
-    ? Math.round((ctx.outputs_saved_count / totalOutputs) * 100)
-    : null;
+  let businessFactsBlock = "";
+  if (ctx.brand_voice || ctx.min_deal_value || (ctx.deal_preferences && ctx.deal_preferences.length > 0)) {
+    const prefsStr = ctx.deal_preferences && ctx.deal_preferences.length > 0 ? ctx.deal_preferences.join(", ") : "None specified";
+    const minValStr = ctx.min_deal_value !== null && ctx.min_deal_value !== undefined ? `$${ctx.min_deal_value}` : "No floor specified";
+    businessFactsBlock = `\n- Brand voice guidelines: ${ctx.brand_voice || "Authentic and direct"}\n- Minimum deal value floor: ${minValStr}\n- Target deal types: ${prefsStr}`;
+  }
 
   let knowledgeBlock = "";
   const ak = ctx.athleteKnowledge;
@@ -108,14 +107,8 @@ Use this context to personalize outputs — reference their strengths and growth
   }
 
   return `
-## AI Memory (learned from your history):
-- Preferred tone: ${ctx.preferred_tone.charAt(0).toUpperCase() + ctx.preferred_tone.slice(1)}
-- Preferred output length: ${ctx.preferred_output_length}
-- Most used tools: ${topTools || "None yet"}
-- Outputs saved: ${ctx.outputs_saved_count}${saveRate !== null ? ` (${saveRate}% save rate)` : ""}
-- Regenerated without saving: ${ctx.outputs_regenerated_count}
-- Last active tool: ${ctx.last_used_tool || "N/A"}
-Apply these preferences in your output — prioritize the preferred tone and length.${knowledgeBlock}
+## Business Facts & Style Profile:
+- Preferred tone: ${ctx.preferred_tone.charAt(0).toUpperCase() + ctx.preferred_tone.slice(1)}${businessFactsBlock}${knowledgeBlock}
 `.trim();
 }
 

@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getMyProfile } from "@/lib/actions/profile";
 import { getAiQuota, recordAiUsage } from "@/lib/actions/ai-usage";
-import { getAiMemory } from "@/lib/actions/ai-memory";
+import { getBusinessFacts } from "@/lib/actions/business-facts";
 import { callGemini } from "@/lib/ai";
 
 export type QuickAiResult = {
@@ -33,10 +33,11 @@ export async function quickAiAction(signal: string): Promise<QuickAiResult> {
     }
     const profile = profileRes.data;
 
-    // Fetch memory
-    const memory = await getAiMemory();
-    const memoryInstructions = memory
-      ? `Preferred tone: ${memory.preferred_tone}. Output length preference: ${memory.preferred_output_length}.`
+    // Fetch business facts
+    const factsRes = await getBusinessFacts();
+    const facts = factsRes.ok ? factsRes.data : null;
+    const memoryInstructions = facts
+      ? `Preferred tone: ${facts.preferred_tone}.${facts.brand_voice ? ` Brand voice: ${facts.brand_voice}.` : ""}`
       : "Tone: confident.";
 
     let prompt = "";

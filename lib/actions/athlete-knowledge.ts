@@ -148,7 +148,6 @@ export async function seedKnowledgeFromProfile(profile: {
 
 /**
  * Fire-and-forget: log a single learning event and update knowledge aggregates.
- * Called alongside existing recordAiEvent() in lib/actions/ai.ts.
  */
 export async function recordLearningEvent(event: LearningEvent): Promise<void> {
   try {

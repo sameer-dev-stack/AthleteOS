@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Mail, Check, ChevronDown, ChevronUp, DollarSign, TrendingUp, Heart, Briefcase, Award } from "lucide-react";
 import { getAthleteInquiries, updateInquiryStatus } from "@/lib/actions/inquiries";
 import { getTipEarnings, type TipEarnings } from "@/lib/actions/tips";
+import { BusinessProfilePanel } from "@/components/dashboard/business-profile-panel";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export type PipelineStatus = "new" | "replied" | "negotiating" | "won" | "lost";
@@ -152,9 +153,12 @@ export function InquiryInbox() {
         </div>
       </div>
 
-      {/* Main Stream */}
-      {inquiries.length === 0 ? (
-        <div className="p-10 text-center">
+      {/* Business Profile Panel & Main Stream */}
+      <div className="p-6">
+        <BusinessProfilePanel />
+
+        {inquiries.length === 0 ? (
+          <div className="py-8 text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/10 border border-accent/20">
             <Mail className="h-5 w-5 text-accent" />
           </div>
@@ -308,6 +312,7 @@ export function InquiryInbox() {
           })}
         </div>
       )}
+      </div>
     </div>
   );
 }

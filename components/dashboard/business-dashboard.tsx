@@ -66,7 +66,7 @@ export function BusinessDashboard({ themeAccent = "#C6FF3D", username }: Props) 
       {/* Section Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-accent" />
+          <TrendingUp className="h-4 w-4" style={{ color: themeAccent }} />
           <h3 className="text-sm font-bold text-white tracking-tight">Business Overview</h3>
         </div>
         <span className="text-[10px] font-bold uppercase tracking-wider text-white/35">NIL Operations</span>

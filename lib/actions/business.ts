@@ -39,7 +39,7 @@ export async function getBusinessSummary(): Promise<{ ok: boolean; data?: Busine
     // NOTE: nil_deals is explicitly EXCLUDED per ADR-047 (compliance reporting only)
     const { data: inquiriesData, error: inqErr } = await supabase
       .from("inquiries")
-      .select("id, status, deal_value, created_at")
+      .select("id, status, deal_value, created_at, won_at")
       .eq("athlete_id", user.id);
 
     if (inqErr) console.warn("[business] Error fetching inquiries:", inqErr.message);
@@ -85,7 +85,9 @@ export async function getBusinessSummary(): Promise<{ ok: boolean; data?: Busine
         totalDealsWonCount++;
         const val = Number(i.deal_value) || 0;
         wonDealsTotal += val;
-        if (i.created_at >= sevenDaysAgo) {
+        // Window on won_at timestamp, falling back to created_at when won_at is null (legacy rows)
+        const wonTimestamp = i.won_at || i.created_at;
+        if (wonTimestamp >= sevenDaysAgo) {
           wonDealsThisWeek += val;
         }
       }

@@ -1040,6 +1040,25 @@ The Deal Room needs pipeline status and dollar values, but `inquiries` was a fla
 
 ---
 
+## ADR-048 — Business Facts: the user-owned store that replaces AI memory
+
+**Status:** Accepted — 2026-08-05
+
+**Context:**
+ADR-046 rejected AI that learns silently from tool usage. With `getAiMemory` reduced to a null stub (Batch 2), the AI context was empty — pitch/caption/rate tools had no grounding for voice, tone, or pricing. The successor needs to be user-owned, user-visible, and user-editable.
+
+**Decision:**
+1. New `business_facts` table (owner-only RLS: `profile_id = auth.uid()`): `brand_voice` (free text, max 500), `preferred_tone` (check-constrained: confident/casual/professional/playful), `min_deal_value` (numeric dollars, nullable), `deal_preferences` (JSONB array of 6 allowed types). `getBusinessFacts` / `saveBusinessFacts` in `lib/actions/business-facts.ts`; the save path is Zod-validated and upserts on `profile_id` via the authenticated client (RLS double-gate).
+2. AI grounding replaces the memory read everywhere: `getEnrichedMemoryContext` (lib/actions/ai.ts), `ai-content.ts`, `quick-ai.ts` now read facts; `lib/ai.ts` `AIMemoryContext` grows `brand_voice`/`min_deal_value`/`deal_preferences`, and `buildMemoryBlock` emits a "Business Facts & Style Profile" block instead of the old "learned from your history" block. `lib/actions/ai-memory.ts` deleted (0 importers); DB tables `ai_events`/`athlete_ai_memory` remain for now; `gdpr.ts` untouched.
+3. `inquiries.won_at TIMESTAMPTZ` added; `updateInquiryStatus` sets it on transition TO 'won' and clears it on transition AWAY. `getBusinessSummary` windows "won this week" on `won_at`, falling back to `created_at` for legacy rows. "Won this week" now means *when the deal was won*, not when the inquiry arrived.
+
+**Consequences:**
+- The athlete controls what the AI knows about them; nothing is inferred from usage.
+- AI quota (`recordAiUsage`) is an operator limit, not silent learning — unchanged.
+- `preferred_output_length`, `tools_used_count`, and the tool-usage stats were dropped from the AI context; `preferred_output_length` is now a fixed "medium" default.
+
+---
+
 ## ADR-045 — Complete-card requirement is a deliberate friction tradeoff
 
 **Status:** Accepted — 2026-08-05
