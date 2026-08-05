@@ -21,6 +21,7 @@ import { Logo } from "@/components/logo";
 import { resolvePlan } from "@/lib/referral-reward";
 import { ShareButtons } from "@/components/share-buttons";
 import { QrShareModal } from "@/components/dashboard/qr-share-modal";
+import { useSearchParams } from "next/navigation";
 import { CARD_W, CARD_H } from "@/lib/constants";
 import { cleanName } from "@/lib/display-name";
 
@@ -69,6 +70,8 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [linksExpanded, setLinksExpanded] = useState(false);
+  const [showTipSuccess, setShowTipSuccess] = useState(false);
+  const searchParams = useSearchParams();
   const autoReturnRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const trackedRef = useRef(false);
 
@@ -78,6 +81,15 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
       trackedRef.current = true;
     }
   }, [profile.id]);
+
+  useEffect(() => {
+    if (searchParams?.get("tip") === "success") {
+      setShowTipSuccess(true);
+      import("canvas-confetti").then((mod) => {
+        mod.default({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      }).catch(() => {});
+    }
+  }, [searchParams]);
 
   const accent = profile.theme_accent || "#C6FF3D";
   const displayName = cleanName(profile.full_name, profile.username);
@@ -873,6 +885,51 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
         open={showInquiry}
         onClose={() => setShowInquiry(false)}
       />
+      {/* Tip Success Modal */}
+      <AnimatePresence>
+        {showTipSuccess && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[150] flex items-center justify-center p-4"
+            style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
+            onClick={() => setShowTipSuccess(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-3xl border border-white/[0.08] bg-[#111115] p-6 text-center shadow-2xl relative"
+            >
+              <button
+                onClick={() => setShowTipSuccess(false)}
+                className="absolute top-4 right-4 text-white/30 hover:text-white transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <div
+                className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl"
+                style={{ backgroundColor: `${accent}15`, border: `1px solid ${accent}30` }}
+              >
+                <Heart className="h-7 w-7" style={{ color: accent }} fill="currentColor" />
+              </div>
+              <h3 className="text-xl font-black text-white">Thank You!</h3>
+              <p className="mt-2 text-sm text-white/60">
+                Your tip for <span className="font-semibold text-white">{firstName}</span> has been processed successfully. Your support helps power their athletic journey!
+              </p>
+              <button
+                onClick={() => setShowTipSuccess(false)}
+                className="mt-6 w-full rounded-2xl py-3 text-xs font-bold text-bg transition-all hover:brightness-110"
+                style={{ backgroundColor: accent }}
+              >
+                Back to Profile
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
