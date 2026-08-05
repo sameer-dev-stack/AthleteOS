@@ -24,7 +24,7 @@ Second ratified batch of MASTER_PLAN (§8 step 4): finish ADR-046 (no silent tel
 - Docs: `CHANGELOG.md`, `ARCHITECTURE.md`, `COMPONENTS.md`, `FEATURES.md`, `COPY.md`
 
 ### Commit
-Recorded at push (this session)
+`8aa077f`
 
 ---
 
