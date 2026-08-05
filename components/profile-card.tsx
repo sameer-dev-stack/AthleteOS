@@ -648,7 +648,7 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
             <div className="mx-4 h-px flex-shrink-0" style={{ background: `linear-gradient(90deg, transparent, ${accent}20, transparent)` }} />
 
             {/* ── Scrollable content ────────────────── */}
-            <div className="flex-1 overflow-y-auto scrollbar-none px-5 pt-4 pb-4 space-y-3" onClick={stopFlip}>
+            <div className="flex-1 overflow-y-auto scrollbar-none px-5 pt-4 pb-8 space-y-4" onClick={stopFlip}>
 
               {/* Bio */}
               {hasValidBio && (
@@ -741,12 +741,12 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
 
               {/* Highlights */}
               {highlights.length > 0 && (
-                <div>
+                <div className="mb-1">
                   <div className="flex items-center gap-1.5 mb-1.5">
                     <Play className="h-3 w-3" style={{ color: `${accent}60` }} />
                     <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: `${accent}50` }}>Highlights</span>
                   </div>
-                  <div className="flex flex-wrap items-center justify-center gap-1.5 py-2 px-1">
+                  <div className="flex flex-wrap items-center justify-center gap-2 py-2.5 px-1">
                     {highlights.map((h, i) => (
                       <a
                         key={i}
@@ -779,7 +779,7 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
               )}
             {/* Connect: socials + share */}
               {socialLinks.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-2 mb-1">
                   <div className="flex items-center gap-1.5">
                     <Heart className="h-3 w-3" style={{ color: `${accent}60` }} />
                     <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: `${accent}50` }}>Connect</span>
@@ -816,7 +816,7 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
               </div>
             </div>
             {/* ── Bottom: Actions ─────────── */}
-            <div className="mt-auto flex flex-col gap-3 w-full px-5 pb-4 pt-1 flex-shrink-0" onClick={stopFlip}>
+            <div className="mt-auto flex flex-col gap-4 w-full px-5 pb-4 pt-2 flex-shrink-0" onClick={stopFlip}>
 
               {/* Contact + Inquiry (2-col) */}
               <div className="flex gap-2 w-full">
