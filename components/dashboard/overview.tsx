@@ -34,6 +34,7 @@ import { getInquiryCount } from "@/lib/actions/inquiries";
 import { PullToRefresh } from "@/components/mobile/pull-to-refresh";
 import { useHaptic } from "@/components/mobile/use-haptic";
 import { SwipeCards } from "@/components/mobile/swipe-cards";
+import { getMissingCardFieldLabels } from "@/lib/card-completeness";
 
 const QrShareModal = lazy(() => import("@/components/dashboard/qr-share-modal").then((m) => ({ default: m.QrShareModal })));
 
@@ -57,6 +58,7 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
   const [savedAssetsCount, setSavedAssetsCount] = useState(0);
   const [loadingMetrics, setLoadingMetrics] = useState(true);
   const [togglingPublished, setTogglingPublished] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
   const [showQr, setShowQr] = useState(false);
   const [cardLinkCopied, setCardLinkCopied] = useState(false);
   const [showMore, setShowMore] = useState(false);
@@ -152,11 +154,26 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
   async function handleTogglePublished() {
     haptic.mediumTap();
     const next = !profile.profile_published;
+    setPublishError(null);
+
+    if (next) {
+      const missing = getMissingCardFieldLabels(profile);
+      if (missing.length > 0) {
+        const message =
+          missing.length <= 2
+            ? `Your card needs ${missing.join(" and ")} before it can go live.`
+            : `Your card needs ${missing.slice(0, -1).join(", ")}, and ${missing[missing.length - 1]} before it can go live.`;
+        setPublishError(message);
+        return;
+      }
+    }
+
     setTogglingPublished(true);
     setProfile((p) => ({ ...p, profile_published: next }));
     const result = await updateProfile({ profile_published: next });
     if (!result.ok) {
       setProfile((p) => ({ ...p, profile_published: !next }));
+      setPublishError(result.error || "Failed to update publish state.");
     } else if (next) {
       trackFunnel("profile_publish");
       haptic.success();
@@ -396,6 +413,14 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
                   </span>
                 </button>
               </div>
+
+              {publishError && (
+                <div className="px-4 pb-3">
+                  <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2.5 text-xs text-red-400">
+                    {publishError}
+                  </div>
+                </div>
+              )}
 
               {profile.username ? (
                 <div className="px-4 pb-4">

@@ -58,6 +58,27 @@ export function LaunchChecklist({ profile }: { profile: Profile }) {
       href: "/dashboard/profile?tab=social",
     },
     {
+      id: "links",
+      label: "Add your links",
+      description: "Hudl, merch store, or any link you want on your card",
+      done: (profile.links?.length || 0) >= 1,
+      href: "/dashboard/profile",
+    },
+    {
+      id: "highlights",
+      label: "Add a highlight",
+      description: "Show off game film, YouTube, or a news feature",
+      done: (profile.highlights?.length || 0) >= 1,
+      href: "/dashboard/profile",
+    },
+    {
+      id: "contact",
+      label: "Add contact info",
+      description: "An email or phone so brands can reach you",
+      done: !!(profile.contact_email?.trim() || profile.contact_phone?.trim()),
+      href: "/dashboard/profile",
+    },
+    {
       id: "publish",
       label: "Publish your card",
       description: "Go live so brands and fans can find you",

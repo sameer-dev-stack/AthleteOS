@@ -161,6 +161,29 @@ export async function updateProfile(
     return { ok: false, error: "Cannot complete onboarding without payout method" };
   }
 
+  // Block publishing until every card field is filled — the public card must never look incomplete.
+  if (validated.profile_published) {
+    const { isCardComplete, getMissingCardFieldLabels } = await import("../card-completeness");
+    const { data: current } = await admin
+      .from("profiles")
+      .select("avatar_url, full_name, sport, position, school, class_year, bio, stats, links, social, highlights, contact_email, contact_phone")
+      .eq("id", user.id)
+      .single();
+
+    const mergedCard: import("../card-completeness").CardProfile = { ...(current || {}) };
+    for (const key of ["avatar_url", "full_name", "sport", "position", "school", "class_year", "bio", "stats", "links", "social", "highlights", "contact_email", "contact_phone"] as const) {
+      if (validated[key] !== undefined) (mergedCard as Record<string, unknown>)[key] = validated[key];
+    }
+
+    if (!isCardComplete(mergedCard)) {
+      const labels = getMissingCardFieldLabels(mergedCard);
+      const message = labels.length <= 2
+        ? `Your card needs ${labels.join(" and ")} before it can go live.`
+        : `Your card needs ${labels.slice(0, -1).join(", ")}, and ${labels[labels.length - 1]} before it can go live.`;
+      return { ok: false, error: message };
+    }
+  }
+
   if (updates.username) {
     const clean = validated.username!.toLowerCase().trim();
 

@@ -5,6 +5,28 @@
 
 ---
 
+## 2026-08-05 — Make every card field required before publishing
+
+### What changed
+- **New `lib/card-completeness.ts`** — single source of truth for what makes a card publishable: profile photo, full name, sport, position, school, class year, bio (15+ chars), ≥1 stat, ≥1 link, ≥1 highlight, ≥1 social handle, contact email or phone. Exports `getMissingCardFields`, `getMissingCardFieldLabels`, `isCardComplete`.
+- **Server-side publish gate** in `lib/actions/profile.ts` — `updateProfile` now rejects any call that sets `profile_published: true` when the card is incomplete, returning the exact list of missing fields. No client can publish an incomplete card.
+- **Onboarding (`app/onboarding/page.tsx`) now 6 required steps**: username → profile → socials → stats → links/details → done. Profile step now requires photo, position, class year, and bio (15+ chars, with live validation). Socials step requires ≥1 handle (Instagram/TikTok). New "Show your numbers" step (stat rows + sport quick-add templates). New "Finish your card" step (links, highlights, contact email/phone — at least one of email/phone). All Skip buttons and the "Skip for now" path removed; `skipOptional` deleted. Preview now renders the stats grid.
+- **Dashboard overview publish toggle** — client-side pre-check using `getMissingCardFieldLabels`; shows a red banner listing what's missing instead of failing silently. Server gate remains the backstop.
+- **Launch checklist** — added links, highlights, and contact items (9 items total).
+
+### Why
+User direction: when a user creates their card, all information must be filled so nothing is missing — the published card must never look incomplete or ugly. Previously onboarding only required name/sport/school and published immediately, so cards went live without photos, bios, stats, links, highlights, socials, or contact info.
+
+### Files touched
+- Added: `lib/card-completeness.ts`
+- Edited: `app/onboarding/page.tsx`, `lib/actions/profile.ts`, `components/dashboard/overview.tsx`, `components/dashboard/launch-checklist.tsx`
+- Docs: `CHANGELOG.md`, `DECISIONS.md` (ADR-044)
+
+### Commit
+(see git log)
+
+---
+
 ## 2026-08-05 — Cut fan memberships (tiers, content posts, email campaigns) pre-MVP
 
 ### What changed

@@ -996,4 +996,26 @@ The product shipped a partially-built fan-membership system: `membership_tiers`,
 - Stripe recurring products/config specific to fan tiers under the platform account are unused.
 - If re-added post-MVP, Phase 9 in ROADMAP.md is the recovery checklist.
 
+---
+
+## ADR-044 — Publishing requires a complete card (no field can be left missing)
+
+**Status:** Accepted — 2026-08-05
+
+**Context:**
+Onboarding previously required only username, full name, sport, and school; everything else (photo, position, class year, bio, socials) was skippable, and the card was published (`profile_published: true`) immediately. The public card renders every section — front-face photo hero, identity chips, stats grid, back-face About/Links/Highlights/Connect/Contact — so published cards could look incomplete and ugly, clipping and breaking sections.
+
+**Decision:**
+1. `lib/card-completeness.ts` is the single source of truth: a card is publishable only when it has photo, full name, sport, position, school, class year, bio ≥15 chars, ≥1 stat, ≥1 link (valid http URL), ≥1 highlight (valid http URL), ≥1 social handle, and contact email or phone.
+2. `updateProfile` (server action) rejects any call that sets `profile_published: true` against an incomplete card and returns the list of missing fields — client-side validation is convenience, this gate is the invariant.
+3. Onboarding grows to 6 required steps (username, profile, socials, stats, links/details, done); all Skip paths removed; the "Finish your card" step collects links, highlights, and contact info.
+4. Dashboard publish toggle pre-checks completeness and shows a red banner listing missing fields; Launch checklist gains links/highlights/contact items.
+5. Requirement bar (min 15-char bio, valid https URLs for links/highlights, ≥10-digit phone or valid email) is enforced in onboarding UI and re-validated server-side by the existing Zod schemas plus the completeness gate.
+
+**Consequences:**
+- No published card can go live incomplete from onboarding or the dashboard.
+- Onboarding is longer (6 steps); friction is the tradeoff for never shipping a broken-looking card.
+- Already-published legacy users who unpublish will be blocked from re-publishing until they fill the gaps — intended.
+- `lib/actions/profile.ts` now does one extra profile read only when `profile_published: true` is set (publish path only; normal saves unaffected).
+
 
