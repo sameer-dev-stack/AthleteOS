@@ -28,7 +28,7 @@ User direction: MVP is the digital card only — name, contact, stats, photos, a
 - Docs: `CHANGELOG.md`, `DECISIONS.md` (ADR-043), `ROADMAP.md`, `ARCHITECTURE.md`, `COMPONENTS.md`, `COPY.md`
 
 ### Commit
-- (pending)
+- `b9f6957`
 
 ---
 
