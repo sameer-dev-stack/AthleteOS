@@ -24,7 +24,7 @@ Athletes don't use Stripe Connect directly. Tips flow into the platform account;
 `lib/actions/stripe.ts`, `lib/actions/balance.ts`, `lib/actions/admin.ts`, `app/api/stripe/webhook/route.ts`, `components/dashboard/balance-overview.tsx`, `components/dashboard/tip-earnings.tsx`, `components/dashboard/overview.tsx`, `components/admin/payout-management.tsx`, `components/card-flip.tsx`, `instrumentation.ts`, `next.config.mjs`, `supabase/migrations/20260805_payout_method_destination.sql` (new)
 
 ### Commit
-`ea81fde`
+`dcecf2c` (prior push `c38685b` author-amended to Sameer)
 
 ---
 
@@ -49,7 +49,7 @@ Null-safety prevents build/runtime crashes when env vars are missing. Dev SW cle
 `lib/supabase/client.ts`, `middleware.ts`, `components/navbar.tsx`, `app/dashboard/notifications/page.tsx`, `app/onboarding/page.tsx`, `components/avatar-upload.tsx`, `components/cover-image-upload.tsx`, `components/providers/sw-registration.tsx`, `next.config.mjs`, `public/sw.js`, `components/card-flip.tsx` (new), `components/hero.tsx`
 
 ### Commit
-`abfc6b1`
+`abfc6b1` → rewritten as `6fefe8f` (author amended to Sameer)
 
 ---
 
