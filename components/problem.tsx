@@ -16,7 +16,7 @@ const PROBLEMS = [
   {
     icon: Wallet,
     title: "Your audience isn&rsquo;t paying you.",
-    body: "You&rsquo;ve got 50K followers but $0 from them. Tips, memberships, shoutouts, merch — none of it is set up.",
+    body: "You&rsquo;ve got 50K followers but $0 from them. Tips, shoutouts, merch — none of it is set up.",
   },
   {
     icon: Hourglass,

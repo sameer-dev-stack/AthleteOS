@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getPublicProfile } from "@/lib/actions/profile";
-import { getTiers } from "@/lib/actions/memberships";
 import { ProfileCard } from "@/components/profile-card";
 import { ProfileCardSkeleton } from "@/components/profile-card-skeleton";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
@@ -78,9 +77,6 @@ export default async function UserProfilePage({ params }: Props) {
   const p = result.data;
   const displayName = cleanDisplayName(p.full_name, p.username);
 
-  const tiersResult = await getTiers(p.id);
-  const tiers = (tiersResult.ok && tiersResult.data ? tiersResult.data : []) as { id: string; name: string; description: string | null; price_cents: number; is_active: boolean }[];
-
   // Fetch public stats (views, social followers, nil score)
   let totalViews = 0;
   let totalFollowers = 0;
@@ -141,7 +137,7 @@ export default async function UserProfilePage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: safeJsonLd }}
       />
       <Suspense fallback={<ProfileCardSkeleton />}>
-        <ProfileCard profile={p} tiers={tiers} totalViews={totalViews} totalFollowers={totalFollowers} nilScore={nilScore} />
+        <ProfileCard profile={p} totalViews={totalViews} totalFollowers={totalFollowers} nilScore={nilScore} />
       </Suspense>
     </>
   );

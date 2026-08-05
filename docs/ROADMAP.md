@@ -19,7 +19,7 @@
 | **Phase 6** | DONE | **Subscription/paywall + usage metering** — Stripe Billing wired, webhook handlers complete |
 | **Phase 7** | DONE | **God Mode admin** — All 8 items: user mgmt, plan controls, audit log, sign-out, usage monitoring, content moderation, payout management, abuse detection |
 | **Phase 8** | DONE | **Analytics + refinement** — raw event schema, server actions, dashboard panel, platform analytics |
-| **Phase 9** | DONE | **Fan memberships** — tiers, content posts, subscriber management, Stripe subscriptions |
+| **Phase 9** | CUT (2026-08-05) | **Fan memberships** — REMOVED pre-MVP. Tiers/content posts/subscriber mgmt/Stripe subscriptions deleted from codebase (see Phase 9 section) |
 | **Phase 10** | DONE | **Brand-side tools** — brand accounts, athlete discovery, campaign briefs, inbound inquiries, public discovery portal |
 | **Phase 11** | DONE | **Team tier** — multi-athlete accounts, bulk onboarding, roster analytics, team pages |
 | **Phase 12** | DONE | **AI Asset Vault + Gamified Milestones** — save/reuse AI outputs, Day 7/30/90 feature unlocks |
@@ -270,18 +270,20 @@
 
 ---
 
-## Phase 9 — Fan Memberships (week 16–17)
+## Phase 9 — Fan Memberships (week 16–17) — CUT from MVP
 
 **Goal:** Recurring fan revenue for athletes.
 
-### Fan features
+**Status:** REMOVED 2026-08-05. Post-MVP if ever — the MVP is the athlete card (name, contact, stats, photos, tips) only. Tiers create per-athlete recurring Stripe subscriptions, exclusive content gating, and subscriber management — too much surface for launch.
+
+**If revisited:**
 - [ ] Fan sign-up (email or social)
 - [ ] Support tier selection ($3/$5/$10/mo)
 - [ ] Exclusive content section on athlete card (member-only posts, media, updates)
 - [ ] Stripe subscriptions for recurring payments
 - [ ] Fan dashboard (manage subscriptions, view content)
 
-**Definition of done:** A fan can subscribe to an athlete and get access to exclusive content in their feed.
+**Definition of done (original):** A fan can subscribe to an athlete and get access to exclusive content in their feed.
 
 ---
 

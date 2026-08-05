@@ -473,9 +473,7 @@ test.describe('Dashboard Navigation', () => {
     '/dashboard/billing',
     '/dashboard/compliance',
     '/dashboard/marketplace',
-    '/dashboard/memberships',
     '/dashboard/schedule',
-    '/dashboard/campaigns',
     '/dashboard/notifications',
   ];
 

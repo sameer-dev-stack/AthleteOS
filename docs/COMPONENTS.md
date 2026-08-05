@@ -201,13 +201,13 @@ The public-facing athlete card rendered at `/username`. Premium dark design with
 
 ### `<ProfileCard />` — `components/profile-card.tsx`
 Premium flip-style public profile card with front/back faces. Features:
-- Front: photo hero with AthleteOS logo overlay, identity (name, verified badge, sport/position/school), NIL Score badge, views/followers/stats counts, sport-specific stat grid
-- Back: bio, expandable links, highlight videos, social icons (Instagram, Twitter, TikTok, YouTube) with brand-color hover, membership tiers, Contact/Inquiry/Tip buttons, share buttons
+- Front: photo hero with AthleteOS logo overlay and top-bar Pro/Team plan badge, identity (name, verified badge, class year chip, sport/position/school, views/followers), unified 2x2 stats grid (NIL score + up to 3 stats)
+- Back: bio, expandable links, highlight videos, Connect section (social icons + card share row separated by hairline rules), Contact/Inquiry buttons in a 2-column row, full-width "Support [Name]" tip CTA
 - Framer Motion spring-based 3D flip animation with auto-return timer
 - Rotating glow border via conic-gradient animation
 - Photo carousel for multi-photo profiles
 - **Used by:** `app/[username]/page.tsx`
-- **Props:** `{ profile: Profile; tiers?: Tier[]; totalViews?: number; totalFollowers?: number; nilScore?: number | null }`
+- **Props:** `{ profile: Profile; totalViews?: number; totalFollowers?: number; nilScore?: number | null }`
 
 ### `<CardSection>` — `components/card-sections.tsx`
 Reusable entrance animation wrapper using Framer Motion. Fades in and slides up with configurable delay.
@@ -497,7 +497,7 @@ Premium standard-sized (360x504px) interactive trading card with 3D flip animati
 ## Dashboard Components (`components/dashboard/`)
 
 ### `<DashboardEditor>` — `components/dashboard/profile-editor.tsx`
-Tabbed profile editor with 8 sections (Bio, Stats, Links, Social, Highlights, Theme, Tiers, Content). Client component with local form state and optimistic save via `updateProfile` server action. Theme tab includes `<ThemePicker>` for accent color and layout customization.
+Tabbed profile editor with 7 sections (Bio, Stats, Links, Social, Highlights, Contact, Theme). Client component with local form state and optimistic save via `updateProfile` server action. Theme tab includes `<ThemePicker>` for accent color and layout customization.
 - **Used by:** `app/dashboard/page.tsx`
 - **Props:**
   - `profile: Profile` — current profile data
@@ -598,18 +598,6 @@ Displays athlete's tip earnings summary and payout status. Shows total tips rece
 Admin withdrawal-request queue. Lists pending payout requests (athlete email, amount, payout method, requested time) with Mark paid / Failed actions via `updatePayoutStatus`. Shows aggregate stat cards (total tips, total revenue, requests, awaiting fulfillment) via `getAllTipsSummary`.
 - **Used by:** `app/admin/*`
 - **Props:** none
-
-### `<MembershipTiers>` — `components/dashboard/membership-tiers.tsx`
-Manages athlete membership tiers for fan subscriptions. Displays list of active tiers with name, price, and subscriber count. Create tier form with name, description, and price inputs. Delete button for each tier. Empty state when no tiers exist.
-- **Used by:** `components/dashboard/profile-editor.tsx` (Tiers tab)
-- **Props:**
-  - `athleteId: string` — athlete profile ID
-
-### `<ContentPosts>` — `components/dashboard/content-posts.tsx`
-Manages exclusive content posts for fan subscriptions. Create post form with title, body, member-only toggle, and tier requirement. List of posts with publish/unpublish toggle, truncated body preview, and metadata (tier, status, date). Empty state when no posts exist.
-- **Used by:** `components/dashboard/profile-editor.tsx` (Content tab)
-- **Props:**
-  - `athleteId: string` — athlete profile ID
 
 ### `<InquiryInbox>` — `components/dashboard/inquiry-inbox.tsx`
 Inbound brand inquiry management for athletes. Displays inquiry count badge and list of inquiries with brand name, message preview, status badges (new/read/replied), and timestamp. Status update dropdown for each inquiry. Empty state when no inquiries received.

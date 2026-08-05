@@ -971,4 +971,27 @@ Tips previously used Stripe Connect: each athlete had their own connected Stripe
 - Legacy Connect columns (`stripe_account_id`, `stripe_onboarding_complete`) remain in `profiles` but are no longer written for new athletes; god-mode filters on them are effectively all-empty until cleaned up.
 - New `payouts` columns (`payout_method`, `payout_destination`, `updated_at`) require migration `20260805_payout_method_destination.sql` to be applied before `createPayout` works.
 
+---
+
+## ADR-043 — Cut fan memberships (tiers, content posts, email campaigns) for MVP launch
+
+**Status:** Accepted · 2026-08-05
+
+**Context:**
+The product shipped a partially-built fan-membership system: `membership_tiers`, `fan_subscriptions`, `fan_subscribers`, recurring Stripe Checkout (`createSubscriptionCheckout`, `/fan/subscribe/[tierId]`), exclusive content posts, and email campaigns that mail `fan_subscribers`. MVP launch is the priority; the card must be simply name, contact, stats, photos, animations, and tips. Recurring fan revenue requires per-athlete subscription products, gated content CRUD, subscriber management, and campaign tooling — too much unbuilt surface to complete before launch. The athlete's own plan billing (Pro/Team, Free/Pro/Elite for athletes, `billing.ts`/`stripe-billing.ts`) is a separate system and stays.
+
+**Decision:**
+1. Delete `lib/actions/memberships.ts`, `lib/actions/memberships-client.ts`, `lib/actions/campaigns.ts`.
+2. Delete `components/dashboard/membership-tiers.tsx`, `content-posts.tsx`, `email-campaigns.tsx`.
+3. Delete routes `app/fan/subscribe/`, `app/dashboard/memberships/`, `app/dashboard/campaigns/`; remove their nav entries from `config/dashboard-nav.ts`.
+4. `ProfileCard` drops the `tiers` prop and the tier section; `app/[username]/page.tsx` stops calling `getTiers`.
+5. DB tables `membership_tiers`, `fan_subscriptions`, `fan_subscribers`, `email_campaigns` are left in place (no destructive migration) so existing analytics/teams/GDPR queries keep working; they are simply unused.
+6. Landing copy scrubbed of "memberships" (Problem, How It Works, NIL guide, `docs/COPY.md`); ROADMAP Phase 9 marked CUT.
+
+**Consequences:**
+- Faster MVP: the card is only name/contact/stats/photos/tips; no recurring-subscription backend to finish or maintain.
+- Orphaned tables remain in Supabase (empty or unused) — safe to drop later with a migration if desired.
+- Stripe recurring products/config specific to fan tiers under the platform account are unused.
+- If re-added post-MVP, Phase 9 in ROADMAP.md is the recovery checklist.
+
 

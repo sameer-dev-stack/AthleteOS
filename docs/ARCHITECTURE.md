@@ -78,11 +78,6 @@ NIL/
 │   │   │   └── error.tsx         # Notifications error page
 │   │   ├── error.tsx             # Global dashboard error page
 │   │   └── page.tsx              # Athlete dashboard (protected) — profile overview
-│   ├── fan/
-│   │   └── subscribe/
-│   │       └── [tierId]/
-│   │           ├── client.tsx    # Fan subscribe UI (client component)
-│   │           └── page.tsx      # Fan subscription page (server component)
 │   ├── onboarding/
 │   │   └── page.tsx              # Multi-step onboarding wizard — username + profile
 │   ├── stripe/
@@ -146,12 +141,10 @@ NIL/
 │   │   ├── analytics-panel.tsx   # Analytics dashboard panel (client)
 │   │   ├── billing-panel.tsx     # Subscription billing + pricing cards (client)
 │   │   ├── compounding-value.tsx # Days on platform compounding value lock-in card
-│   │   ├── content-posts.tsx     # Exclusive content post management (client)
 │   │   ├── dashboard-content.tsx # Dashboard state wrapper (client)
 │   │   ├── empty-state.tsx       # Reusable empty state component
 │   │   ├── inquiry-inbox.tsx     # Inbound inquiry management (client)
 │   │   ├── launch-checklist.tsx  # Onboarding completion checklist
-│   │   ├── membership-tiers.tsx  # Membership tier management (client)
 │   │   ├── nil-ai-breakdown.tsx  # AI explanation panel with quota details (client)
 │   │   ├── nil-deal-checker.tsx  # Deal evaluator form (client, Pro/Elite gated)
 │   │   ├── nil-metrics-strip.tsx # Stats bar component displaying 5 NIL indicators
@@ -237,8 +230,6 @@ NIL/
 │       ├── inquiries.ts          # Server Actions: submitInquiry, getAthleteInquiries, updateInquiryStatus
 │       ├── balance.ts            # Server Actions: getBalanceSummary, getPayoutHistory, createPayout (48h request)
 │       ├── billing.ts            # Server Actions: billing read/write paths
-│       ├── memberships.ts        # Server Actions: createTier, getTiers, createContentPost, createSubscriptionCheckout
-│       ├── memberships-client.ts # Server Action: getTierForSubscription (for fan subscribe page)
 │       ├── plan.ts               # Server Action: getEffectivePlan
 │       ├── profile.ts            # Server Actions: getMyProfile, checkUsername, updateProfile, getPublicProfile
 │       ├── quick-ai.ts           # Server Actions: quickAiAction (One-click signal actions)

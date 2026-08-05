@@ -5,7 +5,32 @@
 
 ---
 
-## 2026-08-05 — Athlete card luxury trading-card redesign (front + back)
+## 2026-08-05 — Cut fan memberships (tiers, content posts, email campaigns) pre-MVP
+
+### What changed
+- **Deleted** `lib/actions/memberships.ts`, `lib/actions/memberships-client.ts`, `lib/actions/campaigns.ts`.
+- **Deleted** `components/dashboard/membership-tiers.tsx`, `components/dashboard/content-posts.tsx`, `components/dashboard/email-campaigns.tsx`.
+- **Deleted routes** `app/fan/subscribe/`, `app/dashboard/memberships/`, `app/dashboard/campaigns/`.
+- **`config/dashboard-nav.ts`** — removed Campaigns + Memberships entries (and unused `Mail`/`Users` icon imports).
+- **`components/profile-card.tsx`** — removed the `tiers` prop, `Tier` type, and the membership-tier section from the back face. Card is now: name, contact (modal), stats, photos, animations, tips.
+- **`app/[username]/page.tsx`** — removed the `getTiers` fetch.
+- **`e2e/full-audit.spec.ts`** — dropped the removed dashboard routes from the auth-redirect audit.
+- **Copy** — `components/problem.tsx`, `components/how-it-works.tsx`, `app/docs/nil-guide/page.tsx` scrubbed of "memberships"; `docs/COPY.md` updated (5 revenue streams, dashboard mockup, Pro tier features).
+- **Docs** — ADR-043 added; ROADMAP Phase 9 marked CUT; ARCHITECTURE/COMPONENTS updated.
+- DB tables (`membership_tiers`, `fan_subscriptions`, `fan_subscribers`, `email_campaigns`) intentionally left in place — no destructive migration; analytics/teams/GDPR queries still work.
+
+### Why
+User direction: MVP is the digital card only — name, contact, stats, photos, animations, tips. Monthly membership tiers (Gold tier etc.) were partially built and would require recurring Stripe products, gated content, subscriber management, and campaign tooling to complete — too much surface before launch. Remove now so nothing eats MVP time now or later.
+
+### Files touched
+- Deleted: `lib/actions/memberships.ts`, `lib/actions/memberships-client.ts`, `lib/actions/campaigns.ts`, `components/dashboard/membership-tiers.tsx`, `components/dashboard/content-posts.tsx`, `components/dashboard/email-campaigns.tsx`, `app/fan/subscribe/`, `app/dashboard/memberships/`, `app/dashboard/campaigns/`
+- Edited: `components/profile-card.tsx`, `app/[username]/page.tsx`, `config/dashboard-nav.ts`, `e2e/full-audit.spec.ts`, `components/problem.tsx`, `components/how-it-works.tsx`, `app/docs/nil-guide/page.tsx`
+- Docs: `CHANGELOG.md`, `DECISIONS.md` (ADR-043), `ROADMAP.md`, `ARCHITECTURE.md`, `COMPONENTS.md`, `COPY.md`
+
+### Commit
+- (pending)
+
+---
 
 ### What changed
 - **`components/profile-card.tsx`** — Full layout revamp of the public athlete card, both faces.

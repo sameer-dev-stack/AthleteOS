@@ -74,7 +74,7 @@
 **4 cards:**
 1. **Your brand lives in 8 different apps.** — Instagram bio. TikTok link. Highlights on Hudl. DMs for deals. Nothing is consolidated. Nothing converts.
 2. **Brands can't find you.** — Sponsors and collectives scroll past athletes who don't look professional online. A bad profile loses you real money.
-3. **Your audience isn't paying you.** — You've got 50K followers but $0 from them. Tips, memberships, shoutouts, merch — none of it is set up.
+3. **Your audience isn't paying you.** — You've got 50K followers but $0 from them. Tips, shoutouts, merch — none of it is set up.
 4. **Writing copy eats your time.** — Bios, captions, sponsor pitches, DMs. You're an athlete, not a copywriter. Most pitches never get sent.
 
 ---
@@ -103,7 +103,6 @@
 - Highlight reel · 3 videos · 14K plays
 - Tip jar · $847 this month
 - Sponsor inquiries · 2 new · Gymshark, Celsius
-- Membership · 42 paying fans
 - **Monthly takeaway: $2,348** · ↑ 38%
 
 ---
@@ -141,7 +140,7 @@
 **4 steps:**
 1. **Claim your athlete card** — Sign up, drop your sport and school, and grab your custom URL: `athleteos.app/yourname`. *Takes under 2 minutes. Free to start.*
 2. **Let AI build the first draft** — Generate your bio, captions, and sponsor pitches in one click. Edit, approve, publish. *5 free AI generations included.*
-3. **Plug in monetization** — Turn on tips, memberships, paid shoutouts, merch, and brand inquiries — all in one card. *Powered by Stripe. Direct deposit.*
+3. **Plug in monetization** — Turn on tips, paid shoutouts, merch, and brand inquiries — all in one card. *Powered by Stripe. Direct deposit.*
 4. **Share it everywhere** — Drop your link in every bio. Fans support you. Brands DM you. The card does the rest. *Tracked, analyzed, and optimized.*
 
 ---
@@ -192,11 +191,10 @@
 > Turn your audience into income.
 
 **Body:**
-> You shouldn't need 4 apps and a manager to make money from your following. Every athlete card ships with six revenue streams ready to switch on.
+> You shouldn't need 4 apps and a manager to make money from your following. Every athlete card ships with five revenue streams ready to switch on.
 
-**6 streams:**
+**5 streams:**
 - Tips · From $1+
-- Memberships · Recurring
 - Paid shoutouts · Per request
 - Merch · Print + ship
 - Brand deals · Inbound
@@ -209,7 +207,7 @@
 - Lifetime earnings: **$12,847.20** (animated counter)
 - +$2,348 this mo (animated counter)
 - Chart (Jan–Jul)
-- Recent activity: Gymshark · Brand deal (+$2,400) · Membership · 42 fans (+$378) · Tip · @jordan_h (+$45) · Shoutout · 8 orders (+$240)
+- Recent activity: Gymshark · Brand deal (+$2,400) · Tip · @jordan_h (+$45) · Shoutout · 8 orders (+$240)
 
 ---
 
@@ -239,7 +237,7 @@
 *For serious athletes building a real NIL business.*
 - Everything in Free
 - Unlimited AI tools
-- Memberships & paid shoutouts
+- Paid shoutouts
 - Full revenue dashboard
 - Brand deal inbox
 - Custom themes & domain

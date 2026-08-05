@@ -58,9 +58,7 @@ function sanitize(t: string | null): string {
 
 /* ── Component ───────────────────────────────────────── */
 
-type Tier = { id: string; name: string; description: string | null; price_cents: number; is_active: boolean };
-
-export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollowers = 0, nilScore = null }: { profile: Profile; tiers?: Tier[]; totalViews?: number; totalFollowers?: number; nilScore?: number | null }) {
+export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilScore = null }: { profile: Profile; totalViews?: number; totalFollowers?: number; nilScore?: number | null }) {
   const [flipped, setFlipped] = useState(false);
   const [copied, setCopied] = useState(false);
   const [photoIdx, setPhotoIdx] = useState(0);
@@ -817,39 +815,8 @@ export function ProfileCard({ profile, tiers = [], totalViews = 0, totalFollower
                 <div className="h-px w-10" style={{ background: "rgba(255,255,255,0.08)" }} />
               </div>
             </div>
-            {/* ── Bottom: Tiers + Actions ─────────── */}
+            {/* ── Bottom: Actions ─────────── */}
             <div className="mt-auto flex flex-col gap-3 w-full px-5 pb-4 pt-1 flex-shrink-0" onClick={stopFlip}>
-              {/* Membership Tiers */}
-              {tiers.length > 0 && (
-                <div className="w-full space-y-2">
-                  {tiers.map((tier) => (
-                    <a
-                      key={tier.id}
-                      href={`/fan/subscribe/${tier.id}`}
-                      onClick={(e) => { e.stopPropagation(); resetAutoReturn(); }}
-                      className="flex items-center justify-between gap-3 rounded-2xl px-5 py-3.5 backdrop-blur-md transform translate-z-0 [backface-visibility:hidden] [will-change:transform] transition-all duration-200 hover:border-white/[0.14]"
-                      style={{
-                        background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                        boxShadow: "0 0 1px transparent, 0 8px 32px -12px rgba(0,0,0,0.5)",
-                        outline: "1px solid transparent",
-                        WebkitBackfaceVisibility: "hidden",
-                        backfaceVisibility: "hidden",
-                      }}
-                    >
-                      <div className="min-w-0">
-                        <span className="block text-[13px] font-bold text-white/90 leading-tight truncate">{tier.name}</span>
-                        {tier.description && (
-                          <span className="block text-[10px] text-white/40 truncate mt-0.5 leading-tight">{tier.description}</span>
-                        )}
-                      </div>
-                      <span className="flex-shrink-0 text-[12px] font-black" style={{ color: accent }}>
-                        ${(tier.price_cents / 100).toFixed(0)}/mo
-                      </span>
-                    </a>
-                  ))}
-                </div>
-              )}
 
               {/* Contact + Inquiry (2-col) */}
               <div className="flex gap-2 w-full">

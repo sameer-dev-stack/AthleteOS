@@ -47,9 +47,8 @@ export default function NilGuidePage() {
             <section>
               <h2 className="text-xl font-bold text-white">Monetization Strategies</h2>
               <p className="mt-3 text-sm leading-relaxed text-ink-muted">
-                Start with tips from fans. Add membership tiers for exclusive content. Build
-                relationships with local brands. The AthleteOS monetization tools make it easy
-                to get paid — directly from your card.
+                Start with tips from fans. Build relationships with local brands. The AthleteOS
+                monetization tools make it easy to get paid — directly from your card.
               </p>
             </section>
           </div>
