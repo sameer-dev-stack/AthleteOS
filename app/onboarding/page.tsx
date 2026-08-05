@@ -341,7 +341,6 @@ export default function OnboardingPage() {
 
   const canProceedUsername = usernameStatus === "available" && username.length >= 3;
   const canProceedProfile =
-    !!avatarUrl &&
     fullName.trim().length > 0 &&
     sport.length > 0 &&
     position.trim().length > 0 &&
@@ -358,10 +357,7 @@ export default function OnboardingPage() {
   );
 
   const contactEmailInvalid = contactEmail.trim().length > 0 && !isValidEmail(contactEmail);
-  const hasFilledLink = links.some((l) => l.label.trim().length > 0 && l.url.trim().length > 0);
-  const hasFilledHighlight = highlights.some((h) => h.title.trim().length > 0 && h.url.trim().length > 0);
-  const contactFilled = isValidEmail(contactEmail.trim()) || contactPhone.replace(/\D/g, "").length >= 10;
-  const canProceedDetails = hasFilledLink && hasFilledHighlight && contactFilled;
+  const canProceedDetails = !contactEmailInvalid;
 
   const statTemplates = sport ? getStatTemplatesForSport(sport) : null;
   const usedStatLabels = new Set(stats.map((s) => s.label.toLowerCase()));

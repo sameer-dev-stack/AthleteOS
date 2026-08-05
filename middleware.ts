@@ -85,7 +85,10 @@ export async function middleware(request: NextRequest) {
 
   if (isAdminPath) {
     if (!user) {
-      return new NextResponse("Forbidden", { status: 403 });
+      const signInUrl = request.nextUrl.clone();
+      signInUrl.pathname = "/auth/sign-in";
+      signInUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(signInUrl);
     }
 
     const { data: profile } = await serviceRole!
@@ -96,7 +99,9 @@ export async function middleware(request: NextRequest) {
 
     const authorized = profile?.role === "admin" || isAdmin(user.email);
     if (!authorized) {
-      return new NextResponse("Forbidden", { status: 403 });
+      const dashUrl = request.nextUrl.clone();
+      dashUrl.pathname = "/dashboard";
+      return NextResponse.redirect(dashUrl);
     }
 
     if (profile?.suspended) {
