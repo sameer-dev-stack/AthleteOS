@@ -600,10 +600,16 @@ Admin withdrawal-request queue. Lists pending payout requests (athlete email, am
 - **Props:** none
 
 ### `<InquiryInbox>` — `components/dashboard/inquiry-inbox.tsx`
-Inbound brand inquiry management for athletes. Displays inquiry count badge and list of inquiries with brand name, message preview, status badges (new/read/replied), and timestamp. Status update dropdown for each inquiry. Empty state when no inquiries received.
-- **Used by:** `components/dashboard/dashboard-content.tsx`
+Unified Deal Room & Business Inbox. Displays total business revenue ledger (`Tips Total + Won Deals Total`), inbound brand inquiries with a 5-stage pipeline selector (`New` → `Replied` → `Negotiating` → `Won` → `Lost`), dollar deal value input for won deals, and direct email reply links. Empty state prompts card sharing.
+- **Used by:** `components/dashboard/overview.tsx`
+- **Props:** none
+
+### `<BusinessDashboard>` — `components/dashboard/business-dashboard.tsx`
+Business Operations summary card for the right sidebar. Displays 7-day revenue (tips + won deals), total won deals count, active pipeline counts (new/negotiating), and quick CTA buttons ("Open Deal Room", "Share"). Clean empty state when zero revenue exists.
+- **Used by:** `components/dashboard/overview.tsx`
 - **Props:**
-  - `athleteId: string` — athlete profile ID
+  - `themeAccent?: string` — accent color (default `"#C6FF3D"`)
+  - `username?: string | null` — athlete handle for card sharing link
 
 ### `<BillingPanel>` — `components/dashboard/billing-panel.tsx`
 Subscription billing panel showing current plan badge, AI usage bar, pricing cards, and upgrade/manage buttons. Integrates with Stripe Checkout for upgrades and Customer Portal for management. Includes loading states for checkout, portal, and cancel operations. Error display for failed operations. Graceful downgrade via `cancel_at_period_end`.

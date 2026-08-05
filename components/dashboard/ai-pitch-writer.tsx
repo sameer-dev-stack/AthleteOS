@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Loader2, Mail, Copy, Check, Bookmark } from "lucide-react";
-import { generatePitchStream, recordToolEvent } from "@/lib/actions/ai";
+import { generatePitchStream } from "@/lib/actions/ai";
 import { type Profile } from "@/lib/actions/profile";
 import { saveAssetToVault } from "@/lib/actions/ai-vault";
 import { useStream } from "@/lib/hooks/use-stream";
@@ -36,11 +36,7 @@ export function AIPitchWriter({ profile, onQuotaChange, disabled }: Props) {
   const hasSavedOrCopiedRef = useRef(false);
 
   useEffect(() => {
-    return () => {
-      if (hasGeneratedRef.current && !hasSavedOrCopiedRef.current) {
-        recordToolEvent("pitch", "ignored").catch(() => {});
-      }
-    };
+    return () => {};
   }, []);
 
   useEffect(() => {
@@ -81,7 +77,6 @@ export function AIPitchWriter({ profile, onQuotaChange, disabled }: Props) {
     setCopiedIndex(index);
     hasSavedOrCopiedRef.current = true;
     setTimeout(() => setCopiedIndex(null), 2000);
-    recordToolEvent("pitch", "copied").catch(() => {});
   }
 
   function handleUseDraft(text: string, index: number) {
@@ -89,7 +84,6 @@ export function AIPitchWriter({ profile, onQuotaChange, disabled }: Props) {
     setUsedDraftIndex(index);
     hasSavedOrCopiedRef.current = true;
     setTimeout(() => setUsedDraftIndex(null), 2000);
-    recordToolEvent("pitch", "saved").catch(() => {});
   }
 
   async function handleSaveToVault(text: string, index: number) {
@@ -98,7 +92,6 @@ export function AIPitchWriter({ profile, onQuotaChange, disabled }: Props) {
       setSavedIndex(index);
       hasSavedOrCopiedRef.current = true;
       setTimeout(() => setSavedIndex(null), 2000);
-      recordToolEvent("pitch", "saved").catch(() => {});
     }
   }
 

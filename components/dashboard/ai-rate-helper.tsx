@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Loader2, DollarSign, Copy, Check, Bookmark } from "lucide-react";
-import { generateRateGuidanceAction, recordToolEvent } from "@/lib/actions/ai";
+import { generateRateGuidanceAction } from "@/lib/actions/ai";
 import { type Profile } from "@/lib/actions/profile";
 import { saveAssetToVault } from "@/lib/actions/ai-vault";
 
@@ -24,15 +24,8 @@ export function AIRateHelper({ profile, onQuotaChange, disabled }: Props) {
   const [niche, setNiche] = useState("");
   const [pastDeals, setPastDeals] = useState("");
 
-  const hasGeneratedRef = useRef(false);
-  const hasSavedOrCopiedRef = useRef(false);
-
   useEffect(() => {
-    return () => {
-      if (hasGeneratedRef.current && !hasSavedOrCopiedRef.current) {
-        recordToolEvent("rate", "ignored").catch(() => {});
-      }
-    };
+    return () => {};
   }, []);
 
   async function handleGenerate() {
@@ -55,7 +48,6 @@ export function AIRateHelper({ profile, onQuotaChange, disabled }: Props) {
 
     if (result.ok && result.data) {
       setGuidance(result.data);
-      hasGeneratedRef.current = true;
       if (result.quota) onQuotaChange(result.quota);
     } else {
       setError(result.error || "Generation failed");
@@ -66,9 +58,7 @@ export function AIRateHelper({ profile, onQuotaChange, disabled }: Props) {
     if (!guidance) return;
     navigator.clipboard.writeText(guidance).catch(() => {});
     setCopied(true);
-    hasSavedOrCopiedRef.current = true;
     setTimeout(() => setCopied(false), 2000);
-    recordToolEvent("rate", "copied").catch(() => {});
   }
 
   async function handleSaveToVault() {
@@ -76,9 +66,7 @@ export function AIRateHelper({ profile, onQuotaChange, disabled }: Props) {
     const result = await saveAssetToVault("rate", guidance);
     if (result.ok) {
       setSaved(true);
-      hasSavedOrCopiedRef.current = true;
       setTimeout(() => setSaved(false), 2000);
-      recordToolEvent("rate", "saved").catch(() => {});
     }
   }
 

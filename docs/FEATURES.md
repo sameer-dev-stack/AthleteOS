@@ -18,17 +18,16 @@ A data-driven engine that reads real performance stats from the athlete's dashbo
 
 ---
 
-## 2. The Lock-In System (AI Memory & Telemetry)
+## 2. Business Inbox & Deal Room
 
-A behavioral engagement loop that records toolkit usage parameters silently, refines future AI text generation models, emails weekly briefings to active users, hooks magic action triggers on dashboards, and tracks compounding days-on-platform milestones to lock athletes into the AthleteOS workspace.
+A unified revenue operations hub consolidating inbound brand inquiries, deal pipeline progression (`new` → `replied` → `negotiating` → `won` → `lost`), dollar deal value tracking, and combined business revenue metrics (tips + won deals). Accompanied by a Business Dashboard widget displaying 7-day revenue and active pipeline metrics.
 
 **Files:**
-- `lib/actions/ai-memory.ts` - Event logger and memory updater server actions
-- `lib/actions/quick-ai.ts` - Server action executing pre-built prompts based on real-time traffic/financial triggers
-- `app/api/cron/weekly-briefing/route.ts` - Cron route handler executing Monday 8AM UTC
-- `components/dashboard/smart-ai-actions.tsx` - One-click contextual prompt buttons (e.g. dropped views → re-engagement caption)
-- `components/dashboard/compounding-value.tsx` - Days on platform card showing compounding value stats
-- `vercel.json` - Cron configuration and scheduling parameters
+- `components/dashboard/inquiry-inbox.tsx` - Unified Deal Room & Business Inbox component
+- `components/dashboard/business-dashboard.tsx` - Business Operations overview card
+- `lib/actions/inquiries.ts` - Server actions for inquiries, pipeline status updates, and deal values (`updateInquiryStatus`)
+- `lib/actions/business.ts` - Server action for calculating 7-day revenue, won deals, and pipeline counts (`getBusinessSummary`)
+- `supabase/migrations/20260805_deal_room_inquiries.sql` - Database migration adding `deal_value` column, status check constraint, insert sterilization trigger, and RLS policies
 
 ---
 

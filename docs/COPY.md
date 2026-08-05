@@ -8,7 +8,7 @@
 
 - **2026-08-05** — `components/monetization.tsx` (#1 monetization card): replaced obsolete "Memberships / Recurring" with `{ icon: Handshake, label: "Brand deals", note: "Won & logged" }`.
 - **2026-08-05** — `components/pricing.tsx`: "Memberships & paid shoutouts" → "Tips & won brand deals".
-- **PENDING (Batch 2)** — `components/how-it-works.tsx` step 1: "Turn on tips, paid shoutouts, merch, and brand inquiries — all in one card." → remove non-existent "paid shoutouts" and "merch" claims (only tips + brand inquiries are real).
+- **2026-08-05** — `components/how-it-works.tsx` (step 3 body): "Turn on tips, paid shoutouts, merch, and brand inquiries — all in one card." → "Turn on tips and brand inquiries, and run deals from first message to signed — all in one card." Removes non-existent "paid shoutouts" and "merch" claims; adds the Deal Room story.
 
 ---
 

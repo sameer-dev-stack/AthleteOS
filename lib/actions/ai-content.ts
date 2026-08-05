@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { callGemini } from "@/lib/ai";
 import { getAiQuota, recordAiUsage } from "@/lib/actions/ai-usage";
 import { getMyProfile } from "@/lib/actions/profile";
-import { getAiMemory, recordAiEvent } from "@/lib/actions/ai-memory";
+import { getAiMemory } from "@/lib/actions/ai-memory";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -124,10 +124,7 @@ Write the output directly. No labels, no intro text, no quotation marks around t
   try {
     const data = await callGemini(prompt, config.systemPrompt, config.maxTokens);
 
-    await Promise.all([
-      recordAiUsage("content_generator"),
-      recordAiEvent("content", "generated", memory?.preferred_tone || "confident", "medium"),
-    ]);
+    await recordAiUsage("content_generator");
 
     // Persist to ai_content_history table
     await supabase.from("ai_content_history").insert({

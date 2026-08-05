@@ -5,6 +5,29 @@
 
 ---
 
+## 2026-08-05 — Batch 2: retire silent telemetry, ship Business Dashboard, fix landing copy
+
+### What changed
+- **Silent telemetry retired (ADR-046):** `recordToolEvent`/`recordAiEvent` removed from all 5 AI tool components (`ai-bio-builder`, `ai-caption-generator`, `ai-pitch-writer`, `ai-profile-optimizer`, `ai-rate-helper`) and `overview.tsx`; `getAiMemory` reduced to a null stub in `lib/actions/ai-memory.ts`; `lib/actions/ai.ts`, `ai-content.ts`, `quick-ai.ts` read memory null-safe (`memory?.preferred_tone || "confident"`). Tables `ai_events` / `athlete_ai_memory` kept in schema (GDPR export list untouched) — no write path remains.
+- **NEW `lib/actions/business.ts` — `getBusinessSummary()`:** authenticated client, RLS-scoped; 7-day window; tips summed from `net_amount ?? amount` (cents ÷ 100 → dollars), `status='succeeded'` only; won deals from `inquiries.deal_value` (dollars); `nil_deals` excluded (ADR-047); returns `{tipsThisWeek, tipsTotal, wonDealsThisWeek, wonDealsTotal, totalMoneyThisWeek, totalDealsWonCount, pipeline{new,replied,negotiating,won,lost}}`.
+- **NEW `components/dashboard/business-dashboard.tsx`:** "Business Overview / NIL Operations" — 7-Day Revenue, Total Won Deals, Active Pipeline, Open Deal Room (smooth-scroll to `id="deal-room-section"` in overview), Share card (`navigator.share` → clipboard fallback, `NEXT_PUBLIC_SITE_URL`), empty state "Ready for Brand Deals"; rendered where `CompoundingValue` sat.
+- **Copy:** `components/how-it-works.tsx` step 3 → "Turn on tips and brand inquiries, and run deals from first message to signed — all in one card." Logged in `docs/COPY.md`.
+- **Docs:** ARCHITECTURE.md / COMPONENTS.md / FEATURES.md refreshed (4 deleted components removed; FEATURES §2 "The Lock-In System" → "Business Inbox & Deal Room"; `<BusinessDashboard>` documented).
+- **Verification:** 46/46 unit tests pass; `npm run build` green (14.4s); lint clean except pre-existing `components/profile-card.tsx:87` warning.
+
+### Why
+Second ratified batch of MASTER_PLAN (§8 step 4): finish ADR-046 (no silent telemetry shaping AI outputs), and surface the business ledger (tips + won deals + pipeline) as the athlete's visible scoreboard — the defensible moat. Copy corrected to stop advertising features that don't exist.
+
+### Files touched
+- Added: `lib/actions/business.ts`, `components/dashboard/business-dashboard.tsx`
+- Edited: `components/dashboard/{ai-bio-builder,ai-caption-generator,ai-pitch-writer,ai-profile-optimizer,ai-rate-helper,overview}.tsx`, `components/how-it-works.tsx`, `lib/actions/{ai-memory,ai,ai-content,quick-ai}.ts`
+- Docs: `CHANGELOG.md`, `ARCHITECTURE.md`, `COMPONENTS.md`, `FEATURES.md`, `COPY.md`
+
+### Commit
+Recorded at push (this session)
+
+---
+
 ## 2026-08-05 — Batch 1: cut speculative features + Deal Room + inquiry hardening
 
 ### What changed

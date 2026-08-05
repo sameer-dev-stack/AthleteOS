@@ -15,7 +15,6 @@ import { sendCardPublishedEmail } from "@/lib/actions/emails";
 import { getTipEarnings, type TipEarnings as TipEarningsData } from "@/lib/actions/tips";
 import { getBalanceSummary, type BalanceSummary } from "@/lib/actions/balance";
 import { trackFunnel } from "@/lib/hooks/use-funnel-tracking";
-import { getAiMemory, type AIMemory } from "@/lib/actions/ai-memory";
 import { getAnalytics, type AnalyticsData } from "@/lib/actions/analytics";
 import { getNilMetrics } from "@/lib/actions/nil-engine";
 import { NilMetricsStrip } from "@/components/dashboard/nil-metrics-strip";
@@ -24,6 +23,7 @@ import { getSocialAccounts, type SocialAccount } from "@/lib/actions/social-acco
 import { resolvePlan } from "@/lib/referral-reward";
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton";
 import { ReferralCard } from "@/components/dashboard/referral-card";
+import { BusinessDashboard } from "@/components/dashboard/business-dashboard";
 import { LaunchChecklist } from "@/components/dashboard/launch-checklist";
 import { SystemStatus } from "@/components/dashboard/system-status";
 import { WhatsNewBanner } from "@/components/dashboard/whats-new-banner";
@@ -49,7 +49,6 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
   const [balance, setBalance] = useState<BalanceSummary | null>(null);
   const [loadingTips, setLoadingTips] = useState(true);
 
-  const [memory, setMemory] = useState<AIMemory | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [nilScore, setNilScore] = useState<number | null>(null);
   const [socialAccounts, setSocialAccounts] = useState<SocialAccount[]>([]);
@@ -107,7 +106,6 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
 
   useEffect(() => {
     let cancelled = false;
-    getAiMemory().then((m) => { if (!cancelled) setMemory(m); }).catch(() => {});
     const cleanup = fetchMetrics();
     return () => { cancelled = true; if (cleanup) cleanup(); };
   }, [fetchMetrics]);
@@ -198,7 +196,7 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
   };
 
   const handleRefresh = useCallback(async () => {
-    await Promise.all([fetchMetrics(), getAiMemory().then(m => setMemory(m)).catch(() => {})]);
+    await fetchMetrics();
   }, [fetchMetrics]);
 
   return (
@@ -354,7 +352,9 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         {/* Left Section (col-span-2 / 2-thirds width) */}
         <div className="lg:col-span-2 space-y-6">
-          <InquiryInbox />
+          <div id="deal-room-section" data-deal-room>
+            <InquiryInbox />
+          </div>
           <TipEarnings
             earnings={earnings}
             balance={balance}
@@ -579,6 +579,7 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
             </div>
           </div>
 
+          <BusinessDashboard themeAccent={accentColor} username={profile.username} />
           <ReferralCard />
           <LaunchChecklist profile={profile} />
 

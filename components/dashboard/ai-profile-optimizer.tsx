@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Loader2, Zap, Check, ArrowRight, Bookmark } from "lucide-react";
-import { optimizeProfileAction, recordToolEvent } from "@/lib/actions/ai";
+import { optimizeProfileAction } from "@/lib/actions/ai";
 import { updateProfile, type Profile } from "@/lib/actions/profile";
 import { saveAssetToVault } from "@/lib/actions/ai-vault";
 
@@ -26,15 +26,8 @@ export function AIProfileOptimizer({ profile, onQuotaChange, disabled }: Props) 
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const hasGeneratedRef = useRef(false);
-  const hasSavedOrCopiedRef = useRef(false);
-
   useEffect(() => {
-    return () => {
-      if (hasGeneratedRef.current && !hasSavedOrCopiedRef.current) {
-        recordToolEvent("optimize", "ignored").catch(() => {});
-      }
-    };
+    return () => {};
   }, []);
 
   async function handleGenerate() {
@@ -49,8 +42,6 @@ export function AIProfileOptimizer({ profile, onQuotaChange, disabled }: Props) 
 
     if (res.ok && res.data) {
       setResult(res.data);
-      hasGeneratedRef.current = true;
-      hasSavedOrCopiedRef.current = false;
       if (res.quota) onQuotaChange(res.quota);
     } else {
       setError(res.error || "Generation failed");
@@ -65,9 +56,7 @@ export function AIProfileOptimizer({ profile, onQuotaChange, disabled }: Props) 
 
     if (res.ok) {
       setApplied(true);
-      hasSavedOrCopiedRef.current = true;
       setTimeout(() => setApplied(false), 2000);
-      recordToolEvent("optimize", "applied").catch(() => {});
     }
   }
 
@@ -77,9 +66,7 @@ export function AIProfileOptimizer({ profile, onQuotaChange, disabled }: Props) 
     const res = await saveAssetToVault("optimize", content);
     if (res.ok) {
       setSaved(true);
-      hasSavedOrCopiedRef.current = true;
       setTimeout(() => setSaved(false), 2000);
-      recordToolEvent("optimize", "saved").catch(() => {});
     }
   }
 

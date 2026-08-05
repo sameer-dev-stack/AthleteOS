@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Loader2, Sparkles, Copy, Check, ArrowRight, Bookmark } from "lucide-react";
-import { generateBiosStream, recordToolEvent } from "@/lib/actions/ai";
+import { generateBiosStream } from "@/lib/actions/ai";
 import { updateProfile, type Profile } from "@/lib/actions/profile";
 import { saveAssetToVault } from "@/lib/actions/ai-vault";
 import { useStream } from "@/lib/hooks/use-stream";
@@ -47,13 +47,7 @@ export function AIBioBuilder({ profile, onQuotaChange, onProfileChange, disabled
   const hasSavedOrCopiedRef = useRef(false);
 
   useEffect(() => {
-    const mountTime = mountTimeRef.current;
-    return () => {
-      const timeSinceMount = Date.now() - mountTime;
-      if (hasGeneratedRef.current && !hasSavedOrCopiedRef.current && timeSinceMount > 5000) {
-        recordToolEvent("bio", "ignored").catch(() => {});
-      }
-    };
+    return () => {};
   }, []);
 
   useEffect(() => {
@@ -98,7 +92,6 @@ export function AIBioBuilder({ profile, onQuotaChange, onProfileChange, disabled
       setApplied(true);
       hasSavedOrCopiedRef.current = true;
       setTimeout(() => setApplied(false), 2000);
-      recordToolEvent("bio", "applied").catch(() => {});
     }
   }
 
@@ -107,7 +100,6 @@ export function AIBioBuilder({ profile, onQuotaChange, onProfileChange, disabled
     setCopiedIndex(index);
     hasSavedOrCopiedRef.current = true;
     setTimeout(() => setCopiedIndex(null), 2000);
-    recordToolEvent("bio", "copied").catch(() => {});
   }
 
   async function handleSaveToVault(text: string, index: number) {
@@ -116,7 +108,6 @@ export function AIBioBuilder({ profile, onQuotaChange, onProfileChange, disabled
       setSavedIndex(index);
       hasSavedOrCopiedRef.current = true;
       setTimeout(() => setSavedIndex(null), 2000);
-      recordToolEvent("bio", "saved").catch(() => {});
     }
   }
 

@@ -152,10 +152,9 @@ NIL/
 │   │   ├── nil-score-card.tsx    # Animated SVG radial gauge showing score + rank (client)
 │   │   ├── profile-editor.tsx    # Tabbed profile editor with 8 sections (client)
 │   │   ├── profile-score.tsx     # Profile completion score UI with progress bar
-│   │   ├── qr-share-modal.tsx   # QR code share modal — glassmorphic (client)
-│   │   ├── settings-panel.tsx    # Settings section components with collapsible sections
-│   │   ├── smart-ai-actions.tsx  # One-click contextual AI prompts buttons (client)
-│   │   ├── social-accounts-editor.tsx # Social account handles manager (client)
+│   │   ├── business-dashboard.tsx # Business Overview cockpit displaying 7-day revenue & deal pipeline (client)
+│   │   ├── inquiry-inbox.tsx     # Unified Deal Room & Business Inbox — 5-stage pipeline, deal values, combined earnings ledger (client)
+│   │   ├── nil-ai-breakdown.tsx  # Valuation feedback generated via AI (client)
 │   │   ├── system-status.tsx     # System health status with real-time checks
 │   │   ├── theme-picker.tsx      # Card theme customization (client)
 │   │   └── tip-earnings.tsx      # Tip earnings display (client)
@@ -223,6 +222,7 @@ NIL/
 │       ├── auth.ts               # Server Actions: signUp, signIn, signOut, signInWithGoogle
 │       ├── billing.ts            # Server Actions: createCheckoutSessionAction, createPortalSessionAction, getSubscriptionStatus
 │       ├── brand.ts              # Server Actions: createBrandAccount, searchAthletes, saveAthlete, getCampaignBriefs
+│       ├── business.ts           # Server Actions: getBusinessSummary (7-day revenue, total won deals, pipeline counts)
 │       ├── compliance.ts         # Server Actions: discloseDeal, getMyDeals, updateDealStatus (Compliance OS)
 │       ├── discovery.ts          # Server Actions: searchPublicAthletes, getDiscoverySports (public, no auth)
 │       ├── emails.ts             # Email functions: sendConfirmationEmail, sendWelcomeEmail, sendWeeklyBriefing

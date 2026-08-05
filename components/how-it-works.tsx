@@ -17,7 +17,7 @@ const STEPS = [
   {
     n: "03",
     title: "Plug in monetization",
-    body: "Turn on tips, paid shoutouts, merch, and brand inquiries — all in one card.",
+    body: "Turn on tips and brand inquiries, and run deals from first message to signed — all in one card.",
     detail: "Powered by Stripe. Direct deposit.",
   },
   {

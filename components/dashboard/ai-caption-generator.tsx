@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Loader2, Sparkles, Copy, Check, Bookmark } from "lucide-react";
-import { generateCaptionsStream, recordToolEvent } from "@/lib/actions/ai";
+import { generateCaptionsStream } from "@/lib/actions/ai";
 import { type Profile } from "@/lib/actions/profile";
 import { saveAssetToVault } from "@/lib/actions/ai-vault";
 import { useStream } from "@/lib/hooks/use-stream";
@@ -18,7 +18,7 @@ const CONTEXTS = [
   { value: "sponsorship", label: "Sponsorship" },
   { value: "training", label: "Training" },
   { value: "milestone", label: "Milestone" },
-  { value: "personal", label: "Personal" },
+  { value: "gameday", label: "Gameday" },
 ] as const;
 
 const TONES = [
@@ -43,17 +43,10 @@ export function AICaptionGenerator({ profile, onQuotaChange, disabled }: Props) 
   const [error, setError] = useState<string | null>(null);
 
   const [context, setContext] = useState<string>("win");
-  const [tone, setTone] = useState<string>("energetic");
-
-  const hasGeneratedRef = useRef(false);
-  const hasSavedOrCopiedRef = useRef(false);
+  const [tone, setTone] = useState<string>("confident");
 
   useEffect(() => {
-    return () => {
-      if (hasGeneratedRef.current && !hasSavedOrCopiedRef.current) {
-        recordToolEvent("captions", "ignored").catch(() => {});
-      }
-    };
+    return () => {};
   }, []);
 
   useEffect(() => {
@@ -64,7 +57,6 @@ export function AICaptionGenerator({ profile, onQuotaChange, disabled }: Props) 
     if (!isStreaming && streamedText) {
       const parsed = parseCaptions(streamedText);
       queueMicrotask(() => setCaptions(parsed));
-      hasGeneratedRef.current = true;
     }
   }, [isStreaming, streamedText]);
 
@@ -87,26 +79,20 @@ export function AICaptionGenerator({ profile, onQuotaChange, disabled }: Props) 
   function handleCopy(text: string, index: number) {
     navigator.clipboard.writeText(text).catch(() => {});
     setCopiedIndex(index);
-    hasSavedOrCopiedRef.current = true;
     setTimeout(() => setCopiedIndex(null), 2000);
-    recordToolEvent("captions", "copied").catch(() => {});
   }
 
   function handleUseDraft(text: string, index: number) {
     navigator.clipboard.writeText(text).catch(() => {});
     setUsedDraftIndex(index);
-    hasSavedOrCopiedRef.current = true;
     setTimeout(() => setUsedDraftIndex(null), 2000);
-    recordToolEvent("captions", "saved").catch(() => {});
   }
 
   async function handleSaveToVault(text: string, index: number) {
     const result = await saveAssetToVault("captions", text);
     if (result.ok) {
       setSavedIndex(index);
-      hasSavedOrCopiedRef.current = true;
       setTimeout(() => setSavedIndex(null), 2000);
-      recordToolEvent("captions", "saved").catch(() => {});
     }
   }
 

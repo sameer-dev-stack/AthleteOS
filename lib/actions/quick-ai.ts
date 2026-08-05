@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getMyProfile } from "@/lib/actions/profile";
 import { getAiQuota, recordAiUsage } from "@/lib/actions/ai-usage";
-import { getAiMemory, recordAiEvent } from "@/lib/actions/ai-memory";
+import { getAiMemory } from "@/lib/actions/ai-memory";
 import { callGemini } from "@/lib/ai";
 
 export type QuickAiResult = {
@@ -91,10 +91,7 @@ Write exactly one quick caption (1-2 sentences) with 2 tags. Do not include labe
     const data = await callGemini(prompt, systemPrompt, maxTokens);
 
     // Record usage and event
-    await Promise.all([
-      recordAiUsage("quick_action"),
-      recordAiEvent(toolType, "generated", memory?.preferred_tone || "confident", "medium"),
-    ]);
+    await recordAiUsage("quick_action");
 
     const updatedQuota = await getAiQuota();
     return { ok: true, data, quota: updatedQuota };

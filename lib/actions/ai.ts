@@ -14,7 +14,7 @@ import {
 } from "@/lib/ai";
 import { getAiQuota, recordAiUsage } from "@/lib/actions/ai-usage";
 import { getMyProfile } from "@/lib/actions/profile";
-import { getAiMemory, recordAiEvent } from "@/lib/actions/ai-memory";
+import { getAiMemory } from "@/lib/actions/ai-memory";
 import { recordLearningEvent, getAthleteKnowledge } from "@/lib/actions/athlete-knowledge";
 
 // ── Enriched memory context (memory + knowledge in parallel) ─────────────────
@@ -67,13 +67,8 @@ async function checkQuota(): Promise<
 
 // ── Event recording helpers — called from client components ──────────────────
 
-export async function recordToolEvent(
-  tool: string,
-  action: "saved" | "copied" | "regenerated" | "ignored" | "applied"
-): Promise<void> {
-  await recordAiEvent(tool, action);
-  // Fire-and-forget: update athlete knowledge aggregates
-  recordLearningEvent({ tool, action }).catch(() => {});
+export async function recordToolEvent(): Promise<void> {
+  // Deprecated stub per ADR-046
 }
 
 // ── Bio Generator ─────────────────────────────────────────────────────────────
@@ -111,10 +106,7 @@ export async function generateBios(formData: {
       memoryContext,
     });
 
-    await Promise.all([
-      recordAiUsage("bio_generator"),
-      recordAiEvent("bio", "generated", parsed.data.tone, "medium"),
-    ]);
+    await recordAiUsage("bio_generator");
 
     const updatedQuota = await getAiQuota();
     return { ok: true, data: bios, quota: updatedQuota };
@@ -169,10 +161,7 @@ export async function generatePitch(formData: {
       memoryContext,
     });
 
-    await Promise.all([
-      recordAiUsage("pitch_writer"),
-      recordAiEvent("pitch", "generated", memoryContext?.preferred_tone, "long"),
-    ]);
+    await recordAiUsage("pitch_writer");
 
     const updatedQuota = await getAiQuota();
     return { ok: true, data: pitches, quota: updatedQuota };
@@ -217,10 +206,7 @@ export async function generateCaptionsAction(formData: {
       memoryContext,
     });
 
-    await Promise.all([
-      recordAiUsage("caption_generator"),
-      recordAiEvent("captions", "generated", parsed.data.tone, "short"),
-    ]);
+    await recordAiUsage("caption_generator");
 
     const updatedQuota = await getAiQuota();
     return { ok: true, data: captions, quota: updatedQuota };
@@ -259,10 +245,7 @@ export async function optimizeProfileAction(): Promise<
       memoryContext,
     });
 
-    await Promise.all([
-      recordAiUsage("profile_optimizer"),
-      recordAiEvent("optimize", "generated", memoryContext?.preferred_tone, "long"),
-    ]);
+    await recordAiUsage("profile_optimizer");
 
     const updatedQuota = await getAiQuota();
     return { ok: true, data: result, quota: updatedQuota };
@@ -313,10 +296,7 @@ export async function generateRateGuidanceAction(formData: {
       memoryContext,
     });
 
-    await Promise.all([
-      recordAiUsage("rate_helper"),
-      recordAiEvent("rate", "generated", memoryContext?.preferred_tone, "long"),
-    ]);
+    await recordAiUsage("rate_helper");
 
     const updatedQuota = await getAiQuota();
     return { ok: true, data: guidance, quota: updatedQuota };
@@ -361,10 +341,7 @@ export async function generateBiosStream(formData: {
       memoryContext,
     });
 
-    await Promise.all([
-      recordAiUsage("bio_generator"),
-      recordAiEvent("bio", "generated", parsed.data.tone, "medium"),
-    ]);
+    await recordAiUsage("bio_generator");
 
     const updatedQuota = await getAiQuota();
     return { ok: true, data: stream, quota: updatedQuota };
@@ -409,10 +386,7 @@ export async function generatePitchStream(formData: {
       memoryContext,
     });
 
-    await Promise.all([
-      recordAiUsage("pitch_writer"),
-      recordAiEvent("pitch", "generated", memoryContext?.preferred_tone, "long"),
-    ]);
+    await recordAiUsage("pitch_writer");
 
     const updatedQuota = await getAiQuota();
     return { ok: true, data: stream, quota: updatedQuota };
@@ -450,10 +424,7 @@ export async function generateCaptionsStream(formData: {
       memoryContext,
     });
 
-    await Promise.all([
-      recordAiUsage("caption_generator"),
-      recordAiEvent("captions", "generated", parsed.data.tone, "short"),
-    ]);
+    await recordAiUsage("caption_generator");
 
     const updatedQuota = await getAiQuota();
     return { ok: true, data: stream, quota: updatedQuota };
