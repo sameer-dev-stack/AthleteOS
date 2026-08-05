@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import { DollarSign, Clock, ArrowDownToLine, TrendingUp, Loader2, AlertCircle, ArrowRight, CheckCircle, XCircle } from "lucide-react";
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton";
 import { getBalanceSummary, getPayoutHistory, createPayout, type BalanceSummary, type PayoutRecord } from "@/lib/actions/balance";
-import { createConnectOnboarding } from "@/lib/actions/stripe";
 import { PaymentMethodSetup } from "./payment-method-setup";
 
 const MINIMUM_PAYOUT_CENTS = 2500;
@@ -29,7 +28,6 @@ export function BalanceOverview() {
   const [summary, setSummary] = useState<BalanceSummary | null>(null);
   const [payouts, setPayouts] = useState<PayoutRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [connecting, setConnecting] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
   const [withdrawResult, setWithdrawResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [showBreakdown, setShowBreakdown] = useState(false);
@@ -53,15 +51,6 @@ export function BalanceOverview() {
     return () => { cancelled = true; };
   }, []);
 
-  async function handleConnect() {
-    setConnecting(true);
-    const result = await createConnectOnboarding();
-    setConnecting(false);
-    if (result.ok && result.url) {
-      window.location.href = result.url;
-    }
-  }
-
   async function handleWithdraw() {
     setWithdrawing(true);
     setWithdrawResult(null);
@@ -72,7 +61,7 @@ export function BalanceOverview() {
     if (result.ok && result.data) {
       setWithdrawResult({
         ok: true,
-        message: `${formatCents(result.data.amount)} payout initiated. Money arrives in 1-3 business days.`,
+        message: `Withdrawal of ${formatCents(result.data.amount)} requested. It will be sent to you within 48 hours.`,
       });
       const [summaryRes, payoutsRes] = await Promise.all([getBalanceSummary(), getPayoutHistory()]);
       if (mountedRef.current && summaryRes.ok && summaryRes.data) setSummary(summaryRes.data);
@@ -119,7 +108,7 @@ export function BalanceOverview() {
     {
       label: "Pending",
       value: formatCents(s.pending),
-      sub: "2-day hold",
+      sub: "In-flight payouts",
       Icon: Clock,
       accent: false,
     },
@@ -133,7 +122,7 @@ export function BalanceOverview() {
     {
       label: "Withdrawn",
       value: formatCents(s.withdrawn),
-      sub: "Sent to bank",
+      sub: "Sent to you",
       Icon: ArrowDownToLine,
       accent: false,
     },
@@ -173,9 +162,9 @@ export function BalanceOverview() {
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="text-sm font-semibold text-white">Withdraw to bank</p>
+                <p className="text-sm font-semibold text-white">Withdraw to your account</p>
                 <p className="mt-0.5 text-[11px] text-white/30">
-                  Minimum ${(MINIMUM_PAYOUT_CENTS / 100).toFixed(2)} · Arrives in 1-3 business days
+                  Minimum ${(MINIMUM_PAYOUT_CENTS / 100).toFixed(2)} · Sent within 48 hours
                 </p>
               </div>
               {s.available < MINIMUM_PAYOUT_CENTS && (
@@ -207,7 +196,7 @@ export function BalanceOverview() {
                     <div className="flex justify-between"><span>Still needed</span><span className="text-white/60">{formatCents(Math.max(0, MINIMUM_PAYOUT_CENTS - s.available))}</span></div>
                     <div className="flex justify-between"><span>Withdrawal fee (Stripe)</span><span className="text-white/60">Free</span></div>
                     <div className="flex justify-between"><span>Platform fee already deducted</span><span className="text-white/60">5% per tip</span></div>
-                    <div className="flex justify-between"><span>Estimated arrival</span><span className="text-white/60">1-3 business days</span></div>
+                    <div className="flex justify-between"><span>Estimated arrival</span><span className="text-white/60">Within 48 hours</span></div>
                   </div>
                 )}
               </div>
@@ -215,8 +204,8 @@ export function BalanceOverview() {
 
             {s.available >= MINIMUM_PAYOUT_CENTS && !withdrawResult && (
               <div className="text-[11px] text-white/40 mb-3 flex items-center gap-4">
-                <span>Stripe fee: Free</span>
-                <span>Arrives: 1-3 business days</span>
+                <span>No Stripe fees</span>
+                <span>Sent within 48 hours</span>
               </div>
             )}
 
@@ -248,8 +237,8 @@ export function BalanceOverview() {
                 <ArrowDownToLine className="h-4 w-4" />
               )}
               {withdrawing
-                ? "Processing withdrawal..."
-                : `Withdraw ${formatCents(s.available)} to bank`}
+                ? "Requesting withdrawal..."
+                : `Withdraw ${formatCents(s.available)}`}
             </button>
           </div>
         )}
@@ -313,7 +302,7 @@ export function BalanceOverview() {
             </div>
             <p className="mt-5 text-sm font-bold text-white">No payouts yet</p>
             <p className="mt-1.5 max-w-xs mx-auto text-xs leading-relaxed text-white/40">
-              Once you reach the ${(MINIMUM_PAYOUT_CENTS / 100).toFixed(2)} minimum, you can withdraw your earnings to your bank account.
+              Once you reach the ${(MINIMUM_PAYOUT_CENTS / 100).toFixed(2)} minimum, you can request a withdrawal. Your earnings are sent within 48 hours.
             </p>
           </div>
         )}

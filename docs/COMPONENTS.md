@@ -587,10 +587,17 @@ Profile card theme customization interface. Allows selection of accent color (5 
   - `onSaved: (profile: Profile) => void` — callback invoked after successful theme save
 
 ### `<TipEarnings>` — `components/dashboard/tip-earnings.tsx`
-Displays athlete's tip earnings summary and payout status. Shows total tips received, tip count, and payout balance from Stripe Connect account. Includes "Connect with Stripe" CTA when not onboarded, or payout balance display when onboarded. Empty state shown when no tips received yet.
-- **Used by:** `components/dashboard/dashboard-content.tsx`
+Displays athlete's tip earnings summary and payout status. Shows total tips received, tip count, and available balance via `getBalanceSummary`. Payment-method setup banner via `PaymentMethodSetup` when no payout method is set, "Manage payouts" link to `/dashboard/billing` when set. Empty state shown when no tips received yet.
+- **Used by:** `components/dashboard/overview.tsx`
 - **Props:**
-  - `athleteId: string` — athlete profile ID for querying tips
+  - `earnings?: TipEarnings | null`
+  - `balance?: BalanceSummary | null`
+  - `loading?: boolean`
+
+### `<PayoutManagement>` — `components/admin/payout-management.tsx`
+Admin withdrawal-request queue. Lists pending payout requests (athlete email, amount, payout method, requested time) with Mark paid / Failed actions via `updatePayoutStatus`. Shows aggregate stat cards (total tips, total revenue, requests, awaiting fulfillment) via `getAllTipsSummary`.
+- **Used by:** `app/admin/*`
+- **Props:** none
 
 ### `<MembershipTiers>` — `components/dashboard/membership-tiers.tsx`
 Manages athlete membership tiers for fan subscriptions. Displays list of active tiers with name, price, and subscriber count. Create tier form with name, description, and price inputs. Delete button for each tier. Empty state when no tiers exist.

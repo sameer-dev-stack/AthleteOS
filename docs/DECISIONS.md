@@ -948,3 +948,27 @@ Referral rewards were cosmetic because plan-checking logic (`getPlan` in `lib/ac
 - One extra Supabase client creation in `getAiQuota()` (creates its own + `getEffectivePlan()` creates one). Acceptable for architectural clarity.
 - Test suite includes delegation regression test.
 
+---
+
+## ADR-042 — Platform-collected tipping with manual 48h withdrawal requests (retire Stripe Connect)
+
+**Status:** Accepted · 2026-08-05
+
+**Context:**
+Tips previously used Stripe Connect: each athlete had their own connected Stripe account, fans tipped directly, and AthleteOS took an `application_fee`. This required per-athlete Connect onboarding and per-athlete payout infrastructure, which the product did not actually operate. The desired flow is: fans tip into AthleteOS's own Stripe account, athletes see their earnings in the dashboard, and athletes request a withdrawal which AthleteOS fulfills manually within 48 hours.
+
+**Decision:**
+1. Remove Stripe Connect entirely from the tip flow. `createTipSession` now creates a standard `mode: "payment"` Checkout session into the platform account — no `transfer_data`, no `application_fee`.
+2. The webhook computes the 5% platform fee in-app from `session.amount_total` (`PLATFORM_FEE_PERCENT` in `lib/constants.ts`) and stores `net_amount` on the tip.
+3. `createPayout` no longer moves money via Stripe. It inserts a `status: "pending"` row into `payouts` (with `payout_method` + `payout_destination` snapshot), blocks repeat requests within 5 minutes, and enforces the $25 minimum. AthleteOS admins fulfill the request manually (send funds via the recorded payout method) and mark it paid via `updatePayoutStatus`.
+4. Balance math is derived from the DB: `available = earned(net tips) − withdrawn(paid payouts) − pending`.
+5. Payout-method eligibility (`profiles.payout_method`) gates both the withdraw UI and onboarding completion, replacing the Connect `stripe_onboarding_complete` path for tips.
+6. Admin payout screen becomes a withdrawal-request queue (`getPayoutData` + `updatePayoutStatus`); god-mode financials still read legacy Connect columns (left in place, unset for new athletes).
+
+**Consequences:**
+- No per-athlete Stripe onboarding; faster athlete activation.
+- AthleteOS holds tip funds in its own account until manual payout — requires the 48h operational commitment and an admin queue to clear.
+- Legacy Connect columns (`stripe_account_id`, `stripe_onboarding_complete`) remain in `profiles` but are no longer written for new athletes; god-mode filters on them are effectively all-empty until cleaned up.
+- New `payouts` columns (`payout_method`, `payout_destination`, `updated_at`) require migration `20260805_payout_method_destination.sql` to be applied before `createPayout` works.
+
+

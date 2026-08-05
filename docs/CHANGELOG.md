@@ -5,6 +5,29 @@
 
 ---
 
+## 2026-08-05 — Platform-collected tipping: 48h withdrawal requests (replaces Stripe Connect)
+
+### What changed
+- **`lib/actions/stripe.ts`** — Rewritten. Only `createTipSession` remains. Tips are now collected into AthleteOS's own Stripe account (`mode: "payment"`, `line_items[0].price_data`), no `transfer_data`, no `application_fee`, no Connect. Removed `createConnectOnboarding`, `getPayoutBalance`, `PayoutBalance`.
+- **`app/api/stripe/webhook/route.ts`** — Fee computed in-app via `PLATFORM_FEE_PERCENT` (5%) from `session.amount_total`; `net_amount = amount - fee`. Dedupes on `stripe_payment_intent_id`. Removed `account.updated`, `payout.paid`, `payout.failed` from `ALLOWED_EVENTS` and their switch cases.
+- **`lib/actions/balance.ts`** — Rewritten: `getBalanceSummary` (earned/pending/available/withdrawn + payout-method gate), `getPayoutHistory`, and `createPayout` which only inserts a `status:"pending"` withdrawal request (no money moved), blocks duplicates within 5 minutes, enforces `MINIMUM_PAYOUT_CENTS`.
+- **`components/dashboard/balance-overview.tsx`**, **`tip-earnings.tsx`**, **`overview.tsx`** — Removed Connect wiring/CTAs; use `getBalanceSummary`; copy updated to "sent within 48 hours", "No Stripe fees".
+- **`lib/actions/admin.ts`** — `getPayoutData` now lists pending withdrawal requests (amount, payout method, requested time); added `updatePayoutStatus(payoutId, "paid"|"failed")`.
+- **`components/admin/payout-management.tsx`** — Rewritten as a withdrawal-request queue with Mark paid / Failed actions.
+- **`supabase/migrations/20260805_payout_method_destination.sql`** (NEW) — Adds `payout_method`, `payout_destination`, `updated_at` to `payouts` + `updated_at` trigger.
+- **Build fix** — `components/card-flip.tsx` deep lucide imports swapped to package-level named imports; `instrumentation.ts` `captureRequestError` typing fixed; `next.config.mjs` restored to committed baseline. Build + lint green again.
+
+### Why
+Athletes don't use Stripe Connect directly. Tips flow into the platform account; athletes see earnings and request a withdrawal, which AthleteOS fulfills within 48 hours. Simpler ops, no per-athlete Stripe onboarding.
+
+### Files touched
+`lib/actions/stripe.ts`, `lib/actions/balance.ts`, `lib/actions/admin.ts`, `app/api/stripe/webhook/route.ts`, `components/dashboard/balance-overview.tsx`, `components/dashboard/tip-earnings.tsx`, `components/dashboard/overview.tsx`, `components/admin/payout-management.tsx`, `components/card-flip.tsx`, `instrumentation.ts`, `next.config.mjs`, `supabase/migrations/20260805_payout_method_destination.sql` (new)
+
+### Commit
+`<pending>`
+
+---
+
 ## 2026-08-04 — Null-safe Supabase client, dev SW cleanup, CardFlip hero
 
 ### What changed

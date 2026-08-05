@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { DollarSign, TrendingUp, ArrowRight, AlertCircle, Loader2, User, Share2 } from "lucide-react";
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton";
 import { getTipEarnings, type TipEarnings } from "@/lib/actions/tips";
-import { getPayoutBalance, createConnectOnboarding, type PayoutBalance } from "@/lib/actions/stripe";
+import { getBalanceSummary, type BalanceSummary } from "@/lib/actions/balance";
 import { PaymentMethodSetup } from "./payment-method-setup";
+import Link from "next/link";
 
 function formatCents(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
@@ -27,24 +28,19 @@ export function TipEarnings({
   earnings: propEarnings,
   balance: propBalance,
   loading: propLoading,
-  connecting: propConnecting,
-  onConnect,
 }: {
   earnings?: TipEarnings | null;
-  balance?: PayoutBalance | null;
+  balance?: BalanceSummary | null;
   loading?: boolean;
-  connecting?: boolean;
-  onConnect?: () => void;
 }) {
   const [localEarnings, setLocalEarnings] = useState<TipEarnings | null>(null);
-  const [localBalance, setLocalBalance] = useState<PayoutBalance | null>(null);
+  const [localBalance, setLocalBalance] = useState<BalanceSummary | null>(null);
   const [localLoading, setLocalLoading] = useState(true);
-  const [localConnecting, setLocalConnecting] = useState(false);
 
   useEffect(() => {
     if (propLoading === undefined) {
       let cancelled = false;
-      Promise.all([getTipEarnings(), getPayoutBalance()]).then(([earningsResult, balanceResult]) => {
+      Promise.all([getTipEarnings(), getBalanceSummary()]).then(([earningsResult, balanceResult]) => {
         if (cancelled) return;
         if (earningsResult.ok && earningsResult.data) setLocalEarnings(earningsResult.data);
         if (balanceResult.ok && balanceResult.data) setLocalBalance(balanceResult.data);
@@ -57,22 +53,8 @@ export function TipEarnings({
   }, [propLoading]);
 
   const activeLoading = propLoading !== undefined ? propLoading : localLoading;
-  const activeConnecting = propConnecting !== undefined ? propConnecting : localConnecting;
   const activeEarnings = propEarnings !== undefined ? propEarnings : localEarnings;
   const activeBalance = propBalance !== undefined ? propBalance : localBalance;
-
-  async function handleConnect() {
-    if (onConnect) {
-      onConnect();
-      return;
-    }
-    setLocalConnecting(true);
-    const result = await createConnectOnboarding();
-    setLocalConnecting(false);
-    if (result.ok && result.url) {
-      window.location.href = result.url;
-    }
-  }
 
   if (activeLoading) {
     return (
@@ -138,7 +120,6 @@ export function TipEarnings({
       </div>
 
       <div className="p-6 space-y-6">
-        {/* ── Stripe Payout Banner ────────────── */}
         {/* ── Payment Method Setup Banner ──────── */}
         {!b.onboardingComplete && (
           <PaymentMethodSetup onSuccess={() => window.location.reload()} />
@@ -162,20 +143,16 @@ export function TipEarnings({
         </div>
 
         {/* ── CTA Button ──────────────────────── */}
-        <div>
-          <button
-            onClick={handleConnect}
-            disabled={activeConnecting}
-            className="w-full bg-accent text-bg font-bold text-xs rounded-lg py-2.5 hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {activeConnecting
-              ? "Connecting..."
-              : b.connected
-              ? "Update Payout Method"
-              : "Set Up Payout Method"}
-          </button>
-        </div>
-
+        {b.onboardingComplete && (
+          <div>
+            <Link
+              href="/dashboard/billing"
+              className="w-full flex justify-center bg-accent text-bg font-bold text-xs rounded-lg py-2.5 hover:opacity-90 transition-opacity"
+            >
+              Manage payouts
+            </Link>
+          </div>
+        )}
 
         {/* ── Recent Tips ────────────────────── */}
         {e.recentTips.length > 0 && (

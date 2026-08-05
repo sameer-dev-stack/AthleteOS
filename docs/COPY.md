@@ -287,7 +287,7 @@
    Honesty: real AI is expensive. Metering keeps the free plan free forever, and keeps Pro affordable. Power users get unlimited generations on Pro for $14/month.
 
 5. **How do payouts work?**
-   Stripe-powered. Direct deposit to your bank account, usually within 2 business days. Athletes keep 92%+ of every dollar after standard payment processing.
+   Fans tip into your AthleteOS earnings, and you request a withdrawal anytime you have at least $25. AthleteOS sends the funds to your payout method (bank or PayPal) within 48 hours. Athletes keep 95% of every dollar — AthleteOS takes a 5% platform fee.
 
 6. **Can my school or collective onboard a whole roster?**
    Yes. The Team plan handles bulk onboarding, branded team pages, roster analytics, and compliance support. Hit Contact sales to talk.

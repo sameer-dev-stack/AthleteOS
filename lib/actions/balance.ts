@@ -1,9 +1,7 @@
 "use server";
 
-import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
-import { stripe } from "@/lib/stripe";
 import { MINIMUM_PAYOUT_CENTS } from "@/lib/constants";
 
 export type BalanceSummary = {
@@ -23,6 +21,39 @@ export type PayoutRecord = {
   createdAt: string;
 };
 
+type AdminClient = any;
+
+async function getEarnedAndWithdrawn(admin: AdminClient, userId: string): Promise<{
+  earned: number;
+  withdrawn: number;
+  pending: number;
+}> {
+  const [tipsRes, payoutsRes] = await Promise.all([
+    admin
+      .from("tips")
+      .select("net_amount")
+      .eq("athlete_id", userId)
+      .eq("status", "succeeded"),
+    admin
+      .from("payouts")
+      .select("amount, status")
+      .eq("athlete_id", userId),
+  ]);
+
+  const tips = (tipsRes.data as Array<{ net_amount: number }> | null) || [];
+  const payouts = (payoutsRes.data as Array<{ amount: number; status: string }> | null) || [];
+
+  const earned = tips.reduce((sum: number, t) => sum + (t.net_amount ?? 0), 0);
+  const withdrawn = payouts
+    .filter((p) => p.status === "paid")
+    .reduce((sum: number, p) => sum + (p.amount ?? 0), 0);
+  const pending = payouts
+    .filter((p) => p.status === "pending" || p.status === "processing")
+    .reduce((sum: number, p) => sum + (p.amount ?? 0), 0);
+
+  return { earned, withdrawn, pending };
+}
+
 export async function getBalanceSummary(): Promise<{
   ok: boolean;
   data?: BalanceSummary;
@@ -39,92 +70,26 @@ export async function getBalanceSummary(): Promise<{
 
   const { data: profile } = await admin
     .from("profiles")
-    .select("stripe_account_id, stripe_onboarding_complete, payout_method")
+    .select("payout_method")
     .eq("id", user.id)
     .single();
 
-  const hasManualPayout = !!profile?.payout_method;
+  const hasPayoutMethod = !!profile?.payout_method;
 
-  if (hasManualPayout) {
-    const [tipsRes, payoutsRes] = await Promise.all([
-      admin
-        .from("tips")
-        .select("net_amount")
-        .eq("athlete_id", user.id)
-        .eq("status", "succeeded"),
-      admin
-        .from("payouts")
-        .select("amount")
-        .eq("athlete_id", user.id)
-        .eq("status", "paid"),
-    ]);
+  const { earned, withdrawn, pending } = await getEarnedAndWithdrawn(admin, user.id);
+  const available = Math.max(0, earned - withdrawn - pending);
 
-    const earned = (tipsRes.data || []).reduce((sum, t) => sum + t.net_amount, 0);
-    const withdrawn = (payoutsRes.data || []).reduce((sum, p) => sum + p.amount, 0);
-    const available = Math.max(0, earned - withdrawn);
-
-    return {
-      ok: true,
-      data: {
-        earned,
-        pending: 0,
-        available,
-        withdrawn,
-        connected: true,
-        onboardingComplete: true,
-      },
-    };
-  }
-
-  if (!profile?.stripe_account_id) {
-    const { data: tips } = await admin
-      .from("tips")
-      .select("net_amount")
-      .eq("athlete_id", user.id)
-      .eq("status", "succeeded");
-
-    const earned = (tips || []).reduce((sum, t) => sum + t.net_amount, 0);
-    return {
-      ok: true,
-      data: { earned, pending: 0, available: 0, withdrawn: 0, connected: false, onboardingComplete: false },
-    };
-  }
-
-  try {
-    const [balanceRes, tipsRes, payoutsRes] = await Promise.all([
-      stripe.balance.retrieve({}, { stripeAccount: profile.stripe_account_id }),
-      admin
-        .from("tips")
-        .select("net_amount")
-        .eq("athlete_id", user.id)
-        .eq("status", "succeeded"),
-      admin
-        .from("payouts")
-        .select("amount")
-        .eq("athlete_id", user.id)
-        .eq("status", "paid"),
-    ]);
-
-    const earned = (tipsRes.data || []).reduce((sum, t) => sum + t.net_amount, 0);
-    const available = balanceRes.available.reduce((sum, b) => sum + b.amount, 0);
-    const pending = balanceRes.pending.reduce((sum, b) => sum + b.amount, 0);
-    const withdrawn = (payoutsRes.data || []).reduce((sum, p) => sum + p.amount, 0);
-
-    return {
-      ok: true,
-      data: {
-        earned,
-        pending,
-        available,
-        withdrawn,
-        connected: true,
-        onboardingComplete: profile.stripe_onboarding_complete,
-      },
-    };
-  } catch (err) {
-    console.error("[balance] getBalanceSummary failed", err);
-    return { ok: false, error: "Failed to fetch balance" };
-  }
+  return {
+    ok: true,
+    data: {
+      earned,
+      pending,
+      available,
+      withdrawn,
+      connected: hasPayoutMethod,
+      onboardingComplete: hasPayoutMethod,
+    },
+  };
 }
 
 export async function getPayoutHistory(): Promise<{
@@ -167,6 +132,11 @@ export async function getPayoutHistory(): Promise<{
   }
 }
 
+/**
+ * Create a withdrawal request. Money is NOT moved here — AthleteOS reviews
+ * pending requests and sends the funds to the athlete's payout method
+ * within 48 hours.
+ */
 export async function createPayout(): Promise<{
   ok: boolean;
   data?: { payoutId: string; amount: number };
@@ -183,93 +153,53 @@ export async function createPayout(): Promise<{
 
   const { data: profile } = await admin
     .from("profiles")
-    .select("stripe_account_id, stripe_onboarding_complete, payout_method")
+    .select("payout_method, payout_settings")
     .eq("id", user.id)
     .single();
 
-  const hasManualPayout = !!profile?.payout_method;
-
-  if (hasManualPayout) {
-    // Prevent double-withdrawal: check for recent pending payout
-    const fiveMinAgo = new Date(Date.now() - 5 * 60_000).toISOString();
-    const { data: recentPayout } = await admin
-      .from("payouts")
-      .select("id")
-      .eq("athlete_id", user.id)
-      .gte("created_at", fiveMinAgo)
-      .limit(1);
-    if (recentPayout && recentPayout.length > 0) {
-      return { ok: false, error: "A payout was recently initiated. Please wait before trying again." };
-    }
-
-    const { data: tips } = await admin
-      .from("tips")
-      .select("net_amount")
-      .eq("athlete_id", user.id)
-      .eq("status", "succeeded");
-    const { data: payouts } = await admin
-      .from("payouts")
-      .select("amount")
-      .eq("athlete_id", user.id)
-      .eq("status", "paid");
-
-    const earned = (tips || []).reduce((sum, t) => sum + t.net_amount, 0);
-    const withdrawn = (payouts || []).reduce((sum, p) => sum + p.amount, 0);
-    const available = Math.max(0, earned - withdrawn);
-
-    if (available < MINIMUM_PAYOUT_CENTS) {
-      return {
-        ok: false,
-        error: `Minimum withdrawal is $${(MINIMUM_PAYOUT_CENTS / 100).toFixed(2)}. You have $${(available / 100).toFixed(2)} available.`,
-      };
-    }
-
-    await admin.from("payouts").insert({
-      athlete_id: user.id,
-      amount: available,
-      stripe_payout_id: null,
-      status: "paid",
-      arrival_date: new Date().toISOString().split("T")[0],
-    }).select("id").single();
-
-    return { ok: true, data: { payoutId: "manual-" + Date.now(), amount: available } };
+  if (!profile?.payout_method) {
+    return { ok: false, error: "Set up a payout method first" };
   }
 
-  if (!profile?.stripe_account_id || !profile.stripe_onboarding_complete) {
-    return { ok: false, error: "Connect your bank account first" };
+  // Prevent double-withdrawal: block if a withdrawal was requested recently
+  const fiveMinAgo = new Date(Date.now() - 5 * 60_000).toISOString();
+  const { data: recentPayout } = await admin
+    .from("payouts")
+    .select("id")
+    .eq("athlete_id", user.id)
+    .in("status", ["pending", "processing"])
+    .gte("created_at", fiveMinAgo)
+    .limit(1);
+  if (recentPayout && recentPayout.length > 0) {
+    return { ok: false, error: "A withdrawal was recently requested. Please wait before trying again." };
   }
 
-  try {
-    const balance = await stripe.balance.retrieve(
-      {},
-      { stripeAccount: profile.stripe_account_id }
-    );
+  const { earned, withdrawn, pending } = await getEarnedAndWithdrawn(admin, user.id);
+  const available = Math.max(0, earned - withdrawn - pending);
 
-    const available = balance.available.reduce((sum, b) => sum + b.amount, 0);
+  if (available < MINIMUM_PAYOUT_CENTS) {
+    return {
+      ok: false,
+      error: `Minimum withdrawal is $${(MINIMUM_PAYOUT_CENTS / 100).toFixed(2)}. You have $${(available / 100).toFixed(2)} available.`,
+    };
+  }
 
-    if (available < MINIMUM_PAYOUT_CENTS) {
-      return {
-        ok: false,
-        error: `Minimum withdrawal is $${(MINIMUM_PAYOUT_CENTS / 100).toFixed(2)}. You have $${(available / 100).toFixed(2)} available.`,
-      };
-    }
-
-    const payout = await stripe.payouts.create(
-      { amount: available, currency: "usd" },
-      { stripeAccount: profile.stripe_account_id }
-    );
-
-    await admin.from("payouts").insert({
+  const { data: payout, error } = await admin
+    .from("payouts")
+    .insert({
       athlete_id: user.id,
       amount: available,
-      stripe_payout_id: payout.id,
       status: "pending",
-      arrival_date: payout.arrival_date ? new Date(payout.arrival_date * 1000).toISOString().split("T")[0] : null,
-    });
+      payout_method: profile.payout_method,
+      payout_destination: profile.payout_settings ?? null,
+    })
+    .select("id")
+    .single();
 
-    return { ok: true, data: { payoutId: payout.id, amount: available } };
-  } catch (err) {
-    console.error("[balance] createPayout failed", err);
-    return { ok: false, error: "Payout failed. Please try again." };
+  if (error) {
+    console.error("[balance] createPayout insert failed:", error);
+    return { ok: false, error: "Failed to request withdrawal. Please try again." };
   }
+
+  return { ok: true, data: { payoutId: payout.id, amount: available } };
 }

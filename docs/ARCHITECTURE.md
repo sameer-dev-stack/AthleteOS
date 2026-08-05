@@ -123,7 +123,7 @@ NIL/
 │   │   ├── user-table.tsx          # User management table (client)
 │   │   ├── waitlist-table.tsx      # Waitlist table with search + CSV export (client)
 │   │   └── abuse-detection.tsx     # Security dashboard — rate limits, suspended (client)
-│   │   └── payout-management.tsx   # Payout dashboard — Stripe Connect athletes (client)
+│   │   └── payout-management.tsx   # Payout dashboard — athlete withdrawal-request queue (client)
 │   │   └── god-mode/              # Premium Vite-ported admin modules
 │   │       ├── AbuseDashboard.tsx  # Abuse detection and rate limit monitoring (client)
 │   │       ├── AnalyticsOverview.tsx # Platform-wide analytics overview (client)
@@ -235,15 +235,17 @@ NIL/
 │       ├── emails.ts             # Email functions: sendConfirmationEmail, sendWelcomeEmail, sendWeeklyBriefing
 │       ├── first-500-pro.ts      # Server Actions: assignFirst500ProBenefit, checkProExpiry
 │       ├── inquiries.ts          # Server Actions: submitInquiry, getAthleteInquiries, updateInquiryStatus
+│       ├── balance.ts            # Server Actions: getBalanceSummary, getPayoutHistory, createPayout (48h request)
+│       ├── billing.ts            # Server Actions: billing read/write paths
 │       ├── memberships.ts        # Server Actions: createTier, getTiers, createContentPost, createSubscriptionCheckout
 │       ├── memberships-client.ts # Server Action: getTierForSubscription (for fan subscribe page)
 │       ├── plan.ts               # Server Action: getEffectivePlan
 │       ├── profile.ts            # Server Actions: getMyProfile, checkUsername, updateProfile, getPublicProfile
 │       ├── quick-ai.ts           # Server Actions: quickAiAction (One-click signal actions)
-│       ├── stripe.ts             # Server Actions: createStripeConnectLink, getStripeDashboardLink
+│       ├── stripe.ts             # Server Action: createTipSession (platform-collected tips, no Connect)
 │       ├── stripe-status.ts      # Server Actions: getStripeStatus
 │       ├── teams.ts              # Server Actions: createTeam, getMyTeams, addTeamMember, getTeamAnalytics
-│       ├── tips.ts               # Server Actions: getTips, getTipEarnings, getPayoutBalance
+│       ├── tips.ts               # Server Actions: getTips, getTipEarnings
 │       └── waitlist.ts           # Server Actions: joinWaitlist, joinNewsletter, subscribeNewsletterAction
 │
 ├── data/                         # Gitignored — waitlist.json + newsletter.json (local-dev fallback only)

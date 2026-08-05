@@ -18,7 +18,7 @@ export async function register() {
 
 // ponytail: Sentry's require-in-the-middle fails under Turbopack.
 // Dynamic import so the instrumentation hook doesn't crash the dev server.
-let captureRequestError: (...args: unknown[]) => void = () => {};
+let captureRequestError: Awaited<typeof import("@sentry/nextjs")>["captureRequestError"] | (() => void) = () => {};
 try {
   ({ captureRequestError } = await import("@sentry/nextjs"));
 } catch {

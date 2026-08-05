@@ -722,7 +722,7 @@ export async function getAbuseStats(): Promise<
 export async function getPayoutData(
   page = 1,
   pageSize = 20
-): Promise<AdminResult<{ athletes: { email: string; username: string | null; plan: string; stripe_onboarding_complete: boolean; totalTips: number; tipCount: number }[]; total: number }>> {
+): Promise<AdminResult<{ requests: { id: string; athleteEmail: string; athleteUsername: string | null; amount: number; status: string; payoutMethod: string | null; createdAt: string }[]; total: number }>> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not authorized" };
@@ -737,46 +737,74 @@ export async function getPayoutData(
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  const { data: athletes, error, count } = await serviceClient
-    .from("profiles")
-    .select("id, email, username, plan, stripe_onboarding_complete, stripe_account_id", { count: "exact" })
-    .not("stripe_account_id", "is", null)
+  const { data: payouts, error, count } = await serviceClient
+    .from("payouts")
+    .select("id, athlete_id, amount, status, payout_method, created_at", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(from, to);
 
   if (error) return { ok: false, error: error.message };
 
-  const athleteIds = (athletes ?? []).map((a: Record<string, unknown>) => a.id as string);
+  const athleteIds = (payouts ?? []).map((p: Record<string, unknown>) => p.athlete_id as string);
 
-  let tipsMap = new Map<string, { total: number; count: number }>();
+  let emailMap = new Map<string, { email: string; username: string | null }>();
   if (athleteIds.length > 0) {
-    const { data: tips } = await serviceClient
-      .from("tips")
-      .select("athlete_id, amount")
-      .in("athlete_id", athleteIds);
+    const { data: profiles } = await serviceClient
+      .from("profiles")
+      .select("id, email, username")
+      .in("id", athleteIds);
 
-    for (const tip of tips ?? []) {
-      const t = tip as { athlete_id: string; amount: number };
-      const existing = tipsMap.get(t.athlete_id) || { total: 0, count: 0 };
-      existing.total += t.amount;
-      existing.count += 1;
-      tipsMap.set(t.athlete_id, existing);
+    for (const prof of profiles ?? []) {
+      const p = prof as { id: string; email: string; username: string | null };
+      emailMap.set(p.id, { email: p.email, username: p.username });
     }
   }
 
-  const result = (athletes ?? []).map((a: Record<string, unknown>) => {
-    const tips = tipsMap.get(a.id as string) || { total: 0, count: 0 };
+  const result = (payouts ?? []).map((p: Record<string, unknown>) => {
+    const prof = emailMap.get(p.athlete_id as string) || { email: "unknown", username: null };
     return {
-      email: a.email as string,
-      username: a.username as string | null,
-      plan: (a.plan as string) || "free",
-      stripe_onboarding_complete: (a.stripe_onboarding_complete as boolean) ?? false,
-      totalTips: tips.total,
-      tipCount: tips.count,
+      id: p.id as string,
+      athleteEmail: prof.email,
+      athleteUsername: prof.username,
+      amount: p.amount as number,
+      status: (p.status as string) || "pending",
+      payoutMethod: (p.payout_method as string | null) ?? null,
+      createdAt: p.created_at as string,
     };
   });
 
-  return { ok: true, data: { athletes: result, total: count ?? 0 } };
+  return { ok: true, data: { requests: result, total: count ?? 0 } };
+}
+
+export async function updatePayoutStatus(
+  payoutId: string,
+  status: "paid" | "failed"
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not authorized" };
+  const isAuthorized = await verifyAdmin(supabase, user);
+  if (!isAuthorized) return { ok: false, error: "Not authorized" };
+
+  const serviceClient = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { error } = await serviceClient
+    .from("payouts")
+    .update({
+      status,
+      arrival_date: status === "paid" ? new Date().toISOString().split("T")[0] : null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", payoutId);
+
+  if (error) return { ok: false, error: error.message };
+
+  await logAdminAction(`payout_${status}`, "payout", payoutId, { status });
+
+  return { ok: true };
 }
 
 export async function getAllTipsSummary(): Promise<

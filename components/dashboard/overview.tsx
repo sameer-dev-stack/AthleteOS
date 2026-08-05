@@ -13,7 +13,7 @@ import { InquiryInbox } from "@/components/dashboard/inquiry-inbox";
 import { Camera, Bookmark, QrCode, Database, Link as LinkIcon, Film, EyeOff, Share2, Copy, Check, Zap } from "lucide-react";
 import { sendCardPublishedEmail } from "@/lib/actions/emails";
 import { getTipEarnings, type TipEarnings as TipEarningsData } from "@/lib/actions/tips";
-import { getPayoutBalance, createConnectOnboarding, type PayoutBalance } from "@/lib/actions/stripe";
+import { getBalanceSummary, type BalanceSummary } from "@/lib/actions/balance";
 import { trackFunnel } from "@/lib/hooks/use-funnel-tracking";
 import { getAiMemory, type AIMemory } from "@/lib/actions/ai-memory";
 import { getAnalytics, type AnalyticsData } from "@/lib/actions/analytics";
@@ -47,9 +47,8 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
 
   const [earnings, setEarnings] = useState<TipEarningsData | null>(null);
   const cardName = cleanName(profile.full_name, profile.username);
-  const [balance, setBalance] = useState<PayoutBalance | null>(null);
+  const [balance, setBalance] = useState<BalanceSummary | null>(null);
   const [loadingTips, setLoadingTips] = useState(true);
-  const [connecting, setConnecting] = useState(false);
 
   const [memory, setMemory] = useState<AIMemory | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
@@ -73,7 +72,7 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getTipEarnings(), getPayoutBalance()]).then(([earningsResult, balanceResult]) => {
+    Promise.all([getTipEarnings(), getBalanceSummary()]).then(([earningsResult, balanceResult]) => {
       if (cancelled) return;
       if (earningsResult.ok && earningsResult.data) setEarnings(earningsResult.data);
       if (balanceResult.ok && balanceResult.data) setBalance(balanceResult.data);
@@ -126,16 +125,6 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
       clearInterval(pollInterval);
     };
   }, [fetchMetrics]);
-
-  async function handleConnect() {
-    haptic.mediumTap();
-    setConnecting(true);
-    const result = await createConnectOnboarding();
-    setConnecting(false);
-    if (result.ok && result.url) {
-      window.location.href = result.url;
-    }
-  }
 
   async function handleAvatarUpload(newUrl: string) {
     setAvatarUrl(newUrl);
@@ -363,8 +352,6 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
             earnings={earnings}
             balance={balance}
             loading={loadingTips}
-            connecting={connecting}
-            onConnect={handleConnect}
           />
           {profile.profile_published && <InquiryInbox />}
         </div>

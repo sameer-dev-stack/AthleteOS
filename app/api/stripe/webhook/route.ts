@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { PLATFORM_FEE_PERCENT } from "@/lib/constants";
 
 const ALLOWED_EVENTS = new Set([
   "checkout.session.completed",
@@ -9,9 +10,6 @@ const ALLOWED_EVENTS = new Set([
   "customer.subscription.updated",
   "customer.subscription.deleted",
   "invoice.payment_failed",
-  "account.updated",
-  "payout.paid",
-  "payout.failed",
 ]);
 
 function getStripe() {
@@ -144,30 +142,31 @@ export async function POST(request: NextRequest) {
             console.log("[webhook] fan subscription created:", { fanUserId: userId, athleteId, tierId, subscriptionId });
             revalidatePath("/dashboard");
           }
-        } else if (athleteId && session.payment_intent) {
-          const paymentIntent = await stripe.paymentIntents.retrieve(
-            session.payment_intent as string
-          );
-
-          const amount = paymentIntent.amount;
-          const applicationFee = paymentIntent.application_fee_amount || 0;
+        } else if (athleteId && session.amount_total) {
+          // Platform-collected tip: the full amount lands in AthleteOS's own
+          // Stripe account. Compute the platform fee & athlete net ourselves.
+          const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : null;
+          if (!paymentIntentId) break;
+          const amount = session.amount_total ?? 0;
+          const platformFee = Math.round(amount * (PLATFORM_FEE_PERCENT / 100));
+          const netAmount = amount - platformFee;
 
           const { data: existingTip } = await supabase
             .from("tips")
             .select("id")
-            .eq("stripe_payment_intent_id", session.payment_intent as string)
+            .eq("stripe_payment_intent_id", paymentIntentId)
             .single();
 
           if (!existingTip) {
             const { error: insertErr } = await supabase.from("tips").insert({
               athlete_id: athleteId,
               amount,
-              platform_fee: applicationFee,
-              net_amount: amount - applicationFee,
+              platform_fee: platformFee,
+              net_amount: netAmount,
               sender_name: session.metadata?.sender_name || null,
               sender_email: session.metadata?.sender_email || null,
               stripe_session_id: session.id,
-              stripe_payment_intent_id: session.payment_intent as string,
+              stripe_payment_intent_id: paymentIntentId,
               status: "succeeded",
             });
 
@@ -189,7 +188,7 @@ export async function POST(request: NextRequest) {
                   const prefs = athlete.email_preferences as Record<string, boolean> | null;
                   if (prefs?.tips !== false && prefs?.earnings !== false) {
                     const senderName = session.metadata?.sender_name || "Someone";
-                    const netDollars = ((amount - applicationFee) / 100).toFixed(2);
+                    const netDollars = (netAmount / 100).toFixed(2);
                     sendTipReceivedEmail(athlete.email, athlete.full_name || "there", senderName, netDollars).catch(() => {});
                   }
                 }
@@ -310,50 +309,7 @@ export async function POST(request: NextRequest) {
         break;
       }
 
-      case "account.updated": {
-        const account = event.data.object as Stripe.Account;
-        const athleteosId = account.metadata?.athleteos_id;
-
-          if (athleteosId) {
-            const chargesEnabled = account.charges_enabled;
-            const payoutsEnabled = account.payouts_enabled;
-
-            const { error: updateErr } = await supabase
-              .from("profiles")
-              .update({
-                stripe_onboarding_complete: chargesEnabled && payoutsEnabled,
-                updated_at: new Date().toISOString(),
-              })
-              .eq("id", athleteosId);
-            if (updateErr) console.error("[webhook] account.updated DB update failed:", updateErr);
-          }
-        break;
       }
-
-      case "payout.paid": {
-        const payout = event.data.object as Stripe.Payout;
-        if (payout.id) {
-          const { error: updateErr } = await supabase
-            .from("payouts")
-            .update({ status: "paid" })
-            .eq("stripe_payout_id", payout.id);
-          if (updateErr) console.error("[webhook] payout.paid DB update failed:", updateErr);
-        }
-        break;
-      }
-
-      case "payout.failed": {
-        const payout = event.data.object as Stripe.Payout;
-        if (payout.id) {
-          const { error: updateErr } = await supabase
-            .from("payouts")
-            .update({ status: "failed" })
-            .eq("stripe_payout_id", payout.id);
-          if (updateErr) console.error("[webhook] payout.failed DB update failed:", updateErr);
-        }
-        break;
-      }
-    }
 
     await logWebhookEvent(supabase, event, "success");
     return NextResponse.json({ received: true }, { status: 200 });
