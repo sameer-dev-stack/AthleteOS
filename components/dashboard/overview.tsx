@@ -522,25 +522,7 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
                         ) : null;
                       })()}
 
-                      {/* CTA */}
-                      {profile.profile_published ? (
-                        <Link
-                          href={`/${profile.username}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-3 h-9 w-full rounded-xl flex items-center justify-center text-[10px] font-black tracking-[0.15em] uppercase transition-all duration-200 hover:brightness-110"
-                          style={{ backgroundColor: accentColor, color: "#0A0A0D" }}
-                        >
-                          View Card
-                        </Link>
-                      ) : (
-                        <div
-                          className="mt-3 h-9 w-full rounded-xl flex items-center justify-center text-[10px] font-bold tracking-[0.1em] uppercase text-white/20"
-                          style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px dashed rgba(255,255,255,0.08)" }}
-                        >
-                          Unpublished
-                        </div>
-                      )}
+                      {/* Stats chips */}
                     </div>
 
                     {/* Hover: change photo (only when live) */}
