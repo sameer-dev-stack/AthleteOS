@@ -24,7 +24,7 @@ Athletes don't use Stripe Connect directly. Tips flow into the platform account;
 `lib/actions/stripe.ts`, `lib/actions/balance.ts`, `lib/actions/admin.ts`, `app/api/stripe/webhook/route.ts`, `components/dashboard/balance-overview.tsx`, `components/dashboard/tip-earnings.tsx`, `components/dashboard/overview.tsx`, `components/admin/payout-management.tsx`, `components/card-flip.tsx`, `instrumentation.ts`, `next.config.mjs`, `supabase/migrations/20260805_payout_method_destination.sql` (new)
 
 ### Commit
-`<pending>`
+`ea81fde`
 
 ---
 
