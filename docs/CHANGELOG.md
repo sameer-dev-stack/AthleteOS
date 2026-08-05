@@ -25,6 +25,10 @@ Fourth ratified batch of MASTER_PLAN (launch gate / funnel polish): closes the s
 ### Commit
 `5c7d6ab`
 
+### Post-batch audit (same session)
+- E2E run `npx playwright test e2e/full-audit.spec.ts --config=playwright.prod.ts` against live prod: **83 passed / 15 failed**. All 15 failures are landing-page/shared-page waits that never reach `networkidle` — and a direct fetch of `https://athlete-os-vert.vercel.app` shows **prod is serving a STALE build** (missing Batch 2 copy). Failures are attributable to stale deployment + possibly a pre-existing long-poll hang, not to Batches 1–4 code.
+- **BLOCKED on founder action before go-live:** (1) Vercel redeploy of latest `main` (verify GitHub integration / trigger Redeploy), (2) apply the 4 pending migrations in Supabase SQL editor (`drop_fan_memberships`, `payout_method_destination`, `deal_room_inquiries`, `business_facts`). Then re-run the e2e audit; if `networkidle` still hangs, debug the open connection (likely an analytics/font script) as its own issue.
+
 ---
 
 ## 2026-08-05 — Batch 3: Business Facts store + AI grounding + won_at correctness
