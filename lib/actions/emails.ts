@@ -851,7 +851,7 @@ export async function sendQuotaWarningEmail(
                       <p style="color:#88888A;font-size:14px;line-height:1.6;margin:0 0 24px;">
                         We require at least 2 credits to run the data analysis and generate your brand insights.
                       </p>
-                      <a href="${SITE_URL || "https://athlete-os-vert.vercel.app"}/dashboard/settings" style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;letter-spacing:-0.1px;">
+                      <a href="${SITE_URL || "https://athleteos.app"}/dashboard/settings" style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;letter-spacing:-0.1px;">
                         Upgrade Plan or Buy Credits
                       </a>
                     </td>

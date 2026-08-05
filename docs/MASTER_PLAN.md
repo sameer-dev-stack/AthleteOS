@@ -126,12 +126,14 @@ the dependent build prompt ships.
 
 ## 8. Build Order After Ratification
 
-1. **Cut/redesign pass** — ✅ **DONE (Batch 1).** §4 CUT items deleted (~100 kB), routes/nav cleaned, silent-telemetry write paths still pending (Batch 2), CompoundingValue deleted (Business Dashboard lands with the Deal Room data).
-2. **Deal Room** — ⏳ In progress (Batch 1 delivered the unified inbox + pipeline on `inquiries`; ADR-047). Remaining: Business Facts wiring (Batch 4).
-3. **Business Dashboard** — ⏳ BATCH 2 (replaces the empty spot where CompoundingValue rendered; sources: tips, inquiry pipeline, page_views).
-4. **AI operates** — Batch 4: reply drafting + pitch/rate re-grounding on Business Facts.
-5. **Launch gate** — production deploy (Phase 25), UAT, monitor.
-6. **Team tier** — post-launch push.
+Actual delivery (compressed vs. §9D wording as batches landed):
+
+1. **Cut/redesign pass + Deal Room** — ✅ **DONE (Batch 1, `e8b16e3`):** §4 CUT items deleted (~100 kB), routes/nav cleaned, unified Deal Room (pipeline on `inquiries`, ADR-047), inquiry RLS hardening, CompoundingValue deleted.
+2. **Silent-telemetry removal + Business Dashboard** — ✅ **DONE (Batch 2, `8aa077f`):** `recordToolEvent`/`recordAiEvent` write paths dead (ADR-046), `getBusinessSummary` + `<BusinessDashboard>` (tips + won deals + pipeline).
+3. **Business Facts + AI grounding** — ✅ **DONE (Batch 3, `570f095`):** `business_facts` store (owner-RLS, ADR-048), Business Profile panel in Deal Room, AI tools read facts instead of memory, `won_at` semantics, `ai-memory.ts` deleted.
+4. **Launch gate + funnel polish** — ✅ **DONE (Batch 4):** funnel audit passed all steps; per-profile OG/twitter tags on public cards (incl. existing `/api/og/[username]`); hardcoded URLs routed through `NEXT_PUBLIC_SITE_URL`; `.env.example` completed and committed (`!.env.example` un-ignore).
+5. **Deployed product** — ⏳ **BLOCKED on founder action:** apply the 4 pending migrations (`drop_fan_memberships`, `payout_method_destination`, `deal_room_inquiries`, `business_facts`) in Supabase SQL editor, then UAT + go-live.
+6. **Post-launch queue (deferred, documented):** AI reply-drafting (needs real inquiries + facts), Free-tier deal-cap enforcement (3 active deals — needs paid-tier entitlements), advanced analytics presets + exports, teams/collectives tier.
 
 **Rule:** a prompt ships only when every OPEN what-if its section depends on is CLOSED.
 

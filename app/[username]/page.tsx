@@ -35,12 +35,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const p = result.data;
   const displayName = cleanDisplayName(p.full_name, p.username);
-  const title = `${displayName} — AthleteOS`;
-  const description = p.bio && p.bio.trim().length > 10 && !p.bio.includes("@")
-    ? p.bio
-    : `${p.sport || "Athlete"}${p.position ? ` · ${p.position}` : ""} at ${p.school || "Unknown school"}. View my AthleteOS profile.`;
+  const title = p.sport
+    ? `${displayName} — ${p.sport} | AthleteOS`
+    : `${displayName} — AthleteOS`;
+
+  const description =
+    p.bio && p.bio.trim().length > 10 && !p.bio.includes("@")
+      ? p.bio.slice(0, 200)
+      : `${displayName} (${p.sport || "Athlete"}${p.position ? ` · ${p.position}` : ""} at ${p.school || "School"}). Official AthleteOS card.`;
 
   const ogImageUrl = `${SITE_URL}/api/og/${username}`;
+  const images = p.avatar_url
+    ? [
+        { url: p.avatar_url, alt: `${displayName} Avatar` },
+        { url: ogImageUrl, width: 1200, height: 630, alt: `${displayName} — AthleteOS` },
+      ]
+    : [{ url: ogImageUrl, width: 1200, height: 630, alt: `${displayName} — AthleteOS` }];
 
   return {
     title,
@@ -52,10 +62,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       type: "profile",
+      siteName: "AthleteOS",
       url: `${SITE_URL}/${username}`,
-      images: [
-        { url: ogImageUrl, width: 1200, height: 630, alt: `${displayName} — AthleteOS` },
-      ],
+      images,
     },
     twitter: {
       card: "summary_large_image",

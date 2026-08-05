@@ -12,7 +12,7 @@ const inter = Inter({
   display: "swap",
 });
 
-const SITE_URL = "https://athleteos.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app";
 const SITE_NAME = "AthleteOS";
 const TITLE = "AthleteOS — The NIL operating system for athletes";
 const DESCRIPTION =

@@ -401,7 +401,7 @@ export function SettingsPanel({ profile, user }: Props) {
                         <div className="mt-1.5 flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
                           <ExternalLink className="h-3.5 w-3.5 text-ink-dim" />
                           <span className="text-sm text-accent font-mono">
-                            athlete-os-vert.vercel.app/{profile.username}
+                            {(process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app").replace(/^https?:\/\//, "")}/{profile.username}
                           </span>
                         </div>
                       </div>

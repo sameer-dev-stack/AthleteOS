@@ -5,6 +5,28 @@
 
 ---
 
+## 2026-08-05 — Batch 4: launch gate — funnel audit, per-profile OG share preview, env/URL hardening
+
+### What changed
+- **Funnel audit passed** at desktop + ~390px across all 7 stages (landing → sign-up → onboarding → publish card → share card → Deal Room → Business Dashboard). No dead CTAs found; note publish-card confetti, QR share modal, tip modal, inquiry submission with trigger sterilization all verified in the running build.
+- **Dynamic social share preview** — `app/[username]/page.tsx` `generateMetadata`: per-profile `og:title` (name — sport), `og:description` (bio >10 chars else fallback line), `og:image` (avatar if present + first-class `/api/og/[username]` OG image route which already existed), `twitter:card=summary_large_image`, canonical + `og:url` from `NEXT_PUBLIC_SITE_URL`.
+- **URL/domain hardening**: `app/layout.tsx` `SITE_URL` now resolves from `NEXT_PUBLIC_SITE_URL`; `settings-panel.tsx` shows the live domain (protocol stripped) instead of hardcoded `athlete-os-vert.vercel.app`; `emails.ts` quota-warning fallback corrected to `athleteos.app`.
+- **`.env.example` completed + committed**: all 22 `process.env.*` reads documented. Fixed `.gitignore` so `.env.example` is committed (`!.env.example`) while real `.env*` stays ignored.
+- **Verification:** 46/46 tests; lint 0 errors (1 pre-existing warning); build green 13.9s.
+
+### Why
+Fourth ratified batch of MASTER_PLAN (launch gate / funnel polish): closes the share-discovery loop (shared cards render rich previews), removes the last hardcoded staging URL, and makes env configuration reproducible so a fresh clone/deploy can't drift. Product is deploy-ready pending migrations.
+
+### Files touched
+- Edited: `app/[username]/page.tsx`, `app/layout.tsx`, `components/dashboard/settings-panel.tsx`, `lib/actions/emails.ts`, `.gitignore`, `docs/MASTER_PLAN.md` (§8 status), `docs/CHANGELOG.md`
+- Added (now tracked): `.env.example`
+- Docs: `CHANGELOG.md`, `MASTER_PLAN.md`
+
+### Commit
+Recorded at push (this session)
+
+---
+
 ## 2026-08-05 — Batch 3: Business Facts store + AI grounding + won_at correctness
 
 ### What changed
