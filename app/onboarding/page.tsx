@@ -1143,9 +1143,6 @@ export default function OnboardingPage() {
                       Add link
                     </button>
                   )}
-                  {!hasFilledLink && (
-                    <p className="mt-2 text-xs text-red-400/80">At least one link is required (e.g., Hudl, Instagram, merch store).</p>
-                  )}
                 </div>
 
                 <div>
@@ -1193,9 +1190,6 @@ export default function OnboardingPage() {
                       <Plus className="h-3.5 w-3.5" />
                       Add highlight
                     </button>
-                  )}
-                  {!hasFilledHighlight && (
-                    <p className="mt-2 text-xs text-red-400/80">At least one highlight is required (YouTube, Hudl, news feature).</p>
                   )}
                 </div>
 
