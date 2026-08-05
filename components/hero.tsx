@@ -1,7 +1,6 @@
 import { Shield, Zap, Users } from "lucide-react";
-import { AthleteCard } from "./athlete-card";
+import { CardFlip } from "./card-flip";
 import { Reveal } from "./motion/reveal";
-import { Tilt } from "./motion/tilt";
 import { LiveWaitlistCount } from "./motion/live-waitlist-count";
 import { HeroCta } from "./hero-cta";
 import { TypingText } from "./motion/typing-text";
@@ -97,11 +96,7 @@ export function Hero() {
           </div>
 
           <div className="relative flex justify-center lg:col-span-5 lg:justify-end">
-            <Reveal delay={0.15} y={40}>
-              <Tilt max={9} scale={1.01} className="rounded-[34px]">
-                <AthleteCard />
-              </Tilt>
-            </Reveal>
+            <CardFlip />
           </div>
         </div>
       </div>

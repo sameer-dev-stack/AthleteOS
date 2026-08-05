@@ -56,6 +56,7 @@ export function AvatarUpload({ currentUrl, userId, onUpload, size = "md", trigge
 
       try {
         const supabase = createClient();
+        if (!supabase) throw new Error("Supabase client unavailable");
         const ext = file.name.split(".").pop() || "jpg";
         const filePath = `${userId}/avatar.${ext}`;
 

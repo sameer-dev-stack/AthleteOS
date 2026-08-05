@@ -33,7 +33,7 @@ export function Navbar() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
 
-    createClient().auth.getUser().then(({ data: { user } }) => {
+    createClient()?.auth.getUser().then(({ data: { user } }) => {
       setLoggedIn(!!user);
     }).catch(() => {});
 

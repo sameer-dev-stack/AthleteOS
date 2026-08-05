@@ -202,6 +202,7 @@ export default function OnboardingPage() {
   useEffect(() => {
     let cancelled = false;
     const supabase = createClient();
+    if (!supabase) return;
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (cancelled) return;
       if (!user) {
@@ -348,7 +349,7 @@ export default function OnboardingPage() {
           }).catch((e) => console.error("[referral] recordReferral exception:", e));
         }
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await supabase!.auth.getUser();
         if (user?.email) {
           sendWelcomeEmail(user.email, fullName.trim().split(" ")[0], username).catch(() => {});
         }

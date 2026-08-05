@@ -40,6 +40,7 @@ export function CoverImageUpload({ currentUrl, userId, onUpload, onRemove }: Pro
 
       try {
         const supabase = createClient();
+        if (!supabase) throw new Error("Supabase client unavailable");
         const ext = file.name.split(".").pop() || "jpg";
         const filePath = `${userId}/cover.${ext}`;
 

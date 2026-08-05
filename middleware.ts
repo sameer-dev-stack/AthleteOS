@@ -3,15 +3,21 @@ import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { isAdmin } from "@/lib/admin";
 
-const serviceRole = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const serviceRole = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+  : null;
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
+
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
     return NextResponse.next();
   }
 
@@ -82,7 +88,7 @@ export async function middleware(request: NextRequest) {
       return new NextResponse("Forbidden", { status: 403 });
     }
 
-    const { data: profile } = await serviceRole
+    const { data: profile } = await serviceRole!
       .from("profiles")
       .select("role, suspended")
       .eq("id", user.id)
@@ -103,7 +109,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user) {
-    const { data: profile } = await serviceRole
+    const { data: profile } = await serviceRole!
       .from("profiles")
       .select("suspended, onboarding_completed")
       .eq("id", user.id)
@@ -150,7 +156,7 @@ export async function middleware(request: NextRequest) {
   const refMatch = pathname.match(/^\/r\/([A-Za-z0-9]+)$/);
   if (refMatch) {
     const refCode = refMatch[1];
-    const { data: codeRow } = await serviceRole
+    const { data: codeRow } = await serviceRole!
       .from("referral_codes")
       .select("code, is_active")
       .ilike("code", refCode)
