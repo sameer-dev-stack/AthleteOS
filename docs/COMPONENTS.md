@@ -115,12 +115,18 @@ Sticky nav. Background blurs after `scrollY > 16`. Includes mobile hamburger men
 ### `<Hero />` — `components/hero.tsx`
 Main top section. Animated gradient background, floating decorative elements, typing-effect headline, social proof avatars with hover tooltips, trust badges, glow CTA, athlete card mockup.
 - Server component (wraps client motion primitives).
-- Contains `<Reveal>`, `<Tilt>`, `<AthleteCard>`, `<AnimatedGradientBg>`, `<FloatingElements>`, `<TypingText>`, `<SocialProofAvatars>`, `<TrustBadge>`, `<HeroCta>`, `<LiveWaitlistCount>`.
+- Contains `<Reveal>`, `<CardFlip>`, `<AnimatedGradientBg>`, `<FloatingElements>`, `<TypingText>`, `<SocialProofAvatars>`, `<TrustBadge>`, `<HeroCta>`, `<LiveWaitlistCount>`.
 
 ### `<AthleteCard />` — `components/athlete-card.tsx`
 The product hero mockup. Phone-frame style with verified badge, stats, action tiles, latest highlight. Three floating receipts (brand deal, AI bio, tip notification) translate forward on Z-axis so they pop in 3D when the parent `<Tilt>` rotates.
 - Server component. No props.
 - Uses `transformStyle: preserve-3d` to enable 3D layering for floating elements.
+
+### `<CardFlip />` — `components/card-flip.tsx`
+Hover-activated hero card that replaces `<AthleteCard>` + `<Tilt>` in the landing page hero. On hover, three floating notification overlays fade in (AI Bio draft, tip notification, brand deal) with staggered delays. Main card lifts with enhanced glow.
+- Client component (uses `useState`).
+- State: `hovered`
+- Used by: `components/hero.tsx`
 
 ### `<TrustStrip />` — `components/trust-strip.tsx`
 Animated marquee of sport categories.

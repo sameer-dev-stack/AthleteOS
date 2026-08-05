@@ -5,6 +5,31 @@
 
 ---
 
+## 2026-08-04 — Null-safe Supabase client, dev SW cleanup, CardFlip hero
+
+### What changed
+- **`lib/supabase/client.ts`** — `createClient()` returns `null` when `NEXT_PUBLIC_SUPABASE_URL` is unset instead of crashing.
+- **`middleware.ts`** — Early return when Supabase URL missing; conditional `serviceRole` client; non-null assertions on guaranteed paths.
+- **`components/navbar.tsx`** — Optional chaining on `createClient()?.auth`.
+- **`app/dashboard/notifications/page.tsx`** — Optional chaining on `createClient()?.auth`.
+- **`app/onboarding/page.tsx`** — Null guard + non-null assertion on `createClient()`.
+- **`components/avatar-upload.tsx`** / **`components/cover-image-upload.tsx`** — Null guard on `createClient()`.
+- **`components/providers/sw-registration.tsx`** — Dev mode: unregisters service workers and clears caches for clean dev experience.
+- **`next.config.mjs`** — Added `turbopack.root` config.
+- **`public/sw.js`** — Bumped cache name `athleteos-v3` to `v4`.
+- **`components/card-flip.tsx`** (NEW) — Hover-activated hero card with floating notification overlays (AI Bio draft, tip notification, brand deal). Replaces `AthleteCard` + `Tilt` wrapper in hero.
+
+### Why
+Null-safety prevents build/runtime crashes when env vars are missing. Dev SW cleanup eliminates stale cache issues during local development. CardFlip replaces the static hero card with an interactive hover effect.
+
+### Files touched
+`lib/supabase/client.ts`, `middleware.ts`, `components/navbar.tsx`, `app/dashboard/notifications/page.tsx`, `app/onboarding/page.tsx`, `components/avatar-upload.tsx`, `components/cover-image-upload.tsx`, `components/providers/sw-registration.tsx`, `next.config.mjs`, `public/sw.js`, `components/card-flip.tsx` (new), `components/hero.tsx`
+
+### Commit
+`abfc6b1`
+
+---
+
 ## 2026-07-14 — Fix: Apify webhook callback URL fell back to relative path when NEXT_PUBLIC_APP_URL unset
 
 ### What changed
