@@ -97,14 +97,16 @@ export async function getAthleteInquiries(
 
 const UpdateStatusSchema = z.object({
   inquiryId: z.string().uuid(),
-  status: z.enum(["new", "read", "replied", "archived"]),
+  status: z.enum(["new", "replied", "negotiating", "won", "lost"]),
+  dealValue: z.number().min(0).nullable().optional(),
 });
 
 export async function updateInquiryStatus(
   inquiryId: string,
-  status: string
+  status: string,
+  dealValue?: number | null
 ): Promise<{ ok: boolean; error?: string }> {
-  const parsed = UpdateStatusSchema.safeParse({ inquiryId, status });
+  const parsed = UpdateStatusSchema.safeParse({ inquiryId, status, dealValue });
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
 
   const supabase = await createClient();
@@ -119,9 +121,14 @@ export async function updateInquiryStatus(
 
   if (!inquiry || inquiry.athlete_id !== user.id) return { ok: false, error: "Not authorized" };
 
+  const updates: Record<string, unknown> = { status: parsed.data.status };
+  if (parsed.data.dealValue !== undefined) {
+    updates.deal_value = parsed.data.dealValue;
+  }
+
   const { error } = await supabase
     .from("inquiries")
-    .update({ status: parsed.data.status })
+    .update(updates)
     .eq("id", parsed.data.inquiryId);
 
   if (error) return { ok: false, error: error.message };

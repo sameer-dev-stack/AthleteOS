@@ -23,7 +23,6 @@ export const dashboardNavSections: NavSection[] = [
     label: "Growth",
     items: [
       { title: "NIL Value", href: "/dashboard/nil", icon: LineChart },
-      { title: "Marketplace", href: "/dashboard/marketplace", icon: Store },
       { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
       { title: "Referrals", href: "/dashboard/referrals", icon: UserPlus },
     ],
@@ -32,7 +31,6 @@ export const dashboardNavSections: NavSection[] = [
     label: "Tools",
     items: [
       { title: "AI Toolkit", href: "/dashboard/ai", icon: Sparkles },
-      { title: "Scheduler", href: "/dashboard/schedule", icon: Calendar },
     ],
   },
   {

@@ -1020,6 +1020,26 @@ Onboarding previously required only username, full name, sport, and school; ever
 
 ---
 
+## ADR-047 — Deal Room data model: inquiries ARE the pipeline
+
+**Status:** Accepted — 2026-08-05
+
+**Context:**
+The Deal Room needs pipeline status and dollar values, but `inquiries` was a flat inbox. Options: create a separate `deals` table or extend `inquiries`. A separate table forks the data (one inquiry turning into a deal would live in two places), doubles every query, and complicates the ledger.
+
+**Decision:**
+1. `inquiries` IS the pipeline. Added `status` (`CHECK status IN ('new','replied','negotiating','won','lost')`, default `'new'`) and `deal_value NUMERIC` (dollars, nullable, recorded when won).
+2. To stop public-insert forgery (the open brand-inquiry form could otherwise write `status='won'` / `deal_value=999999` on any athlete row), a `sanitize_inquiry_insert()` BEFORE INSERT trigger forces `status='new'` and `deal_value=NULL` on every insert. Only the athlete's own UPDATE — owner-scoped, `WITH CHECK (athlete_id = auth.uid())` — moves rows through the pipeline.
+3. Server actions double-gate ownership: authenticated client (RLS enforced) plus an explicit `inquiry.athlete_id === user.id` check in `updateInquiryStatus`. `submitInquiry` stays service-role (anon card visitors), sanitized by the trigger.
+4. **Currency ledger:** `tips.amount` in cents; `inquiries.deal_value` in dollars. The displayed ledger = tips (cents ÷ 100) + won `deal_value`. The existing `nil_deals` compliance table (also cents) is NOT summed into the business ledger — it is mandated disclosure reporting, not operations. If product later wants a unified reporting view, it reconciles explicitly and logs that ADR.
+
+**Consequences:**
+- No `deals` table; single source of truth for the pipeline.
+- Public inquiry form stays open; forged rows impossible via trigger.
+- Outstanding ADR-046 sub-item moved to Batch 2: `recordToolEvent` calls (5 AI tools) and `ai_events`/`athlete_ai_memory` write paths in `lib/actions/ai-memory.ts` are still live and must be removed; `getAiMemory` read surface stays null-safe until Business Facts (Batch 4).
+
+---
+
 ## ADR-045 — Complete-card requirement is a deliberate friction tradeoff
 
 **Status:** Accepted — 2026-08-05

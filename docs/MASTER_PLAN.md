@@ -126,10 +126,10 @@ the dependent build prompt ships.
 
 ## 8. Build Order After Ratification
 
-1. **Cut/redesign pass** — delete/freeze §4 CUT items; remove silent telemetry; replace CompoundingValue with Business Dashboard skeleton. Verify no leftover membership code.
-2. **Deal room** — inbox + ledger (tables, server actions, UI).
-3. **Business Facts** — user-owned facts store; wire into AI context.
-4. **AI operates** — reply drafting from facts; pitch/pricing from deal history.
+1. **Cut/redesign pass** — ✅ **DONE (Batch 1).** §4 CUT items deleted (~100 kB), routes/nav cleaned, silent-telemetry write paths still pending (Batch 2), CompoundingValue deleted (Business Dashboard lands with the Deal Room data).
+2. **Deal Room** — ⏳ In progress (Batch 1 delivered the unified inbox + pipeline on `inquiries`; ADR-047). Remaining: Business Facts wiring (Batch 4).
+3. **Business Dashboard** — ⏳ BATCH 2 (replaces the empty spot where CompoundingValue rendered; sources: tips, inquiry pipeline, page_views).
+4. **AI operates** — Batch 4: reply drafting + pitch/rate re-grounding on Business Facts.
 5. **Launch gate** — production deploy (Phase 25), UAT, monitor.
 6. **Team tier** — post-launch push.
 

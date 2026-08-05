@@ -21,10 +21,8 @@ import { getNilMetrics } from "@/lib/actions/nil-engine";
 import { NilMetricsStrip } from "@/components/dashboard/nil-metrics-strip";
 import { getSavedAssetsCount } from "@/lib/actions/ai-vault";
 import { getSocialAccounts, type SocialAccount } from "@/lib/actions/social-accounts";
-import { SmartAiActions } from "@/components/dashboard/smart-ai-actions";
 import { resolvePlan } from "@/lib/referral-reward";
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton";
-import { CompoundingValue } from "@/components/dashboard/compounding-value";
 import { ReferralCard } from "@/components/dashboard/referral-card";
 import { LaunchChecklist } from "@/components/dashboard/launch-checklist";
 import { SystemStatus } from "@/components/dashboard/system-status";
@@ -356,21 +354,12 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         {/* Left Section (col-span-2 / 2-thirds width) */}
         <div className="lg:col-span-2 space-y-6">
-          <SmartAiActions
-            themeAccent={accentColor}
-            context="dashboard"
-            cardViews={analytics?.totalViews || 0}
-            linkClicks={analytics?.totalClicks || 0}
-            nilScore={nilScore}
-            tipsCount={earnings?.totalTips || 0}
-            hasBio={!!profile.bio}
-          />
+          <InquiryInbox />
           <TipEarnings
             earnings={earnings}
             balance={balance}
             loading={loadingTips}
           />
-          {profile.profile_published && <InquiryInbox />}
         </div>
 
         {/* Right Section (col-span-1 / 1-third width) */}
@@ -590,11 +579,6 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
             </div>
           </div>
 
-          <CompoundingValue
-            themeAccent={accentColor}
-            createdAt={profile.created_at || new Date().toISOString()}
-            memory={memory}
-          />
           <ReferralCard />
           <LaunchChecklist profile={profile} />
 

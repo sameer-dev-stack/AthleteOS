@@ -4,6 +4,14 @@
 
 ---
 
+## Edit log
+
+- **2026-08-05** — `components/monetization.tsx` (#1 monetization card): replaced obsolete "Memberships / Recurring" with `{ icon: Handshake, label: "Brand deals", note: "Won & logged" }`.
+- **2026-08-05** — `components/pricing.tsx`: "Memberships & paid shoutouts" → "Tips & won brand deals".
+- **PENDING (Batch 2)** — `components/how-it-works.tsx` step 1: "Turn on tips, paid shoutouts, merch, and brand inquiries — all in one card." → remove non-existent "paid shoutouts" and "merch" claims (only tips + brand inquiries are real).
+
+---
+
 ## Announcement Bar
 
 > **Private beta open.** First 500 athletes get 3 months of Pro free. → **Claim your spot**

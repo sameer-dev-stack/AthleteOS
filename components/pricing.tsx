@@ -32,7 +32,7 @@ const PLANS = [
     features: [
       "Everything in Free",
       "300 AI actions / mo",
-      "Memberships & paid shoutouts",
+      "Tips & won brand deals",
       "Full revenue dashboard",
       "Brand deal inbox",
       "Custom themes",

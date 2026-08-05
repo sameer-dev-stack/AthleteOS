@@ -14,7 +14,6 @@ import { NilAiBreakdown } from "@/components/dashboard/nil-ai-breakdown";
 import { NilScoreHistory } from "@/components/dashboard/nil-score-history";
 import { NilDealChecker } from "@/components/dashboard/nil-deal-checker";
 import { SocialAccountsEditor } from "@/components/dashboard/social-accounts-editor";
-import { SmartAiActions } from "@/components/dashboard/smart-ai-actions";
 
 // Wraps the Suggested NIL Rates table. While accounts sync (PENDING) it shows a
 // glassmorphism "tuning" blur; when zero verified channels exist it shows a
@@ -324,13 +323,6 @@ export function NilDashboardClient({
               <NilDealChecker
                 plan={quotaState.plan}
                 themeAccent={themeAccent}
-              />
-              <SmartAiActions
-                themeAccent={themeAccent}
-                context="nil"
-                cardViews={metrics?.card_views || 0}
-                linkClicks={metrics?.link_clicks || 0}
-                nilScore={metrics?.nil_score || null}
               />
             </div>
 

@@ -16,7 +16,6 @@ import {
 } from "@/lib/actions/analytics";
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton";
 import { EmptyState } from "./empty-state";
-import { SmartAiActions } from "@/components/dashboard/smart-ai-actions";
 
 type Props = {
   athleteId: string;
@@ -844,14 +843,7 @@ export function AnalyticsPanel({ athleteId, themeAccent = "#C6FF3D" }: Props) {
               )}
             </div>
 
-            <div className="mt-6 pt-6 border-t border-white/[0.04]">
-              <SmartAiActions
-                themeAccent={themeAccent}
-                context="analytics"
-                cardViews={data.totalViews}
-                linkClicks={data.totalClicks}
-              />
-            </div>
+
 
             {showShareToast && (
               <div className="fixed bottom-6 right-6 z-50 rounded-lg bg-accent px-4 py-3 text-sm font-semibold text-black shadow-lg">

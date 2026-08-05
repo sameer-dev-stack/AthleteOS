@@ -5,6 +5,30 @@
 
 ---
 
+## 2026-08-05 — Batch 1: cut speculative features + Deal Room + inquiry hardening
+
+### What changed
+- **Deleted (~100 kB client JS):** `sponsorship-marketplace.tsx` (MOCK data), `social-scheduler.tsx`, `smart-ai-actions.tsx`, `compounding-value.tsx`; routes `app/dashboard/marketplace/` and `app/dashboard/schedule/`; nav entries cleaned in `config/dashboard-nav.ts`.
+- **Unified Deal Room & Business Inbox** (`components/dashboard/inquiry-inbox.tsx`, client): inquiries + tips in one component, pipeline status (new → replied → negotiating → won/lost), inline deal value, "Total Business Revenue" readout (tips + won deals), empty state pointing athletes to share their card. Renders on the dashboard overview where `SmartAiActions` was; no longer gated on `profile_published`.
+- **Migration `supabase/migrations/20260805_deal_room_inquiries.sql`:** `inquiries.deal_value NUMERIC` (dollars); status CHECK over the 5 pipeline values; `sanitize_inquiry_insert()` BEFORE INSERT trigger forces `status='new'` and `deal_value=NULL` on every insert (kills forged-won-deal / inbox-spam vector on the public form); athlete UPDATE policy owner-scoped with `WITH CHECK (athlete_id = auth.uid())`; currency-unit comment (`tips.amount` = cents, `inquiries.deal_value` = dollars).
+- **`lib/actions/inquiries.ts`:** `updateInquiryStatus` Zod-validates the status union and `deal_value` (number ≥ 0, nullable, optional); explicit ownership check `inquiry.athlete_id === user.id` on the authenticated client (RLS + code double-gate); `submitInquiry` remains service-role for anon card visitors, sanitized by the trigger.
+- **Copy:** `components/monetization.tsx` — "Memberships / Recurring" card → Handshake "Brand deals / Won & logged"; `components/pricing.tsx` — "Memberships & paid shoutouts" → "Tips & won brand deals". Logged in `docs/COPY.md`.
+- **Verification:** 46/46 unit tests pass; `npm run build` green.
+
+### Why
+First ratified batch of MASTER_PLAN (§4/§8): remove pre-launch speculation and mock data (locked fact 6), retire the lock-in widget path, and ship the retention core — the Deal Room — on the real data model. Security hardening closes the open-INSERT forgery vector.
+
+### Files touched
+- Deleted: `components/dashboard/{sponsorship-marketplace,social-scheduler,smart-ai-actions,compounding-value}.tsx`, `app/dashboard/marketplace/*`, `app/dashboard/schedule/*`
+- Edited: `components/dashboard/inquiry-inbox.tsx`, `overview.tsx`, `analytics-panel.tsx`, `app/dashboard/nil/client.tsx`, `config/dashboard-nav.ts`, `lib/actions/inquiries.ts`, `components/monetization.tsx`, `components/pricing.tsx`
+- Added: `supabase/migrations/20260805_deal_room_inquiries.sql`
+- Docs: `CHANGELOG.md`, `DECISIONS.md` (ADR-047), `COPY.md`
+
+### Commit
+(see git log)
+
+---
+
 ## 2026-08-05 — Session: Master Plan draft + strategy lock setup (discussion session)
 
 ### What changed

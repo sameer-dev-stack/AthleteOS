@@ -6,10 +6,9 @@ import { Counter } from "./motion/counter";
 
 const STREAMS = [
   { icon: Heart, label: "Tips", note: "From $1+" },
-  { icon: Users, label: "Memberships", note: "Recurring" },
+  { icon: Handshake, label: "Brand deals", note: "Won & logged" },
   { icon: Mic, label: "Paid shoutouts", note: "Per request" },
   { icon: ShoppingBag, label: "Merch", note: "Print + ship" },
-  { icon: Handshake, label: "Brand deals", note: "Inbound" },
   { icon: LinkIcon, label: "Affiliate links", note: "Auto-tracked" },
 ];
 
