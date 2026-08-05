@@ -462,7 +462,7 @@ export async function getTeamAnalytics(teamId: string): Promise<{
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   const since = thirtyDaysAgo.toISOString();
 
-  const [viewsResult, clicksResult, subsResult, recentViews, recentClicks] = await Promise.all([
+  const [viewsResult, clicksResult, recentViews, recentClicks] = await Promise.all([
     supabase
       .from("page_views")
       .select("id", { count: "exact", head: true })
@@ -471,11 +471,6 @@ export async function getTeamAnalytics(teamId: string): Promise<{
       .from("link_clicks")
       .select("id", { count: "exact", head: true })
       .in("athlete_id", athleteIds),
-    supabase
-      .from("fan_subscriptions")
-      .select("id", { count: "exact", head: true })
-      .in("athlete_id", athleteIds)
-      .eq("status", "active"),
     supabase
       .from("page_views")
       .select("athlete_id, created_at")
@@ -492,27 +487,11 @@ export async function getTeamAnalytics(teamId: string): Promise<{
 
   const totalViews = viewsResult.count ?? 0;
   const totalClicks = clicksResult.count ?? 0;
-  const activeSubscribers = subsResult.count ?? 0;
+  const activeSubscribers = 0;
 
   const viewsByAthlete = new Map<string, number>();
   const clicksByAthlete = new Map<string, number>();
   const subsByAthlete = new Map<string, number>();
-
-  for (const row of (recentViews.data ?? []) as { athlete_id: string }[]) {
-    viewsByAthlete.set(row.athlete_id, (viewsByAthlete.get(row.athlete_id) ?? 0) + 1);
-  }
-  for (const row of (recentClicks.data ?? []) as { athlete_id: string }[]) {
-    clicksByAthlete.set(row.athlete_id, (clicksByAthlete.get(row.athlete_id) ?? 0) + 1);
-  }
-
-  const { data: subRows } = await supabase
-    .from("fan_subscriptions")
-    .select("athlete_id")
-    .in("athlete_id", athleteIds)
-    .eq("status", "active");
-  for (const row of (subRows ?? []) as { athlete_id: string }[]) {
-    subsByAthlete.set(row.athlete_id, (subsByAthlete.get(row.athlete_id) ?? 0) + 1);
-  }
 
   const dateMap = new Map<string, { views: number; clicks: number }>();
   for (let i = 0; i < 30; i++) {
@@ -629,7 +608,7 @@ export async function getTeamMemberAnalytics(teamId: string): Promise<{
 
   const athleteIds = members.map((m: { athlete_id: string }) => m.athlete_id);
 
-  const [viewsResult, clicksResult, subsResult] = await Promise.all([
+  const [viewsResult, clicksResult] = await Promise.all([
     supabase
       .from("page_views")
       .select("athlete_id", { count: "exact" })
@@ -638,16 +617,10 @@ export async function getTeamMemberAnalytics(teamId: string): Promise<{
       .from("link_clicks")
       .select("athlete_id", { count: "exact" })
       .in("athlete_id", athleteIds),
-    supabase
-      .from("fan_subscriptions")
-      .select("athlete_id", { count: "exact" })
-      .in("athlete_id", athleteIds)
-      .eq("status", "active"),
   ]);
 
   const viewRows = (viewsResult.data ?? []) as { athlete_id: string }[];
   const clickRows = (clicksResult.data ?? []) as { athlete_id: string }[];
-  const subRows = (subsResult.data ?? []) as { athlete_id: string }[];
 
   const viewsByAthlete = new Map<string, number>();
   for (const row of viewRows) {
@@ -657,11 +630,6 @@ export async function getTeamMemberAnalytics(teamId: string): Promise<{
   const clicksByAthlete = new Map<string, number>();
   for (const row of clickRows) {
     clicksByAthlete.set(row.athlete_id, (clicksByAthlete.get(row.athlete_id) ?? 0) + 1);
-  }
-
-  const subsByAthlete = new Map<string, number>();
-  for (const row of subRows) {
-    subsByAthlete.set(row.athlete_id, (subsByAthlete.get(row.athlete_id) ?? 0) + 1);
   }
 
   const result: TeamMemberAnalytics[] = members.map((m: Record<string, unknown>) => {
@@ -675,7 +643,7 @@ export async function getTeamMemberAnalytics(teamId: string): Promise<{
       sport: (p?.sport as string) ?? null,
       views: viewsByAthlete.get(athleteId) ?? 0,
       clicks: clicksByAthlete.get(athleteId) ?? 0,
-      subscribers: subsByAthlete.get(athleteId) ?? 0,
+      subscribers: 0,
     };
   });
 

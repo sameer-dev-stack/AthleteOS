@@ -3,6 +3,8 @@
 > Derived strictly from `supabase/schema.sql`, `supabase/APPLY_MIGRATIONS.sql`, and all 37 files under `supabase/migrations/`.
 > Confidence legend: **High** = fully defined & consistent across schema + migration; **Medium** = defined in migrations only / minor ambiguity; **Low** = referenced in code but **no migration and no schema definition exists**.
 
+> **UPDATE 2026-08-05 (ADR-043):** Fan-membership tables (`membership_tiers`, `fan_subscriptions`, `content_posts`, `email_campaigns`, `fan_subscribers`) were dropped from the product under ADR-043. Migration `20260805_drop_fan_memberships.sql` removes them from the remote DB. This audit covers the pre-drop state; membership-related sections below are historical. `APPLY_MIGRATIONS.sql` was scrubbed of membership blocks, so a fresh DB will not recreate them.
+
 ---
 
 ## SECTION 11 — Database Documentation

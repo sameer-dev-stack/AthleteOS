@@ -988,9 +988,11 @@ The product shipped a partially-built fan-membership system: `membership_tiers`,
 5. DB tables `membership_tiers`, `fan_subscriptions`, `fan_subscribers`, `email_campaigns` are left in place (no destructive migration) so existing analytics/teams/GDPR queries keep working; they are simply unused.
 6. Landing copy scrubbed of "memberships" (Problem, How It Works, NIL guide, `docs/COPY.md`); ROADMAP Phase 9 marked CUT.
 
+**Update (same day):** User chose to drop the tables after all. `supabase/migrations/20260805_drop_fan_memberships.sql` drops the four orphaned tables; all remaining code references (stripe webhook fan-subscription branch, team subscriber counts in `teams.ts`, weekly-briefing subscriber stat, GDPR delete list) were removed in the same session. ADR decision #5 is superseded — the tables no longer exist once the migration runs. Historical migrations (`20260620_full_platform.sql`, `20260705_fan_content_rls.sql`) are untouched; `APPLY_MIGRATIONS.sql` was scrubbed so fresh DBs don't recreate the tables.
+
 **Consequences:**
 - Faster MVP: the card is only name/contact/stats/photos/tips; no recurring-subscription backend to finish or maintain.
-- Orphaned tables remain in Supabase (empty or unused) — safe to drop later with a migration if desired.
+- Orphaned tables were dropped by migration `20260805_drop_fan_memberships.sql` (supersedes decision #5 above).
 - Stripe recurring products/config specific to fan tiers under the platform account are unused.
 - If re-added post-MVP, Phase 9 in ROADMAP.md is the recovery checklist.
 

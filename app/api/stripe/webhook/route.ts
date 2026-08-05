@@ -124,24 +124,6 @@ export async function POST(request: NextRequest) {
           console.log("[webhook] checkout.session.completed plan updated:", { userId, tier, subscriptionId });
           revalidatePath("/dashboard");
           revalidatePath("/dashboard/billing");
-        } else if (userId && athleteId && subscriptionId && session.metadata?.tier_id) {
-          const tierId = session.metadata.tier_id;
-          const { error: subError } = await supabase
-            .from("fan_subscriptions")
-            .insert({
-              fan_user_id: userId,
-              athlete_id: athleteId,
-              tier_id: tierId,
-              stripe_subscription_id: subscriptionId,
-              status: "active",
-            });
-
-          if (subError) {
-            console.error("[webhook] fan subscription insert FAILED:", subError);
-          } else {
-            console.log("[webhook] fan subscription created:", { fanUserId: userId, athleteId, tierId, subscriptionId });
-            revalidatePath("/dashboard");
-          }
         } else if (athleteId && session.amount_total) {
           // Platform-collected tip: the full amount lands in AthleteOS's own
           // Stripe account. Compute the platform fee & athlete net ourselves.

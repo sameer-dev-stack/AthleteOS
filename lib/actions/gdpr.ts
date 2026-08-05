@@ -59,7 +59,7 @@ export async function deleteAccount(): Promise<{ ok: boolean; error?: string }> 
     const tables = [
       "tips", "inquiries", "ai_usage", "ai_saved_assets", "ai_events",
       "page_views", "link_clicks", "nil_value_metrics", "nil_deals",
-      "audit_log", "fan_subscriptions", "content_posts", "membership_tiers",
+      "audit_log",
       "social_accounts", "athlete_ai_memory", "saved_athletes",
     ];
 

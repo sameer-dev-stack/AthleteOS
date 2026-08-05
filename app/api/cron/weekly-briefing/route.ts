@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
     for (const athlete of athletes) {
       try {
         // --- 7-day stats ---
-        const weekStart = sevenDaysAgo.toISOString();        const [viewsRes, clicksRes, tipsRes, nilRes, memoryRes, quotaRes, inquiriesRes, subsRes] = await Promise.all([
+        const weekStart = sevenDaysAgo.toISOString();        const [viewsRes, clicksRes, tipsRes, nilRes, memoryRes, quotaRes, inquiriesRes] = await Promise.all([
           admin.from("page_views").select("id", { count: "exact", head: true })
             .eq("athlete_id", athlete.id).gte("created_at", weekStart),
           admin.from("link_clicks").select("id", { count: "exact", head: true })
@@ -65,8 +65,6 @@ export async function GET(req: NextRequest) {
             .eq("period_start", new Date().toISOString().slice(0, 7) + "-01").single(),
           admin.from("inquiries").select("id", { count: "exact", head: true })
             .eq("athlete_id", athlete.id).gte("created_at", weekStart),
-          admin.from("fan_subscriptions").select("id", { count: "exact", head: true })
-            .eq("athlete_id", athlete.id).eq("status", "active"),
         ]);
 
         const cardViews = viewsRes.count || 0;
@@ -87,7 +85,7 @@ export async function GET(req: NextRequest) {
         const aiRemaining = Math.max(0, aiLimit - aiUsed);
 
         const newInquiries = inquiriesRes.count || 0;
-        const fanSubscribers = subsRes.count || 0;
+        const fanSubscribers = 0;
 
         // Pro/Elite only — Free tier athletes do not receive weekly briefings
         if (effectivePlan === "free") {

@@ -181,43 +181,6 @@ CREATE TABLE IF NOT EXISTS public.tips (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Membership tiers
-CREATE TABLE IF NOT EXISTS public.membership_tiers (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  athlete_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  name TEXT NOT NULL,
-  description TEXT,
-  price_cents INTEGER NOT NULL,
-  stripe_price_id TEXT,
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Fan subscriptions
-CREATE TABLE IF NOT EXISTS public.fan_subscriptions (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  fan_user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  athlete_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  tier_id UUID REFERENCES public.membership_tiers(id) ON DELETE SET NULL,
-  stripe_subscription_id TEXT,
-  status TEXT DEFAULT 'active',
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(fan_user_id, athlete_id)
-);
-
--- Content posts
-CREATE TABLE IF NOT EXISTS public.content_posts (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  athlete_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  title TEXT NOT NULL,
-  body TEXT,
-  media_url TEXT,
-  is_members_only BOOLEAN DEFAULT false,
-  tier_required TEXT DEFAULT 'free',
-  published BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
 -- Brand accounts
 CREATE TABLE IF NOT EXISTS public.brand_accounts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -306,9 +269,6 @@ ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS theme_layout TEXT DEFAULT '
 
 -- Enable RLS
 ALTER TABLE public.tips ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.membership_tiers ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.fan_subscriptions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.content_posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.brand_accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.campaign_briefs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.inquiries ENABLE ROW LEVEL SECURITY;
@@ -326,44 +286,6 @@ END $$;
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Athletes can read own tips') THEN
     CREATE POLICY "Athletes can read own tips" ON public.tips FOR SELECT TO authenticated USING (athlete_id = auth.uid());
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Athletes manage own tiers') THEN
-    CREATE POLICY "Athletes manage own tiers" ON public.membership_tiers FOR ALL TO authenticated USING (athlete_id = auth.uid());
-  END IF;
-END $$;
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Public can read active tiers') THEN
-    CREATE POLICY "Public can read active tiers" ON public.membership_tiers FOR SELECT TO anon USING (is_active = true);
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Fans read own subscriptions') THEN
-    CREATE POLICY "Fans read own subscriptions" ON public.fan_subscriptions FOR SELECT TO authenticated USING (fan_user_id = auth.uid());
-  END IF;
-END $$;
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Athletes read own fan subs') THEN
-    CREATE POLICY "Athletes read own fan subs" ON public.fan_subscriptions FOR SELECT TO authenticated USING (athlete_id = auth.uid());
-  END IF;
-END $$;
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Service role full access subs') THEN
-    CREATE POLICY "Service role full access subs" ON public.fan_subscriptions FOR ALL TO service_role USING (true);
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Athletes manage own posts') THEN
-    CREATE POLICY "Athletes manage own posts" ON public.content_posts FOR ALL TO authenticated USING (athlete_id = auth.uid());
-  END IF;
-END $$;
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Public read free posts') THEN
-    CREATE POLICY "Public read free posts" ON public.content_posts FOR SELECT TO anon USING (published = true AND is_members_only = false);
   END IF;
 END $$;
 
@@ -424,10 +346,6 @@ CREATE INDEX IF NOT EXISTS idx_tips_athlete ON public.tips(athlete_id);
 CREATE INDEX IF NOT EXISTS idx_tips_created_at ON public.tips(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_tips_athlete_created ON public.tips(athlete_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_profiles_moderation ON public.profiles(moderation_status);
-CREATE INDEX IF NOT EXISTS idx_membership_tiers_athlete ON public.membership_tiers(athlete_id);
-CREATE INDEX IF NOT EXISTS idx_fan_subscriptions_athlete ON public.fan_subscriptions(athlete_id);
-CREATE INDEX IF NOT EXISTS idx_fan_subscriptions_fan ON public.fan_subscriptions(fan_user_id);
-CREATE INDEX IF NOT EXISTS idx_content_posts_athlete ON public.content_posts(athlete_id);
 CREATE INDEX IF NOT EXISTS idx_campaign_briefs_brand ON public.campaign_briefs(brand_id);
 CREATE INDEX IF NOT EXISTS idx_inquiries_athlete ON public.inquiries(athlete_id);
 CREATE INDEX IF NOT EXISTS idx_saved_athletes_brand ON public.saved_athletes(brand_id);
