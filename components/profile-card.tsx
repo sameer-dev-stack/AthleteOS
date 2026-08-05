@@ -648,7 +648,7 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
             <div className="mx-4 h-px flex-shrink-0" style={{ background: `linear-gradient(90deg, transparent, ${accent}20, transparent)` }} />
 
             {/* ── Scrollable content ────────────────── */}
-            <div className="flex-1 overflow-y-auto scrollbar-none px-5 pt-4 pb-8 space-y-4" onClick={stopFlip}>
+            <div className="flex-1 overflow-y-auto scrollbar-none px-5 pt-4 pb-6 space-y-3" onClick={stopFlip}>
 
               {/* Bio */}
               {hasValidBio && (
@@ -746,7 +746,7 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
                     <Play className="h-3 w-3" style={{ color: `${accent}60` }} />
                     <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: `${accent}50` }}>Highlights</span>
                   </div>
-                  <div className="flex flex-wrap items-center justify-center gap-2 py-2.5 px-1">
+                  <div className="flex flex-wrap items-center justify-center gap-2 py-2 px-1">
                     {highlights.map((h, i) => (
                       <a
                         key={i}
@@ -816,14 +816,14 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
               </div>
             </div>
             {/* ── Bottom: Actions ─────────── */}
-            <div className="mt-auto flex flex-col gap-4 w-full px-5 pb-4 pt-2 flex-shrink-0" onClick={stopFlip}>
+            <div className="mt-auto flex flex-col gap-2.5 w-full px-5 pb-2 pt-2 flex-shrink-0" onClick={stopFlip}>
 
               {/* Contact + Inquiry (2-col) */}
               <div className="flex gap-2 w-full">
                 {hasContact && (
                   <button
                     onClick={(e) => { e.stopPropagation(); resetAutoReturn(); setShowContactModal(true); }}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-xl px-3 py-3 text-[12px] font-black tracking-wide transition-all duration-200 hover:scale-[1.02] transform translate-z-0 [backface-visibility:hidden] [will-change:transform]"
+                    className="flex-1 flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[12px] font-black tracking-wide transition-all duration-200 hover:scale-[1.02] transform translate-z-0 [backface-visibility:hidden] [will-change:transform]"
                     style={{
                       background: "rgba(255,255,255,0.05)",
                       border: "1px solid rgba(255,255,255,0.08)",
@@ -840,7 +840,7 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
                 )}
                 <button
                   onClick={(e) => { e.stopPropagation(); resetAutoReturn(); setShowInquiry(true); }}
-                  className={`${hasContact ? "flex-1" : "w-full"} flex items-center justify-center gap-2 rounded-xl px-3 py-3 text-[12px] font-black tracking-wide transition-all duration-200 hover:scale-[1.02] transform translate-z-0 [backface-visibility:hidden] [will-change:transform]`}
+                  className={`${hasContact ? "flex-1" : "w-full"} flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[12px] font-black tracking-wide transition-all duration-200 hover:scale-[1.02] transform translate-z-0 [backface-visibility:hidden] [will-change:transform]`}
                   style={{
                     background: `${accent}15`,
                     border: `1px solid ${accent}30`,
@@ -868,7 +868,7 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
 
                 {/* ── Footer ───────────────────────────── */}
                 <div
-                  className="flex items-center justify-center gap-1.5 py-2 flex-shrink-0"
+                  className="flex items-center justify-center gap-1.5 py-1.5 flex-shrink-0"
                   style={{ borderTop: "1px solid rgba(255,255,255,0.04)", background: "rgba(0,0,0,0.15)" }}
                 >
                   <span className="text-[7px] font-bold tracking-[0.3em] uppercase text-white/20">Powered by</span>
