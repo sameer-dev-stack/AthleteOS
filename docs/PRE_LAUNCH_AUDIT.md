@@ -246,7 +246,6 @@ The `ParallaxWordmark` component attaches a `mousemove` listener to `window`. On
 | Suspended | `/suspended` | Clean |
 | Offline | `/offline` | Clean |
 | Referral | `/r/[username]` | Clean |
-| Fan subscribe | `/fan/subscribe/[tierId]` | Clean |
 | Stripe status | `/stripe/status` | Clean (admin only) |
 | Admin | `/admin` | Clean (admin only) |
 

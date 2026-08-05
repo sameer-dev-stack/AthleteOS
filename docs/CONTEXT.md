@@ -38,7 +38,7 @@ The card is the front-end identity layer. The real value is the system behind it
 | Customer | How they pay | When to build |
 |----------|-------------|---------------|
 | **Athletes** | Brand tools, AI help, customization, analytics, monetization utilities | **Phase 1** — supply side, identity layer |
-| **Fans / Supporters** | Subscriptions, support tiers, exclusive content, shoutouts, digital access | **Phase 2** — after athlete adoption |
+| **Fans / Supporters** | Tips (platform-collected), shoutouts, digital access | **Phase 2** — after athlete adoption |
 | **Brands / Teams / Schools** | Discovery, verified profiles, campaign tools, bulk onboarding, data access | **Phase 3** — after quality athlete profiles exist |
 
 **Sequence matters:** Athletes first (supply + identity), then fans (monetization), then brands (marketplace expansion). Never start with a marketplace.
@@ -171,7 +171,7 @@ Secondary CTA: **See how it works** (scroll to How It Works section)
 - 3D mouse-tracking athlete card mockup
 - Scroll-triggered reveals, magnetic CTAs, spotlight cards, animated counters
 - Custom cinematic footer with parallax wordmark
-- Supabase Postgres database with 19+ tables (profiles, waitlist, newsletter, ai_usage, ai_saved_assets, page_views, link_clicks, audit_log, membership_tiers, fan_subscriptions, content_posts, tips, brand_accounts, campaign_briefs, inquiries, saved_athletes, team_accounts, team_members, team_invites, social_accounts, nil_value_metrics, nil_deals, athlete_ai_memory, ai_events)
+- Supabase Postgres database with 19+ tables (profiles, waitlist, newsletter, ai_usage, ai_saved_assets, page_views, link_clicks, audit_log, tips, brand_accounts, campaign_briefs, inquiries, saved_athletes, team_accounts, team_members, team_invites, social_accounts, nil_value_metrics, nil_deals, athlete_ai_memory, ai_events)
 - Auth system (email/password + Google OAuth) with sign-in, sign-up, callback routes
 - Custom email confirmation via Resend API (bypasses broken Supabase SMTP)
 - Multi-step onboarding wizard (username claim, profile fields, avatar upload)
@@ -210,10 +210,11 @@ Secondary CTA: **See how it works** (scroll to How It Works section)
 - CSV export of disclosed deals ledger
 - Admin audit for clearing/rejecting deals
 
-### Fan Memberships
-- Membership tier management (create, delete, pricing)
-- Exclusive content post system (publish/unpublish, tier-gated)
-- Fan subscription checkout via Stripe
+### Fan Monetization (CUT pre-MVP — see ADR-043)
+- ~~Membership tier management (create, delete, pricing)~~ — REMOVED 2026-08-05
+- ~~Exclusive content post system (publish/unpublish, tier-gated)~~ — REMOVED 2026-08-05
+- ~~Fan subscription checkout via Stripe~~ — REMOVED 2026-08-05
+- Active fan monetization is one-tap tips via Stripe Checkout (platform-collected, 5% fee)
 
 ### Brand-Side Tools
 - Brand account creation and management

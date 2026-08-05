@@ -192,7 +192,7 @@ about deepening it, not building it from zero. The intended trajectory:
 - Expand the on-card action set toward the full Monetization layer: bookings,
   paid shoutouts, affiliate links, and digital offers, alongside the existing
   tips, memberships, and inquiries.
-- Tier-gated content blocks on the Card for fan memberships (Phase 2).
+- ~~Tier-gated content blocks on the Card for fan memberships (Phase 2).~~ — CUT 2026-08-05 (ADR-043); MVP card is name/contact/stats/photos/tips only.
 
 ### 3.4 Discovery & brand readiness
 - The public **discovery portal** (responsive card grid, SEO-indexed) turns the

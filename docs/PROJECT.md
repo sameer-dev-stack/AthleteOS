@@ -278,11 +278,11 @@ The product surface is exposed via **server actions** (`"use server"` functions)
 ### 9.6 Teams & Collaboration
 - `teams.ts` — full workspace: create, members, roles, invites, analytics, messaging, content, tasks, events, announcements (~30 functions).
 
-### 9.7 Memberships & Fan Subscriptions
-- `memberships.ts` — tiers + content posts + subscriber counts + `createSubscriptionCheckout`. `memberships-client.ts` (fan-side tier lookup).
+### 9.7 Memberships & Fan Subscriptions — REMOVED 2026-08-05 (ADR-043)
+- ~~`memberships.ts` — tiers + content posts + subscriber counts + `createSubscriptionCheckout`. `memberships-client.ts` (fan-side tier lookup).~~ Deleted pre-MVP. Fan monetization = one-tap tips only.
 
 ### 9.8 Brands & Campaigns
-- `brand.ts` (brand accounts + scouting), `campaigns.ts` (athlete email campaigns), `compliance.ts` (NIL deal disclosure), `inquiries.ts` (brand→athlete inquiries), `schedule.ts` (social scheduler).
+- `brand.ts` (brand accounts + scouting), `compliance.ts` (NIL deal disclosure), `inquiries.ts` (brand→athlete inquiries), `schedule.ts` (social scheduler). ~~`campaigns.ts` (athlete email campaigns)~~ — deleted 2026-08-05.
 
 ### 9.9 Referrals & Waitlist
 - `referrals.ts` (codes, stats, reward), `waitlist.ts` (join/confirm/newsletter).
@@ -358,10 +358,10 @@ Auth legend: **Anon** = no auth; **Auth** = session cookie; **Admin** = session 
 - **No native Postgres `ENUM` types** — all enums are `TEXT` + `CHECK` constraints.
 
 ### 11.1 Tables referenced in code but MISSING from `schema.sql` (exist in migrations, High)
-`tips`, `fan_subscriptions`, `membership_tiers`, `payouts`, `team_members`, `team_accounts`, `inquiries`, `milestones`, `athlete_knowledge`, `campaign_briefs`. `email_preferences` is a **column on `profiles`**, not a table.
+`tips`, `payouts`, `team_members`, `team_accounts`, `inquiries`, `milestones`, `athlete_knowledge`, `campaign_briefs`. `email_preferences` is a **column on `profiles`**, not a table. ~~`fan_subscriptions`, `membership_tiers`~~ — no longer referenced in code (removed 2026-08-05).
 
 ### 11.2 Tables referenced in code with NO migration / NO schema — WILL ERROR AT RUNTIME (Low)
-`email_campaigns`, `fan_subscribers` (both in `campaigns.ts`), and `team_messages`, `team_content`, `team_tasks`, `team_events`, `team_announcements` (all in `teams.ts`). **These have no DDL anywhere** — production calls will raise "relation does not exist".
+`team_messages`, `team_content`, `team_tasks`, `team_events`, `team_announcements` (all in `teams.ts`). **These have no DDL anywhere** — production calls will raise "relation does not exist". ~~`email_campaigns`, `fan_subscribers` (both in `campaigns.ts`)~~ — source deleted 2026-08-05, no longer referenced.
 
 ### 11.3 Core tables (High)
 - **profiles** — PK=auth.users(id). 40+ columns (email, full_name, username UNIQUE, sport, school, class_year, position, bio, stats/links/social/highlights JSONB, plan, stripe_*, role, suspended, onboarding_completed, profile_published, email_confirmed, confirmation_token, theme_accent DEFAULT '#C6FF3D', email_preferences JSONB, etc.). RLS: self + public-published + admin.
@@ -374,7 +374,7 @@ Auth legend: **Anon** = no auth; **Auth** = session cookie; **Admin** = session 
 - **social_accounts** — stores OAuth `access_token` (IG/TikTok); unique `(profile_id, platform)`.
 - **nil_value_metrics** — unique `(profile_id, period_start, period_end)`; `tips_amount` NUMERIC **dollars**.
 - **athlete_ai_memory / ai_events / ai_saved_assets** — AI data moat; `ai_saved_assets.tool_type` has CHECK enum.
-- **fan_subscriptions / membership_tiers / content_posts** — membership + members-only content.
+- ~~**fan_subscriptions / membership_tiers / content_posts** — membership + members-only content.~~ Removed 2026-08-05 (ADR-043); tables orphaned in DB, unused.
 - **brand_accounts / campaign_briefs / saved_athletes / inquiries** — brand side.
 - **team_accounts / team_members / team_invites** — teams (role CHECK admin/coach/athlete).
 - **profile_events / weekly_snapshots / milestones / payouts / athlete_knowledge / nil_score_history / scheduled_posts** — data-moat + analytics + scheduler.
@@ -403,21 +403,17 @@ erDiagram
   profiles ||--o{ athlete_ai_memory : "1:1"
   profiles ||--o{ ai_events : generates
   profiles ||--o{ ai_saved_assets : saves
-  profiles ||--o{ membership_tiers : offers
-  profiles ||--o{ fan_subscriptions : subscribed_by
-  profiles ||--o{ content_posts : publishes
   profiles ||--o{ inquiries : receives
   profiles ||--o{ referrals : referrer
   profiles ||--o{ referral_codes : "1:1"
   profiles ||--o{ team_members : member_of
   profiles ||--o{ payouts : paid
-  membership_tiers ||--o{ fan_subscriptions : "tier_id"
-  fan_subscriptions }o--|| auth_users : fan
   brand_accounts ||--o{ campaign_briefs : creates
   brand_accounts ||--o{ saved_athletes : saves
   team_accounts ||--o{ team_members : has
 ```
-External (used in code, undefined): `email_campaigns`, `fan_subscribers`, `team_messages`, `team_content`, `team_tasks`, `team_events`, `team_announcements`.
+External (used in code, undefined): `team_messages`, `team_content`, `team_tasks`, `team_events`, `team_announcements`. ~~`email_campaigns`, `fan_subscribers`~~ — source deleted 2026-08-05.
+~~`membership_tiers`/`fan_subscriptions`/`content_posts` edges removed from ERD 2026-08-05 (ADR-043); tables remain in DB, orphaned.~~
 
 ---
 
@@ -562,7 +558,7 @@ Used in **20 `lib/actions/*`** files: admin, ai-content, ai-vault, ai, analytics
 
 ## 18. Code Quality  ·  *Confidence: High*
 
-- **Naming:** consistent camelCase/kebab/Pascal. Some identifier typos: `setMounted`/`withdrawing`/`showBreakdown`/`earned`; undefined `ink-dim`/`ink-muted` Tailwind classes in `membership-tiers.tsx`.
+- **Naming:** consistent camelCase/kebab/Pascal. Some identifier typos: `setMounted`/`withdrawing`/`showBreakdown`/`earned`.
 - **`"use client"` ratio:** 127/201 (~63%) — acceptable (logic in server actions) but raises bundle/maintenance cost.
 - **Dead code:** `@google/generative-ai` dep + `GEMINI_*` env unused; `RealtimeDashboard` name implies websockets but polls.
 - **Duplicate logic:** `cleanDisplayName` vs `cleanName`; `MINIMUM_PAYOUT_CENTS` redefined in `balance-overview.tsx`; `getStripe()` + `stripe` Proxy both exist.
@@ -588,7 +584,7 @@ Used in **20 `lib/actions/*`** files: admin, ai-content, ai-vault, ai, analytics
 | D9 | Medium | Fragile sport lookup (exact, no normalize) | `sport-stat-templates.ts`, `nil-score.ts` | Low | Normalize before lookup |
 | D10 | Low | Service-role at module load in edge middleware | `middleware.ts` | Low | Confirm correct client choice for edge |
 | D11 | **High** | **RLS INSERT-escalation** (§16 #14) | 8 tables' policies | Medium | Split into INSERT policy with `WITH CHECK(owner=auth.uid())` |
-| D12 | **High** | **Missing tables referenced in code** (§11.2) | `campaigns.ts`, `teams.ts` | Medium | Add migrations for `email_campaigns`, `fan_subscribers`, `team_*` |
+| D12 | **High** | **Missing tables referenced in code** (§11.2) | `teams.ts` | Medium | Add migrations for `team_*` (~~`email_campaigns`, `fan_subscribers`~~ — resolved by deletion 2026-08-05) |
 | D13 | Medium | SECURITY DEFINER without search_path | 3 functions | Low | Add `SET search_path = public, pg_catalog` + restrict `grant_pro_reward` EXECUTE |
 | D14 | Medium | `rate_limits` broken/missing DDL + no policies | `schema.sql`, migrations | Low | Fix typo, add migration + policy, or remove usage |
 | D15 | Medium | Currency-unit inconsistency (cents vs dollars) | `nil_deals`, snapshots | Low | Standardize + document per column |
@@ -739,7 +735,7 @@ Used in **20 `lib/actions/*`** files: admin, ai-content, ai-vault, ai, analytics
 
 ## 28. Missing Documentation  ·  *Honest gaps — not invented*
 
-- **Full per-table DDL for tables existing only in migrations** (`tips`, `fan_subscriptions`, `payouts`, etc.) — `schema.sql` omits them; reconstruct from `supabase/migrations/*`. (Subagent enumerated columns from migrations in §11.3.)
+- **Full per-table DDL for tables existing only in migrations** (`tips`, `payouts`, etc.) — `schema.sql` omits them; reconstruct from `supabase/migrations/*`. (Subagent enumerated columns from migrations in §11.3. ~~`fan_subscriptions`~~ no longer referenced in code — 2026-08-05.)
 - **Exact external API contracts for MiMo** (`api.xiaomimimo.com`) — undocumented vendor; only request/response shape inferred from `lib/ai.ts`.
 - **Stripe Connect payout lifecycle** beyond webhook `payout.paid/failed` — `payouts`/`payout_methods` tables; `payout_methods` not found in migrations.
 - **Team RBAC model** — `team_members.role` CHECK (admin/coach/athlete) confirmed; full team_* schema incomplete (tables referenced but no DDL).

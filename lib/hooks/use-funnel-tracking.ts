@@ -15,7 +15,6 @@ type FunnelEvent =
   | "onboarding_skip_profile"
   | "profile_publish"
   | "first_tip_received"
-  | "first_subscription_received"
   | "upgrade_click"
   | "upgrade_complete"
   | "public_card_share"

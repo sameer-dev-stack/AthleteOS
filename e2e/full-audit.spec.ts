@@ -516,7 +516,7 @@ test.describe('Profile Editor', () => {
   });
 
   test('profile editor has expected tab sections', async ({ page }) => {
-    // Profile editor uses 8 tabs: Bio, Stats, Links, Social, Highlights, Theme, Tiers, Content
+    // Profile editor uses 7 tabs: Bio, Stats, Links, Social, Highlights, Contact, Theme
     // When unauthenticated, we verify the redirect behavior
     await page.goto('/dashboard/profile');
     const url = page.url();

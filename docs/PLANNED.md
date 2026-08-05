@@ -96,10 +96,10 @@
 - [ ] Cover image upload for public card
 
 ### Medium-term
-- [ ] Fan memberships — recurring fan revenue for athletes
-- [ ] Exclusive content section on athlete card (member-only posts, media, updates)
-- [ ] Fan dashboard (manage subscriptions, view content)
-- [ ] Stripe subscriptions for fan recurring payments
+- ~~Fan memberships — recurring fan revenue for athletes~~ — CUT 2026-08-05 (ADR-043); do not add to MVP scope
+- ~~Exclusive content section on athlete card (member-only posts, media, updates)~~ — CUT
+- ~~Fan dashboard (manage subscriptions, view content)~~ — CUT
+- ~~Stripe subscriptions for fan recurring payments~~ — CUT
 
 ### Long-term
 - [ ] Brand-side tools — athlete discovery, campaign brief creation, inbound lead management

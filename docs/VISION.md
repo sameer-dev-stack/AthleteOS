@@ -129,7 +129,7 @@ First 20–50 athletes are more important than vanity traffic — they become yo
 7. 🔜 **Subscription/paywall + usage metering**
 8. 🔜 **God Mode admin** — billing, moderation, usage visibility
 9. 🔜 **Analytics + refinement**
-10. 🔜 **Fan memberships**
+10. ~~🔜 **Fan memberships**~~ — CUT pre-MVP 2026-08-05 (ADR-043); revisit only after launch if ever
 11. 🔜 **Brand-side tools** (later)
 
 **Rule:** Do not start with a full marketplace. Start with a useful single-player

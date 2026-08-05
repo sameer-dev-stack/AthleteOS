@@ -57,9 +57,9 @@ Refactored the core AI generation modules from Google Gemini SDK to direct conne
 
 ---
 
-## 5. Stripe Connect & Payments
+## 5. Stripe Payments
 
-Transaction rails enabling fans to tip athletes directly on their cards and subscribe to monthly membership plans.
+Transaction rails enabling fans to tip athletes directly on their cards (platform-collected Checkout, 5% fee). ~~Monthly membership subscriptions~~ — removed pre-MVP 2026-08-05 (ADR-043).
 
 **Files:**
 - `lib/stripe.ts` - Proxy-wrapped Stripe client singleton

@@ -16,7 +16,9 @@
 - **`app/[username]/page.tsx`** — removed the `getTiers` fetch.
 - **`e2e/full-audit.spec.ts`** — dropped the removed dashboard routes from the auth-redirect audit.
 - **Copy** — `components/problem.tsx`, `components/how-it-works.tsx`, `app/docs/nil-guide/page.tsx` scrubbed of "memberships"; `docs/COPY.md` updated (5 revenue streams, dashboard mockup, Pro tier features).
-- **Docs** — ADR-043 added; ROADMAP Phase 9 marked CUT; ARCHITECTURE/COMPONENTS updated.
+- **Docs** — ADR-043 added; ROADMAP Phase 9 marked CUT; ARCHITECTURE/COMPONENTS updated. Follow-up scrub pass: CONTEXT, PROJECT (ERD + §9.7/9.8/11.1/11.2/11.3/D12/§28), PRODUCT_SPECIFICATION (Fan Memberships spec, table list, action map, phase 9 row), PLANNED (medium-term items struck), VISION (build order item 10 struck), CARD_FEATURE, PRE_LAUNCH_AUDIT (route table), FEATURES (§5 Stripe).
+- **`lib/hooks/use-funnel-tracking.ts`** — removed unused `first_subscription_received` funnel event.
+- **`e2e/full-audit.spec.ts`** — fixed stale "8 tabs … Tiers, Content" comment → 7 tabs.
 - DB tables (`membership_tiers`, `fan_subscriptions`, `fan_subscribers`, `email_campaigns`) intentionally left in place — no destructive migration; analytics/teams/GDPR queries still work.
 
 ### Why

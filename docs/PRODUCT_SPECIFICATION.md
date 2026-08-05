@@ -367,15 +367,16 @@ Server Component (app/[username]/page.tsx)
 - Payment failure email notification
 - Live Stripe tier derivation from price ID
 
-#### Fan Memberships
+#### Fan Memberships — REMOVED pre-MVP (2026-08-05, ADR-043)
 
-**Component:** `components/dashboard/membership-tiers.tsx`
-**Server Action:** `lib/actions/memberships.ts`
+~~**Component:** `components/dashboard/membership-tiers.tsx`~~ (deleted)
+~~**Server Action:** `lib/actions/memberships.ts`~~ (deleted)
 
-- Tier management (create, delete, pricing)
-- Exclusive content posts (publish/unpublish, tier-gated)
-- Fan subscription checkout via Stripe
-- Tier-gated content display on public card
+- ~~Tier management (create, delete, pricing)~~
+- ~~Exclusive content posts (publish/unpublish, tier-gated)~~
+- ~~Fan subscription checkout via Stripe~~
+- ~~Tier-gated content display on public card~~
+- Fan monetization for MVP is one-tap tips (platform-collected Checkout) only.
 
 ### 5.9 Analytics
 
@@ -690,10 +691,7 @@ Three layers stack to give the site its motion personality:
 | `ai_usage` | AI action tracking per user per month |
 | `ai_saved_assets` | Saved AI-generated outputs (Asset Vault) |
 | `audit_log` | Admin action audit trail |
-| `membership_tiers` | Fan subscription tiers |
-| `fan_subscriptions` | Fan subscription records |
-| `content_posts` | Exclusive content for fan subscriptions |
-| `tips` | Tip transactions via Stripe Connect |
+| `tips` | Tip transactions via Stripe (platform-collected) |
 | `brand_accounts` | Brand/sponsor accounts |
 | `campaign_briefs` | Brand campaign briefs |
 | `inquiries` | Inbound brand inquiries to athletes |
@@ -782,7 +780,6 @@ Three layers stack to give the site its motion personality:
 | `discovery.ts` | `searchPublicAthletes`, `getDiscoverySports` |
 | `compliance.ts` | `discloseDeal`, `getMyDeals`, `updateDealStatus` |
 | `inquiries.ts` | `submitInquiry`, `getAthleteInquiries`, `updateInquiryStatus` |
-| `memberships.ts` | `createTier`, `getTiers`, `createContentPost`, `createSubscriptionCheckout` |
 | `teams.ts` | `createTeam`, `getMyTeams`, `addTeamMember`, `getTeamAnalytics` |
 | `quick-ai.ts` | `quickAiAction` (one-click signal actions) |
 | `gdpr.ts` | `exportUserData`, `deleteAccount` |
@@ -1158,7 +1155,7 @@ npx playwright test e2e/full-audit.spec.ts --config=playwright.prod.ts
 | 6 | Subscription/paywall + usage metering | DONE |
 | 7 | God Mode admin (8 modules) | DONE |
 | 8 | Analytics + refinement | DONE |
-| 9 | Fan memberships | DONE |
+| 9 | Fan memberships | CUT pre-MVP (2026-08-05, ADR-043) |
 | 10 | Brand-side tools | DONE |
 | 11 | Team tier | DONE |
 | 12 | AI Asset Vault + Gamified Milestones | DONE |
