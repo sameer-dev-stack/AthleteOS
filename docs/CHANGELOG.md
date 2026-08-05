@@ -26,7 +26,7 @@ Third ratified batch of MASTER_PLAN (§8 step 4): the AI read surface now ground
 - Docs: `CHANGELOG.md`, `DECISIONS.md` (ADR-048)
 
 ### Commit
-Recorded at push (this session)
+`570f095`
 
 ---
 
