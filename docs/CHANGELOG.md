@@ -28,7 +28,7 @@ User request: card should read as a luxury, high-end sports trading card — cle
 - `components/profile-card.tsx`
 
 ### Commit
-- (pending)
+- `1683e46`
 
 ---
 
