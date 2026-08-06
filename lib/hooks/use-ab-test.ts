@@ -6,7 +6,7 @@ type Variant = "A" | "B";
 const AB_KEY = "athleteos_ab_cta";
 
 const NAV_VARIANTS: Record<Variant, string> = {
-  A: "Get started",
+  A: "Launch your card",
   B: "Launch your card",
 };
 
