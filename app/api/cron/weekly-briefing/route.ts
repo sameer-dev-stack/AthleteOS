@@ -81,7 +81,7 @@ export async function GET(req: NextRequest) {
         const memory = memoryRes.data;
         const aiUsed = quotaRes.data?.used_count || 0;
         const effectivePlan = resolvePlan(athlete.plan, athlete.extended_pro_until);
-        const aiLimit = effectivePlan === "pro" ? 300 : effectivePlan === "elite" ? 500 : 5;
+        const aiLimit = effectivePlan === "pro" ? 300 : 5;
         const aiRemaining = Math.max(0, aiLimit - aiUsed);
 
         const newInquiries = inquiriesRes.count || 0;

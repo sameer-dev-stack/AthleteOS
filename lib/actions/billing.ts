@@ -40,7 +40,7 @@ export type SubscriptionStatus = {
 };
 
 const CheckoutSchema = z.object({
-  tier: z.enum(["pro", "elite"]),
+  tier: z.enum(["pro"]),
 });
 
 export async function createCheckoutSessionAction(

@@ -3,11 +3,10 @@ import { resolvePlan } from "@/lib/referral-reward";
 
 const PRICE_IDS = {
   pro: process.env.STRIPE_PRICE_ID_PRO ?? "",
-  elite: process.env.STRIPE_PRICE_ID_ELITE ?? "",
 } as const;
 
-type CheckoutTier = "pro" | "elite";
-type PlanTier = "free" | "pro" | "elite";
+type CheckoutTier = "pro";
+type PlanTier = "free" | "pro";
 
 export async function createCheckoutSession({
   userId,
@@ -99,7 +98,6 @@ export async function recoverSubscriptionFromStripe(userId: string, userEmail: s
         const priceId = sub.items.data[0]?.price?.id;
         let tier: PlanTier = "free";
         if (priceId === process.env.STRIPE_PRICE_ID_PRO) tier = "pro";
-        else if (priceId === process.env.STRIPE_PRICE_ID_ELITE) tier = "elite";
         else continue;
 
         // Sync to database
@@ -177,8 +175,6 @@ export async function getSubscriptionByUserId(userId: string): Promise<{
       const priceId = firstItem?.price?.id;
       if (priceId === process.env.STRIPE_PRICE_ID_PRO) {
         tier = "pro";
-      } else if (priceId === process.env.STRIPE_PRICE_ID_ELITE) {
-        tier = "elite";
       }
     }
 

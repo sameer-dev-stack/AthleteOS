@@ -256,6 +256,13 @@ export async function updateProfile(
       // Non-blocking — history logging should never break the save
     }
 
+    try {
+      const { checkAndRewardReferral } = await import("./referrals");
+      await checkAndRewardReferral(user.id);
+    } catch {
+      // Non-blocking
+    }
+
     revalidatePath("/dashboard");
     revalidatePath("/dashboard/profile");
     revalidatePath(`/${data.username || ""}`);

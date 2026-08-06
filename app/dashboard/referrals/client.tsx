@@ -144,24 +144,59 @@ export function ReferralsPageClient({ profile, initialStats, initialHistory, ini
         </div>
       </div>
 
+      {/* Milestone Rewards Breakdown */}
+      <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-white">Milestone Rewards</h2>
+          <span className="text-[10px] font-bold text-accent bg-accent/10 px-2.5 py-1 rounded-full border border-accent/20">
+            Capped at 12 Months Max
+          </span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-white">5 Referrals</span>
+              <span className="text-xs font-bold text-accent">1 Month Pro</span>
+            </div>
+            <p className="text-[11px] text-ink-dim">Unlock 30 days of Pro access & 0% tip fees.</p>
+          </div>
+
+          <div className="rounded-xl border border-accent/20 bg-accent/5 p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-white">15 Referrals</span>
+              <span className="text-xs font-bold text-accent">3 Months + Gold Badge</span>
+            </div>
+            <p className="text-[11px] text-ink-dim">90 days of Pro + Gold Verified Badge unlocked.</p>
+          </div>
+
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-white">25 Referrals</span>
+              <span className="text-xs font-bold text-accent">6 Months Pro</span>
+            </div>
+            <p className="text-[11px] text-ink-dim">180 days of full Pro access.</p>
+          </div>
+        </div>
+      </div>
+
       {/* How It Works */}
       <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-6 mb-6">
-        <h2 className="text-sm font-semibold text-white mb-4">How It Works</h2>
+        <h2 className="text-sm font-semibold text-white mb-4">Anti-Cheat Qualified Referral Rules</h2>
         <div className="space-y-4">
           <Step
             num={1}
-            title="Share your link"
-            desc="Copy your unique referral link and share it with other athletes."
+            title="Share your unique link"
+            desc="Copy your link and invite real student-athletes to AthleteOS."
           />
           <Step
             num={2}
-            title="They sign up"
-            desc="The athlete creates their account using your link."
+            title="Friend completes & publishes profile"
+            desc="Referrals stay 'Pending' until your friend uploads a photo, bio, stat, and publishes their card."
           />
           <Step
             num={3}
-            title="You earn Pro"
-            desc="Get 7 days of Pro for each athlete who completes onboarding."
+            title="Milestone Pro Granted"
+            desc="Reach 5, 15, or 25 verified referrals to automatically unlock free Pro months."
           />
         </div>
       </div>

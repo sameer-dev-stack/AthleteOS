@@ -377,10 +377,11 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
                 <h1 className="text-[28px] font-black tracking-[-0.03em] leading-none text-white truncate">
                   {displayName}
                 </h1>
-                {profile.is_verified && (
+                {(profile.is_verified || resolvePlan(profile.plan, profile.extended_pro_until) === "pro") && (
                   <span
-                    className="flex-shrink-0 flex h-[18px] w-[18px] items-center justify-center rounded-full"
-                    style={{ backgroundColor: accent }}
+                    className="flex-shrink-0 flex h-[18px] w-[18px] items-center justify-center rounded-full shadow-[0_0_10px_rgba(250,204,21,0.6)]"
+                    style={{ backgroundColor: "#FACC15" }}
+                    title="Gold Verified Athlete"
                   >
                     <CheckIcon className="h-2.5 w-2.5 text-[#111115]" strokeWidth={3} />
                   </span>
@@ -642,7 +643,7 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
             <div className="mx-4 h-px flex-shrink-0" style={{ background: `linear-gradient(90deg, transparent, ${accent}20, transparent)` }} />
 
             {/* ── Scrollable content ────────────────── */}
-            <div className="flex-1 overflow-y-auto scrollbar-none px-5 pt-4 pb-6 space-y-3" onClick={stopFlip}>
+            <div className="flex-1 overflow-y-auto scrollbar-none px-5 pt-4 pb-6 space-y-3" onClick={stopFlip} data-lenis-prevent>
 
               {/* Bio */}
               {hasValidBio && (

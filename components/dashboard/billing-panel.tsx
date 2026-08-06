@@ -35,7 +35,12 @@ const PLANS = [
     name: "Free",
     price: "$0",
     period: "forever",
-    features: ["1 athlete card", "5 AI actions/mo", "Basic profile", "Tip receiving"],
+    features: [
+      "Public Athlete Card & Link",
+      "Standard Card Styling & Colors",
+      "Basic View Analytics",
+      "Fan Tips Enabled (20% platform fee)",
+    ],
   },
   {
     id: "pro" as const,
@@ -43,25 +48,11 @@ const PLANS = [
     price: "$14",
     period: "/mo",
     features: [
-      "Everything in Free",
-      "300 AI actions/mo",
-      "Analytics dashboard",
-      "Custom branding",
-      "Priority support",
-    ],
-  },
-  {
-    id: "elite" as const,
-    name: "Elite",
-    price: "$29",
-    period: "/mo",
-    features: [
-      "Everything in Pro",
-      "500 AI actions/mo",
-      "Advanced sponsor kit",
-      "Custom domain",
-      "Verified badge",
-      "Early access features",
+      "0% Platform Tip Fee (Keep 100%)",
+      "Gold Verified Badge",
+      "Premium Metallic & Neon Themes",
+      "Advanced Traffic & Country Analytics",
+      "Priority Placement in Athlete Discover",
     ],
   },
 ];
@@ -128,7 +119,7 @@ export function BillingPanel({ subscription: initial }: Props) {
 
   const [subscription, setSubscription] = useState(initial);
   const [loading, setLoading] = useState<
-    "pro" | "elite" | "portal" | "cancel" | null
+    "pro" | "portal" | "cancel" | null
   >(null);
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -182,7 +173,7 @@ export function BillingPanel({ subscription: initial }: Props) {
   const currentPlan =
     PLANS.find((p) => p.id === subscription.plan) || PLANS[0];
 
-  async function handleUpgrade(tier: "pro" | "elite") {
+  async function handleUpgrade(tier: "pro") {
     setLoading(tier);
     setError(null);
     trackFunnel("upgrade_click", { tier });
@@ -414,11 +405,7 @@ export function BillingPanel({ subscription: initial }: Props) {
                     <div className="absolute -top-px left-4 right-4 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
                   )}
                   <div className="flex items-center gap-2">
-                    {plan.id === "elite" ? (
-                      <Crown className="h-4 w-4 text-accent" />
-                    ) : (
-                      <Zap className="h-4 w-4 text-accent" />
-                    )}
+                    <Zap className="h-4 w-4 text-accent" />
                     <span className="text-sm font-semibold text-white">
                       {plan.name}
                     </span>

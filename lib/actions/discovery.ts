@@ -129,6 +129,13 @@ export async function searchPublicAthletes(
     athletes = athletes.filter((a) => a.total_followers >= minFollowers);
   }
 
+  // Priority Discover Ranking: Pro users & Gold Verified athletes are boosted to the top
+  athletes.sort((a, b) => {
+    const aWeight = (a.plan === "pro" ? 2 : 0) + (a.is_verified ? 1 : 0);
+    const bWeight = (b.plan === "pro" ? 2 : 0) + (b.is_verified ? 1 : 0);
+    return bWeight - aWeight;
+  });
+
   return { ok: true, data: athletes, total: athletes.length };
 }
 

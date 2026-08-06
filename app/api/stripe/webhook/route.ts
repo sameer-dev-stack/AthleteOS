@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
-import { PLATFORM_FEE_PERCENT } from "@/lib/constants";
+import { PLATFORM_FEE_PERCENT_FREE, PLATFORM_FEE_PERCENT_PRO } from "@/lib/constants";
+import { resolvePlan } from "@/lib/referral-reward";
 
 const ALLOWED_EVENTS = new Set([
   "checkout.session.completed",
@@ -130,7 +131,17 @@ export async function POST(request: NextRequest) {
           const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : null;
           if (!paymentIntentId) break;
           const amount = session.amount_total ?? 0;
-          const platformFee = Math.round(amount * (PLATFORM_FEE_PERCENT / 100));
+
+          // Check receiving athlete's plan to determine platform fee (20% for Free, 0% for Pro)
+          const { data: athleteProfile } = await supabase
+            .from("profiles")
+            .select("plan, extended_pro_until")
+            .eq("id", athleteId)
+            .single();
+
+          const isPro = resolvePlan(athleteProfile?.plan, athleteProfile?.extended_pro_until) === "pro";
+          const feePercent = isPro ? PLATFORM_FEE_PERCENT_PRO : PLATFORM_FEE_PERCENT_FREE;
+          const platformFee = Math.round(amount * (feePercent / 100));
           const netAmount = amount - platformFee;
 
           const { data: existingTip } = await supabase

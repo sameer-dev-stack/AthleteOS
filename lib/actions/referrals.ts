@@ -2,9 +2,9 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
-import { REFERRAL_REWARD_DAYS, REFERRAL_CODE_CHARS } from "@/lib/constants";
+import { REFERRAL_CODE_CHARS } from "@/lib/constants";
 import { hashIp } from "@/lib/referral-click";
-import { usersToReward } from "@/lib/referral-reward";
+import { isDisposableEmail, isProfileQualifiedForReferral, getReferralMilestoneStatus } from "@/lib/referral-reward";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app";
 
@@ -132,7 +132,8 @@ export async function getReferralStats(): Promise<ReferralStats> {
       .single();
 
     const completedCount = completed || 0;
-    const proDaysEarned = completedCount * REFERRAL_REWARD_DAYS;
+    const milestone = getReferralMilestoneStatus(completedCount);
+    const proDaysEarned = milestone.totalDaysEarned;
 
     return {
       referralCode: code,
@@ -155,6 +156,11 @@ export async function recordReferral(code: string): Promise<{ ok: boolean; error
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { ok: false, error: "Not authenticated" };
 
+    // Anti-Cheat: Reject disposable/temp emails
+    if (isDisposableEmail(user.email)) {
+      return { ok: false, error: "Temporary/disposable email addresses are not allowed." };
+    }
+
     const admin = createAdmin();
 
     const { data: codeRow, error: codeErr } = await admin
@@ -167,7 +173,7 @@ export async function recordReferral(code: string): Promise<{ ok: boolean; error
     if (codeErr || !codeRow) return { ok: false, error: "Invalid referral code" };
     if (codeRow.user_id === user.id) return { ok: false, error: "Cannot refer yourself" };
 
-    const { data: existingReferral, error: existErr } = await admin
+    const { data: existingReferral } = await admin
       .from("referrals")
       .select("id")
       .eq("referred_id", user.id)
@@ -175,15 +181,15 @@ export async function recordReferral(code: string): Promise<{ ok: boolean; error
 
     if (existingReferral) return { ok: false, error: "Already referred" };
 
+    // Insert referral in 'pending' status. It completes when referred athlete publishes card.
     const { error: insertErr } = await admin
       .from("referrals")
       .insert({
         referrer_id: codeRow.user_id,
         referred_id: user.id,
         code_used: codeRow.code,
-        status: "completed",
-        reward_days: REFERRAL_REWARD_DAYS,
-        rewarded_at: new Date().toISOString(),
+        status: "pending",
+        reward_days: 0,
       });
 
     if (insertErr) {
@@ -191,17 +197,75 @@ export async function recordReferral(code: string): Promise<{ ok: boolean; error
       return { ok: false, error: `Insert failed: ${insertErr.message}` };
     }
 
-    // Two-sided reward: referrer AND referred both earn Pro (standard referral model).
-    const rewarded = usersToReward(codeRow.user_id, user.id, codeRow.user_id === user.id, false);
-    for (const uid of rewarded) {
-      const { error: rpcErr } = await admin.rpc("grant_pro_reward", { referrer_uuid: uid });
-      if (rpcErr) console.error("[referrals] grant_pro_reward error:", rpcErr);
-    }
+    // Check if profile is already completed & published
+    await checkAndRewardReferral(user.id);
 
     return { ok: true };
   } catch (err) {
     console.error("[referrals] recordReferral error:", err);
     return { ok: false, error: err instanceof Error ? err.message : "Failed to record referral" };
+  }
+}
+
+// Anti-Cheat Reward Qualifier: Evaluates pending referral when referred user publishes card.
+export async function checkAndRewardReferral(referredUserId: string): Promise<boolean> {
+  try {
+    const admin = createAdmin();
+
+    const { data: referral } = await admin
+      .from("referrals")
+      .select("id, referrer_id, status")
+      .eq("referred_id", referredUserId)
+      .maybeSingle();
+
+    if (!referral || referral.status === "completed" || referral.status === "rewarded") return false;
+
+    const { data: profile } = await admin
+      .from("profiles")
+      .select("id, full_name, avatar_url, bio, stats, profile_published")
+      .eq("id", referredUserId)
+      .single();
+
+    if (!isProfileQualifiedForReferral(profile)) return false;
+
+    // Referred athlete is qualified! Upgrade referral to 'completed'
+    await admin
+      .from("referrals")
+      .update({
+        status: "completed",
+        rewarded_at: new Date().toISOString(),
+      })
+      .eq("id", referral.id);
+
+    // Get updated count of completed referrals for referrer
+    const { count: completedCount } = await admin
+      .from("referrals")
+      .select("id", { count: "exact", head: true })
+      .eq("referrer_id", referral.referrer_id)
+      .in("status", ["completed", "rewarded"]);
+
+    const milestoneStatus = getReferralMilestoneStatus(completedCount || 0);
+
+    // Extend referrer's Pro access based on earned milestone days (up to 365 days max cap)
+    if (milestoneStatus.totalDaysEarned > 0) {
+      const proUntilDate = new Date(Date.now() + milestoneStatus.totalDaysEarned * 24 * 60 * 60 * 1000).toISOString();
+      await admin
+        .from("profiles")
+        .update({ extended_pro_until: proUntilDate })
+        .eq("id", referral.referrer_id);
+    }
+
+    // Grant 30 days Pro bonus to the newly joined athlete as well
+    const welcomeProDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    await admin
+      .from("profiles")
+      .update({ extended_pro_until: welcomeProDate })
+      .eq("id", referredUserId);
+
+    return true;
+  } catch (err) {
+    console.error("[referrals] checkAndRewardReferral error:", err);
+    return false;
   }
 }
 
