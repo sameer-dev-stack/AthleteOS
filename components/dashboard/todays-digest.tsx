@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { TrendingUp, TrendingDown, Eye, MousePointerClick, MessageCircle, Sparkles, ArrowRight } from "lucide-react";
+import { TrendingUp, TrendingDown, Eye, MousePointerClick, MessageCircle, Sparkles, ArrowRight, Share2 } from "lucide-react";
 import type { AnalyticsData } from "@/lib/actions/analytics";
 
 type Props = {
@@ -11,6 +11,9 @@ type Props = {
   tipsCount: number;
   inquiriesCount?: number;
   themeAccent: string;
+  isPublished?: boolean;
+  username?: string | null;
+  onShare?: () => void;
 };
 
 type DigestItem = {
@@ -32,7 +35,16 @@ function formatCompact(n: number): string {
   return n.toString();
 }
 
-export function TodaysDigest({ analytics, nilScore, tipsCount, inquiriesCount = 0, themeAccent }: Props) {
+export function TodaysDigest({
+  analytics,
+  nilScore,
+  tipsCount,
+  inquiriesCount = 0,
+  themeAccent,
+  isPublished = false,
+  username,
+  onShare,
+}: Props) {
   const [items, setItems] = useState<DigestItem[]>([]);
 
   useEffect(() => {
@@ -101,21 +113,64 @@ export function TodaysDigest({ analytics, nilScore, tipsCount, inquiriesCount = 
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-sm font-semibold text-white">{getGreeting()}</p>
-            <p className="text-xs text-white/40 mt-0.5">Your NIL activity will appear here</p>
+            <p className="text-xs text-white/40 mt-0.5">
+              {isPublished ? "Your card is live and ready for visitors" : "Your NIL activity will appear here"}
+            </p>
           </div>
           <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${themeAccent}15` }}>
             <Sparkles className="h-4 w-4" style={{ color: themeAccent }} />
           </div>
         </div>
         <div className="rounded-xl border border-dashed border-white/[0.08] bg-white/[0.01] p-6 text-center">
-          <p className="text-xs text-white/40 mb-3">Publish your card to start seeing analytics</p>
-          <Link
-            href="/dashboard/profile"
-            className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold transition-all"
-            style={{ backgroundColor: `${themeAccent}15`, color: themeAccent, border: `1px solid ${themeAccent}30` }}
-          >
-            Complete your profile <ArrowRight className="h-3 w-3" />
-          </Link>
+          {isPublished ? (
+            <>
+              <p className="text-xs font-semibold text-white/70 mb-1">Your card is live!</p>
+              <p className="text-xs text-white/40 mb-4 max-w-sm mx-auto leading-relaxed">
+                Share your card link on social media to start receiving card views, link clicks, and brand inquiries.
+              </p>
+              <div className="flex items-center justify-center gap-3">
+                {onShare ? (
+                  <button
+                    onClick={onShare}
+                    className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold transition-all hover:opacity-90"
+                    style={{ backgroundColor: themeAccent, color: "#111115" }}
+                  >
+                    <Share2 className="h-3.5 w-3.5" /> Share your card
+                  </button>
+                ) : username ? (
+                  <Link
+                    href={`/${username}`}
+                    target="_blank"
+                    className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold transition-all hover:opacity-90"
+                    style={{ backgroundColor: themeAccent, color: "#111115" }}
+                  >
+                    <Share2 className="h-3.5 w-3.5" /> View public card
+                  </Link>
+                ) : null}
+                {username && onShare && (
+                  <Link
+                    href={`/${username}`}
+                    target="_blank"
+                    className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold transition-all"
+                    style={{ backgroundColor: `${themeAccent}15`, color: themeAccent, border: `1px solid ${themeAccent}30` }}
+                  >
+                    View card <ArrowRight className="h-3 w-3" />
+                  </Link>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-xs text-white/40 mb-3">Publish your card to start seeing analytics</p>
+              <Link
+                href="/dashboard/profile"
+                className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold transition-all"
+                style={{ backgroundColor: `${themeAccent}15`, color: themeAccent, border: `1px solid ${themeAccent}30` }}
+              >
+                Complete your profile <ArrowRight className="h-3 w-3" />
+              </Link>
+            </>
+          )}
         </div>
       </div>
     );

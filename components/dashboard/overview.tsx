@@ -230,6 +230,9 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
         tipsCount={earnings?.totalTips || 0}
         inquiriesCount={inquiriesCount}
         themeAccent={accentColor}
+        isPublished={profile.profile_published}
+        username={profile.username}
+        onShare={handleShareCard}
       />
 
       {/* TOP ROW: Horizontal summary row */}
