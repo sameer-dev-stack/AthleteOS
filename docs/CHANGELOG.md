@@ -5,6 +5,25 @@
 
 ---
 
+## 2026-08-06 — Fix card back scroll (Lenis) + pre-existing type errors
+
+### What changed
+- **`components/profile-card.tsx`**: added `data-lenis-prevent` to the scrollable content div on the card back. Lenis smooth scroll was intercepting wheel/touch events inside the card, preventing internal scrolling. With 3+ links + bio + highlights + socials, content exceeds the visible area but users couldn't scroll to reach highlights.
+- **`app/api/cron/weekly-briefing/route.ts`**: removed dead `effectivePlan === "elite"` branch — `resolvePlan()` returns `"free" | "pro"` only, "elite" is already mapped to "pro" at source.
+- **`components/dashboard/billing-panel.tsx`**: replaced dead `plan.id === "elite"` ternary with direct `Zap` icon — only "pro" plan exists in the plans array.
+- **`lib/actions/referrals.ts`**: removed unused `usersToReward` import (no longer exported from `referral-reward.ts`).
+
+### Why
+Highlights weren't reachable on the card back because Lenis captured scroll events. The 3 pre-existing type errors blocked `npm run build`.
+
+### Files touched
+- `components/profile-card.tsx`, `app/api/cron/weekly-briefing/route.ts`, `components/dashboard/billing-panel.tsx`, `lib/actions/referrals.ts`, `docs/CHANGELOG.md`
+
+### Commit
+_Not yet committed._
+
+---
+
 ## 2026-08-06 — Gate unbuilt features: NIL Value Engine + AI Toolkit shown as "Coming soon" and routes redirect to dashboard
 
 ### What changed
