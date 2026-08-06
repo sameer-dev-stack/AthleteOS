@@ -620,8 +620,8 @@ export async function getAnalytics(
             .gte("created_at", start)
             .lte("created_at", end),
           serviceRole
-            .from("tips_received")
-            .select("amount_cents")
+            .from("tips")
+            .select("amount")
             .eq("athlete_id", athleteId)
             .gte("created_at", start)
             .lte("created_at", end),
@@ -639,7 +639,7 @@ export async function getAnalytics(
       const uniqueVisitors = uniqueIps.size;
       const totalClicks = clicksResult.count ?? 0;
       const totalInquiries = inquiriesResult.count ?? 0;
-      const totalTipsReceived = (tipsResult.data ?? []).reduce((sum, t) => sum + (t.amount_cents || 0), 0) / 100;
+      const totalTipsReceived = (tipsResult.data ?? []).reduce((sum, t) => sum + (t.amount || 0), 0) / 100;
 
       const referrerCounts = new Map<string, number>();
       for (const r of referrersResult.data ?? []) {
