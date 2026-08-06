@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Loader2, Plus, X, Save, BarChart3, Link2, Play, Palette, Check } from "lucide-react";
 import { updateProfile, updateTheme, type Profile } from "@/lib/actions/profile";
+import { resolvePlan } from "@/lib/referral-reward";
 import { EmptyState } from "./empty-state";
 import { ThemePicker } from "./theme-picker";
 import { AvatarUpload } from "@/components/avatar-upload";
@@ -342,6 +343,7 @@ export function DashboardEditor({ profile, onSaved }: Props) {
           <ThemePicker
             accent={accent}
             onAccentChange={setAccent}
+            isPro={resolvePlan(profile.plan, profile.extended_pro_until) === "pro"}
           />
         )}
       </div>

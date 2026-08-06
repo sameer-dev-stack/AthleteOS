@@ -128,7 +128,7 @@ export default function DiscoverPage() {
                   <div className="mt-3 flex gap-2">
                     {a.sport && <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] text-ink-muted">{a.sport}</span>}
                     {a.school && <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] text-ink-muted">{a.school}</span>}
-                    {a.is_verified && <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] text-accent">Verified</span>}
+                    {a.is_verified && <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold text-[#111115]" style={{ backgroundColor: "#FACC15" }}>Verified</span>}
                   </div>
                   {a.bio && <p className="mt-2 line-clamp-2 text-xs text-ink-dim">{a.bio}</p>}
                   {a.username && (

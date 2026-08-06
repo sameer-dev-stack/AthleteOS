@@ -427,7 +427,13 @@ export function BillingPanel({ subscription: initial }: Props) {
                         key={f}
                         className="flex items-start gap-1.5 text-xs text-ink-muted"
                       >
-                        <Check className="mt-0.5 h-3 w-3 flex-shrink-0 text-accent" />
+                        {f === "Gold Verified Badge" ? (
+                          <span className="mt-0.5 flex h-3 w-3 flex-shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: "#FACC15" }}>
+                            <Check className="h-2 w-2 text-[#111115]" strokeWidth={3} />
+                          </span>
+                        ) : (
+                          <Check className="mt-0.5 h-3 w-3 flex-shrink-0 text-accent" />
+                        )}
                         {f}
                       </li>
                     ))}

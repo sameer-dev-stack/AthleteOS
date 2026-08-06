@@ -19,11 +19,12 @@ import { trackView, trackLinkClick } from "@/lib/actions/analytics";
 import { trackFunnel } from "@/lib/hooks/use-funnel-tracking";
 import { Logo } from "@/components/logo";
 import { resolvePlan } from "@/lib/referral-reward";
-import { ShareButtons } from "@/components/share-buttons";
 import { QrShareModal } from "@/components/dashboard/qr-share-modal";
+import { ShareButtons } from "@/components/share-buttons";
 import { useSearchParams } from "next/navigation";
 import { CARD_W, CARD_H } from "@/lib/constants";
 import { cleanName } from "@/lib/display-name";
+import { resolveTheme } from "@/lib/themes";
 
 /* ── Constants ───────────────────────────────────────── */
 
@@ -92,7 +93,8 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
     }
   }, [searchParams]);
 
-  const accent = profile.theme_accent || "#C6FF3D";
+  const themeObj = resolveTheme(profile.theme_accent);
+  const accent = themeObj.primaryColor;
   const displayName = cleanName(profile.full_name, profile.username);
   const firstName = displayName.split(" ")[0];
   const publicUrl = typeof window === "undefined" ? "" : window.location.href;
@@ -243,7 +245,7 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
             style={{
               width: "100%",
               height: "100%",
-              boxShadow: `
+              boxShadow: themeObj.borderGlow ? `${themeObj.borderGlow}, 0 16px 48px -12px rgba(0,0,0,0.5)` : `
                 0 0 0 1px rgba(255,255,255,0.04),
                 0 2px 4px rgba(0,0,0,0.15),
                 0 16px 48px -12px rgba(0,0,0,0.5)
@@ -379,7 +381,7 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
                 </h1>
                 {(profile.is_verified || resolvePlan(profile.plan, profile.extended_pro_until) === "pro") && (
                   <span
-                    className="flex-shrink-0 flex h-[18px] w-[18px] items-center justify-center rounded-full shadow-[0_0_10px_rgba(250,204,21,0.6)]"
+                    className="flex-shrink-0 flex h-[18px] w-[18px] items-center justify-center rounded-full gold-badge-glow"
                     style={{ backgroundColor: "#FACC15" }}
                     title="Gold Verified Athlete"
                   >
@@ -624,8 +626,17 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
                     <span className="text-[10px] font-black" style={{ color: `${accent}60` }}>{initials}</span>
                   </div>
                 )}
-                <div className="min-w-0">
+                <div className="min-w-0 flex items-center gap-1.5">
                   <p className="text-[14px] font-bold text-white truncate leading-tight">{displayName}</p>
+                  {(profile.is_verified || resolvePlan(profile.plan, profile.extended_pro_until) === "pro") && (
+                    <span
+                      className="flex-shrink-0 flex h-[16px] w-[16px] items-center justify-center rounded-full gold-badge-glow"
+                      style={{ backgroundColor: "#FACC15" }}
+                      title="Gold Verified Athlete"
+                    >
+                      <CheckIcon className="h-2 w-2 text-[#111115]" strokeWidth={3} />
+                    </span>
+                  )}
                   {(profile.sport || profile.position) && (
                     <p className="text-[9px] text-white/25 font-medium truncate">
                       {[profile.sport, profile.position, profile.school].filter(Boolean).join(" · ")}

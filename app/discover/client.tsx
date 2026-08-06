@@ -8,7 +8,7 @@ import {
   Search,
   SlidersHorizontal,
   X,
-  BadgeCheck,
+  Check,
   Users,
   ChevronLeft,
   ChevronRight,
@@ -200,7 +200,11 @@ export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props)
                   <h3 className="text-sm font-semibold text-white truncate">
                     {athletes[0].full_name || "Unnamed Athlete"}
                   </h3>
-                  {athletes[0].is_verified && <BadgeCheck className="h-4 w-4 flex-shrink-0 text-blue-400" />}
+                  {athletes[0].is_verified && (
+                    <span className="flex-shrink-0 flex h-4 w-4 items-center justify-center rounded-full" style={{ backgroundColor: "#FACC15" }}>
+                      <Check className="h-2.5 w-2.5 text-[#111115]" strokeWidth={3} />
+                    </span>
+                  )}
                   {athletes[0].plan !== "free" && (
                     <span className="flex-shrink-0 rounded-full bg-accent/15 px-1.5 py-0.5 text-[9px] font-bold uppercase text-accent">
                       {athletes[0].plan}
@@ -494,7 +498,9 @@ function AthleteCard({ athlete, index }: { athlete: DiscoveryAthlete; index: num
                   {athlete.full_name || "Unnamed Athlete"}
                 </h3>
                 {athlete.is_verified && (
-                  <BadgeCheck className="h-4 w-4 flex-shrink-0 text-blue-400" />
+                  <span className="flex-shrink-0 flex h-4 w-4 items-center justify-center rounded-full" style={{ backgroundColor: "#FACC15" }}>
+                    <Check className="h-2.5 w-2.5 text-[#111115]" strokeWidth={3} />
+                  </span>
                 )}
                 {athlete.plan !== "free" && (
                   <span className="flex-shrink-0 rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-accent">
