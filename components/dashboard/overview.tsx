@@ -300,6 +300,10 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
             loading={loadingTips}
           />
 
+          {/* Referral Card (Full width - spacious & unclipped) */}
+          <ReferralCard />
+
+          {/* Profile Score & Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <ProfileScore profile={profile} />
 
@@ -352,12 +356,11 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
             </div>
           </div>
 
+          {/* Launch Checklist & Business Overview */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <LaunchChecklist profile={profile} />
-            <ReferralCard />
+            <BusinessDashboard themeAccent={accentColor} username={profile.username} />
           </div>
-
-          <BusinessDashboard themeAccent={accentColor} username={profile.username} />
         </div>
 
         {/* Right Section (col-span-1 / 1-third width) */}

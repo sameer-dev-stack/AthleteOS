@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Copy, Check, Users, Gift, ShieldCheck } from "lucide-react";
+import { Copy, Check, Gift, ShieldCheck, Share2 } from "lucide-react";
 import Link from "next/link";
 import { getReferralStats, type ReferralStats } from "@/lib/actions/referrals";
-import { ShareSheet } from "@/components/dashboard/share-sheet";
 import { buildShareText } from "@/lib/referral-display";
 import { getReferralMilestoneStatus } from "@/lib/referral-reward";
 
@@ -28,6 +27,20 @@ export function ReferralCard() {
     } catch {}
   }
 
+  async function handleShare() {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Join me on AthleteOS",
+          text: buildShareText(),
+          url: stats!.referralLink,
+        });
+      } catch {}
+    } else {
+      handleCopy();
+    }
+  }
+
   return (
     <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-5 flex flex-col justify-between transition-colors hover:border-white/[0.1]">
       <div>
@@ -43,7 +56,7 @@ export function ReferralCard() {
           </div>
           <span className="flex items-center gap-1 text-[9px] font-bold text-accent bg-accent/10 px-2 py-1 rounded-full border border-accent/20">
             <ShieldCheck className="h-3 w-3" />
-            Verified
+            Anti-Cheat
           </span>
         </div>
 
@@ -72,7 +85,7 @@ export function ReferralCard() {
 
         {/* Copy Link Input */}
         <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 mb-4">
-          <span className="flex-1 truncate text-xs text-white/50 font-mono">
+          <span className="flex-1 truncate text-xs text-white/60 font-mono">
             {stats.referralLink}
           </span>
           <button
@@ -85,15 +98,19 @@ export function ReferralCard() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-1">
-        <div className="flex items-center gap-3 text-xs text-white/50">
-          <span>
-            <strong className="text-white">{stats.pendingReferrals}</strong> pending
-          </span>
-        </div>
+      <div className="flex items-center justify-between pt-1 border-t border-white/[0.04]">
+        <span className="text-xs text-white/50">
+          <strong className="text-white">{stats.pendingReferrals}</strong> pending profile setup
+        </span>
 
         <div className="flex items-center gap-3">
-          <ShareSheet link={stats.referralLink} text={buildShareText()} />
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-1.5 text-xs font-semibold text-white/70 hover:text-white transition-colors"
+          >
+            <Share2 className="h-3 w-3" />
+            Share
+          </button>
           <Link
             href="/dashboard/referrals"
             className="text-xs font-semibold text-accent hover:underline"
