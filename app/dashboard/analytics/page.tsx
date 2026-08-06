@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getMyProfile } from "@/lib/actions/profile";
+import { getAnalyticsData } from "@/lib/actions/analytics";
 import { AnalyticsPanel } from "@/components/dashboard/analytics-panel";
 import { InquiryInbox } from "@/components/dashboard/inquiry-inbox";
 import { BarChart3, AlertCircle } from "lucide-react";
@@ -14,6 +15,7 @@ export default async function AnalyticsPage() {
 
   const profile = profileResult.data;
   const accentColor = profile.theme_accent || "#C6FF3D";
+  const initialAnalytics = await getAnalyticsData(profile.id, "30d");
 
   return (
     <div className="space-y-8">
@@ -43,7 +45,7 @@ export default async function AnalyticsPage() {
         </div>
       ) : (
         <div className="space-y-8 max-w-5xl">
-          <AnalyticsPanel athleteId={profile.id} themeAccent={accentColor} />
+          <AnalyticsPanel athleteId={profile.id} initialData={initialAnalytics} themeAccent={accentColor} />
           <InquiryInbox />
         </div>
       )}

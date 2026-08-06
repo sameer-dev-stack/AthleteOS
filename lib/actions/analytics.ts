@@ -568,26 +568,17 @@ const EMPTY_ANALYTICS_DATA: AnalyticsData = {
   engagement: { clickRate: 0, inquiryRate: 0, tipRate: 0, avgViewsPerDay: 0 },
 };
 
-export async function getAnalytics(
-  athleteId?: string,
+export async function getAnalyticsData(
+  athleteId: string,
   range: AnalyticsRange = "30d",
   customStart?: string,
   customEnd?: string,
   compare = false
-): Promise<{ ok: boolean; data: AnalyticsData; error?: string }> {
+): Promise<AnalyticsData> {
   try {
-    const supabase = await createServerClient();
-    const { data: authData } = await supabase.auth.getUser();
-    const user = authData?.user;
-    
-    if (!user) {
-      return { ok: true, data: EMPTY_ANALYTICS_DATA };
-    }
-
-    const targetId = athleteId || user.id;
     const serviceRole = getSupabaseServiceRole();
-    if (!serviceRole) {
-      return { ok: true, data: EMPTY_ANALYTICS_DATA };
+    if (!serviceRole || !athleteId) {
+      return EMPTY_ANALYTICS_DATA;
     }
 
     const parseIsoDate = (d?: string, fallback = new Date()): string => {
@@ -613,51 +604,51 @@ export async function getAnalytics(
           serviceRole
             .from("page_views")
             .select("id, viewer_ip_hash, created_at, user_agent", { count: "exact" })
-            .eq("athlete_id", targetId)
+            .eq("athlete_id", athleteId)
             .gte("created_at", start)
             .lte("created_at", end),
           serviceRole
             .from("link_clicks")
             .select("id", { count: "exact" })
-            .eq("athlete_id", targetId)
+            .eq("athlete_id", athleteId)
             .gte("created_at", start)
             .lte("created_at", end),
           serviceRole
             .from("page_views")
             .select("referrer")
-            .eq("athlete_id", targetId)
+            .eq("athlete_id", athleteId)
             .gte("created_at", start)
             .lte("created_at", end)
             .not("referrer", "is", null),
           serviceRole
             .from("page_views")
             .select("country")
-            .eq("athlete_id", targetId)
+            .eq("athlete_id", athleteId)
             .gte("created_at", start)
             .lte("created_at", end)
             .not("country", "is", null),
           serviceRole
             .from("link_clicks")
             .select("link_label, link_url")
-            .eq("athlete_id", targetId)
+            .eq("athlete_id", athleteId)
             .gte("created_at", start)
             .lte("created_at", end),
           serviceRole
             .from("inquiries")
             .select("id", { count: "exact", head: true })
-            .eq("athlete_id", targetId)
+            .eq("athlete_id", athleteId)
             .gte("created_at", start)
             .lte("created_at", end),
           serviceRole
             .from("tips")
             .select("amount")
-            .eq("athlete_id", targetId)
+            .eq("athlete_id", athleteId)
             .gte("created_at", start)
             .lte("created_at", end),
           serviceRole
             .from("page_views")
             .select("user_agent")
-            .eq("athlete_id", targetId)
+            .eq("athlete_id", athleteId)
             .gte("created_at", start)
             .lte("created_at", end),
         ]);
@@ -773,10 +764,32 @@ export async function getAnalytics(
       };
     }
 
-    return {
-      ok: true,
-      data: { ...current, previousPeriod },
-    };
+    return { ...current, previousPeriod };
+  } catch (err) {
+    console.error("[analytics] getAnalyticsData error:", err);
+    return EMPTY_ANALYTICS_DATA;
+  }
+}
+
+export async function getAnalytics(
+  athleteId?: string,
+  range: AnalyticsRange = "30d",
+  customStart?: string,
+  customEnd?: string,
+  compare = false
+): Promise<{ ok: boolean; data: AnalyticsData; error?: string }> {
+  try {
+    const supabase = await createServerClient();
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user;
+    
+    if (!user) {
+      return { ok: true, data: EMPTY_ANALYTICS_DATA };
+    }
+
+    const targetId = athleteId || user.id;
+    const data = await getAnalyticsData(targetId, range, customStart, customEnd, compare);
+    return { ok: true, data };
   } catch (err) {
     console.error("[analytics] getAnalytics error:", err);
     return { ok: true, data: EMPTY_ANALYTICS_DATA };

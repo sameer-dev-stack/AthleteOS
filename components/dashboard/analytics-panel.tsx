@@ -19,6 +19,7 @@ import { EmptyState } from "./empty-state";
 
 type Props = {
   athleteId: string;
+  initialData?: AnalyticsData;
   themeAccent?: string;
 };
 
@@ -45,13 +46,13 @@ function DeviceIcon({ device }: { device: string }) {
   return <Monitor className="h-3.5 w-3.5" />;
 }
 
-export function AnalyticsPanel({ athleteId, themeAccent = "#C6FF3D" }: Props) {
+export function AnalyticsPanel({ athleteId, initialData, themeAccent = "#C6FF3D" }: Props) {
   const [range, setRange] = useState<AnalyticsRange>("30d");
   const [customStart, setCustomStart] = useState("");
   const [customEnd, setCustomEnd] = useState("");
   const [compare, setCompare] = useState(false);
-  const [data, setData] = useState<AnalyticsData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<AnalyticsData | null>(initialData || null);
+  const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState<string | null>(null);
 
   const [shareUrl, setShareUrl] = useState<string | null>(null);
@@ -71,36 +72,43 @@ export function AnalyticsPanel({ athleteId, themeAccent = "#C6FF3D" }: Props) {
   useEffect(() => {
     let cancelled = false;
 
-    const fetchData = () => {
-      const start = range === "custom" ? customStart || undefined : undefined;
-      const end = range === "custom" ? customEnd || undefined : undefined;
-      getAnalytics(athleteId, range, start, end, compare).then((result) => {
+    const fetchData = async () => {
+      try {
+        const params = new URLSearchParams();
+        params.set("range", range);
+        if (range === "custom") {
+          if (customStart) params.set("customStart", customStart);
+          if (customEnd) params.set("customEnd", customEnd);
+        }
+        if (compare) params.set("compare", "true");
+
+        const res = await fetch(`/api/analytics?${params.toString()}`);
         if (cancelled) return;
+        const result = await res.json();
         if (result.ok && result.data) {
           setData(result.data);
           setError(null);
         } else {
           setError(result?.error || "Failed to load analytics");
         }
-        setLoading(false);
-      }).catch((err) => {
+      } catch (err) {
         if (cancelled) return;
         console.error("[AnalyticsPanel] fetchData error:", err);
-        setError(err?.message || "Failed to load analytics");
-        setLoading(false);
-      });
+        setError("Failed to load analytics");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     };
 
-    queueMicrotask(() => {
+    if (!initialData || range !== "30d" || compare || customStart || customEnd) {
       setLoading(true);
-      setError(null);
-    });
-    fetchData();
+      fetchData();
+    }
 
     return () => {
       cancelled = true;
     };
-  }, [athleteId, range, customStart, customEnd, compare]);
+  }, [athleteId, range, customStart, customEnd, compare, initialData]);
 
   useEffect(() => {
     if (showScheduled) {
