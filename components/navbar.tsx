@@ -89,9 +89,12 @@ export function Navbar() {
               >
                 Sign in
               </Link>
-              <a href="#waitlist" className="btn-primary !py-2 !px-4 text-[13px]">
+              <Link
+                href="/auth/sign-up"
+                className="btn-primary !py-2 !px-4 text-[13px]"
+              >
                 {navText}
-              </a>
+              </Link>
             </>
           )}
         </div>
@@ -138,13 +141,13 @@ export function Navbar() {
                 >
                   Sign in
                 </Link>
-                <a
-                  href="#waitlist"
+                <Link
+                  href="/auth/sign-up"
                   onClick={() => { haptic.lightTap(); close(); }}
                   className="btn-primary mx-5 mt-2 w-auto"
                 >
                   {navText}
-                </a>
+                </Link>
               </>
             )}
           </div>

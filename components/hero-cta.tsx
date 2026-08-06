@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Magnetic } from "./motion/magnetic";
 import { useAbTest } from "@/lib/hooks/use-ab-test";
@@ -11,17 +12,17 @@ export function HeroCta() {
   return (
     <div className="mt-9 flex flex-wrap items-center gap-3">
       <Magnetic strength={0.25}>
-        <a
-          href="#waitlist"
+        <Link
+          href="/auth/sign-up"
           className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-bg transition-all duration-300 hover:bg-accent-soft hover:-translate-y-0.5 active:translate-y-0"
-          onClick={() => trackFunnel("cta_click", { variant: "hero_primary", destination: "#waitlist" })}
+          onClick={() => trackFunnel("cta_click", { variant: "hero_primary", destination: "/auth/sign-up" })}
         >
           {/* Glow ring */}
           <span className="pointer-events-none absolute -inset-1 rounded-full bg-accent/20 opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-100" />
           <span className="pointer-events-none absolute -inset-px rounded-full ring-1 ring-accent/30 transition-all duration-300 group-hover:ring-accent/50 group-hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)]" />
           <span className="relative z-10">{heroText}</span>
           <ArrowRight className="relative z-10 h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
-        </a>
+        </Link>
       </Magnetic>
       <Magnetic strength={0.2}>
         <a href="#how" className="btn-ghost group">
