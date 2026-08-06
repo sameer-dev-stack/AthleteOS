@@ -377,7 +377,10 @@ export function Header({ profile, email }: HeaderProps) {
                     >
                       <Icon className="h-4 w-4 flex-shrink-0" />
                       <span className="flex-1">{item.title}</span>
-                      <Lock className="h-3 w-3 text-white/20" />
+                      <span className="flex items-center gap-1 text-[10px] font-medium text-white/20">
+                        <Lock className="h-2.5 w-2.5" />
+                        Coming soon
+                      </span>
                     </div>
                   );
                 }
