@@ -18,7 +18,7 @@ test.describe('Landing Page', () => {
     page.on('pageerror', err => errors.push(err.message));
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Filter out known noise (favicon 404s, etc.)
     const realErrors = errors.filter(
@@ -29,7 +29,7 @@ test.describe('Landing Page', () => {
 
   test('renders all 14 landing page sections', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Announcement bar
     await expect(page.locator('text=Private beta').first()).toBeVisible();
@@ -95,7 +95,7 @@ test.describe('Landing Page', () => {
 
   test('FAQ accordion expands on click', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     // Scroll to the FAQ section using the nav link (Lenis smooth scroll)
     await page.getByRole('link', { name: 'FAQ' }).click();
     await page.waitForTimeout(1500); // wait for smooth scroll animation
@@ -113,7 +113,7 @@ test.describe('Landing Page', () => {
 
   test('pricing tiers are displayed', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     // Use exact matching to avoid false positives with "pro" appearing in other headings
     await expect(page.getByRole('heading', { name: 'Free', exact: true, level: 3 })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Pro', exact: true, level: 3 })).toBeVisible();
@@ -301,7 +301,7 @@ test.describe('Performance', () => {
 
   test('landing page has no broken images', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     const images = await page.locator('img').all();
     for (const img of images) {
       const src = await img.getAttribute('src');
@@ -315,7 +315,7 @@ test.describe('Performance', () => {
 
   test('no broken internal links on landing page', async ({ page, request }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     const links = await page.locator('a[href^="/"]').all();
     const checked = new Set<string>();
     const brokenLinks: { href: string; status: number }[] = [];
@@ -396,7 +396,7 @@ test.describe('Mobile Responsiveness', () => {
 
   test('landing page renders on mobile', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   });
 
@@ -729,7 +729,7 @@ test.describe('Mobile Navigation', () => {
 
   test('mobile hamburger menu on landing page opens', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     const menuButton = page.locator(
       'button[aria-label*="menu"], button[aria-label*="Menu"], button[aria-controls]'
     );
@@ -774,13 +774,13 @@ test.describe('Mobile Navigation', () => {
 
   test('mobile landing page hero is visible', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   });
 
   test('mobile landing page pricing section loads', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await expect(page.getByRole('heading', { name: 'Free', exact: true, level: 3 })).toBeVisible();
   });
 });
