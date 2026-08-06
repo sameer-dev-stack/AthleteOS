@@ -9,7 +9,6 @@ import { AvatarUpload } from "@/components/avatar-upload";
 import { updateProfile } from "@/lib/actions/profile";
 import { ProfileScore } from "@/components/dashboard/profile-score";
 import { TipEarnings } from "@/components/dashboard/tip-earnings";
-import { InquiryInbox } from "@/components/dashboard/inquiry-inbox";
 import { Camera, Bookmark, QrCode, Database, Link as LinkIcon, Film, EyeOff, Share2, Copy, Check, Zap } from "lucide-react";
 import { sendCardPublishedEmail } from "@/lib/actions/emails";
 import { getTipEarnings, type TipEarnings as TipEarningsData } from "@/lib/actions/tips";
@@ -353,9 +352,6 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         {/* Left Section (col-span-2 / 2-thirds width) */}
         <div className="lg:col-span-2 space-y-6">
-          <div id="deal-room-section" data-deal-room>
-            <InquiryInbox />
-          </div>
           <TipEarnings
             earnings={earnings}
             balance={balance}

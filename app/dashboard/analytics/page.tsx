@@ -3,7 +3,6 @@ import Link from "next/link";
 import { getMyProfile } from "@/lib/actions/profile";
 import { getAnalyticsData } from "@/lib/actions/analytics";
 import { AnalyticsPanel } from "@/components/dashboard/analytics-panel";
-import { InquiryInbox } from "@/components/dashboard/inquiry-inbox";
 import { BarChart3, AlertCircle } from "lucide-react";
 
 export default async function AnalyticsPage() {
@@ -20,9 +19,9 @@ export default async function AnalyticsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-white">Analytics & Inbox</h1>
+        <h1 className="text-2xl font-black tracking-tight text-white">Analytics</h1>
         <p className="mt-1.5 text-sm text-white/40">
-          Track card visitor counts, unique views, top external link clicks, and brand inquiries.
+          Track card visitor counts, unique views, and top external link clicks.
         </p>
       </div>
 
@@ -31,7 +30,7 @@ export default async function AnalyticsPage() {
           <AlertCircle className="mx-auto h-8 w-8 text-white/35" />
           <h3 className="mt-4 text-sm font-bold text-white">Profile is draft</h3>
           <p className="mt-2 text-xs text-white/40 leading-relaxed">
-            Detailed visitor analytics and brand inquiries are only active once your card is published. Publish your card to start tracking data.
+            Detailed visitor analytics are only active once your card is published. Publish your card to start tracking data.
           </p>
           <div className="mt-6">
             <Link
@@ -46,7 +45,6 @@ export default async function AnalyticsPage() {
       ) : (
         <div className="space-y-8 max-w-5xl">
           <AnalyticsPanel athleteId={profile.id} initialData={initialAnalytics} themeAccent={accentColor} />
-          <InquiryInbox />
         </div>
       )}
     </div>
