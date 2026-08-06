@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { dashboardNavSections } from "@/config/dashboard-nav";
 import { signOut } from "@/lib/actions/auth";
-import { LogOut, ChevronLeft, ChevronRight } from "lucide-react";
+import { LogOut, ChevronLeft, ChevronRight, Lock } from "lucide-react";
 import type { Profile } from "@/lib/actions/profile";
 
 type SidebarProps = {
@@ -79,20 +79,18 @@ export function Sidebar({ profile, email }: SidebarProps) {
                     return (
                       <div
                         key={item.href}
-                        title={collapsed ? item.title : undefined}
+                        title={collapsed ? `${item.title} — coming soon` : undefined}
                         className={`group flex items-center gap-3 rounded-lg transition-all duration-150 cursor-not-allowed select-none ${
                           collapsed ? "justify-center h-10 px-0" : "h-10 px-3"
-                        } opacity-40`}
+                        }`}
                       >
-                        <Icon className="h-[18px] w-[18px] flex-shrink-0 text-white/40" />
+                        <Icon className="h-[18px] w-[18px] flex-shrink-0 text-white/30" />
                         {!collapsed && (
                           <>
-                            <span className="flex-1 text-[13px] font-semibold whitespace-nowrap text-white/40">
+                            <span className="flex-1 text-[13px] font-semibold whitespace-nowrap text-white/30">
                               {item.title}
                             </span>
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-white/30 bg-white/[0.06] rounded-full px-2 py-0.5">
-                              Coming soon
-                            </span>
+                            <Lock className="h-3 w-3 text-white/20" />
                           </>
                         )}
                       </div>
@@ -241,17 +239,13 @@ export function Sidebar({ profile, email }: SidebarProps) {
                         return (
                           <div
                             key={item.href}
-                            className={`flex items-center gap-3 h-10 px-3 rounded-lg transition-all duration-150 cursor-not-allowed select-none opacity-40 ${
-                              isActive ? "bg-accent/10 text-accent" : "text-white/45"
-                            }`}
+                            className="flex items-center gap-3 h-10 px-3 rounded-lg transition-all duration-150 cursor-not-allowed select-none text-white/30"
                           >
                             <Icon className="h-[18px] w-[18px] flex-shrink-0" />
                             <span className="flex-1 text-[13px] font-semibold whitespace-nowrap">
                               {item.title}
                             </span>
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-white/30 bg-white/[0.06] rounded-full px-2 py-0.5">
-                              Coming soon
-                            </span>
+                            <Lock className="h-3 w-3 text-white/20" />
                           </div>
                         );
                       }

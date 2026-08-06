@@ -9,6 +9,7 @@ import {
   Sparkles,
   User,
   MoreHorizontal,
+  Lock,
 } from "lucide-react";
 
 const tabs = [
@@ -56,16 +57,17 @@ export function BottomNav() {
               <div
                 key={tab.href}
                 aria-label={`${tab.label} — coming soon`}
-                className="relative flex flex-col items-center justify-center gap-1.5 w-14 h-[52px] rounded-xl cursor-not-allowed select-none opacity-35"
+                className="relative flex flex-col items-center justify-center gap-1.5 w-14 h-[52px] rounded-xl cursor-not-allowed select-none"
                 style={{ WebkitTapHighlightColor: "transparent" }}
               >
                 <span className="relative flex items-center justify-center">
                   <Icon
-                    className={`h-[22px] w-[22px] transition-all duration-300 ease-out text-white/30`}
+                    className="h-[22px] w-[22px] text-white/25"
                     strokeWidth={1.8}
                   />
+                  <Lock className="absolute -bottom-0.5 -right-0.5 h-[9px] w-[9px] text-white/20 bg-[#0A0A0B] rounded-full p-[1.5px]" />
                 </span>
-                <span className="text-[10px] font-semibold leading-none text-white/30">
+                <span className="text-[10px] font-semibold leading-none text-white/25">
                   {tab.label}
                 </span>
               </div>

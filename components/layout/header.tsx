@@ -17,6 +17,7 @@ import {
   Settings,
   User,
   CreditCard,
+  Lock,
 } from "lucide-react";
 import type { Profile } from "@/lib/actions/profile";
 
@@ -372,13 +373,11 @@ export function Header({ profile, email }: HeaderProps) {
                   return (
                     <div
                       key={item.href}
-                      className="flex items-center gap-2.5 w-full rounded-lg px-4 py-2.5 text-xs font-bold cursor-not-allowed select-none opacity-40"
+                      className="flex items-center gap-2.5 w-full rounded-lg px-4 py-2.5 text-xs font-bold cursor-not-allowed select-none text-white/30"
                     >
-                      <Icon className="h-4 w-4 flex-shrink-0 text-white/40" />
-                      <span className="flex-1 text-white/50">{item.title}</span>
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-white/30 bg-white/[0.06] rounded-full px-2 py-0.5">
-                        Coming soon
-                      </span>
+                      <Icon className="h-4 w-4 flex-shrink-0" />
+                      <span className="flex-1">{item.title}</span>
+                      <Lock className="h-3 w-3 text-white/20" />
                     </div>
                   );
                 }
