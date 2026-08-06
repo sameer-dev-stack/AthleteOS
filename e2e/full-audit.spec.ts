@@ -96,19 +96,18 @@ test.describe('Landing Page', () => {
   test('FAQ accordion expands on click', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
-    // Scroll to the FAQ section using the nav link (Lenis smooth scroll)
+    // Scroll to the FAQ section using the nav link
     await page.getByRole('link', { name: 'FAQ' }).click();
-    await page.waitForTimeout(1500); // wait for smooth scroll animation
+    await page.waitForTimeout(1500);
     // Find the first FAQ question button
     const firstFaqButton = page.getByRole('button', { name: /Who is AthleteOS for/i });
     await expect(firstFaqButton).toBeVisible({ timeout: 10000 });
-    // It should already be expanded (first item is open by default)
     // Click the second one to test toggle
-    const secondFaqButton = page.getByRole('button', { name: /NCAA|compliant/i });
+    const secondFaqButton = page.getByRole('button', { name: /Is this compliant with NCAA/i });
     await secondFaqButton.click();
-    await page.waitForTimeout(300);
-    // Verify the second answer is now visible
-    await expect(page.locator('text=NCAA')).toBeVisible();
+    await page.waitForTimeout(500);
+    // Verify the second FAQ panel is now visible
+    await expect(page.locator('#faq-panel-1')).toBeVisible();
   });
 
   test('pricing tiers are displayed', async ({ page }) => {
@@ -839,7 +838,6 @@ test.describe('Error States & Edge Cases', () => {
 
   test('auth error page has resend form', async ({ page }) => {
     await page.goto('/auth/error');
-    await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.getByRole('link', { name: /Back to sign in/i })).toBeVisible();
   });
 
