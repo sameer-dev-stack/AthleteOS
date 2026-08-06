@@ -738,39 +738,6 @@ export function AnalyticsPanel({ athleteId, initialData, themeAccent = "#C6FF3D"
                   </div>
                 </div>
               )}
-
-              {data.demographics.browsers.length > 0 && (
-                <div>
-                  <p className="mb-3 text-xs font-medium uppercase tracking-wider text-ink-dim">
-                    Browsers
-                  </p>
-                  <div className="space-y-2">
-                    {data.demographics.browsers.map((b) => {
-                      const total = data.demographics.browsers.reduce((s, x) => s + x.count, 0);
-                      const pct = total > 0 ? Math.round((b.count / total) * 100) : 0;
-                      return (
-                        <div
-                          key={b.browser}
-                          className="rounded-lg bg-white/[0.03] px-3 py-2"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-white">{b.browser}</span>
-                            <span className="text-xs text-ink-muted">
-                              {pct}%
-                            </span>
-                          </div>
-                          <div className="mt-1.5 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-                            <div
-                              className="h-full rounded-full bg-accent/40"
-                              style={{ width: `${pct}%` }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
             </div>
 
 
