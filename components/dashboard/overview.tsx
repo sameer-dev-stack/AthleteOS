@@ -233,77 +233,6 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
         onShare={handleShareCard}
       />
 
-      {/* TOP ROW: Horizontal summary row */}
-      <div className="grid gap-6 sm:grid-cols-2">
-        {/* Card 1: Profile Completion Score */}
-        <ProfileScore profile={profile} />
-
-        {/* Card 2: Quick Stats */}
-        <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-6 flex flex-col justify-between transition-colors hover:border-white/[0.1]">
-          <div>
-            <h3 className="text-sm font-semibold text-ink-muted">Quick Stats</h3>
-            <div className="mt-4 space-y-2.5 text-xs text-white/70">
-              <div className="flex justify-between items-center border-l-2 border-accent/30 pl-3 py-3">
-                <div className="flex items-center gap-1.5">
-                  <Database className="h-3.5 w-3.5 text-accent/60 flex-shrink-0" />
-                  <span>Stats entries</span>
-                </div>
-                <span className="font-bold text-white">{profile.stats?.length || 0}</span>
-              </div>
-              <div className="flex justify-between items-center border-l-2 border-accent/30 pl-3 py-3">
-                <div className="flex items-center gap-1.5">
-                  <LinkIcon className="h-3.5 w-3.5 text-accent/60 flex-shrink-0" />
-                  <span>Custom links</span>
-                </div>
-                <span className="font-bold text-white">{profile.links?.length || 0}</span>
-              </div>
-              <div className="flex justify-between items-center border-l-2 border-accent/30 pl-3 py-3">
-                <div className="flex items-center gap-1.5">
-                  <Film className="h-3.5 w-3.5 text-accent/60 flex-shrink-0" />
-                  <span>Highlight reels</span>
-                </div>
-                <span className="font-bold text-white">{profile.highlights?.length || 0}</span>
-              </div>
-              <div className="flex justify-between items-center border-l-2 border-accent/30 pl-3 py-3">
-                <div className="flex items-center gap-1.5 opacity-50 cursor-not-allowed select-none">
-                  <Bookmark className="h-3.5 w-3.5 text-accent/60 flex-shrink-0" />
-                  <span>Saved Assets</span>
-                </div>
-                <span className="font-bold text-white">{savedAssetsCount}</span>
-              </div>
-            </div>
-          </div>
-          <div className="mt-4 pt-3 border-t border-white/[0.04] flex justify-between items-center">
-            <span className="text-[10px] uppercase tracking-wider text-ink-dim">Card Status</span>
-            <span
-              className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-              style={{
-                backgroundColor: profile.profile_published ? `${accentColor}15` : "rgba(255,255,255,0.06)",
-                color: profile.profile_published ? accentColor : "rgba(255,255,255,0.4)",
-              }}
-            >
-              {profile.profile_published ? "Published" : "Draft"}
-            </span>
-          </div>
-        </div>
-
-
-      </div>
-
-      {/* Upgrade CTA for free users */}
-      {resolvePlan(profile.plan, profile.extended_pro_until) === "free" && (
-        <Link
-          href="/dashboard/billing"
-          className="flex items-center justify-between rounded-2xl border border-accent/20 bg-accent/5 p-4 transition-all hover:bg-accent/10"
-        >
-          <div>
-            <p className="text-sm font-semibold text-accent">Unlock Pro</p>
-            <p className="text-xs text-white/40 mt-0.5">300 AI actions, analytics, custom branding</p>
-          </div>
-          <Zap className="h-4 w-4 text-accent" />
-        </Link>
-      )}
-
       {/* Card Performance Metrics */}
       {profile.profile_published && (
         loadingMetrics ? (
@@ -347,6 +276,20 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
         )
       )}
 
+      {/* Upgrade CTA for free users */}
+      {resolvePlan(profile.plan, profile.extended_pro_until) === "free" && (
+        <Link
+          href="/dashboard/billing"
+          className="flex items-center justify-between rounded-2xl border border-accent/20 bg-accent/5 p-4 transition-all hover:bg-accent/10"
+        >
+          <div>
+            <p className="text-sm font-semibold text-accent">Unlock Pro</p>
+            <p className="text-xs text-white/40 mt-0.5">300 AI actions, analytics, custom branding</p>
+          </div>
+          <Zap className="h-4 w-4 text-accent" />
+        </Link>
+      )}
+
       {/* TWO-COLUMN MAIN BODY */}
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         {/* Left Section (col-span-2 / 2-thirds width) */}
@@ -356,6 +299,58 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
             balance={balance}
             loading={loadingTips}
           />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <ProfileScore profile={profile} />
+
+            <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-6 flex flex-col justify-between transition-colors hover:border-white/[0.1]">
+              <div>
+                <h3 className="text-sm font-semibold text-ink-muted">Quick Stats</h3>
+                <div className="mt-4 space-y-2.5 text-xs text-white/70">
+                  <div className="flex justify-between items-center border-l-2 border-accent/30 pl-3 py-2.5">
+                    <div className="flex items-center gap-1.5">
+                      <Database className="h-3.5 w-3.5 text-accent/60 flex-shrink-0" />
+                      <span>Stats entries</span>
+                    </div>
+                    <span className="font-bold text-white">{profile.stats?.length || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-l-2 border-accent/30 pl-3 py-2.5">
+                    <div className="flex items-center gap-1.5">
+                      <LinkIcon className="h-3.5 w-3.5 text-accent/60 flex-shrink-0" />
+                      <span>Custom links</span>
+                    </div>
+                    <span className="font-bold text-white">{profile.links?.length || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-l-2 border-accent/30 pl-3 py-2.5">
+                    <div className="flex items-center gap-1.5">
+                      <Film className="h-3.5 w-3.5 text-accent/60 flex-shrink-0" />
+                      <span>Highlight reels</span>
+                    </div>
+                    <span className="font-bold text-white">{profile.highlights?.length || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-l-2 border-accent/30 pl-3 py-2.5">
+                    <div className="flex items-center gap-1.5 opacity-50 cursor-not-allowed select-none">
+                      <Bookmark className="h-3.5 w-3.5 text-accent/60 flex-shrink-0" />
+                      <span>Saved Assets</span>
+                    </div>
+                    <span className="font-bold text-white">{savedAssetsCount}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 pt-3 border-t border-white/[0.04] flex justify-between items-center">
+                <span className="text-[10px] uppercase tracking-wider text-ink-dim">Card Status</span>
+                <span
+                  className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                  style={{
+                    backgroundColor: profile.profile_published ? `${accentColor}15` : "rgba(255,255,255,0.06)",
+                    color: profile.profile_published ? accentColor : "rgba(255,255,255,0.4)",
+                  }}
+                >
+                  {profile.profile_published ? "Published" : "Draft"}
+                </span>
+              </div>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <LaunchChecklist profile={profile} />
