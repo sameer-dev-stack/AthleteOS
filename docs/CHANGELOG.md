@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-08-06 — Fix stats strip: remove unused gap below stats on card front
+
+### What changed
+- **`components/profile-card.tsx`**: removed `mt-auto` spacer div between stats strip and URL bar; reduced stats strip top margin from `mt-4` to `mt-3`.
+
+### Why
+The `mt-auto` spacer was pushing the URL bar to the bottom of the card, creating a large unused gap between the stats strip and the URL copy button. Removing it lets the URL sit directly below the stats.
+
+### Files touched
+- `components/profile-card.tsx`, `docs/CHANGELOG.md`
+
+### Commit
+_Not yet committed._
+
+---
+
 ## 2026-08-06 — Gold Verified Badge: consistent gold badge across card, discovery, and billing
 
 ### What changed

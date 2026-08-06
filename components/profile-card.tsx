@@ -401,7 +401,7 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
 
             {/* ── Stats Strip (horizontal) ────────── */}
             {allStatCells.length > 0 && (
-              <div className="flex-shrink-0 mx-6 mt-4">
+              <div className="flex-shrink-0 mx-6 mt-3">
                 <div
                   className="flex items-stretch rounded-xl overflow-hidden"
                   style={{
@@ -429,9 +429,6 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
                 </div>
               </div>
             )}
-
-            {/* Spacer */}
-            <div className="mt-auto" />
 
             {/* ── Card URL + Copy ────────────────── */}
             <div className="flex-shrink-0 mx-6 mb-2">
