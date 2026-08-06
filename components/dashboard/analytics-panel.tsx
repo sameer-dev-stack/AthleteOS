@@ -393,52 +393,6 @@ export function AnalyticsPanel({ athleteId, initialData, themeAccent = "#C6FF3D"
               <ArrowRightLeft className="h-3.5 w-3.5" />
               Compare
             </button>
-            {data && !loading && (
-              <>
-                <button
-                  onClick={handleExportCSV}
-                  disabled={exporting}
-                  className="rounded-lg px-3 py-1.5 text-xs font-medium text-ink-muted hover:bg-white/[0.04] hover:text-white flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  CSV
-                </button>
-                <button
-                  onClick={handleExportPDF}
-                  disabled={exporting}
-                  className="rounded-lg px-3 py-1.5 text-xs font-medium text-ink-muted hover:bg-white/[0.04] hover:text-white flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  <FileText className="h-3.5 w-3.5" />
-                  PDF
-                </button>
-                <button
-                  onClick={handleShareLink}
-                  disabled={shareLoading}
-                  className="rounded-lg px-3 py-1.5 text-xs font-medium text-ink-muted hover:bg-white/[0.04] hover:text-white flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  <Link2 className="h-3.5 w-3.5" />
-                  Share
-                </button>
-                <button
-                  onClick={() => setShowScheduleModal(true)}
-                  className="rounded-lg px-3 py-1.5 text-xs font-medium text-ink-muted hover:bg-white/[0.04] hover:text-white flex items-center gap-1.5"
-                >
-                  <Clock className="h-3.5 w-3.5" />
-                  Schedule
-                </button>
-                <button
-                  onClick={() => setShowScheduled(!showScheduled)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all flex items-center gap-1.5 ${
-                    showScheduled
-                      ? "bg-accent/15 text-accent"
-                      : "text-ink-muted hover:bg-white/[0.04] hover:text-white"
-                  }`}
-                >
-                  <Mail className="h-3.5 w-3.5" />
-                  Reports
-                </button>
-              </>
-            )}
           </div>
         </div>
         {range === "custom" && (
