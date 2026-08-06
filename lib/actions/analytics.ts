@@ -571,16 +571,27 @@ export async function getAnalytics(
     }
 
     const serviceRole = getSupabaseServiceRole();
-    const since = getRangeDate(range, customStart).toISOString();
-    const endDate = customEnd ? new Date(customEnd).toISOString() : new Date().toISOString();
+
+    const parseIsoDate = (d?: string, fallback = new Date()): string => {
+      if (!d) return fallback.toISOString();
+      try {
+        const parsed = new Date(d);
+        return isNaN(parsed.getTime()) ? fallback.toISOString() : parsed.toISOString();
+      } catch {
+        return fallback.toISOString();
+      }
+    };
+
+    const since = parseIsoDate(customStart, getRangeDate(range, customStart));
+    const endDate = parseIsoDate(customEnd, new Date());
     const rangeDays = range === "custom" && customStart && customEnd
-      ? Math.ceil((new Date(customEnd).getTime() - new Date(customStart).getTime()) / (24 * 60 * 60 * 1000))
+      ? Math.max(1, Math.ceil((new Date(endDate).getTime() - new Date(since).getTime()) / (24 * 60 * 60 * 1000)))
       : getRangeDays(range);
     const previousSince = new Date(new Date(since).getTime() - rangeDays * 24 * 60 * 60 * 1000).toISOString();
 
     const fetchPeriod = async (start: string, end: string) => {
       const [viewsResult, clicksResult, referrersResult, geoResult, linksResult, inquiriesResult, tipsResult, uaResult] =
-        await Promise.all([
+        await Promise.allSettled([
           serviceRole
             .from("page_views")
             .select("id, viewer_ip_hash, created_at, user_agent", { count: "exact" })
@@ -633,16 +644,20 @@ export async function getAnalytics(
             .lte("created_at", end),
         ]);
 
-      const views = viewsResult.data ?? [];
-      const totalViews = viewsResult.count ?? 0;
-      const uniqueIps = new Set(views.map((v) => v.viewer_ip_hash));
+      const viewsData = viewsResult.status === "fulfilled" ? (viewsResult.value.data ?? []) : [];
+      const totalViews = viewsResult.status === "fulfilled" ? (viewsResult.value.count ?? 0) : 0;
+      const uniqueIps = new Set(viewsData.filter(v => v?.viewer_ip_hash).map((v) => v.viewer_ip_hash));
       const uniqueVisitors = uniqueIps.size;
-      const totalClicks = clicksResult.count ?? 0;
-      const totalInquiries = inquiriesResult.count ?? 0;
-      const totalTipsReceived = (tipsResult.data ?? []).reduce((sum, t) => sum + (t.amount || 0), 0) / 100;
+      const totalClicks = clicksResult.status === "fulfilled" ? (clicksResult.value.count ?? 0) : 0;
+      const totalInquiries = inquiriesResult.status === "fulfilled" ? (inquiriesResult.value.count ?? 0) : 0;
+      
+      const tipsData = tipsResult.status === "fulfilled" ? (tipsResult.value.data ?? []) : [];
+      const totalTipsReceived = tipsData.reduce((sum, t) => sum + (t?.amount || 0), 0) / 100;
 
+      const referrersData = referrersResult.status === "fulfilled" ? (referrersResult.value.data ?? []) : [];
       const referrerCounts = new Map<string, number>();
-      for (const r of referrersResult.data ?? []) {
+      for (const r of referrersData) {
+        if (!r?.referrer) continue;
         const ref = parseReferrer(r.referrer);
         referrerCounts.set(ref, (referrerCounts.get(ref) || 0) + 1);
       }
@@ -651,9 +666,10 @@ export async function getAnalytics(
         .sort((a, b) => b.count - a.count)
         .slice(0, 10);
 
+      const geoData = geoResult.status === "fulfilled" ? (geoResult.value.data ?? []) : [];
       const countryCounts = new Map<string, number>();
-      for (const g of geoResult.data ?? []) {
-        const country = g.country || "unknown";
+      for (const g of geoData) {
+        const country = g?.country || "unknown";
         countryCounts.set(country, (countryCounts.get(country) || 0) + 1);
       }
       const geoBreakdown = Array.from(countryCounts.entries())
@@ -662,32 +678,38 @@ export async function getAnalytics(
         .slice(0, 10);
 
       const dayCounts = new Map<string, number>();
-      for (const v of views) {
-        const day = v.created_at.slice(0, 10);
-        dayCounts.set(day, (dayCounts.get(day) || 0) + 1);
+      for (const v of viewsData) {
+        if (!v?.created_at) continue;
+        const day = typeof v.created_at === "string" ? v.created_at.slice(0, 10) : "";
+        if (day) {
+          dayCounts.set(day, (dayCounts.get(day) || 0) + 1);
+        }
       }
       const viewsByDay = Array.from(dayCounts.entries())
         .map(([date, count]) => ({ date, count }))
         .sort((a, b) => a.date.localeCompare(b.date));
 
+      const linksData = linksResult.status === "fulfilled" ? (linksResult.value.data ?? []) : [];
       const linkCounts = new Map<string, { label: string; url: string; clicks: number }>();
-      for (const c of linksResult.data ?? []) {
+      for (const c of linksData) {
+        if (!c?.link_url) continue;
         const key = c.link_url;
         const existing = linkCounts.get(key);
         if (existing) {
           existing.clicks++;
         } else {
-          linkCounts.set(key, { label: c.link_label, url: c.link_url, clicks: 1 });
+          linkCounts.set(key, { label: c.link_label || c.link_url, url: c.link_url, clicks: 1 });
         }
       }
       const topLinks = Array.from(linkCounts.values())
         .sort((a, b) => b.clicks - a.clicks)
         .slice(0, 10);
 
+      const uaData = uaResult.status === "fulfilled" ? (uaResult.value.data ?? []) : [];
       const deviceCounts = new Map<string, number>();
       const browserCounts = new Map<string, number>();
-      for (const row of uaResult.data ?? []) {
-        const { device, browser } = parseUserAgent(row.user_agent);
+      for (const row of uaData) {
+        const { device, browser } = parseUserAgent(row?.user_agent ?? null);
         deviceCounts.set(device, (deviceCounts.get(device) || 0) + 1);
         browserCounts.set(browser, (browserCounts.get(browser) || 0) + 1);
       }
@@ -739,6 +761,6 @@ export async function getAnalytics(
     };
   } catch (err) {
     console.error("[analytics] getAnalytics error:", err);
-    return { ok: false, error: "Failed to fetch analytics" };
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to fetch analytics" };
   }
 }

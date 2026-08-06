@@ -78,13 +78,15 @@ export function AnalyticsPanel({ athleteId, themeAccent = "#C6FF3D" }: Props) {
         if (cancelled) return;
         if (result.ok && result.data) {
           setData(result.data);
+          setError(null);
         } else {
-          setError(result.error || "Failed to load analytics");
+          setError(result?.error || "Failed to load analytics");
         }
         setLoading(false);
-      }).catch(() => {
+      }).catch((err) => {
         if (cancelled) return;
-        setError("Network error. Please check your connection.");
+        console.error("[AnalyticsPanel] fetchData error:", err);
+        setError(err?.message || "Failed to load analytics");
         setLoading(false);
       });
     };
