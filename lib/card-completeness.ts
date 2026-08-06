@@ -45,10 +45,8 @@ export type CardProfile = {
   contact_phone?: string | null;
 };
 
-type HttpLinked<T extends { label?: string; url?: string }> = T;
-
-function hasValidHttp<T extends { label?: string; url?: string }>(items: HttpLinked<T>[] | undefined | null): boolean {
-  return !!items?.some((i) => i.label?.trim() && i.url?.trim() && /^https?:\/\/.+/.test(i.url.trim()));
+function hasValidHttp(items: { label?: string; title?: string; url?: string }[] | undefined | null): boolean {
+  return !!items?.some((i) => ((i.label || i.title)?.trim()) && i.url?.trim() && /^https?:\/\/.+/.test(i.url.trim()));
 }
 
 export function getMissingCardFields(profile: CardProfile): CardFieldKey[] {

@@ -341,6 +341,7 @@ export default function OnboardingPage() {
 
   const canProceedUsername = usernameStatus === "available" && username.length >= 3;
   const canProceedProfile =
+    avatarUrl !== null &&
     fullName.trim().length > 0 &&
     sport.length > 0 &&
     position.trim().length > 0 &&
@@ -357,7 +358,10 @@ export default function OnboardingPage() {
   );
 
   const contactEmailInvalid = contactEmail.trim().length > 0 && !isValidEmail(contactEmail);
-  const canProceedDetails = !contactEmailInvalid;
+  const hasLinks = links.some((l) => l.label.trim() && l.url.trim());
+  const hasHighlights = highlights.some((h) => h.title.trim() && h.url.trim());
+  const hasContact = contactEmail.trim().length > 0 || contactPhone.trim().length > 0;
+  const canProceedDetails = !contactEmailInvalid && hasLinks && hasHighlights && hasContact;
 
   const statTemplates = sport ? getStatTemplatesForSport(sport) : null;
   const usedStatLabels = new Set(stats.map((s) => s.label.toLowerCase()));
@@ -1274,7 +1278,15 @@ export default function OnboardingPage() {
                 </div>
                 {!canProceedDetails && (
                   <p className="text-center text-xs text-red-400/80">
-                    Complete the required fields above to launch your card.
+                    {!hasLinks && !hasHighlights && !hasContact
+                      ? "Add at least one link, one highlight, and a contact method."
+                      : !hasLinks
+                        ? "Add at least one link."
+                        : !hasHighlights
+                          ? "Add at least one highlight."
+                          : !hasContact
+                            ? "Add a contact email or phone number."
+                            : "Fix the highlighted fields above."}
                   </p>
                 )}
               </div>
