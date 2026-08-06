@@ -443,7 +443,8 @@ export default function OnboardingPage() {
       } else {
         setError(result.error || "Failed to save profile. Please try again.");
       }
-    } catch {
+    } catch (e) {
+      console.error("[onboarding] handleComplete error:", e);
       setError("Something went wrong. Please try again.");
     } finally {
       setSaving(false);

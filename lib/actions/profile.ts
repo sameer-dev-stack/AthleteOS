@@ -140,68 +140,66 @@ export async function checkUsername(username: string): Promise<{ available: bool
 export async function updateProfile(
   updates: Partial<Pick<Profile, "username" | "full_name" | "sport" | "school" | "class_year" | "position" | "bio" | "stats" | "links" | "social" | "highlights" | "profile_published" | "onboarding_completed" | "avatar_url" | "cover_url" | "contact_phone" | "contact_email" | "payout_method" | "payout_settings" | "stripe_onboarding_complete" | "email_preferences"> & { referred_by?: string | null }>
 ): Promise<ProfileResult> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Not authenticated" };
-
-  const admin = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-
-  const parsed = UpdateProfileSchema.safeParse(updates);
-  if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0].message };
-  }
-
-  const validated = parsed.data;
-
-  // Prevent users from self-marking Stripe onboarding complete without providing payout method
-  if (validated.stripe_onboarding_complete && !validated.payout_method && !updates.payout_method) {
-    return { ok: false, error: "Cannot complete onboarding without payout method" };
-  }
-
-  // Block publishing until every card field is filled — the public card must never look incomplete.
-  if (validated.profile_published) {
-    const { isCardComplete, getMissingCardFieldLabels } = await import("../card-completeness");
-    const { data: current } = await admin
-      .from("profiles")
-      .select("avatar_url, full_name, sport, position, school, class_year, bio, stats, links, social, highlights, contact_email, contact_phone")
-      .eq("id", user.id)
-      .single();
-
-    const mergedCard: import("../card-completeness").CardProfile = { ...(current || {}) };
-    for (const key of ["avatar_url", "full_name", "sport", "position", "school", "class_year", "bio", "stats", "links", "social", "highlights", "contact_email", "contact_phone"] as const) {
-      if (validated[key] !== undefined) (mergedCard as Record<string, unknown>)[key] = validated[key];
-    }
-
-    if (!isCardComplete(mergedCard)) {
-      const labels = getMissingCardFieldLabels(mergedCard);
-      const message = labels.length <= 2
-        ? `Your card needs ${labels.join(" and ")} before it can go live.`
-        : `Your card needs ${labels.slice(0, -1).join(", ")}, and ${labels[labels.length - 1]} before it can go live.`;
-      return { ok: false, error: message };
-    }
-  }
-
-  if (updates.username) {
-    const clean = validated.username!.toLowerCase().trim();
-
-    const { data: existing } = await admin
-      .from("profiles")
-      .select("id")
-      .eq("username", clean)
-      .neq("id", user.id)
-      .single();
-
-    if (existing) {
-      return { ok: false, error: "That username is already taken." };
-    }
-
-    validated.username = clean;
-  }
-
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { ok: false, error: "Not authenticated" };
+
+    const admin = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const parsed = UpdateProfileSchema.safeParse(updates);
+    if (!parsed.success) {
+      return { ok: false, error: parsed.error.issues[0].message };
+    }
+
+    const validated = parsed.data;
+
+    if (validated.stripe_onboarding_complete && !validated.payout_method && !updates.payout_method) {
+      return { ok: false, error: "Cannot complete onboarding without payout method" };
+    }
+
+    if (validated.profile_published) {
+      const { isCardComplete, getMissingCardFieldLabels } = await import("../card-completeness");
+      const { data: current } = await admin
+        .from("profiles")
+        .select("avatar_url, full_name, sport, position, school, class_year, bio, stats, links, social, highlights, contact_email, contact_phone")
+        .eq("id", user.id)
+        .single();
+
+      const mergedCard: import("../card-completeness").CardProfile = { ...(current || {}) };
+      for (const key of ["avatar_url", "full_name", "sport", "position", "school", "class_year", "bio", "stats", "links", "social", "highlights", "contact_email", "contact_phone"] as const) {
+        if (validated[key] !== undefined) (mergedCard as Record<string, unknown>)[key] = validated[key];
+      }
+
+      if (!isCardComplete(mergedCard)) {
+        const labels = getMissingCardFieldLabels(mergedCard);
+        const message = labels.length <= 2
+          ? `Your card needs ${labels.join(" and ")} before it can go live.`
+          : `Your card needs ${labels.slice(0, -1).join(", ")}, and ${labels[labels.length - 1]} before it can go live.`;
+        return { ok: false, error: message };
+      }
+    }
+
+    if (updates.username) {
+      const clean = validated.username!.toLowerCase().trim();
+
+      const { data: existing } = await admin
+        .from("profiles")
+        .select("id")
+        .eq("username", clean)
+        .neq("id", user.id)
+        .single();
+
+      if (existing) {
+        return { ok: false, error: "That username is already taken." };
+      }
+
+      validated.username = clean;
+    }
+
     // Fetch old values before update for change logging
     const TRACKED_FIELDS = ["bio", "full_name", "sport", "school", "position", "class_year", "avatar_url", "stats", "links", "social", "highlights", "contact_phone", "contact_email"] as const;
     const { data: oldProfile } = await admin
@@ -222,9 +220,6 @@ export async function updateProfile(
       .select("*")
       .single();
 
-    // Resilience: if the column is missing from the DB / PostgREST schema cache
-    // (migration not yet applied), retry without referred_by so onboarding is
-    // never hard-blocked. Referral attribution is best-effort until the column exists.
     if (error && /referred_by/.test(error.message)) {
       const { referred_by: _drop, ...payloadWithoutRef } = updatePayload;
       const retry = await admin
@@ -238,14 +233,12 @@ export async function updateProfile(
     }
 
     if (error) {
-      // Unique constraint violation on username = TOCTOU race, another user claimed it first
       if (error.code === "23505" && error.message?.includes("username")) {
         return { ok: false, error: "That username was just claimed by someone else. Please choose another." };
       }
       return { ok: false, error: error.message };
     }
 
-    // Log changes for each tracked field that actually changed
     try {
       const { recordProfileEvent } = await import("./profile-history");
       for (const field of TRACKED_FIELDS) {
@@ -281,6 +274,7 @@ export async function updateProfile(
 
     return { ok: true, data: data as Profile };
   } catch (e) {
+    console.error("[profile] updateProfile error:", e);
     return { ok: false, error: e instanceof Error ? e.message : "Failed to save profile" };
   }
 }

@@ -5,6 +5,25 @@
 
 ---
 
+## 2026-08-05 — Onboarding fix: wrap updateProfile in try-catch, add error logging
+
+### What changed
+- **Structural fix in `lib/actions/profile.ts`**: wrapped the entire `updateProfile` function body in a single try-catch. Previously, lines 143-202 (server client init, Zod parse, card-completeness check, username uniqueness check) were outside the try-catch at line 204. Any exception from those lines (e.g., `createServiceClient` throwing, admin query failing, dynamic import error) propagated uncaught to `handleComplete`'s catch block, which showed the generic "Something went wrong. Please try again." instead of a specific error.
+- **Added `console.error` logging** in `updateProfile`'s catch block and `handleComplete`'s catch block (`app/onboarding/page.tsx:447`) so future errors are visible in server/client logs.
+- **Verification:** lint clean (1 pre-existing warning); build green.
+
+### Why
+The onboarding "Launch my card" button was failing with "Something went wrong. Please try again." — a generic catch-all that hid the real error. Root cause: `updateProfile` had code outside its try-catch that could throw (admin client init, card-completeness validation, username check). With the fix, all exceptions are caught and returned as structured `{ ok: false, error: "..." }` responses, so the user sees a specific actionable message (e.g., "Your card needs a contact email or phone number") instead of a generic failure.
+
+### Files touched
+- `lib/actions/profile.ts` — entire `updateProfile` body wrapped in try-catch; added `console.error` in catch
+- `app/onboarding/page.tsx` — added `console.error` in `handleComplete` catch block
+
+### Commit
+pending
+
+---
+
 ## 2026-08-05 — Batch 4: launch gate — funnel audit, per-profile OG share preview, env/URL hardening
 
 ### What changed
