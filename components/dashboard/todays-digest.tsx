@@ -46,6 +46,14 @@ export function TodaysDigest({
   onShare,
 }: Props) {
   const [items, setItems] = useState<DigestItem[]>([]);
+  const [greeting, setGreeting] = useState("Good day");
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Good morning");
+    else if (hour < 18) setGreeting("Good afternoon");
+    else setGreeting("Good evening");
+  }, []);
 
   useEffect(() => {
     if (!analytics) return;
@@ -112,7 +120,7 @@ export function TodaysDigest({
       <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-5">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-sm font-semibold text-white">{getGreeting()}</p>
+            <p className="text-sm font-semibold text-white" suppressHydrationWarning>{greeting}</p>
             <p className="text-xs text-white/40 mt-0.5">
               {isPublished ? "Your card is live and ready for visitors" : "Your NIL activity will appear here"}
             </p>
@@ -180,7 +188,7 @@ export function TodaysDigest({
     <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <p className="text-sm font-semibold text-white">{getGreeting()}</p>
+          <p className="text-sm font-semibold text-white" suppressHydrationWarning>{greeting}</p>
           <p className="text-xs text-white/40 mt-0.5">Here&apos;s your NIL activity snapshot</p>
         </div>
         <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${themeAccent}15` }}>
