@@ -196,13 +196,11 @@ export function AnalyticsPanel({ athleteId, initialData, themeAccent = "#C6FF3D"
   const handleExportPDF = () => {
     if (!data) return;
     setExporting(true);
-    const w = window.open("", "_blank");
-    if (!w) { setExporting(false); return; }
 
     const maxDay = Math.max(...data.viewsByDay.map((d) => d.count), 1);
     const chartBars = data.viewsByDay.slice(-30).map((d) => {
       const h = Math.max((d.count / maxDay) * 120, 2);
-      return `<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:8px;"><div style="width:100%;max-width:16px;background:#C6FF3D;border-radius:3px 3px 0 0;height:${h}px;"></div><div style="font-size:8px;color:#666;margin-top:4px;writing-mode:vertical-lr;transform:rotate(180deg);max-height:40px;overflow:hidden;">${d.date.slice(5)}</div></div>`;
+      return `<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:8px;"><div style="width:100%;max-width:16px;background:#C6FF3D;border-radius:3px 3px 0 0;height:${h}px;"></div><div style="font-size:8px;color:#888;margin-top:4px;">${d.date.slice(5)}</div></div>`;
     }).join("");
 
     const deviceChart = data.demographics.devices.map((d) => {
@@ -224,41 +222,43 @@ export function AnalyticsPanel({ athleteId, initialData, themeAccent = "#C6FF3D"
       return { text: `${pct > 0 ? "+" : ""}${pct}%`, color: pct > 0 ? "#34d399" : pct < 0 ? "#f87171" : "#888" };
     };
 
-    w.document.write(`
+    const html = `<!DOCTYPE html>
       <html><head><title>AthleteOS Analytics Report</title>
+      <meta charset="utf-8">
       <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:system-ui,-apple-system,sans-serif;background:#0A0A0B;color:#fff;padding:0}
-        .page{max-width:800px;margin:0 auto;padding:48px 40px}
-        .header{margin-bottom:40px}
+        body{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:#0A0A0B;color:#fff;padding:40px;line-height:1.4}
+        .page{max-width:800px;margin:0 auto}
+        .header{margin-bottom:32px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:20px}
         .badge{display:inline-block;background:#C6FF3D;color:#0A0A0B;font-weight:900;font-size:10px;padding:4px 10px;border-radius:6px;letter-spacing:1px;text-transform:uppercase}
-        h1{font-size:28px;font-weight:900;margin:16px 0 4px;text-transform:uppercase;letter-spacing:-0.5px}
-        .subtitle{color:#888;font-size:13px}
-        h2{font-size:14px;color:#888;margin:32px 0 16px;text-transform:uppercase;letter-spacing:1px;font-weight:700;border-bottom:1px solid #222;padding-bottom:8px}
-        .stats-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px}
-        .stat-card{flex:1;min-width:130px;background:#16161A;border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:20px;text-align:center}
-        .stat-card .label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
-        .stat-card .value{font-size:28px;font-weight:900;color:#fff}
+        h1{font-size:26px;font-weight:900;margin:12px 0 4px;text-transform:uppercase;letter-spacing:-0.5px}
+        .subtitle{color:#888;font-size:12px}
+        h2{font-size:13px;color:#888;margin:28px 0 12px;text-transform:uppercase;letter-spacing:1px;font-weight:700;border-bottom:1px solid #222;padding-bottom:6px}
+        .stats-row{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+        .stat-card{flex:1;min-width:120px;background:#16161A;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px;text-align:center}
+        .stat-card .label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+        .stat-card .value{font-size:24px;font-weight:900;color:#fff}
         .stat-card .value.accent{color:#C6FF3D}
         .stat-card .value.green{color:#34d399}
-        .chart-container{background:#16161A;border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:24px;margin-bottom:8px}
-        .chart-title{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:16px;font-weight:700}
-        .bar-chart{display:flex;align-items:flex-end;gap:3px;height:140px;padding-top:10px}
+        .chart-container{background:#16161A;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:20px;margin-bottom:16px}
+        .bar-chart{display:flex;align-items:flex-end;gap:4px;height:120px;padding-top:10px}
         .two-col{display:flex;gap:16px}
         .two-col > div{flex:1}
         table{width:100%;border-collapse:collapse}
-        td{padding:10px 12px;border-bottom:1px solid #1a1a1e;font-size:13px;color:#ccc}
+        td{padding:8px 12px;border-bottom:1px solid #1a1a1e;font-size:12px;color:#ccc}
         td:last-child{text-align:right;color:#C6FF3D;font-weight:600}
-        .footer{margin-top:48px;padding-top:24px;border-top:1px solid #222;text-align:center;color:#555;font-size:11px}
-        @media print{body{background:#111113} .page{padding:24px}}
-      </style></head><body>
+        .footer{margin-top:40px;padding-top:20px;border-top:1px solid #222;text-align:center;color:#555;font-size:11px}
+        @media print{
+          body{background:#0A0A0B !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        }
+      </style></head>
+      <body>
       <div class="page">
         <div class="header">
           <span class="badge">AthleteOS</span>
           <h1>Analytics Report</h1>
-          <p class="subtitle">Generated ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })} | Range: ${range === "custom" ? `${customStart} to ${customEnd}` : range === "7d" ? "Last 7 days" : range === "90d" ? "Last 90 days" : "Last 30 days"}</p>
+          <p class="subtitle">Generated ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })} | Range: ${range === "custom" ? `${customStart} to ${customEnd}` : range}</p>
         </div>
-
         <div class="stats-row">
           <div class="stat-card"><div class="label">Total Views</div><div class="value">${data.totalViews.toLocaleString()}</div></div>
           <div class="stat-card"><div class="label">Unique Visitors</div><div class="value">${data.uniqueVisitors.toLocaleString()}</div></div>
@@ -266,73 +266,41 @@ export function AnalyticsPanel({ athleteId, initialData, themeAccent = "#C6FF3D"
           <div class="stat-card"><div class="label">Inquiries</div><div class="value">${data.totalInquiries.toLocaleString()}</div></div>
           <div class="stat-card"><div class="label">Tips Received</div><div class="value green">$${data.totalTipsReceived.toFixed(2)}</div></div>
         </div>
-
         <div class="stats-row">
           <div class="stat-card"><div class="label">Click Rate</div><div class="value accent">${data.engagement.clickRate.toFixed(1)}%</div></div>
           <div class="stat-card"><div class="label">Inquiry Rate</div><div class="value">${data.engagement.inquiryRate.toFixed(2)}%</div></div>
           <div class="stat-card"><div class="label">Avg Views/Day</div><div class="value">${data.engagement.avgViewsPerDay.toFixed(0)}</div></div>
         </div>
-
-        ${data.viewsByDay.length > 0 ? `
-        <h2>Views Over Time</h2>
-        <div class="chart-container">
-          <div class="bar-chart">${chartBars}</div>
-        </div>` : ""}
-
-        ${prev ? `
-        <h2>vs Previous Period</h2>
-        <div class="chart-container">
-          <table>
-            <tr><td>Total Views</td><td>${prev.totalViews.toLocaleString()} <span style="color:${pctChange(data.totalViews, prev.totalViews).color};margin-left:8px">${pctChange(data.totalViews, prev.totalViews).text}</span></td></tr>
-            <tr><td>Link Clicks</td><td>${prev.totalClicks.toLocaleString()} <span style="color:${pctChange(data.totalClicks, prev.totalClicks).color};margin-left:8px">${pctChange(data.totalClicks, prev.totalClicks).text}</span></td></tr>
-            <tr><td>Inquiries</td><td>${prev.totalInquiries.toLocaleString()} <span style="color:${pctChange(data.totalInquiries, prev.totalInquiries).color};margin-left:8px">${pctChange(data.totalInquiries, prev.totalInquiries).text}</span></td></tr>
-            <tr><td>Tips</td><td>$${prev.totalTipsReceived.toFixed(2)} <span style="color:${pctChange(data.totalTipsReceived, prev.totalTipsReceived).color};margin-left:8px">${pctChange(data.totalTipsReceived, prev.totalTipsReceived).text}</span></td></tr>
-          </table>
-        </div>` : ""}
-
+        ${data.viewsByDay.length > 0 ? `<h2>Views Over Time</h2><div class="chart-container"><div class="bar-chart">${chartBars}</div></div>` : ""}
+        ${prev ? `<h2>vs Previous Period</h2><div class="chart-container"><table>
+          <tr><td>Total Views</td><td>${prev.totalViews.toLocaleString()} <span style="color:${pctChange(data.totalViews, prev.totalViews).color};margin-left:8px">${pctChange(data.totalViews, prev.totalViews).text}</span></td></tr>
+          <tr><td>Link Clicks</td><td>${prev.totalClicks.toLocaleString()} <span style="color:${pctChange(data.totalClicks, prev.totalClicks).color};margin-left:8px">${pctChange(data.totalClicks, prev.totalClicks).text}</span></td></tr>
+          <tr><td>Inquiries</td><td>${prev.totalInquiries.toLocaleString()} <span style="color:${pctChange(data.totalInquiries, prev.totalInquiries).color};margin-left:8px">${pctChange(data.totalInquiries, prev.totalInquiries).text}</span></td></tr>
+        </table></div>` : ""}
         <div class="two-col">
-          ${data.topReferrers.length > 0 ? `
-          <div>
-            <h2>Top Referrers</h2>
-            <div class="chart-container">
-              ${referrerChart || `<table>${data.topReferrers.map(r => `<tr><td>${r.referrer}</td><td>${r.count.toLocaleString()}</td></tr>`).join("")}</table>`}
-            </div>
-          </div>` : ""}
-          ${data.demographics.devices.length > 0 ? `
-          <div>
-            <h2>Devices</h2>
-            <div class="chart-container">
-              ${deviceChart}
-            </div>
-          </div>` : ""}
+          ${data.topReferrers.length > 0 ? `<div><h2>Top Referrers</h2><div class="chart-container">${referrerChart || `<table>${data.topReferrers.map(r => `<tr><td>${r.referrer}</td><td>${r.count.toLocaleString()}</td></tr>`).join("")}</table>`}</div></div>` : ""}
+          ${data.demographics.devices.length > 0 ? `<div><h2>Devices</h2><div class="chart-container">${deviceChart}</div></div>` : ""}
         </div>
-
-        ${data.topLinks.length > 0 ? `
-        <h2>Top Links</h2>
-        <div class="chart-container">
-          <table>${data.topLinks.map(l => `<tr><td>${l.label}</td><td>${l.clicks.toLocaleString()}</td></tr>`).join("")}</table>
-        </div>` : ""}
-
-        ${data.geoBreakdown.length > 0 ? `
-        <h2>Geography</h2>
-        <div class="chart-container">
-          <table>${data.geoBreakdown.map(g => `<tr><td>${g.country}</td><td>${g.count.toLocaleString()}</td></tr>`).join("")}</table>
-        </div>` : ""}
-
-        ${data.demographics.browsers.length > 0 ? `
-        <h2>Browsers</h2>
-        <div class="chart-container">
-          <table>${data.demographics.browsers.map(b => `<tr><td>${b.browser}</td><td>${b.count.toLocaleString()}</td></tr>`).join("")}</table>
-        </div>` : ""}
-
-        <div class="footer">
-          AthleteOS Analytics Report | ${range === "custom" ? `${customStart} to ${customEnd}` : range} | Generated ${new Date().toISOString()}
-        </div>
+        ${data.topLinks.length > 0 ? `<h2>Top Links</h2><div class="chart-container"><table>${data.topLinks.map(l => `<tr><td>${l.label}</td><td>${l.clicks.toLocaleString()}</td></tr>`).join("")}</table></div>` : ""}
+        <div class="footer">AthleteOS Analytics Report | ${range} | Generated ${new Date().toISOString()}</div>
       </div>
-      </body></html>
-    `);
-    w.document.close();
-    setTimeout(() => { w.print(); setExporting(false); }, 300);
+      <script>
+        window.onload = function() {
+          setTimeout(function() { window.print(); }, 250);
+        };
+      </script>
+      </body></html>`;
+
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const blobUrl = URL.createObjectURL(blob);
+    const w = window.open(blobUrl, "_blank");
+    if (!w) {
+      window.print();
+    }
+    setTimeout(() => {
+      URL.revokeObjectURL(blobUrl);
+      setExporting(false);
+    }, 2000);
   };
 
   const handleShareLink = async () => {
