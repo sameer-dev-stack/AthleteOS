@@ -2,7 +2,8 @@
 
 import { z } from "zod";
 import { randomBytes } from "crypto";
-import { createClient } from "@supabase/supabase-js";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { createClient as createServerClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 
 const IP_HASH_SECRET = process.env.ANALYTICS_IP_HASH_SECRET;
@@ -11,10 +12,9 @@ if (!IP_HASH_SECRET) {
 }
 
 function getSupabaseServiceRole() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+  return createServiceClient(url, key);
 }
 
 async function hashIp(ip: string): Promise<string | null> {
@@ -562,11 +562,10 @@ export async function getAnalytics(
   compare = false
 ): Promise<{ ok: boolean; data?: AnalyticsData; error?: string }> {
   try {
-    const { createClient: createServerClient } = await import("@/lib/supabase/server");
     const supabase = await createServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: authErr } = await supabase.auth.getUser();
     
-    if (!user || user.id !== athleteId) {
+    if (authErr || !user || user.id !== athleteId) {
       return { ok: false, error: "Not authorized" };
     }
 

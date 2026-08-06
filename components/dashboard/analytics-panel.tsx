@@ -96,11 +96,9 @@ export function AnalyticsPanel({ athleteId, themeAccent = "#C6FF3D" }: Props) {
       setError(null);
     });
     fetchData();
-    const pollInterval = setInterval(fetchData, 30000);
 
     return () => {
       cancelled = true;
-      clearInterval(pollInterval);
     };
   }, [athleteId, range, customStart, customEnd, compare]);
 
