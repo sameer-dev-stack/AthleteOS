@@ -834,21 +834,21 @@ test.describe('Error States & Edge Cases', () => {
   test('auth error page loads with message', async ({ page }) => {
     const response = await page.goto('/auth/error?message=Test+error');
     expect(response?.status()).toBe(200);
-    await expect(page.getByText('Authentication Error')).toBeVisible();
+    await expect(page.getByText('Sign-in failed')).toBeVisible();
   });
 
   test('auth error page has resend form', async ({ page }) => {
     await page.goto('/auth/error');
     await expect(page.locator('input[type="email"]')).toBeVisible();
-    await expect(page.getByRole('button', { name: /Resend/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Back to sign in/i })).toBeVisible();
   });
 
   test('auth error page has back to home link', async ({ page }) => {
     await page.goto('/auth/error');
-    const homeLink = page.getByRole('link', { name: /Back to Home/i });
+    const homeLink = page.getByRole('link', { name: /Back to sign in/i });
     await expect(homeLink).toBeVisible();
     const href = await homeLink.getAttribute('href');
-    expect(href).toBe('/');
+    expect(href).toBe('/auth/sign-in');
   });
 
   test('deep nested 404 routes are handled', async ({ page }) => {

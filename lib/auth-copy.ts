@@ -11,7 +11,7 @@ export function accountCreatedCopy(email: string | null | undefined) {
 // Maps the current visibility flag to the next <input type>. Pure so the
 // toggle is unit-testable without rendering (eye/eye-off button).
 export function nextPasswordInputType(isVisible: boolean): "text" | "password" {
-  return isVisible ? "password" : "text";
+  return isVisible ? "text" : "password";
 }
 
 // Trust signal shown under auth submit buttons. No emoji; single accent via CSS.
