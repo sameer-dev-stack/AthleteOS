@@ -57,7 +57,6 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
   const [publishError, setPublishError] = useState<string | null>(null);
   const [showQr, setShowQr] = useState(false);
   const [cardLinkCopied, setCardLinkCopied] = useState(false);
-  const [showMore, setShowMore] = useState(false);
   const [inquiriesCount, setInquiriesCount] = useState(0);
   const haptic = useHaptic();
 
@@ -357,6 +356,13 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
             balance={balance}
             loading={loadingTips}
           />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <LaunchChecklist profile={profile} />
+            <ReferralCard />
+          </div>
+
+          <BusinessDashboard themeAccent={accentColor} username={profile.username} />
         </div>
 
         {/* Right Section (col-span-1 / 1-third width) */}
@@ -576,18 +582,7 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
             </div>
           </div>
 
-          <BusinessDashboard themeAccent={accentColor} username={profile.username} />
-          <ReferralCard />
-          <LaunchChecklist profile={profile} />
-
-          {showMore && <SystemStatus />}
-
-          <button
-            onClick={() => { haptic.lightTap(); setShowMore(!showMore); }}
-            className="w-full rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5 text-xs font-medium text-ink-muted transition-colors hover:bg-white/[0.04] hover:text-white"
-          >
-            {showMore ? "Show less" : "Show more"}
-          </button>
+          <SystemStatus />
         </div>
       </div>
       {profile.username && (
