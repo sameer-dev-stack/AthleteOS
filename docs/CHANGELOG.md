@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-08-06 — Gold Verified Badge: consistent gold badge across card, discovery, and billing
+
+### What changed
+- **`components/profile-card.tsx`**: added gold verified badge (16px) next to athlete name on card back; updated front badge to use shared `gold-badge-glow` animation class.
+- **`app/globals.css`**: added `@keyframes gold-badge-glow` animation (subtle 3s pulse between 8px and 14px glow radius).
+- **`app/discover/client.tsx`**: replaced blue `BadgeCheck` icons with gold circle + checkmark badges (2 instances).
+- **`app/brands/discover/page.tsx`**: replaced accent-colored "Verified" text badge with gold pill (`bg: #FACC15`, dark text).
+- **`components/dashboard/billing-panel.tsx`**: added gold badge icon next to "Gold Verified Badge" feature in Pro plan card.
+
+### Why
+The gold verified badge was inconsistent — gold on the card front, blue on discovery pages, accent-colored on brands. This unifies the badge to the same gold circle + checkmark treatment everywhere, with a subtle glow pulse animation to signal premium status.
+
+### Files touched
+- `components/profile-card.tsx`, `app/globals.css`, `app/discover/client.tsx`, `app/brands/discover/page.tsx`, `components/dashboard/billing-panel.tsx`, `docs/CHANGELOG.md`
+
+### Commit
+_Not yet committed._
+
+---
+
 ## 2026-08-06 — Fix card back scroll (Lenis) + pre-existing type errors
 
 ### What changed
