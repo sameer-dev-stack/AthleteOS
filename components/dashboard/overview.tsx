@@ -267,11 +267,9 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
                 <span className="font-bold text-white">{profile.highlights?.length || 0}</span>
               </div>
               <div className="flex justify-between items-center border-l-2 border-accent/30 pl-3 py-3">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 opacity-50 cursor-not-allowed select-none">
                   <Bookmark className="h-3.5 w-3.5 text-accent/60 flex-shrink-0" />
-                  <Link href="/dashboard/ai" className="hover:text-white/90 transition-colors">
-                    <span>Saved Assets</span>
-                  </Link>
+                  <span>Saved Assets</span>
                 </div>
                 <span className="font-bold text-white">{savedAssetsCount}</span>
               </div>

@@ -100,10 +100,11 @@ export function Header({ profile, email }: HeaderProps) {
   const filteredItems = searchQuery
     ? dashboardNavItems.filter(
         (item) =>
-          item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.href.toLowerCase().includes(searchQuery.toLowerCase())
+          !item.comingSoon &&
+          (item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.href.toLowerCase().includes(searchQuery.toLowerCase()))
       )
-    : dashboardNavItems;
+    : dashboardNavItems.filter((item) => !item.comingSoon);
 
   return (
     <>
@@ -366,6 +367,21 @@ export function Header({ profile, email }: HeaderProps) {
               {dashboardNavItems.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
+
+                if (item.comingSoon) {
+                  return (
+                    <div
+                      key={item.href}
+                      className="flex items-center gap-2.5 w-full rounded-lg px-4 py-2.5 text-xs font-bold cursor-not-allowed select-none opacity-40"
+                    >
+                      <Icon className="h-4 w-4 flex-shrink-0 text-white/40" />
+                      <span className="flex-1 text-white/50">{item.title}</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-white/30 bg-white/[0.06] rounded-full px-2 py-0.5">
+                        Coming soon
+                      </span>
+                    </div>
+                  );
+                }
 
                 return (
                   <div key={item.href} className="relative flex items-center">

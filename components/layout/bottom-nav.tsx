@@ -14,7 +14,7 @@ import {
 const tabs = [
   { label: "Home", href: "/dashboard", icon: LayoutDashboard },
   { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
-  { label: "AI", href: "/dashboard/ai", icon: Sparkles },
+  { label: "AI", href: "/dashboard/ai", icon: Sparkles, comingSoon: true },
   { label: "Profile", href: "/dashboard/profile", icon: User },
   { label: "More", href: "/dashboard/more", icon: MoreHorizontal },
 ];
@@ -50,6 +50,27 @@ export function BottomNav() {
             pathname === tab.href ||
             (tab.href !== "/dashboard" && pathname.startsWith(tab.href));
           const Icon = tab.icon;
+
+          if (tab.comingSoon) {
+            return (
+              <div
+                key={tab.href}
+                aria-label={`${tab.label} — coming soon`}
+                className="relative flex flex-col items-center justify-center gap-1.5 w-14 h-[52px] rounded-xl cursor-not-allowed select-none opacity-35"
+                style={{ WebkitTapHighlightColor: "transparent" }}
+              >
+                <span className="relative flex items-center justify-center">
+                  <Icon
+                    className={`h-[22px] w-[22px] transition-all duration-300 ease-out text-white/30`}
+                    strokeWidth={1.8}
+                  />
+                </span>
+                <span className="text-[10px] font-semibold leading-none text-white/30">
+                  {tab.label}
+                </span>
+              </div>
+            );
+          }
 
           return (
             <Link

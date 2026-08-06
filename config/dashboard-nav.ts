@@ -4,6 +4,7 @@ export type NavItem = {
   title: string;
   href: string;
   icon: LucideIcon;
+  comingSoon?: boolean;
 };
 
 export type NavSection = {
@@ -22,7 +23,7 @@ export const dashboardNavSections: NavSection[] = [
   {
     label: "Growth",
     items: [
-      { title: "NIL Value", href: "/dashboard/nil", icon: LineChart },
+      { title: "NIL Value", href: "/dashboard/nil", icon: LineChart, comingSoon: true },
       { title: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
       { title: "Referrals", href: "/dashboard/referrals", icon: UserPlus },
     ],
@@ -30,7 +31,7 @@ export const dashboardNavSections: NavSection[] = [
   {
     label: "Tools",
     items: [
-      { title: "AI Toolkit", href: "/dashboard/ai", icon: Sparkles },
+      { title: "AI Toolkit", href: "/dashboard/ai", icon: Sparkles, comingSoon: true },
     ],
   },
   {

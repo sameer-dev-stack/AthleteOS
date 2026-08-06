@@ -5,6 +5,48 @@
 
 ---
 
+## 2026-08-06 — Gate unbuilt features: NIL Value Engine + AI Toolkit shown as "Coming soon" and routes redirect to dashboard
+
+### What changed
+- **`config/dashboard-nav.ts`**: added `comingSoon?: boolean` to `NavItem`; marked `NIL Value` (`/dashboard/nil`) and `AI Toolkit` (`/dashboard/ai`) as `comingSoon: true`.
+- **`components/layout/sidebar.tsx`**: desktop + mobile nav now render `comingSoon` items as grayed-out, non-clickable "Coming soon" rows (no `<Link>`).
+- **`components/layout/header.tsx`**: desktop nav, mobile drawer nav, and search modal filter out / gray out `comingSoon` items.
+- **`components/layout/bottom-nav.tsx`**: AI tab is non-clickable and dimmed (`comingSoon`).
+- **`app/dashboard/nil/page.tsx`** and **`app/dashboard/ai/page.tsx`**: replaced page with `redirect("/dashboard")` guard so the unbuilt routes are unreachable.
+- **`components/dashboard/overview.tsx`**: "Saved Assets" row no longer links to `/dashboard/ai`.
+- **Verification:** lint clean (2 pre-existing warnings); build green.
+
+### Why
+NIL Value Engine and AI Toolkit are planned but not yet implemented. Rather than shipping dead/dangling pages, the launch entry points are grayed out as "Coming soon" and the routes redirect to the dashboard until the features are real.
+
+### Files touched
+- `config/dashboard-nav.ts`, `components/layout/sidebar.tsx`, `components/layout/header.tsx`, `components/layout/bottom-nav.tsx`, `app/dashboard/nil/page.tsx`, `app/dashboard/ai/page.tsx`, `components/dashboard/overview.tsx`, `docs/CHANGELOG.md`
+
+### Commit
+_Not yet committed._
+
+---
+
+## 2026-08-05 — Onboarding validation fixes: hasValidHttp, canProceedProfile, canProceedDetails
+
+### What changed
+- **`lib/card-completeness.ts`**: `hasValidHttp` now checks both `.label` (links) and `.title` (highlights). Previously it only checked `.label`, so highlights were always treated as missing even when filled in. This was the root cause of the "Your card needs at least one highlight" error despite highlights being present.
+- **`app/onboarding/page.tsx`**: `canProceedProfile` now requires `avatarUrl !== null`. Previously, users without an OAuth photo could skip upload, complete all steps, then get blocked at submit with "Your card needs a profile photo" — forcing them to navigate all the way back to step 2.
+- **`app/onboarding/page.tsx`**: `canProceedDetails` now validates `links.length > 0`, `highlights.length > 0`, and at least one contact method. Button is disabled with specific error messages when fields are missing.
+- **Verification:** lint clean (1 pre-existing warning); build green.
+
+### Why
+Three independent validation gaps allowed users to reach the "Launch my card" button in states that would always fail the server-side card completeness check. The `hasValidHttp` bug was the immediate cause of the reported error; the other two were discovered during audit and would have caused similar frustration.
+
+### Files touched
+- `lib/card-completeness.ts` — `hasValidHttp` fixed to check both `label` and `title`
+- `app/onboarding/page.tsx` — `canProceedProfile` and `canProceedDetails` strengthened
+
+### Commit
+`f0dad60`
+
+---
+
 ## 2026-08-05 — Onboarding fix: wrap updateProfile in try-catch, add error logging
 
 ### What changed

@@ -75,6 +75,29 @@ export function Sidebar({ profile, email }: SidebarProps) {
                 {section.items.map((item) => {
                   const isActive = pathname === item.href;
                   const Icon = item.icon;
+                  if (item.comingSoon) {
+                    return (
+                      <div
+                        key={item.href}
+                        title={collapsed ? item.title : undefined}
+                        className={`group flex items-center gap-3 rounded-lg transition-all duration-150 cursor-not-allowed select-none ${
+                          collapsed ? "justify-center h-10 px-0" : "h-10 px-3"
+                        } opacity-40`}
+                      >
+                        <Icon className="h-[18px] w-[18px] flex-shrink-0 text-white/40" />
+                        {!collapsed && (
+                          <>
+                            <span className="flex-1 text-[13px] font-semibold whitespace-nowrap text-white/40">
+                              {item.title}
+                            </span>
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-white/30 bg-white/[0.06] rounded-full px-2 py-0.5">
+                              Coming soon
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    );
+                  }
                   return (
                     <Link
                       key={item.href}
@@ -214,6 +237,24 @@ export function Sidebar({ profile, email }: SidebarProps) {
                     {section.items.map((item) => {
                       const isActive = pathname === item.href;
                       const Icon = item.icon;
+                      if (item.comingSoon) {
+                        return (
+                          <div
+                            key={item.href}
+                            className={`flex items-center gap-3 h-10 px-3 rounded-lg transition-all duration-150 cursor-not-allowed select-none opacity-40 ${
+                              isActive ? "bg-accent/10 text-accent" : "text-white/45"
+                            }`}
+                          >
+                            <Icon className="h-[18px] w-[18px] flex-shrink-0" />
+                            <span className="flex-1 text-[13px] font-semibold whitespace-nowrap">
+                              {item.title}
+                            </span>
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-white/30 bg-white/[0.06] rounded-full px-2 py-0.5">
+                              Coming soon
+                            </span>
+                          </div>
+                        );
+                      }
                       return (
                         <Link
                           key={item.href}
