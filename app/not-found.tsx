@@ -1,25 +1,27 @@
 import Link from "next/link";
-import { Logo } from "@/components/logo";
-import { ErrorIllustration } from "@/components/error-illustration";
-import { Home, Search, ArrowRight, Mail } from "lucide-react";
+import { Home, Search, ArrowRight } from "lucide-react";
 
 export default function NotFound() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg px-4">
-      <div className="w-full max-w-md text-center">
-        <div className="mb-10 inline-flex items-center gap-2.5">
-          <Logo />
-          <span className="text-lg font-semibold tracking-tight">AthleteOS</span>
+      <div className="w-full max-w-lg text-center">
+        <div className="relative mb-10">
+          <span className="block text-[120px] sm:text-[160px] font-black leading-none tracking-tighter text-white/[0.04] select-none">
+            404
+          </span>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-6xl sm:text-7xl font-black text-accent/30 tracking-tighter select-none">
+              404
+            </span>
+          </div>
         </div>
 
-        <ErrorIllustration code="404" />
-
-        <h1 className="text-display-md font-bold text-white mb-3">
-          Page not found
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+          Lost on the field
         </h1>
-        <p className="text-sm text-ink-muted leading-relaxed max-w-xs mx-auto mb-10">
-          This page doesn&rsquo;t exist. It may have been moved, or the link
-          might be outdated.
+        <p className="text-sm text-ink-muted leading-relaxed max-w-sm mx-auto mb-10">
+          This page doesn&rsquo;t exist. The link might be outdated, or
+          it may have been moved to a different playbook.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -40,9 +42,8 @@ export default function NotFound() {
         <div className="mt-12 pt-8 border-t border-white/[0.06]">
           <a
             href="mailto:support@athleteos.com"
-            className="inline-flex items-center gap-2 text-xs text-ink-dim hover:text-ink-muted transition-colors"
+            className="text-xs text-ink-dim hover:text-ink-muted transition-colors"
           >
-            <Mail className="h-3.5 w-3.5" />
             Contact support
           </a>
         </div>
