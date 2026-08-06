@@ -54,7 +54,7 @@ const SOCIAL_MAP: { key: string; Icon: React.ElementType; prefix: string; color:
 
 function sanitize(t: string | null): string {
   if (!t) return "";
-  return t.replace(/\\\\/g, "\0").replace(/\\"/g, '"').replace(/\\'/g, "'").replace(/\0/g, "\\");
+  return t.replace(/\\\\/g, "\0").replace(/\\\"/g, '"').replace(/\\'/g, "'").replace(/\0/g, "\\\\");
 }
 
 /* ── Component ───────────────────────────────────────── */
@@ -62,6 +62,7 @@ function sanitize(t: string | null): string {
 export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilScore = null }: { profile: Profile; totalViews?: number; totalFollowers?: number; nilScore?: number | null }) {
   const [flipped, setFlipped] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [urlCopied, setUrlCopied] = useState(false);
   const [photoIdx, setPhotoIdx] = useState(0);
   const [hintVisible, setHintVisible] = useState(true);
   const [showContactModal, setShowContactModal] = useState(false);
@@ -113,10 +114,10 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
     return true;
   }).slice(0, 3);
 
-  const statCells = (nilScore !== null && nilScore > 0 ? 1 : 0) + stats.length;
-  const cols = statCells === 1 ? "grid-cols-1" : "grid-cols-2";
-  const cellBorder = (idx: number) =>
-    `${idx === 1 || idx === 3 ? "border-l border-white/[0.07]" : ""}${idx >= 2 ? " border-t border-white/[0.07]" : ""}`.trim();
+  const allStatCells = [
+    ...(nilScore !== null && nilScore > 0 ? [{ key: "nil", label: "NIL", value: String(nilScore), isAccent: true }] : []),
+    ...stats.map(s => ({ key: s.label, label: sanitize(s.label), value: s.value, isAccent: false })),
+  ];
 
   const links = (profile.links ?? []).slice(0, 6);
   const maxVisibleLinks = 2;
@@ -192,6 +193,16 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
     }
   }
 
+  async function handleCopyUrl(e: React.MouseEvent) {
+    e.stopPropagation();
+    const url = `https://athleteos.app/${profile.username}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setUrlCopied(true);
+      setTimeout(() => setUrlCopied(false), 1500);
+    } catch { /* */ }
+  }
+
   function stopFlip(e: React.MouseEvent) { e.stopPropagation(); resetAutoReturn(); }
 
   /* ── Render ────────────────────────── */
@@ -233,9 +244,9 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
               width: "100%",
               height: "100%",
               boxShadow: `
-                0 0 0 1px rgba(255,255,255,0.03),
-                0 2px 4px rgba(0,0,0,0.2),
-                0 20px 60px -15px rgba(0,0,0,0.6)
+                0 0 0 1px rgba(255,255,255,0.04),
+                0 2px 4px rgba(0,0,0,0.15),
+                0 16px 48px -12px rgba(0,0,0,0.5)
               `,
               "--accent-glow": accent,
               opacity: flipped ? 0 : 1,
@@ -254,11 +265,11 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
             {/* Top accent line */}
             <div
               className="absolute top-0 inset-x-0 h-px z-20"
-              style={{ background: `linear-gradient(90deg, transparent 5%, ${accent}50 50%, transparent 95%)` }}
+              style={{ background: `linear-gradient(90deg, transparent 5%, ${accent}40 50%, transparent 95%)` }}
             />
 
-            {/* ── Photo Hero (66%) ─────────────────── */}
-            <div className="relative flex-shrink-0" style={{ height: "52%" }}>
+            {/* ── Photo Hero (40%) ─────────────────── */}
+            <div className="relative flex-shrink-0" style={{ height: "40%" }}>
               {photos.length > 0 ? (
                 <>
                   {photos.map((url, i) => (
@@ -358,111 +369,96 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
                   ))}
                 </div>
               )}
-
-              {/* Plan badge overlay removed — Pro/Team now lives in the top bar */}
             </div>
 
-            {/* ── Identity ─────────────────────────── */}
-            <div className="flex-shrink-0 px-6 -mt-4 relative z-10">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <h1 className="text-[26px] font-black tracking-[-0.03em] leading-none text-white truncate">
-                    {displayName}
-                  </h1>
-                  {profile.is_verified && (
-                    <span
-                      className="flex-shrink-0 flex h-4 w-4 items-center justify-center rounded-full"
-                      style={{ background: `${accent}18`, border: `1px solid ${accent}35` }}
-                    >
-                      <CheckIcon className="h-2.5 w-2.5" style={{ color: accent }} />
-                    </span>
-                  )}
-                  {classLabel && (
-                    <span className="flex-shrink-0 inline-flex items-center rounded-md px-1.5 py-1 text-[8px] font-bold tracking-widest uppercase text-white/50 bg-white/[0.05] border border-white/[0.10]">
-                      {classLabel}
-                    </span>
-                  )}
-                </div>
-
-                <div className="text-[11.5px] text-white/45 font-medium truncate leading-none">
-                  {[profile.sport, profile.position, profile.school].filter(Boolean).join("  ·  ")}
-                </div>
-
-                {(totalViews > 0 || totalFollowers > 0) && (
-                  <div className="flex items-center gap-3">
-                    {totalViews > 0 && (
-                      <span className="flex items-center gap-1 text-[10px] text-white/35 font-medium">
-                        <Eye className="h-3 w-3" style={{ color: `${accent}50` }} />
-                        {totalViews.toLocaleString()} views
-                      </span>
-                    )}
-                    {totalFollowers > 0 && (
-                      <span className="flex items-center gap-1 text-[10px] text-white/35 font-medium">
-                        <Users className="h-3 w-3" style={{ color: `${accent}50` }} />
-                        {totalFollowers.toLocaleString()} followers
-                      </span>
-                    )}
-                  </div>
+            {/* ── Identity Cluster ────────────────────── */}
+            <div className="flex-shrink-0 px-6 mt-1 relative z-10">
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-[28px] font-black tracking-[-0.03em] leading-none text-white truncate">
+                  {displayName}
+                </h1>
+                {profile.is_verified && (
+                  <span
+                    className="flex-shrink-0 flex h-[18px] w-[18px] items-center justify-center rounded-full"
+                    style={{ backgroundColor: accent }}
+                  >
+                    <CheckIcon className="h-2.5 w-2.5 text-[#111115]" strokeWidth={3} />
+                  </span>
                 )}
+                {classLabel && (
+                  <span className="flex-shrink-0 inline-flex items-center rounded-md px-1.5 py-0.5 text-[8px] font-bold tracking-widest uppercase text-white/40 bg-white/[0.04] border border-white/[0.08]">
+                    {classLabel}
+                  </span>
+                )}
+              </div>
+              <div className="text-[12px] text-white/50 font-medium truncate leading-none mt-1.5">
+                {[profile.sport, profile.position, profile.school].filter(Boolean).join(" · ")}
               </div>
             </div>
 
-            {/* ── Stats Grid (2x2) ─────────────────── */}
-            {(stats.length > 0 || (nilScore !== null && nilScore > 0)) && (
+            {/* ── Stats Strip (horizontal) ────────── */}
+            {allStatCells.length > 0 && (
               <div className="flex-shrink-0 mx-6 mt-4">
                 <div
-                  className={`grid ${cols} items-stretch rounded-xl overflow-hidden`}
+                  className="flex items-stretch rounded-xl overflow-hidden"
                   style={{
                     background: "#17171b",
-                    border: "1px solid rgba(255,255,255,0.07)",
-                    boxShadow: "0 8px 24px -14px rgba(0,0,0,0.7)",
+                    border: "1px solid rgba(255,255,255,0.06)",
                   }}
                 >
-                  {nilScore !== null && nilScore > 0 && (
-                    <div className={`flex flex-col items-center justify-center px-1.5 py-2 ${cellBorder(0)}`}>
-                      <div className="flex items-center gap-1 mb-1.5">
-                        <TrendingUp className="h-2.5 w-2.5" style={{ color: `${accent}55` }} />
-                        <span className="text-[8px] font-bold uppercase tracking-wide" style={{ color: `${accent}50` }}>
-                          NIL
-                        </span>
-                      </div>
-                      <p className="text-[20px] font-black leading-none tracking-tight" style={{ color: accent }}>
-                        {nilScore}
-                      </p>
-                      <p className="text-[7.5px] font-bold uppercase tracking-wider mt-1 text-white/40">
-                        {getNilLabel(nilScore)}
+                  {allStatCells.map((cell, i) => (
+                    <div
+                      key={cell.key}
+                      className="flex-1 flex flex-col items-center justify-center py-3 px-2"
+                      style={i > 0 ? { borderLeft: "1px solid rgba(255,255,255,0.06)" } : {}}
+                    >
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-white/35 mb-1 text-center line-clamp-1">
+                        {cell.label}
+                      </span>
+                      <p
+                        className={`text-[20px] font-black leading-none tracking-tight ${cell.isAccent ? "" : "text-white"}`}
+                        style={cell.isAccent ? { color: accent } : {}}
+                      >
+                        {cell.value}
                       </p>
                     </div>
-                  )}
-                  {stats.map((stat, i) => {
-                    const Ic = STAT_ICONS[stat.label.toLowerCase()] || STAT_ICONS.default;
-                    return (
-                      <div
-                        key={stat.label}
-                        className={`flex flex-col items-center justify-center px-1.5 py-2 ${cellBorder((nilScore !== null && nilScore > 0 ? 1 : 0) + i)}`}
-                      >
-                        <div className="flex items-center gap-1 mb-1.5">
-                          <Ic className="h-2.5 w-2.5 flex-shrink-0" style={{ color: `${accent}50` }} />
-                          <span className="text-[8px] font-bold uppercase tracking-wide text-white/45 text-center leading-tight line-clamp-2">
-                            {sanitize(stat.label)}
-                          </span>
-                        </div>
-                        <p className="text-[20px] font-black leading-none tracking-tight" style={{ color: accent }}>
-                          {stat.value}
-                        </p>
-                      </div>
-                    );
-                  })}
+                  ))}
                 </div>
               </div>
             )}
 
-            {/* ── Flip Hint Strip ──────────────────── */}
-            <div className="mt-auto flex items-center justify-center gap-2 py-2.5 px-4">
-              <div className={`flex items-center gap-1.5 transition-opacity duration-500 ${hintVisible ? "flip-hint-pulse" : "opacity-30"}`}>
-                <RotateCcw className="h-3 w-3 text-white/50" />
-                <span className="text-[9px] font-bold tracking-widest uppercase text-white/50">
-                  Tap to see more
+            {/* Spacer */}
+            <div className="mt-auto" />
+
+            {/* ── Card URL + Copy ────────────────── */}
+            <div className="flex-shrink-0 mx-6 mb-2">
+              <button
+                onClick={handleCopyUrl}
+                className="w-full flex items-center justify-between rounded-lg px-4 py-2.5 transition-all duration-200 group"
+                style={{
+                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                }}
+              >
+                <span className="text-[11px] text-white/40 font-medium tracking-wide truncate">
+                  athleteos.app/{profile.username}
+                </span>
+                <span className="flex-shrink-0 ml-2">
+                  {urlCopied ? (
+                    <CheckIcon className="h-3.5 w-3.5 transition-colors" style={{ color: accent }} />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5 text-white/25 group-hover:text-white/50 transition-colors" />
+                  )}
+                </span>
+              </button>
+            </div>
+
+            {/* ── Flip Hint ──────────────────────── */}
+            <div className="flex items-center justify-center gap-1.5 py-2 px-4">
+              <div className={`flex items-center gap-1.5 transition-opacity duration-500 ${hintVisible ? "flip-hint-pulse" : "opacity-25"}`}>
+                <RotateCcw className="h-3 w-3 text-white/40" />
+                <span className="text-[8px] font-bold tracking-[0.2em] uppercase text-white/40">
+                  Tap to flip
                 </span>
               </div>
             </div>
@@ -470,7 +466,7 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
                 {/* Bottom accent line */}
                 <div
                   className="absolute bottom-0 inset-x-0 h-px"
-                  style={{ background: `linear-gradient(90deg, transparent 10%, ${accent}30 50%, transparent 90%)` }}
+                  style={{ background: `linear-gradient(90deg, transparent 10%, ${accent}25 50%, transparent 90%)` }}
                 />
               </div>
             </div>
@@ -775,7 +771,8 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
                   </div>
                 </div>
               )}
-            {/* Connect: socials + share */}
+
+              {/* Connect: socials + share */}
               {socialLinks.length > 0 && (
                 <div className="space-y-2 mb-1">
                   <div className="flex items-center gap-1.5">

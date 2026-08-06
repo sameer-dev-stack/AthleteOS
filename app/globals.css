@@ -376,11 +376,13 @@
   inset: -150%;
   background: conic-gradient(
     from 0deg,
-    transparent 30%,
-    var(--accent-glow, #C6FF3D) 60%,
+    transparent 0%,
+    transparent 38%,
+    var(--accent-glow, #C6FF3D) 50%,
+    transparent 62%,
     transparent 100%
   );
-  animation: border-rotate 10s linear infinite;
+  animation: border-rotate 16s linear infinite;
   pointer-events: none;
   z-index: 0;
 }
@@ -390,13 +392,15 @@
   inset: -20px;
   background: conic-gradient(
     from 0deg,
-    transparent 30%,
-    var(--accent-glow, #C6FF3D) 60%,
+    transparent 0%,
+    transparent 38%,
+    var(--accent-glow, #C6FF3D) 50%,
+    transparent 62%,
     transparent 100%
   );
-  animation: border-rotate 10s linear infinite;
+  animation: border-rotate 16s linear infinite;
   filter: blur(24px);
-  opacity: 0.35;
+  opacity: 0.25;
   pointer-events: none;
   z-index: -1;
   border-radius: 30px;
