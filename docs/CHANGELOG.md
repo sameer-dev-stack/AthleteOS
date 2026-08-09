@@ -5,26 +5,22 @@
 
 ---
 
-## 2026-08-09 — Reduce font size for long names to prevent orphan character breaks
+## 2026-08-09 — Increase card height + reduce font size for long names
 
 ### What changed
+- **`lib/constants.ts`**: `CARD_H` increased from `420` to `480` (aspect ratio now 3:4).
 - **`components/profile-card.tsx`** (`AthleteIdentity`):
-  - Shifted font-size breakpoints one tier earlier so long names (17-24 chars) render at 11-14px instead of 14-17px:
-    - `<= 8` chars: `clamp(20px, 5.5vw, 24px)`
-    - `9–14` chars: `clamp(17px, 4.8vw, 21px)`
-    - `15–20` chars: `clamp(14px, 4vw, 17px)`
-    - `> 20` chars: `clamp(11px, 3.2vw, 14px)`
-  - Changed CSS to `wordBreak: "keep-all"` + `overflowWrap: "anywhere"` to prevent premature character-level wrapping.
-  - `lineHeight: 1.2`, `letterSpacing: "-0.02em"`.
+  - Font-size breakpoints shifted: `>20` chars renders at `clamp(11px, 3.2vw, 14px)`.
+  - CSS: `wordBreak: "keep-all"`, `overflowWrap: "anywhere"`, `lineHeight: 1.2`.
 
 ### Why
-21-char names like `lasihad311adspritecom` were still too large at 14-17px on narrow mobile viewports, causing the browser to break at arbitrary character positions leaving a single orphan "m" on line 2. Reducing to 11-14px at the >20 char tier ensures the name fits on a single line at common mobile widths.
+Long unbroken names like `lasihad311adspritecom` (21 chars) were orphaning a single character on line 2. Taller card gives more vertical breathing room; smaller font ensures the name fits on one line at mobile widths.
 
 ### Files touched
-- `components/profile-card.tsx`
+- `lib/constants.ts`, `components/profile-card.tsx`
 
-### Commit
-`bfca936`
+### Commits
+`bfca936`, `d8a3450`
 
 ---
 
