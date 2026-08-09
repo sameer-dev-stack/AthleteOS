@@ -8,6 +8,7 @@ import { EmptyState } from "./empty-state";
 import { ThemePicker } from "./theme-picker";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { getStatTemplatesForSport } from "@/lib/sport-stat-templates";
+import { SPORT_CONFIG, getPositionsForSport } from "@/lib/sport-config";
 
 type Tab = "bio" | "stats" | "links" | "social" | "highlights" | "contact" | "theme";
 
@@ -117,6 +118,12 @@ export function DashboardEditor({ profile, onSaved }: Props) {
   const [highlights, setHighlights] = useState(profile.highlights || []);
   const [contactEmail, setContactEmail] = useState(profile.contact_email || "");
   const [contactPhone, setContactPhone] = useState(profile.contact_phone || "");
+  const [fullName, setFullName] = useState(profile.full_name || "");
+  const [username, setUsername] = useState(profile.username || "");
+  const [sport, setSport] = useState(profile.sport || "");
+  const [position, setPosition] = useState(profile.position || "");
+  const [school, setSchool] = useState(profile.school || "");
+  const [classYear, setClassYear] = useState(profile.class_year || "");
 
   // Theme state — unified into main save
   const [accent, setAccent] = useState(profile.theme_accent || "#C6FF3D");
@@ -130,6 +137,12 @@ export function DashboardEditor({ profile, onSaved }: Props) {
   const profileAccent = profile.theme_accent || "#C6FF3D";
   const profileContactEmail = profile.contact_email || "";
   const profileContactPhone = profile.contact_phone || "";
+  const profileFullName = profile.full_name || "";
+  const profileUsername = profile.username || "";
+  const profileSport = profile.sport || "";
+  const profilePosition = profile.position || "";
+  const profileSchool = profile.school || "";
+  const profileClassYear = profile.class_year || "";
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -141,9 +154,15 @@ export function DashboardEditor({ profile, onSaved }: Props) {
       setAccent(profile.theme_accent || "#C6FF3D");
       setContactEmail(profile.contact_email || "");
       setContactPhone(profile.contact_phone || "");
+      setFullName(profile.full_name || "");
+      setUsername(profile.username || "");
+      setSport(profile.sport || "");
+      setPosition(profile.position || "");
+      setSchool(profile.school || "");
+      setClassYear(profile.class_year || "");
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profileBio, profileStatsStr, profileLinksStr, profileSocialStr, profileHighlightsStr, profileAccent, profileContactEmail, profileContactPhone]);
+  }, [profileBio, profileStatsStr, profileLinksStr, profileSocialStr, profileHighlightsStr, profileAccent, profileContactEmail, profileContactPhone, profileFullName, profileUsername, profileSport, profilePosition, profileSchool, profileClassYear]);
 
   const contentChanged =
     bio !== profileBio ||
@@ -152,11 +171,18 @@ export function DashboardEditor({ profile, onSaved }: Props) {
     JSON.stringify(social) !== profileSocialStr ||
     JSON.stringify(highlights) !== profileHighlightsStr ||
     contactEmail !== profileContactEmail ||
-    contactPhone !== profileContactPhone;
+    contactPhone !== profileContactPhone ||
+    fullName !== profileFullName ||
+    username !== profileUsername ||
+    sport !== profileSport ||
+    position !== profilePosition ||
+    school !== profileSchool ||
+    classYear !== profileClassYear;
 
   const themeChanged = accent !== profileAccent;
   const hasChanges = contentChanged || themeChanged;
   const contactEmailInvalid = contactEmail.trim().length > 0 && !isValidEmail(contactEmail);
+  const usernameInvalid = username.trim().length > 0 && !/^[a-zA-Z0-9_-]+$/.test(username.trim());
 
   useEffect(() => {
     if (!hasChanges) return;
@@ -176,6 +202,12 @@ export function DashboardEditor({ profile, onSaved }: Props) {
     if (contactEmailInvalid) {
       setSaving(false);
       setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (usernameInvalid) {
+      setSaving(false);
+      setError("Username can only contain letters, numbers, underscores, and dashes.");
       return;
     }
 
@@ -211,6 +243,12 @@ export function DashboardEditor({ profile, onSaved }: Props) {
     if (contentChanged) {
       promises.push(
         updateProfile({
+          full_name: fullName.trim() || null,
+          username: username.trim() || null,
+          sport: sport.trim() || null,
+          position: position.trim() || null,
+          school: school.trim() || null,
+          class_year: classYear.trim() || null,
           bio: bio.trim() || null,
           stats: stats.filter((s) => {
             if (!s.label.trim() || !s.value.trim()) return false;
@@ -249,7 +287,7 @@ export function DashboardEditor({ profile, onSaved }: Props) {
     } else {
       onSaved?.(profile);
     }
-  }, [bio, stats, links, social, highlights, accent, contactEmail, contactPhone, contentChanged, themeChanged, contactEmailInvalid, onSaved, profile]);
+  }, [bio, stats, links, social, highlights, accent, contactEmail, contactPhone, fullName, username, sport, position, school, classYear, contentChanged, themeChanged, contactEmailInvalid, usernameInvalid, onSaved, profile]);
 
   return (
     <div className="rounded-xl border border-white/[0.06] bg-[#111113]">
@@ -258,7 +296,7 @@ export function DashboardEditor({ profile, onSaved }: Props) {
           <h2 className="text-lg font-semibold text-white">Edit Profile</h2>
           <button
             onClick={handleSave}
-            disabled={saving || !hasChanges || contactEmailInvalid}
+            disabled={saving || !hasChanges || contactEmailInvalid || usernameInvalid}
             className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-bg transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {saving ? (
@@ -311,7 +349,24 @@ export function DashboardEditor({ profile, onSaved }: Props) {
         )}
 
         {tab === "bio" && (
-          <BioEditor profile={profile} bio={bio} onChange={setBio} onSaved={onSaved} />
+          <BioEditor
+            profile={profile}
+            fullName={fullName}
+            onFullNameChange={setFullName}
+            username={username}
+            onUsernameChange={setUsername}
+            sport={sport}
+            onSportChange={setSport}
+            position={position}
+            onPositionChange={setPosition}
+            school={school}
+            onSchoolChange={setSchool}
+            classYear={classYear}
+            onClassYearChange={setClassYear}
+            bio={bio}
+            onChange={setBio}
+            onSaved={onSaved}
+          />
         )}
 
         {tab === "stats" && (
@@ -352,7 +407,7 @@ export function DashboardEditor({ profile, onSaved }: Props) {
         <div className="fixed bottom-4 inset-x-4 z-50 lg:hidden">
           <button
             onClick={handleSave}
-            disabled={saving || !hasChanges || contactEmailInvalid}
+            disabled={saving || !hasChanges || contactEmailInvalid || usernameInvalid}
             className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-bg shadow-lg shadow-accent/20 transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] disabled:opacity-50"
           >
             {saving ? (
@@ -370,11 +425,35 @@ export function DashboardEditor({ profile, onSaved }: Props) {
 
 function BioEditor({
   profile,
+  fullName,
+  onFullNameChange,
+  username,
+  onUsernameChange,
+  sport,
+  onSportChange,
+  position,
+  onPositionChange,
+  school,
+  onSchoolChange,
+  classYear,
+  onClassYearChange,
   bio,
   onChange,
   onSaved,
 }: {
   profile: Profile;
+  fullName: string;
+  onFullNameChange: (v: string) => void;
+  username: string;
+  onUsernameChange: (v: string) => void;
+  sport: string;
+  onSportChange: (v: string) => void;
+  position: string;
+  onPositionChange: (v: string) => void;
+  school: string;
+  onSchoolChange: (v: string) => void;
+  classYear: string;
+  onClassYearChange: (v: string) => void;
   bio: string;
   onChange: (v: string) => void;
   onSaved?: (profile: Profile) => void;
@@ -397,7 +476,7 @@ function BioEditor({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Profile Photo */}
       <div>
         <label className="mb-3 block text-sm font-medium text-ink-muted">
@@ -425,6 +504,129 @@ function BioEditor({
               <p className="text-xs text-red-400">{avatarError}</p>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="h-px bg-white/[0.06]" />
+
+      {/* Name and Username */}
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-ink-muted">
+            Name
+          </label>
+          <input
+            type="text"
+            value={fullName}
+            onChange={(e) => onFullNameChange(e.target.value)}
+            placeholder="e.g. Jaylen Carter"
+            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-ink-muted">
+            Username
+          </label>
+          <div className="relative flex items-center">
+            <span className="absolute left-4 text-sm text-white/20 select-none">athleteos.app/</span>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => onUsernameChange(e.target.value)}
+              placeholder="johndoe"
+              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] pl-[108px] pr-4 py-3 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Sport and Position */}
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-ink-muted">
+            Sport
+          </label>
+          <select
+            value={sport}
+            onChange={(e) => {
+              onSportChange(e.target.value);
+              onPositionChange("");
+            }}
+            className="w-full rounded-xl border border-white/[0.08] bg-neutral-900 px-4 py-3 text-sm text-white focus:border-accent/40 focus:outline-none"
+          >
+            <option value="">Select a Sport</option>
+            {Object.values(SPORT_CONFIG).map((cfg) => (
+              <option key={cfg.code} value={cfg.label}>
+                {cfg.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-ink-muted">
+            Position
+          </label>
+          {sport ? (
+            <select
+              value={position}
+              onChange={(e) => onPositionChange(e.target.value)}
+              className="w-full rounded-xl border border-white/[0.08] bg-neutral-900 px-4 py-3 text-sm text-white focus:border-accent/40 focus:outline-none"
+            >
+              <option value="">Select a Position</option>
+              {getPositionsForSport(sport).map((pos) => (
+                <option key={pos} value={pos}>
+                  {pos}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              value={position}
+              onChange={(e) => onPositionChange(e.target.value)}
+              placeholder="Select sport first"
+              disabled
+              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.01] px-4 py-3 text-sm text-white/30 cursor-not-allowed"
+            />
+          )}
+        </div>
+      </div>
+
+      {/* School and Class Year */}
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-ink-muted">
+            School
+          </label>
+          <input
+            type="text"
+            value={school}
+            onChange={(e) => onSchoolChange(e.target.value)}
+            placeholder="e.g. Stanford University"
+            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-ink-muted">
+            Class Year
+          </label>
+          <select
+            value={classYear}
+            onChange={(e) => onClassYearChange(e.target.value)}
+            className="w-full rounded-xl border border-white/[0.08] bg-neutral-900 px-4 py-3 text-sm text-white focus:border-accent/40 focus:outline-none"
+          >
+            <option value="">Select Class Year</option>
+            <option value="FR">FR (Freshman)</option>
+            <option value="SO">SO (Sophomore)</option>
+            <option value="JR">JR (Junior)</option>
+            <option value="SR">SR (Senior)</option>
+            <option value="GS">GS (Graduate Student)</option>
+            <option value="PRO">PRO (Professional)</option>
+          </select>
         </div>
       </div>
 

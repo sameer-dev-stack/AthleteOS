@@ -5,6 +5,27 @@
 
 ---
 
+## 2026-08-09 — Add missing general fields to profile editor dashboard
+
+### What changed
+- **`components/dashboard/profile-editor.tsx`**:
+  - Declared form states for `fullName`, `username`, `sport`, `position`, `school`, and `classYear`.
+  - Added username characters validation (`/^[a-zA-Z0-9_-]+$/`) and form save safety disabling.
+  - Passed new states to the `BioEditor` subcomponent.
+  - Restructured `BioEditor` using grid layouts to feature inputs for Name, Username, Sport (select), Position (smart select depending on sport), School, and Class Year (select).
+  - Saved all fields in the `updateProfile` action payload.
+
+### Why
+To enable athletes to manage their complete public profile details directly from the AthleteOS dashboard.
+
+### Files touched
+- `components/dashboard/profile-editor.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Improve typographic contrast on profile card back face
 
 ### What changed
