@@ -821,7 +821,7 @@ function AboutSection({ bio, accent }: { bio: string; accent: string }) {
       <p
         className="text-[11px] leading-[1.75] line-clamp-4"
         style={{
-          color: "rgba(255,255,255,0.42)",
+          color: "rgba(255,255,255,0.72)",
           overflowWrap: "break-word",
           wordBreak: "break-word",
         }}
@@ -844,10 +844,10 @@ function SectionLabel({
 }) {
   return (
     <div className="flex items-center gap-1.5 mb-2">
-      <span style={{ color: `${accent}55` }}>{icon}</span>
+      <span style={{ color: accent }}>{icon}</span>
       <span
         className="text-[8.5px] font-black uppercase tracking-widest"
-        style={{ color: `${accent}45` }}
+        style={{ color: "rgba(255, 255, 255, 0.85)" }}
       >
         {label}
       </span>
@@ -925,14 +925,14 @@ function LinksSection({
               <div className="flex-1 min-w-0">
                 <div
                   className="text-[11px] font-semibold truncate leading-tight"
-                  style={{ color: "rgba(255,255,255,0.72)" }}
+                  style={{ color: "rgba(255,255,255,0.88)" }}
                 >
                   {sanitize(link.label)}
                 </div>
                 {domain && (
                   <div
                     className="text-[9px] truncate mt-0.5 leading-tight"
-                    style={{ color: "rgba(255,255,255,0.22)" }}
+                    style={{ color: "rgba(255,255,255,0.35)" }}
                   >
                     {domain}
                   </div>
@@ -1008,12 +1008,12 @@ function HighlightsSection({ highlights, accent, profileId, onInteract }: Highli
           >
             <Play
               className="h-2.5 w-2.5 flex-shrink-0"
-              style={{ color: `${accent}cc` }}
-              fill={`${accent}cc`}
+              style={{ color: accent }}
+              fill={accent}
             />
             <span
               className="text-[10px] font-semibold truncate max-w-[100px]"
-              style={{ color: `${accent}c0` }}
+              style={{ color: "rgba(255, 255, 255, 0.85)" }}
             >
               {sanitize(h.title) || `Highlight ${i + 1}`}
             </span>

@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-08-09 — Improve typographic contrast on profile card back face
+
+### What changed
+- **`components/profile-card.tsx`**:
+  - Boosted section label headers to high-contrast white text (`rgba(255, 255, 255, 0.85)`) and made section icons full accent intensity (`color: accent`).
+  - Increased bio body text opacity to `rgba(255,255,255,0.72)`.
+  - Brightened link titles and hostname text in the links list.
+  - Made highlights text white and play icons 100% accent intensity.
+
+### Why
+To make the text elements on the dark card back face highly readable, crisp, and clean under different lighting conditions and zooms.
+
+### Files touched
+- `components/profile-card.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Implement flex-based photo scaling for mobile responsiveness
 
 ### What changed
