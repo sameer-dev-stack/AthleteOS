@@ -60,6 +60,7 @@ import { CARD_W, CARD_H } from "@/lib/constants";
 import { cleanName } from "@/lib/display-name";
 import { resolveTheme } from "@/lib/themes";
 import { ReflectiveCard } from "@/components/reflective-card";
+import { BorderGlow } from "@/components/border-glow";
 import { isValidPosition, getFallbackGradient } from "@/lib/sport-config";
 
 /* ══════════════════════════════════════════════════════════
@@ -1671,7 +1672,19 @@ export function ProfileCard({
               transition: "opacity 0.32s ease",
             }}
           >
-            <ReflectiveCard
+            <BorderGlow
+              edgeSensitivity={30}
+              glowColor="78 100 62"
+              backgroundColor="#0d0d12"
+              borderRadius={20}
+              glowRadius={40}
+              glowIntensity={1.2}
+              coneSpread={25}
+              animated={true}
+              colors={['#C6FF3D', '#a5d933', '#85b029']}
+              className="w-full h-full"
+            >
+              <ReflectiveCard
               blurStrength={11}
               metalness={0.88}
               roughness={0.38}
@@ -1744,7 +1757,8 @@ export function ProfileCard({
                 className="absolute bottom-0 inset-x-0 h-px z-20 pointer-events-none"
                 style={{ background: `linear-gradient(90deg, transparent 10%, ${accent}22 50%, transparent 90%)` }}
               />
-            </ReflectiveCard>
+              </ReflectiveCard>
+            </BorderGlow>
           </div>
 
           {/* ═══════════════════════════════════════════
@@ -1761,7 +1775,19 @@ export function ProfileCard({
             onMouseMove={resetAutoReturn}
             onTouchStart={resetAutoReturn}
           >
-            <ReflectiveCard
+            <BorderGlow
+              edgeSensitivity={30}
+              glowColor="78 100 62"
+              backgroundColor="#0d0d12"
+              borderRadius={20}
+              glowRadius={40}
+              glowIntensity={1.2}
+              coneSpread={25}
+              animated={true}
+              colors={['#C6FF3D', '#a5d933', '#85b029']}
+              className="w-full h-full"
+            >
+              <ReflectiveCard
               blurStrength={11}
               metalness={0.88}
               roughness={0.38}
@@ -1910,7 +1936,8 @@ export function ProfileCard({
                 AthleteOS
               </span>
             </div>
-            </ReflectiveCard>
+              </ReflectiveCard>
+            </BorderGlow>
           </div>
 
         </motion.div>
