@@ -17,10 +17,10 @@ function getSupabaseServiceRole() {
   return createServiceClient(url, key);
 }
 
-async function hashIp(ip: string): Promise<string | null> {
-  if (!IP_HASH_SECRET) return null;
+async function hashIp(ip: string): Promise<string> {
+  const secret = IP_HASH_SECRET || "fallback-secret-hash-for-local-dev";
   const { createHash } = await import("crypto");
-  return createHash("sha256").update(`${IP_HASH_SECRET}:${ip}`).digest("hex");
+  return createHash("sha256").update(`${secret}:${ip}`).digest("hex");
 }
 
 async function getClientIp(): Promise<string> {

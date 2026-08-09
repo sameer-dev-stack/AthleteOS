@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-08-09 — Fix LCP image loading warning and local database view tracking error
+
+### What changed
+- **`components/profile-card.tsx`**: Added explicit `loading={i === 0 ? "eager" : "lazy"}` to the main athlete image hero to resolve Next.js LCP optimization warning.
+- **`lib/actions/analytics.ts`**: Updated `hashIp` to fallback to a static string salt `"fallback-secret-hash-for-local-dev"` if `ANALYTICS_IP_HASH_SECRET` is not configured, avoiding database null-constraint errors during local development.
+
+### Why
+To eliminate console optimization warnings and prevent database transaction crashes when view analytics are logged locally without env secret tokens.
+
+### Files touched
+- `components/profile-card.tsx`
+- `lib/actions/analytics.ts`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Add missing general fields to profile editor dashboard
 
 ### What changed

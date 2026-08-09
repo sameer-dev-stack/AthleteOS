@@ -274,6 +274,7 @@ function AthletePhoto({ photos, photoIdx, displayName, initials, accent, sport }
                 draggable={false}
                 unoptimized
                 priority={i === 0}
+                loading={i === 0 ? "eager" : "lazy"}
               />
             </div>
           ))}
