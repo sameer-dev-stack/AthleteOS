@@ -251,7 +251,7 @@ function AthletePhoto({ photos, photoIdx, displayName, initials, accent }: Athle
   return (
     <div
       className="relative flex-shrink-0"
-      style={{ height: "46%" }}
+      style={{ height: "38%" }}
     >
       {hasPhoto ? (
         <>
