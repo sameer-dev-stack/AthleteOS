@@ -5,13 +5,14 @@
 
 ---
 
-## 2026-08-06 — Fix stats strip: remove unused gap below stats on card front
+## 2026-08-06 — Fix card dimensions: eliminate dead space on front face
 
 ### What changed
-- **`components/profile-card.tsx`**: reduced photo hero from 40% to 33% height; removed `mt-auto` from flip hint so it sits directly below the URL bar; adjusted bottom fade gradient to match new photo height.
+- **`lib/constants.ts`**: reduced `CARD_H` from 504 to 420 (aspect ratio 5:7 → 6:7).
+- **`components/profile-card.tsx`**: increased photo hero from 33% to 45% to fill the shorter card proportionally.
 
 ### Why
-The card's fixed 360x504 aspect ratio with a 40% photo left ~140px of dead space below the content. Shrinking the photo and removing the flex spacer compacts the front face so content feels intentionally spaced.
+The 360x504 card left ~170px of dead space below the content on the front face. Reducing the height to 420px while increasing the photo to 45% eliminates the gap while keeping the card portrait and premium-looking.
 
 ### Files touched
 - `components/profile-card.tsx`, `docs/CHANGELOG.md`
