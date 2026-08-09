@@ -252,7 +252,7 @@ function AthletePhoto({ photos, photoIdx, displayName, initials, accent, sport }
   return (
     <div
       className="relative flex-shrink-0 w-full"
-      style={{ aspectRatio: "16 / 11" }}
+      style={{ aspectRatio: "5 / 4" }}
     >
       {hasPhoto ? (
         <>

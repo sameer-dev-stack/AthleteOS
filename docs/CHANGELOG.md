@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-08-09 — Expose more photo height using 5/4 aspect ratio
+
+### What changed
+- **`components/profile-card.tsx`**: Increased the photo container aspect ratio from `16 / 11` to `5 / 4` (stretching height from ~247px to ~288px on a 360px card).
+- **`components/profile-card-skeleton.tsx`**: Updated matching skeleton shimmer aspect ratio.
+
+### Why
+To increase hero photo visibility, exposing more of the athlete image while optimizing overall card content flow with no wasted vertical space.
+
+### Files touched
+- `components/profile-card.tsx`
+- `components/profile-card-skeleton.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Align photo hero to card ceiling
 
 ### What changed
