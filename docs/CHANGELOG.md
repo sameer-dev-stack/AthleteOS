@@ -5,20 +5,21 @@
 
 ---
 
-## 2026-08-09 — Fix athlete name typography, wrapping, and inline badge alignment
+## 2026-08-09 — Fix athlete name presentation (orphan character breaks)
 
 ### What changed
 - **`components/profile-card.tsx`** (`AthleteIdentity`):
-  - Added fluid length-based font scaling:
-    - `<= 12` chars: `clamp(20px, 5.5vw, 24px)`
-    - `13–20` chars: `clamp(16px, 4.5vw, 19px)`
-    - `> 20` chars: `clamp(13px, 3.8vw, 16px)`
-  - Removed aggressive character-splitting CSS (`wordBreak: "break-word"`, `overflowWrap: "anywhere"`).
-  - Added `overflowWrap: "break-word"`, `wordBreak: "normal"`, `textWrap: "balance"`, and `line-clamp-2` for balanced line breaks and proper overflow protection.
-  - Positioned verified badge and class year tag inline (`inline-flex align-middle ml-2`) directly following the name.
+  - Refined font-size breakpoints to reduce oversized names more aggressively for medium/long names:
+    - `<= 10` chars: `clamp(20px, 5.5vw, 24px)`
+    - `11–16` chars: `clamp(17px, 4.8vw, 21px)`
+    - `17–24` chars: `clamp(14px, 4vw, 17px)`
+    - `> 24` chars: `clamp(12px, 3.5vw, 15px)`
+  - Changed CSS from `overflowWrap: "break-word"` + `wordBreak: "normal"` + `textWrap: "balance"` to `wordBreak: "keep-all"` + `overflowWrap: "anywhere"` — prevents premature character-level wrapping by keeping words intact until overflow forces a break.
+  - Bumped `lineHeight` from `1.18` to `1.2` for slightly more breathing room.
+  - Tightened `letterSpacing` from `-0.025em` to `-0.02em` for cleaner long-name rendering.
 
 ### Why
-Long athlete names or single-word strings (e.g. `lasihad311adspritecom`) were breaking arbitrarily mid-word and leaving isolated single characters (like `m`) on an orphan second line.
+The previous fix used `overflowWrap: "break-word"` which still allowed the browser to break long single-word names at arbitrary character positions (e.g. "lasihad311adspriteco" / "m"). Combined with font sizes that were still too large for medium-length names, this produced broken-looking orphan characters on a second line.
 
 ### Files touched
 - `components/profile-card.tsx`, `docs/CHANGELOG.md`

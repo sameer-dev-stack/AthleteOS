@@ -352,14 +352,15 @@ function AthleteIdentity({
   const metaLine = [position, sport].filter(Boolean).join(" · ");
   const schoolLine = school ?? null;
 
-  // Fluid responsive font size based on name length to ensure clean single/two-line presentation
   const nameLen = displayName.length;
   const fontSize =
-    nameLen <= 12
+    nameLen <= 10
       ? "clamp(20px, 5.5vw, 24px)"
-      : nameLen <= 20
-      ? "clamp(16px, 4.5vw, 19px)"
-      : "clamp(13px, 3.8vw, 16px)";
+      : nameLen <= 16
+      ? "clamp(17px, 4.8vw, 21px)"
+      : nameLen <= 24
+      ? "clamp(14px, 4vw, 17px)"
+      : "clamp(12px, 3.5vw, 15px)";
 
   return (
     <div className="flex-shrink-0 px-5 mt-0 relative z-10">
@@ -368,11 +369,10 @@ function AthleteIdentity({
         className="font-black text-white line-clamp-2"
         style={{
           fontSize,
-          lineHeight: 1.18,
-          letterSpacing: "-0.025em",
-          overflowWrap: "break-word",
-          wordBreak: "normal",
-          textWrap: "balance",
+          lineHeight: 1.2,
+          letterSpacing: "-0.02em",
+          wordBreak: "keep-all",
+          overflowWrap: "anywhere",
         } as React.CSSProperties}
       >
         <span>{displayName}</span>
