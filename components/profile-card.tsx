@@ -1729,14 +1729,7 @@ export function ProfileCard({
               {/* Stats strip */}
               <AthleteStats cells={statCells} accent={accent} />
 
-              {/* Athlete ID / URL block */}
-              <AthleteIDBlock
-                username={profile.username}
-                athleteId={athleteId}
-                accent={accent}
-                urlCopied={urlCopied}
-                onCopy={handleCopyUrl}
-              />
+
 
 
 

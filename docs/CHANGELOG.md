@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-08-09 — Remove front-face URL block
+
+### What changed
+- **`components/profile-card.tsx`**: Removed the `<AthleteIDBlock>` rendering from the front face layout to clean up the design and remove redundancy with the main share button.
+
+### Why
+User confirmed the URL block is redundant since the primary share button is already prominent.
+
+### Files touched
+- `components/profile-card.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Make digital card height dynamic and responsive to zoom
 
 ### What changed
