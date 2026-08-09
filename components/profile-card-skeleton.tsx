@@ -11,8 +11,8 @@ export function ProfileCardSkeleton() {
         style={{
           perspective: "1200px",
           width: `min(${CARD_W}px, calc(100vw - 32px))`,
-          aspectRatio: "360 / 540",
-          maxHeight: "min(540px, calc(100dvh - 32px))",
+          aspectRatio: "360 / 600",
+          maxHeight: "min(600px, calc(100dvh - 32px))",
         }}
       >
         <div
@@ -32,7 +32,7 @@ export function ProfileCardSkeleton() {
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
             {/* Photo area shimmer */}
-            <div className="w-full relative overflow-hidden" style={{ aspectRatio: "5 / 4" }}>
+            <div className="w-full relative overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
               <div className="absolute inset-0 bg-[#16161a]">
                 <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
               </div>

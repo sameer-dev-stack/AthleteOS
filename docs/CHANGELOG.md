@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-08-09 — Implement square 1:1 photo hero and 360/600 card ratio
+
+### What changed
+- **`components/profile-card.tsx`**: Changed photo aspect ratio to `1 / 1` (square, stretching height to 360px) and adjusted the card's aspect ratio to `360 / 600` (max height of 600px).
+- **`components/profile-card-skeleton.tsx`**: Updated matching skeleton card aspect ratio and photo shimmer.
+
+### Why
+To maximize photo hero visibility ("expose it self as much it can") and resolve empty spacing on the front face, while maintaining perfect layout balance and smooth symmetrical rotation.
+
+### Files touched
+- `components/profile-card.tsx`
+- `components/profile-card-skeleton.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Expose more photo height using 5/4 aspect ratio
 
 ### What changed

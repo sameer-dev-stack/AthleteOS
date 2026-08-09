@@ -252,7 +252,7 @@ function AthletePhoto({ photos, photoIdx, displayName, initials, accent, sport }
   return (
     <div
       className="relative flex-shrink-0 w-full"
-      style={{ aspectRatio: "5 / 4" }}
+      style={{ aspectRatio: "1 / 1" }}
     >
       {hasPhoto ? (
         <>
@@ -1645,8 +1645,8 @@ export function ProfileCard({
         style={{
           perspective: "1100px",
           width: `min(${CARD_W}px, calc(100vw - 32px))`,
-          aspectRatio: "360 / 540",
-          maxHeight: "min(540px, calc(100dvh - 32px))",
+          aspectRatio: "360 / 600",
+          maxHeight: "min(600px, calc(100dvh - 32px))",
         }}
       >
         <motion.div
