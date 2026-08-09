@@ -73,11 +73,8 @@ export function ProfileCardSkeleton() {
             </div>
 
             {/* Flip hint skeleton */}
-            <div className="mt-auto flex items-center justify-center gap-2 py-2.5">
-              <div className="flex items-center gap-1.5 opacity-30">
-                <div className="h-3 w-3 rounded bg-white/[0.06] animate-pulse" />
-                <div className="h-2 w-20 rounded bg-white/[0.04] animate-pulse" />
-              </div>
+            <div className="mt-auto flex items-center justify-center py-2.5">
+              <div className="h-7 w-36 rounded-full bg-white/[0.05] border border-white/[0.08] animate-pulse" />
             </div>
 
             {/* Bottom accent shimmer */}

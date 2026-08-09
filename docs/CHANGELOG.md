@@ -8,10 +8,10 @@
 ## 2026-08-06 — Fix stats strip: remove unused gap below stats on card front
 
 ### What changed
-- **`components/profile-card.tsx`**: removed standalone `mt-auto` spacer; moved `mt-auto` to the flip hint div so it pushes to the absolute bottom of the card while URL bar sits directly below stats.
+- **`components/profile-card.tsx`**: reduced photo hero from 40% to 33% height; removed `mt-auto` from flip hint so it sits directly below the URL bar; adjusted bottom fade gradient to match new photo height.
 
 ### Why
-The card's fixed 360x504 aspect ratio leaves dead space when content doesn't fill the height. Moving `mt-auto` to the flip hint keeps it pinned to the bottom while the URL bar stays tight against the stats strip.
+The card's fixed 360x504 aspect ratio with a 40% photo left ~140px of dead space below the content. Shrinking the photo and removing the flex spacer compacts the front face so content feels intentionally spaced.
 
 ### Files touched
 - `components/profile-card.tsx`, `docs/CHANGELOG.md`
