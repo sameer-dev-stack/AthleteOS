@@ -41,14 +41,8 @@ export function ProfileCardSkeleton() {
               <div className="absolute inset-x-0 bottom-0 h-1/2" style={{ background: "linear-gradient(to top, #111115, transparent)" }} />
             </div>
 
-            {/* Avatar skeleton */}
-            <div
-              className="absolute left-4 z-20 w-[72px] h-[72px] rounded-full bg-white/[0.06] animate-pulse"
-              style={{ bottom: "calc(48% - 36px)", border: "3px solid #111115" }}
-            />
-
             {/* Identity area */}
-            <div className="px-4 pt-16 relative z-10">
+            <div className="px-4 pt-6 relative z-10">
               {/* Name skeleton */}
               <div className="flex items-center gap-2">
                 <div className="h-6 w-32 rounded-md bg-white/[0.06] animate-pulse" />

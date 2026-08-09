@@ -423,7 +423,7 @@ function AthleteIdentity({
       : "clamp(11px, 3.2vw, 14px)";
 
   return (
-    <div className="flex-shrink-0 px-5 pt-16 relative z-10">
+    <div className="flex-shrink-0 px-5 pt-6 relative z-10">
       {/* Divider between hero and content */}
       <div
         className="absolute top-0 left-5 right-5 h-px"
@@ -1653,16 +1653,6 @@ export function ProfileCard({
 
               {/* Photo hero */}
               <AthletePhoto
-                photos={photos}
-                photoIdx={photoIdx}
-                displayName={displayName}
-                initials={initials}
-                accent={accent}
-                sport={profile.sport}
-              />
-
-              {/* Circular profile avatar */}
-              <ProfileAvatar
                 photos={photos}
                 photoIdx={photoIdx}
                 displayName={displayName}

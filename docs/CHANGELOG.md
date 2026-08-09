@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-08-09 — Remove front-face avatar
+
+### What changed
+- **`components/profile-card.tsx`**: Removed the `<ProfileAvatar>` rendering from the front face layout. Reduced top padding of `AthleteIdentity` from `pt-16` to `pt-6` now that the avatar overlap spacing is no longer needed.
+- **`components/profile-card-skeleton.tsx`**: Removed the avatar placeholder skeleton and updated the identity area top padding to `pt-6` to match.
+
+### Why
+User requested the removal of the avatar to allow the larger hero image to be fully unobstructed.
+
+### Files touched
+- `components/profile-card.tsx`
+- `components/profile-card-skeleton.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Hero image size increase
 
 ### What changed
