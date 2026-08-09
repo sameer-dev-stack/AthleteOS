@@ -5,27 +5,26 @@
 
 ---
 
-## 2026-08-09 — Fix athlete name presentation (orphan character breaks)
+## 2026-08-09 — Reduce font size for long names to prevent orphan character breaks
 
 ### What changed
 - **`components/profile-card.tsx`** (`AthleteIdentity`):
-  - Refined font-size breakpoints to reduce oversized names more aggressively for medium/long names:
-    - `<= 10` chars: `clamp(20px, 5.5vw, 24px)`
-    - `11–16` chars: `clamp(17px, 4.8vw, 21px)`
-    - `17–24` chars: `clamp(14px, 4vw, 17px)`
-    - `> 24` chars: `clamp(12px, 3.5vw, 15px)`
-  - Changed CSS from `overflowWrap: "break-word"` + `wordBreak: "normal"` + `textWrap: "balance"` to `wordBreak: "keep-all"` + `overflowWrap: "anywhere"` — prevents premature character-level wrapping by keeping words intact until overflow forces a break.
-  - Bumped `lineHeight` from `1.18` to `1.2` for slightly more breathing room.
-  - Tightened `letterSpacing` from `-0.025em` to `-0.02em` for cleaner long-name rendering.
+  - Shifted font-size breakpoints one tier earlier so long names (17-24 chars) render at 11-14px instead of 14-17px:
+    - `<= 8` chars: `clamp(20px, 5.5vw, 24px)`
+    - `9–14` chars: `clamp(17px, 4.8vw, 21px)`
+    - `15–20` chars: `clamp(14px, 4vw, 17px)`
+    - `> 20` chars: `clamp(11px, 3.2vw, 14px)`
+  - Changed CSS to `wordBreak: "keep-all"` + `overflowWrap: "anywhere"` to prevent premature character-level wrapping.
+  - `lineHeight: 1.2`, `letterSpacing: "-0.02em"`.
 
 ### Why
-The previous fix used `overflowWrap: "break-word"` which still allowed the browser to break long single-word names at arbitrary character positions (e.g. "lasihad311adspriteco" / "m"). Combined with font sizes that were still too large for medium-length names, this produced broken-looking orphan characters on a second line.
+21-char names like `lasihad311adspritecom` were still too large at 14-17px on narrow mobile viewports, causing the browser to break at arbitrary character positions leaving a single orphan "m" on line 2. Reducing to 11-14px at the >20 char tier ensures the name fits on a single line at common mobile widths.
 
 ### Files touched
-- `components/profile-card.tsx`, `docs/CHANGELOG.md`
+- `components/profile-card.tsx`
 
 ### Commit
-_Pending._
+`bfca936`
 
 ---
 
