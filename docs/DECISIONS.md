@@ -1094,4 +1094,26 @@ The "lock-in system" (`athlete_ai_memory`, `ai_events`, `compounding-value.tsx`)
 - Retention is chased with real value (deals, earnings, proof), not manipulation.
 - Master Plan §4/§5 build prompts inherit these constraints.
 
+---
+
+## ADR-049 — ReflectiveCard webcam material as the public card shell
+
+**Status:** Accepted · 2026-08-09
+
+**Context:**
+The existing `ReflectiveCardShell` was a pure CSS component — a rotating conic-gradient glow border, noise grain, and a static dark surface. The user requested integration of the React Bits `ReflectiveCard` component, which uses the live webcam feed as the card's reflective surface (blurred, desaturated, SVG-filter-displaced to look like polished metal).
+
+**Decision:**
+Replace `ReflectiveCardShell` with `ReflectiveCard` as the material shell for both card faces. Key design choices:
+1. `children` prop — all athlete card UI renders inside the material layer.
+2. Shared `webcamStreamRef` — front and back faces share one `MediaStream`; browser fires one permission prompt.
+3. Unique `filterId` per instance — prevents SVG filter ID collision in the DOM.
+4. Graceful fallback — static dark metallic gradient when webcam is denied or unavailable.
+5. `prefers-reduced-motion` — strips filter animation, reduces video opacity.
+
+**Consequences:**
+- Card reflects real-world ambient light — premium and unique in the NIL/athlete space.
+- Requires HTTPS + webcam permission on first card view. Fallback handles denial gracefully without blocking render.
+- Both face instances are in the DOM simultaneously; only one stream is allocated.
+- `ReflectiveCardShell` definition remains in `profile-card.tsx` as unused dead code — safe to delete in a future cleanup pass.
 

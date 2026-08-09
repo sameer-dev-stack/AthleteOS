@@ -1,5 +1,38 @@
 "use client";
 
+/*
+ * ═══════════════════════════════════════════════════════════════════════
+ *  AthleteOS · Public Athlete Identity Card
+ *  ─────────────────────────────────────────
+ *  Component Architecture:
+ *
+ *  ProfileCard (root, exported)
+ *  └── AthleteIdentityCard
+ *      ├── ReflectiveCardShell          ← material / theming layer
+ *      ├── [FRONT]
+ *      │   ├── CardHeader               ← logo, plan badge, qr, share
+ *      │   ├── AthletePhoto             ← hero image + vignette
+ *      │   ├── AthleteIdentity          ← name, sport, position, school, verification
+ *      │   ├── AthleteStats             ← stat strip (NIL + custom stats)
+ *      │   ├── AthleteIDBlock           ← athlete ID / URL copy
+ *      │   └── FlipCTA                  ← animated flip affordance
+ *      └── [BACK]
+ *          ├── BackHeader               ← avatar, name, flip-back CTA
+ *          ├── [SCROLLABLE]
+ *          │   ├── AboutSection         ← bio
+ *          │   ├── LinksSection         ← structured links
+ *          │   ├── HighlightsSection    ← highlight reels
+ *          │   └── ConnectSection       ← social icons + share
+ *          ├── ContactModal             ← overlay for email/phone
+ *          └── BackActions              ← Contact, Send Inquiry, Tip
+ *
+ *  Design Tokens (applied via CSS custom properties):
+ *    --aic-accent    primary brand color (theme-driven)
+ *    --aic-surface   card base surface color
+ *    --aic-radius    card corner radius
+ * ═══════════════════════════════════════════════════════════════════════
+ */
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import {
@@ -9,7 +42,8 @@ import {
   GraduationCap, Timer, Trophy, Target,
   TrendingUp, Percent, Zap, Medal,
   Heart, Sparkles, ExternalLink, ChevronRight,
-  X, Phone, QrCode, Eye, Users,
+  X, Phone, QrCode,
+  ShieldCheck, Briefcase, ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Profile } from "@/lib/actions/profile";
@@ -25,13 +59,17 @@ import { useSearchParams } from "next/navigation";
 import { CARD_W, CARD_H } from "@/lib/constants";
 import { cleanName } from "@/lib/display-name";
 import { resolveTheme } from "@/lib/themes";
+import { ReflectiveCard } from "@/components/reflective-card";
 
-/* ── Constants ───────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   CONSTANTS & MAPS
+══════════════════════════════════════════════════════════ */
 
-const AUTO_RETURN_MS = 10_000;
+const AUTO_RETURN_MS = 12_000;
 const PHOTO_INTERVAL_MS = 4_000;
 
-const STAT_ICONS: Record<string, React.ElementType> = {
+/** Maps well-known stat keys to lucide icons */
+const STAT_ICON_MAP: Record<string, React.ElementType> = {
   gpa: GraduationCap,
   "40-yd": Timer,
   ppg: Trophy,
@@ -44,23 +82,1248 @@ const STAT_ICONS: Record<string, React.ElementType> = {
   default: Trophy,
 };
 
-const SOCIAL_MAP: { key: string; Icon: React.ElementType; prefix: string; color: string }[] = [
-  { key: "instagram", Icon: Instagram, prefix: "https://instagram.com/", color: "#E4405F" },
-  { key: "twitter", Icon: Twitter, prefix: "https://x.com/", color: "#1DA1F2" },
-  { key: "tiktok", Icon: Music2, prefix: "https://tiktok.com/@", color: "#00F2EA" },
-  { key: "youtube", Icon: Youtube, prefix: "https://youtube.com/@", color: "#FF0000" },
+/** Social platform metadata */
+const SOCIAL_MAP: { key: string; Icon: React.ElementType; prefix: string; color: string; label: string }[] = [
+  { key: "instagram", Icon: Instagram, prefix: "https://instagram.com/", color: "#E4405F", label: "Instagram" },
+  { key: "twitter",   Icon: Twitter,   prefix: "https://x.com/",         color: "#1DA1F2", label: "X (Twitter)" },
+  { key: "tiktok",    Icon: Music2,    prefix: "https://tiktok.com/@",   color: "#00F2EA", label: "TikTok" },
+  { key: "youtube",   Icon: Youtube,   prefix: "https://youtube.com/@",  color: "#FF0000", label: "YouTube" },
 ];
 
-/* ── Helpers ─────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════════════════════════ */
 
 function sanitize(t: string | null): string {
   if (!t) return "";
-  return t.replace(/\\\\/g, "\0").replace(/\\\"/g, '"').replace(/\\'/g, "'").replace(/\0/g, "\\\\");
+  return t
+    .replace(/\\\\/g, "\0")
+    .replace(/\\"/g, '"')
+    .replace(/\\'/g, "'")
+    .replace(/\0/g, "\\\\");
 }
 
-/* ── Component ───────────────────────────────────────── */
+function getStatIcon(label: string): React.ElementType {
+  const key = label.toLowerCase().trim();
+  return STAT_ICON_MAP[key] ?? STAT_ICON_MAP.default;
+}
 
-export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilScore = null }: { profile: Profile; totalViews?: number; totalFollowers?: number; nilScore?: number | null }) {
+function formatAthleteId(username: string | null): string {
+  if (!username) return "AOS-00000";
+  const hash = username
+    .split("")
+    .reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) & 0xffff, 0);
+  return `AOS-${String(hash).padStart(5, "0")}`;
+}
+
+/* ══════════════════════════════════════════════════════════
+   DESIGN TOKENS TYPE
+══════════════════════════════════════════════════════════ */
+
+interface CardTokens {
+  accent: string;
+  /** Subtle tinted surface — e.g. accent + 08 */
+  accentSurface: string;
+  /** Accent at 15% — borders, fills */
+  accentBorder: string;
+  /** Accent at 25% — stronger fills */
+  accentFill: string;
+  /** Accent at 50% — medium emphasis */
+  accentMedium: string;
+}
+
+function buildTokens(accent: string): CardTokens {
+  return {
+    accent,
+    accentSurface: `${accent}08`,
+    accentBorder:  `${accent}25`,
+    accentFill:    `${accent}15`,
+    accentMedium:  `${accent}50`,
+  };
+}
+
+/* ══════════════════════════════════════════════════════════
+   SUB-COMPONENTS — FRONT FACE
+══════════════════════════════════════════════════════════ */
+
+/* ── CardHeader ─────────────────────────────────────────── */
+interface CardHeaderProps {
+  accent: string;
+  plan: string;
+  isVerified: boolean;
+  profile: Profile;
+  onQr: (e: React.MouseEvent) => void;
+  onShare: (e: React.MouseEvent) => void;
+  copied: boolean;
+}
+
+function CardHeader({ accent, plan, isVerified, onQr, onShare, copied }: CardHeaderProps) {
+  const isPro = plan === "pro" || plan === "team";
+
+  return (
+    <div className="absolute top-0 inset-x-0 pt-3.5 px-4 flex items-center justify-between z-20 pointer-events-none">
+      {/* Brand mark */}
+      <div className="flex items-center gap-2 pointer-events-auto">
+        <Logo
+          className="h-5 w-5 rounded-[4px] flex-shrink-0"
+          style={{ backgroundColor: accent }}
+        />
+        <span
+          className="text-[10px] font-black tracking-[0.2em] uppercase"
+          style={{ color: "rgba(255,255,255,0.75)" }}
+        >
+          AthleteOS
+        </span>
+      </div>
+
+      {/* Right actions */}
+      <div className="flex items-center gap-1.5 pointer-events-auto">
+        {/* Verified / Pro badge */}
+        {(isVerified || isPro) && (
+          <div
+            className="flex items-center gap-1 rounded-full px-2 py-0.5 h-6"
+            style={{
+              background: "rgba(0,0,0,0.5)",
+              border: `1px solid ${accent}30`,
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            {isVerified ? (
+              <ShieldCheck className="h-3 w-3" style={{ color: accent }} />
+            ) : (
+              <Star className="h-3 w-3" style={{ color: accent }} fill={accent} />
+            )}
+            <span className="text-[8px] font-black tracking-wider" style={{ color: accent }}>
+              {isVerified ? "VERIFIED" : isPro ? "PRO" : ""}
+            </span>
+          </div>
+        )}
+
+        {/* QR */}
+        <button
+          onClick={onQr}
+          aria-label="Show QR code"
+          className="h-7 w-7 rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
+          style={{
+            background: "rgba(0,0,0,0.5)",
+            border: "1px solid rgba(255,255,255,0.10)",
+            backdropFilter: "blur(12px)",
+          }}
+        >
+          <QrCode className="h-3 w-3" style={{ color: "rgba(255,255,255,0.55)" }} />
+        </button>
+
+        {/* Share */}
+        <button
+          onClick={onShare}
+          aria-label="Share profile"
+          className="h-7 w-7 rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
+          style={{
+            background: "rgba(0,0,0,0.5)",
+            border: "1px solid rgba(255,255,255,0.10)",
+            backdropFilter: "blur(12px)",
+          }}
+        >
+          {copied ? (
+            <CheckIcon className="h-3 w-3" style={{ color: accent }} />
+          ) : (
+            <Share2 className="h-3 w-3" style={{ color: "rgba(255,255,255,0.55)" }} />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ── AthletePhoto ─────────────────────────────────────── */
+interface AthletePhotoProps {
+  photos: string[];
+  photoIdx: number;
+  displayName: string;
+  initials: string;
+  accent: string;
+}
+
+function AthletePhoto({ photos, photoIdx, displayName, initials, accent }: AthletePhotoProps) {
+  const hasPhoto = photos.length > 0;
+
+  return (
+    <div
+      className="relative flex-shrink-0"
+      style={{ height: "46%" }}
+    >
+      {hasPhoto ? (
+        <>
+          {photos.map((url, i) => (
+            <div
+              key={url}
+              className="absolute inset-0"
+              style={{
+                opacity: i === photoIdx ? 1 : 0,
+                transition: "opacity 1.2s cubic-bezier(0.4,0,0.2,1)",
+              }}
+            >
+              <Image
+                src={url}
+                alt={displayName}
+                fill
+                sizes="420px"
+                className="object-cover object-top"
+                draggable={false}
+                unoptimized
+                priority={i === 0}
+              />
+            </div>
+          ))}
+        </>
+      ) : (
+        /* Placeholder with initials */
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{
+            background: `linear-gradient(160deg, ${accent}18 0%, #0d0d12 100%)`,
+          }}
+        >
+          <span
+            className="text-[72px] font-black select-none"
+            style={{ color: `${accent}18`, letterSpacing: "-0.04em" }}
+          >
+            {initials}
+          </span>
+        </div>
+      )}
+
+      {/* Cinematic vignette — edges */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 85% 65% at 50% 30%, transparent 35%, rgba(0,0,0,0.30) 100%)",
+        }}
+      />
+
+      {/* Bottom gradient blending into card surface */}
+      <div
+        className="absolute inset-x-0 bottom-0 pointer-events-none"
+        style={{
+          height: "55%",
+          background:
+            "linear-gradient(to top, #0d0d12 0%, #0d0d12e8 18%, #0d0d1290 45%, transparent 100%)",
+        }}
+      />
+
+      {/* Noise grain for premium texture */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          backgroundSize: "160px 160px",
+          mixBlendMode: "overlay",
+          opacity: 0.025,
+        }}
+      />
+    </div>
+  );
+}
+
+/* ── AthleteIdentity ─────────────────────────────────── */
+interface AthleteIdentityProps {
+  displayName: string;
+  sport: string | null;
+  position: string | null;
+  school: string | null;
+  classLabel: string | null;
+  isVerified: boolean;
+  isPro: boolean;
+  accent: string;
+}
+
+function AthleteIdentity({
+  displayName,
+  sport,
+  position,
+  school,
+  classLabel,
+  isVerified,
+  isPro,
+  accent,
+}: AthleteIdentityProps) {
+  const metaLine = [position, sport].filter(Boolean).join(" · ");
+  const schoolLine = school ?? null;
+
+  return (
+    <div className="flex-shrink-0 px-5 mt-0 relative z-10">
+      {/* Name row */}
+      <div className="flex items-start gap-2 flex-wrap">
+        <h1
+          className="font-black leading-none tracking-tight text-white"
+          style={{
+            fontSize: "clamp(22px, 7vw, 30px)",
+            letterSpacing: "-0.035em",
+            wordBreak: "break-word",
+            overflowWrap: "anywhere",
+          }}
+        >
+          {displayName}
+        </h1>
+
+        <div className="flex items-center gap-1.5 mt-0.5 flex-shrink-0">
+          {(isVerified || isPro) && (
+            <span
+              className="flex h-[18px] w-[18px] items-center justify-center rounded-full gold-badge-glow flex-shrink-0"
+              style={{ backgroundColor: "#FACC15" }}
+              title="Verified Athlete"
+            >
+              <CheckIcon className="h-2.5 w-2.5 text-[#0d0d12]" strokeWidth={3.5} />
+            </span>
+          )}
+          {classLabel && (
+            <span
+              className="flex-shrink-0 inline-flex items-center rounded px-1.5 py-0.5 text-[7.5px] font-black tracking-widest uppercase"
+              style={{
+                color: "rgba(255,255,255,0.35)",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.08)",
+              }}
+            >
+              {classLabel}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Sport · Position */}
+      {metaLine && (
+        <p
+          className="text-[12px] font-semibold mt-1 leading-none"
+          style={{ color: "rgba(255,255,255,0.50)", letterSpacing: "0.02em" }}
+        >
+          {metaLine}
+        </p>
+      )}
+
+      {/* School */}
+      {schoolLine && (
+        <p
+          className="text-[10.5px] mt-0.5 leading-none font-medium truncate"
+          style={{ color: "rgba(255,255,255,0.28)" }}
+        >
+          {schoolLine}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* ── AthleteStats ─────────────────────────────────────── */
+interface StatCell {
+  key: string;
+  label: string;
+  value: string;
+  isAccent: boolean;
+}
+
+interface AthleteStatsProps {
+  cells: StatCell[];
+  accent: string;
+}
+
+function AthleteStats({ cells, accent }: AthleteStatsProps) {
+  if (cells.length === 0) return null;
+
+  return (
+    <div className="flex-shrink-0 mx-4 mt-3">
+      {/* Subtle rule above */}
+      <div
+        className="mb-2 h-px"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${accent}18, transparent)`,
+        }}
+      />
+
+      <div
+        className="flex items-stretch rounded-xl overflow-hidden"
+        style={{
+          background: "rgba(255,255,255,0.025)",
+          border: "1px solid rgba(255,255,255,0.055)",
+        }}
+      >
+        {cells.map((cell, i) => {
+          const Icon = getStatIcon(cell.label);
+          return (
+            <div
+              key={cell.key}
+              className="flex-1 flex flex-col items-center justify-center py-3 px-2 relative"
+              style={
+                i > 0
+                  ? { borderLeft: "1px solid rgba(255,255,255,0.055)" }
+                  : {}
+              }
+            >
+              {/* Icon micro-indicator */}
+              <Icon
+                className="h-2.5 w-2.5 mb-1.5 opacity-30"
+                style={{ color: cell.isAccent ? accent : "rgba(255,255,255,0.5)" }}
+              />
+              {/* Value */}
+              <span
+                className="text-[19px] font-black leading-none tracking-tight"
+                style={{
+                  color: cell.isAccent ? accent : "rgba(255,255,255,0.95)",
+                  letterSpacing: "-0.03em",
+                }}
+              >
+                {cell.value}
+              </span>
+              {/* Label */}
+              <span
+                className="text-[8px] font-bold uppercase tracking-widest mt-1 text-center leading-none"
+                style={{ color: "rgba(255,255,255,0.30)" }}
+              >
+                {cell.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ── AthleteIDBlock (URL copy + athlete ID) ─────────── */
+interface AthleteIDBlockProps {
+  username: string | null;
+  athleteId: string;
+  accent: string;
+  urlCopied: boolean;
+  onCopy: (e: React.MouseEvent) => void;
+}
+
+function AthleteIDBlock({ username, athleteId, accent, urlCopied, onCopy }: AthleteIDBlockProps) {
+  return (
+    <div className="flex-shrink-0 mx-4 mt-3">
+      <button
+        onClick={onCopy}
+        className="w-full flex items-center justify-between rounded-lg px-3.5 py-2.5 group transition-all duration-200"
+        style={{
+          background: "rgba(255,255,255,0.02)",
+          border: "1px solid rgba(255,255,255,0.055)",
+        }}
+        aria-label="Copy profile URL"
+      >
+        <div className="flex items-center gap-2.5 min-w-0">
+          {/* ID chip */}
+          <span
+            className="flex-shrink-0 text-[7.5px] font-black tracking-widest uppercase px-1.5 py-0.5 rounded"
+            style={{
+              color: `${accent}70`,
+              background: `${accent}10`,
+              border: `1px solid ${accent}20`,
+            }}
+          >
+            {athleteId}
+          </span>
+          {/* URL */}
+          <span
+            className="text-[10.5px] font-medium truncate"
+            style={{ color: "rgba(255,255,255,0.32)" }}
+          >
+            athleteos.app/{username}
+          </span>
+        </div>
+        <span className="flex-shrink-0 ml-2">
+          {urlCopied ? (
+            <CheckIcon className="h-3 w-3" style={{ color: accent }} />
+          ) : (
+            <Copy className="h-3 w-3 text-white/20 group-hover:text-white/45 transition-colors" />
+          )}
+        </span>
+      </button>
+    </div>
+  );
+}
+
+/* ── FlipCTA ─────────────────────────────────────────── */
+interface FlipCTAProps {
+  accent: string;
+  hintVisible: boolean;
+}
+
+function FlipCTA({ accent, hintVisible }: FlipCTAProps) {
+  return (
+    <div className="flex items-center justify-center py-3 px-4 flex-shrink-0">
+      <div
+        className={`inline-flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 group-hover:scale-[1.03] ${
+          hintVisible ? "flip-hint-pulse" : "opacity-40"
+        }`}
+        style={{
+          background: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(255,255,255,0.10)",
+          boxShadow: `0 2px 16px rgba(0,0,0,0.25), 0 0 20px ${accent}12`,
+        }}
+      >
+        <RotateCcw
+          className="h-3 w-3 transition-transform duration-500 group-hover:-rotate-[135deg]"
+          style={{ color: accent }}
+        />
+        <span
+          className="text-[9px] font-black tracking-[0.18em] uppercase"
+          style={{ color: "rgba(255,255,255,0.80)" }}
+        >
+          Tap card to flip
+        </span>
+        <span
+          className="h-1.5 w-1.5 rounded-full animate-ping ml-0.5"
+          style={{ backgroundColor: accent }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   SUB-COMPONENTS — BACK FACE
+══════════════════════════════════════════════════════════ */
+
+/* ── BackHeader ───────────────────────────────────────── */
+interface BackHeaderProps {
+  avatarUrl: string | null;
+  displayName: string;
+  sport: string | null;
+  position: string | null;
+  school: string | null;
+  isVerified: boolean;
+  isPro: boolean;
+  initials: string;
+  accent: string;
+}
+
+function BackHeader({
+  avatarUrl,
+  displayName,
+  sport,
+  position,
+  school,
+  isVerified,
+  isPro,
+  initials,
+  accent,
+}: BackHeaderProps) {
+  const metaParts = [position, sport, school].filter(Boolean);
+
+  return (
+    <div className="flex items-center justify-between px-5 pt-4 pb-3 flex-shrink-0">
+      {/* Avatar + name */}
+      <div className="flex items-center gap-2.5 min-w-0">
+        {avatarUrl ? (
+          <Image
+            src={avatarUrl}
+            alt={displayName}
+            width={34}
+            height={34}
+            className="h-[34px] w-[34px] rounded-full object-cover flex-shrink-0"
+            style={{ border: `2px solid ${accent}30` }}
+            draggable={false}
+            unoptimized
+          />
+        ) : (
+          <div
+            className="h-[34px] w-[34px] rounded-full flex items-center justify-center flex-shrink-0"
+            style={{
+              background: `${accent}12`,
+              border: `2px solid ${accent}28`,
+            }}
+          >
+            <span
+              className="text-[10px] font-black"
+              style={{ color: `${accent}70` }}
+            >
+              {initials}
+            </span>
+          </div>
+        )}
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <p
+              className="text-[13px] font-black text-white truncate leading-tight"
+              style={{ letterSpacing: "-0.02em" }}
+            >
+              {displayName}
+            </p>
+            {(isVerified || isPro) && (
+              <span
+                className="flex-shrink-0 flex h-[14px] w-[14px] items-center justify-center rounded-full gold-badge-glow"
+                style={{ backgroundColor: "#FACC15" }}
+              >
+                <CheckIcon className="h-2 w-2 text-[#0d0d12]" strokeWidth={3.5} />
+              </span>
+            )}
+          </div>
+          {metaParts.length > 0 && (
+            <p
+              className="text-[9px] font-medium truncate leading-tight"
+              style={{ color: "rgba(255,255,255,0.28)" }}
+            >
+              {metaParts.join(" · ")}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Flip back affordance */}
+      <div
+        className="flex items-center gap-1.5 flex-shrink-0 px-2.5 py-1.5 rounded-full cursor-pointer transition-all duration-200 hover:border-white/20"
+        style={{
+          background: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(255,255,255,0.09)",
+        }}
+        role="button"
+        aria-label="Flip card back"
+      >
+        <RotateCcw className="h-3 w-3" style={{ color: accent }} />
+        <span className="text-[8.5px] font-black tracking-wider text-white/60 uppercase">
+          Flip Back
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ── AboutSection ─────────────────────────────────────── */
+function AboutSection({ bio, accent }: { bio: string; accent: string }) {
+  return (
+    <div>
+      <SectionLabel icon={<Sparkles className="h-2.5 w-2.5" />} label="About" accent={accent} />
+      <p
+        className="text-[11px] leading-[1.75] line-clamp-4"
+        style={{
+          color: "rgba(255,255,255,0.42)",
+          overflowWrap: "break-word",
+          wordBreak: "break-word",
+        }}
+      >
+        {sanitize(bio)}
+      </p>
+    </div>
+  );
+}
+
+/* ── SectionLabel ─────────────────────────────────────── */
+function SectionLabel({
+  icon,
+  label,
+  accent,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  accent: string;
+}) {
+  return (
+    <div className="flex items-center gap-1.5 mb-2">
+      <span style={{ color: `${accent}55` }}>{icon}</span>
+      <span
+        className="text-[8.5px] font-black uppercase tracking-widest"
+        style={{ color: `${accent}45` }}
+      >
+        {label}
+      </span>
+    </div>
+  );
+}
+
+/* ── LinksSection ─────────────────────────────────────── */
+interface LinksSectionProps {
+  links: { label: string; url: string }[];
+  accent: string;
+  expanded: boolean;
+  onToggle: () => void;
+  maxVisible: number;
+  onLinkClick: (label: string, url: string) => void;
+  onInteract: () => void;
+}
+
+function LinksSection({
+  links,
+  accent,
+  expanded,
+  onToggle,
+  maxVisible,
+  onLinkClick,
+  onInteract,
+}: LinksSectionProps) {
+  const displayed = expanded ? links : links.slice(0, maxVisible);
+
+  return (
+    <div>
+      <SectionLabel
+        icon={<ExternalLink className="h-2.5 w-2.5" />}
+        label="Links"
+        accent={accent}
+      />
+      <div className="space-y-1.5">
+        {displayed.map((link) => {
+          let domain = "";
+          try {
+            domain = new URL(link.url).hostname.replace("www.", "");
+          } catch { /* */ }
+          return (
+            <a
+              key={link.url}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                e.stopPropagation();
+                onInteract();
+                onLinkClick(link.label, link.url);
+              }}
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200 group"
+              style={{
+                background: "rgba(255,255,255,0.025)",
+                border: "1px solid rgba(255,255,255,0.065)",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background = `${accent}0d`;
+                (e.currentTarget as HTMLAnchorElement).style.borderColor = `${accent}28`;
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,0.025)";
+                (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.065)";
+              }}
+            >
+              {/* Color bar */}
+              <div
+                className="w-0.5 self-stretch rounded-full flex-shrink-0"
+                style={{
+                  background: `linear-gradient(to bottom, ${accent}70, ${accent}18)`,
+                }}
+              />
+              <div className="flex-1 min-w-0">
+                <div
+                  className="text-[11px] font-semibold truncate leading-tight"
+                  style={{ color: "rgba(255,255,255,0.72)" }}
+                >
+                  {sanitize(link.label)}
+                </div>
+                {domain && (
+                  <div
+                    className="text-[9px] truncate mt-0.5 leading-tight"
+                    style={{ color: "rgba(255,255,255,0.22)" }}
+                  >
+                    {domain}
+                  </div>
+                )}
+              </div>
+              <div
+                className="flex-shrink-0 h-5 w-5 rounded-full flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
+                style={{ background: `${accent}14` }}
+              >
+                <ChevronRight className="h-2.5 w-2.5" style={{ color: `${accent}70` }} />
+              </div>
+            </a>
+          );
+        })}
+
+        {links.length > maxVisible && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onInteract();
+              onToggle();
+            }}
+            className="w-full flex items-center justify-center gap-1 py-1.5 transition-colors"
+            style={{ color: `${accent}65` }}
+          >
+            <ChevronDown
+              className="h-3 w-3 transition-transform duration-300"
+              style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }}
+            />
+            <span className="text-[8.5px] font-bold uppercase tracking-wider">
+              {expanded ? "Show less" : `Show all ${links.length}`}
+            </span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── HighlightsSection ──────────────────────────────── */
+interface HighlightsSectionProps {
+  highlights: { title: string; url: string }[];
+  accent: string;
+  profileId: string;
+  onInteract: () => void;
+}
+
+function HighlightsSection({ highlights, accent, profileId, onInteract }: HighlightsSectionProps) {
+  return (
+    <div>
+      <SectionLabel
+        icon={<Play className="h-2.5 w-2.5" />}
+        label="Highlights"
+        accent={accent}
+      />
+      <div className="flex flex-wrap gap-2">
+        {highlights.map((h, i) => (
+          <a
+            key={i}
+            href={h.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => {
+              e.stopPropagation();
+              onInteract();
+              trackLinkClick(profileId, h.title || `Highlight ${i + 1}`, h.url);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-200 hover:scale-105"
+            style={{
+              background: `${accent}0e`,
+              border: `1px solid ${accent}1e`,
+            }}
+          >
+            <Play
+              className="h-2.5 w-2.5 flex-shrink-0"
+              style={{ color: `${accent}cc` }}
+              fill={`${accent}cc`}
+            />
+            <span
+              className="text-[10px] font-semibold truncate max-w-[100px]"
+              style={{ color: `${accent}c0` }}
+            >
+              {sanitize(h.title) || `Highlight ${i + 1}`}
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── ConnectSection ───────────────────────────────────── */
+interface ConnectSectionProps {
+  socialLinks: { key: string; Icon: React.ElementType; href: string; color: string; label: string }[];
+  publicUrl: string;
+  displayName: string;
+  bio: string | null;
+  accent: string;
+  onInteract: () => void;
+}
+
+function ConnectSection({ socialLinks, publicUrl, displayName, bio, accent, onInteract }: ConnectSectionProps) {
+  if (socialLinks.length === 0) return null;
+
+  return (
+    <div>
+      <SectionLabel icon={<Heart className="h-2.5 w-2.5" />} label="Connect" accent={accent} />
+      <div className="flex flex-wrap items-center gap-2">
+        {socialLinks.map(({ key, Icon, href, color, label }) => (
+          <a
+            key={key}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={label}
+            onClick={(e) => {
+              e.stopPropagation();
+              onInteract();
+            }}
+            className="social-icon-btn h-8 w-8 rounded-lg flex items-center justify-center transition-all duration-300"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              "--social-color": color,
+            } as React.CSSProperties}
+          >
+            <Icon className="h-3.5 w-3.5 text-white/30" />
+          </a>
+        ))}
+        {/* Separator + share buttons */}
+        <div className="flex items-center gap-2 ml-1">
+          <div className="h-4 w-px" style={{ background: "rgba(255,255,255,0.06)" }} />
+          <ShareButtons
+            url={publicUrl}
+            title={`${displayName} on AthleteOS`}
+            description={bio || `Check out ${displayName}'s athlete card`}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── ContactModal ─────────────────────────────────────── */
+interface ContactModalProps {
+  profile: Profile;
+  accent: string;
+  onClose: () => void;
+  copiedEmail: boolean;
+  copiedPhone: boolean;
+  onCopyEmail: () => void;
+  onCopyPhone: () => void;
+}
+
+function ContactModal({
+  profile,
+  accent,
+  onClose,
+  copiedEmail,
+  copiedPhone,
+  onCopyEmail,
+  onCopyPhone,
+}: ContactModalProps) {
+  const contactEmail = profile.contact_email || profile.email;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      onClick={(e) => e.stopPropagation()}
+      className="absolute inset-0 z-30 flex flex-col justify-between p-5 rounded-[18.5px]"
+      style={{
+        background: "rgba(10,10,14,0.96)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+      }}
+    >
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Mail className="h-3.5 w-3.5" style={{ color: accent }} />
+            <h3 className="text-[11px] font-black text-white uppercase tracking-widest">
+              Contact Details
+            </h3>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Close contact details"
+            className="h-6 w-6 rounded-full flex items-center justify-center transition-colors"
+            style={{
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.09)",
+              color: "rgba(255,255,255,0.40)",
+            }}
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          {/* Email */}
+          <div
+            className="rounded-xl p-3 space-y-2"
+            style={{
+              background: "rgba(255,255,255,0.02)",
+              border: "1px solid rgba(255,255,255,0.05)",
+            }}
+          >
+            <p className="text-[8px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.25)" }}>
+              Email Address
+            </p>
+            <p className="text-[11px] font-semibold truncate leading-none py-0.5" style={{ color: "rgba(255,255,255,0.80)" }}>
+              {contactEmail}
+            </p>
+            <div className="flex gap-2">
+              <a
+                href={`mailto:${contactEmail}`}
+                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[9px] font-black"
+                style={{ background: accent, color: "#0a0a0e" }}
+              >
+                <Mail className="h-3 w-3" /> Email
+              </a>
+              <button
+                onClick={onCopyEmail}
+                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[9px] font-black transition-all"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.09)",
+                  color: "rgba(255,255,255,0.55)",
+                }}
+              >
+                {copiedEmail ? "Copied!" : "Copy"}
+              </button>
+            </div>
+          </div>
+
+          {/* Phone */}
+          {profile.contact_phone?.trim() && (
+            <div
+              className="rounded-xl p-3 space-y-2"
+              style={{
+                background: "rgba(255,255,255,0.02)",
+                border: "1px solid rgba(255,255,255,0.05)",
+              }}
+            >
+              <p className="text-[8px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.25)" }}>
+                Phone Number
+              </p>
+              <p className="text-[11px] font-semibold truncate leading-none py-0.5" style={{ color: "rgba(255,255,255,0.80)" }}>
+                {profile.contact_phone}
+              </p>
+              <div className="flex gap-2">
+                <a
+                  href={`tel:${profile.contact_phone}`}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[9px] font-black"
+                  style={{ background: accent, color: "#0a0a0e" }}
+                >
+                  <Phone className="h-3 w-3" /> Call
+                </a>
+                <button
+                  onClick={onCopyPhone}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[9px] font-black transition-all"
+                  style={{
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.09)",
+                    color: "rgba(255,255,255,0.55)",
+                  }}
+                >
+                  {copiedPhone ? "Copied!" : "Copy"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <button
+        onClick={onClose}
+        className="w-full py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
+        style={{
+          border: "1px solid rgba(255,255,255,0.08)",
+          background: "rgba(255,255,255,0.04)",
+          color: "rgba(255,255,255,0.45)",
+        }}
+      >
+        Close
+      </button>
+    </motion.div>
+  );
+}
+
+/* ── BusinessBlock (Monetization architecture boundary) ── */
+/**
+ * Architecture placeholder for future monetization blocks.
+ * This component defines the boundary for:
+ *   - Sponsorship inquiries
+ *   - Bookings
+ *   - Tips / support
+ *   - Paid links
+ *   - Shoutouts
+ *   - Digital offers
+ * Currently surfaces via AthleteBusiness (Inquiry + Tip).
+ * Each block will eventually be togglable by the athlete.
+ */
+interface BusinessBlockProps {
+  profileId: string;
+  displayName: string;
+  accent: string;
+  hasContact: boolean;
+  onContactOpen: () => void;
+  onInquiryOpen: () => void;
+  onInteract: () => void;
+}
+
+function BusinessBlock({
+  profileId,
+  displayName,
+  accent,
+  hasContact,
+  onContactOpen,
+  onInquiryOpen,
+  onInteract,
+}: BusinessBlockProps) {
+  return (
+    <div className="flex flex-col gap-2 w-full px-4 pb-2 pt-2 flex-shrink-0">
+      {/* Sponsor / business affordance label */}
+      <div className="flex items-center gap-1.5 mb-0.5">
+        <Briefcase className="h-2.5 w-2.5" style={{ color: `${accent}40` }} />
+        <span className="text-[8px] font-black uppercase tracking-widest" style={{ color: `${accent}35` }}>
+          Partnership &amp; Inquiries
+        </span>
+      </div>
+
+      {/* CTA row */}
+      <div className="flex gap-2 w-full">
+        {hasContact && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onInteract();
+              onContactOpen();
+            }}
+            className="flex-1 flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[11.5px] font-black tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              color: "rgba(255,255,255,0.55)",
+            }}
+          >
+            <Mail className="h-3.5 w-3.5 flex-shrink-0" />
+            Contact
+          </button>
+        )}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onInteract();
+            onInquiryOpen();
+          }}
+          className={`${hasContact ? "flex-1" : "w-full"} flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[11.5px] font-black tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]`}
+          style={{
+            background: `${accent}15`,
+            border: `1px solid ${accent}30`,
+            color: accent,
+          }}
+        >
+          <Send className="h-3.5 w-3.5 flex-shrink-0" />
+          Send Inquiry
+        </button>
+      </div>
+
+      {/* Tip / support — existing TipButton integration preserved */}
+      <div onClick={(e) => { e.stopPropagation(); onInteract(); }}>
+        <TipButton
+          athleteId={profileId}
+          athleteName={displayName}
+          accentColor={accent}
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   REFLECTIVE CARD SHELL
+   ─────────────────────────────────────────────────────
+   Themeable card material layer. Controls:
+   • surface color
+   • rotating glow border track
+   • noise texture overlay
+   • shadow system
+   • border radius
+   
+   Future themes can modify these values without touching
+   the inner content components.
+══════════════════════════════════════════════════════════ */
+
+interface ReflectiveCardShellProps {
+  accent: string;
+  borderGlow?: string;
+  children: React.ReactNode;
+  /** Which face: 'front' is visible, 'back' is rotateY(180deg) */
+  face: "front" | "back";
+  flipped: boolean;
+  onClick?: () => void;
+  className?: string;
+  style?: React.CSSProperties;
+  onMouseMove?: () => void;
+  onTouchStart?: () => void;
+}
+
+function ReflectiveCardShell({
+  accent,
+  borderGlow,
+  children,
+  face,
+  flipped,
+  onClick,
+  className = "",
+  style = {},
+  onMouseMove,
+  onTouchStart,
+}: ReflectiveCardShellProps) {
+  const isFront = face === "front";
+  const isActive = isFront ? !flipped : flipped;
+
+  const boxShadow = borderGlow
+    ? `${borderGlow}, 0 20px 60px -16px rgba(0,0,0,0.6)`
+    : `
+        0 0 0 1px rgba(255,255,255,0.035),
+        0 2px 4px rgba(0,0,0,0.20),
+        0 20px 60px -16px rgba(0,0,0,0.60)
+      `;
+
+  return (
+    <div
+      className={`flip-card-face ${face === "back" ? "flip-card-back" : ""} flex flex-col ${className}`}
+      style={{
+        width: "100%",
+        height: "100%",
+        boxShadow,
+        opacity: isActive ? 1 : 0,
+        pointerEvents: isActive ? "auto" : "none",
+        zIndex: isActive ? 1 : 0,
+        transition: "opacity 0.3s ease",
+        "--accent-glow": accent,
+        ...style,
+      } as React.CSSProperties}
+      onClick={onClick}
+      onMouseMove={onMouseMove}
+      onTouchStart={onTouchStart}
+    >
+      {/* Glow border container */}
+      <div className="glow-border-container flex flex-col w-full h-full">
+        {/* Rotating light track */}
+        <div className="glow-border-track" />
+
+        {/* Inner card surface */}
+        <div
+          className="w-full h-full flex flex-col rounded-[18.5px] overflow-hidden relative z-10"
+          style={{ background: "#0d0d12" }}
+        >
+          {/* Top accent hairline */}
+          <div
+            className="absolute top-0 inset-x-0 h-px z-20 pointer-events-none"
+            style={{
+              background: `linear-gradient(90deg, transparent 5%, ${accent}35 50%, transparent 95%)`,
+            }}
+          />
+
+          {/* Noise grain — premium material texture */}
+          <div
+            className="absolute inset-0 pointer-events-none z-10 rounded-[18.5px]"
+            style={{
+              backgroundImage:
+                "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+              backgroundSize: "128px 128px",
+              mixBlendMode: "overlay",
+              opacity: 0.022,
+            }}
+          />
+
+          {children}
+
+          {/* Bottom accent hairline */}
+          <div
+            className="absolute bottom-0 inset-x-0 h-px z-20 pointer-events-none"
+            style={{
+              background: `linear-gradient(90deg, transparent 10%, ${accent}20 50%, transparent 90%)`,
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   ROOT COMPONENT — ProfileCard (exported)
+══════════════════════════════════════════════════════════ */
+
+export function ProfileCard({
+  profile,
+  totalViews = 0,
+  totalFollowers = 0,
+  nilScore = null,
+}: {
+  profile: Profile;
+  totalViews?: number;
+  totalFollowers?: number;
+  nilScore?: number | null;
+}) {
+  /* ── State ──────────────────────────────────────── */
   const [flipped, setFlipped] = useState(false);
   const [copied, setCopied] = useState(false);
   const [urlCopied, setUrlCopied] = useState(false);
@@ -76,7 +1339,10 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
   const searchParams = useSearchParams();
   const autoReturnRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const trackedRef = useRef(false);
+  /** Shared webcam stream between front and back ReflectiveCard instances */
+  const webcamStreamRef = useRef<MediaStream | null>(null);
 
+  /* ── Analytics ──────────────────────────────────── */
   useEffect(() => {
     if (!trackedRef.current) {
       trackView(profile.id);
@@ -93,69 +1359,84 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
     }
   }, [searchParams]);
 
+  /* ── Derived data ───────────────────────────────── */
   const themeObj = resolveTheme(profile.theme_accent);
   const accent = themeObj.primaryColor;
+
   const displayName = cleanName(profile.full_name, profile.username);
   const firstName = displayName.split(" ")[0];
   const publicUrl = typeof window === "undefined" ? "" : window.location.href;
-
-  const initials = displayName.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+  const initials = displayName
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  const athleteId = formatAthleteId(profile.username);
 
   const photos: string[] = [profile.avatar_url].filter(Boolean) as string[];
   const hasMultiplePhotos = photos.length > 1;
 
-  const PLACEHOLDER_STATS = /^(test|asdf|foo|bar|baz|aaa|123|000|xxx|yyy|zzz|na|n\/a|none|sample|demo|example|temp|placeholder)$/i;
-  const stats = (profile.stats ?? []).filter(s => {
+  const plan = resolvePlan(profile.plan, profile.extended_pro_until);
+  const isPro = plan === "pro";
+  const isVerified = profile.is_verified || isPro;
+
+  const classLabel =
+    profile.class_year?.toLowerCase() === "freshman"  ? "FR" :
+    profile.class_year?.toLowerCase() === "sophomore" ? "SO" :
+    profile.class_year?.toLowerCase() === "junior"    ? "JR" :
+    profile.class_year?.toLowerCase() === "senior"    ? "SR" : null;
+
+  /* Stats filtering */
+  const PLACEHOLDER_RE = /^(test|asdf|foo|bar|baz|aaa|123|000|xxx|yyy|zzz|na|n\/a|none|sample|demo|example|temp|placeholder)$/i;
+  const cleanStats = (profile.stats ?? []).filter((s) => {
     if (!s.label?.trim() || !s.value?.trim()) return false;
     const l = s.label.trim().toLowerCase();
     const v = s.value.trim();
     if (/^(.)\1+$/.test(l) && l.length > 2) return false;
     if (/^(.)\1+$/.test(v) && v.length > 2) return false;
     if (v.length > 50) return false;
-    if (PLACEHOLDER_STATS.test(l) || PLACEHOLDER_STATS.test(v)) return false;
+    if (PLACEHOLDER_RE.test(l) || PLACEHOLDER_RE.test(v)) return false;
     return true;
   }).slice(0, 3);
 
-  const allStatCells = [
-    ...(nilScore !== null && nilScore > 0 ? [{ key: "nil", label: "NIL", value: String(nilScore), isAccent: true }] : []),
-    ...stats.map(s => ({ key: s.label, label: sanitize(s.label), value: s.value, isAccent: false })),
+  const statCells: StatCell[] = [
+    ...(nilScore !== null && nilScore > 0
+      ? [{ key: "nil", label: "NIL", value: String(nilScore), isAccent: true }]
+      : []),
+    ...cleanStats.map((s) => ({ key: s.label, label: sanitize(s.label), value: s.value, isAccent: false })),
   ];
 
   const links = (profile.links ?? []).slice(0, 6);
-  const maxVisibleLinks = 2;
-  const displayedLinks = linksExpanded ? links : links.slice(0, maxVisibleLinks);
+  const MAX_VISIBLE_LINKS = 2;
   const highlights = (profile.highlights ?? []).slice(0, 6);
-  const hasValidBio = profile.bio && profile.bio.trim().length > 15 && !/^(.)\1+$/.test(profile.bio.trim()) && !profile.bio.includes("@") && !/^[a-z]{2,6}$/i.test(profile.bio.trim());
+
+  const hasValidBio =
+    profile.bio &&
+    profile.bio.trim().length > 15 &&
+    !/^(.)\1+$/.test(profile.bio.trim()) &&
+    !profile.bio.includes("@") &&
+    !/^[a-z]{2,6}$/i.test(profile.bio.trim());
 
   const socialLinks = SOCIAL_MAP
-    .filter(s => profile.social?.[s.key as keyof typeof profile.social])
-    .map(s => ({
+    .filter((s) => profile.social?.[s.key as keyof typeof profile.social])
+    .map((s) => ({
       ...s,
       href: s.prefix + encodeURIComponent(profile.social![s.key as keyof typeof profile.social]!),
     }));
 
   const hasContact = Boolean(profile.contact_email?.trim() || profile.contact_phone?.trim());
 
-  const classLabel = profile.class_year?.toLowerCase() === "freshman" ? "FR" : profile.class_year?.toLowerCase() === "sophomore" ? "SO" : profile.class_year?.toLowerCase() === "junior" ? "JR" : profile.class_year?.toLowerCase() === "senior" ? "SR" : null;
-
-  function getNilLabel(score: number): string {
-    if (score > 80) return "Elite";
-    if (score > 60) return "Strong";
-    if (score > 40) return "Established";
-    if (score > 20) return "Growing";
-    return "Emerging";
-  }
-
-  /* ── Photo carousel ────────────────── */
+  /* ── Photo carousel ─────────────────────────────── */
   useEffect(() => {
     if (!hasMultiplePhotos) return;
     const id = setInterval(() => {
-      setPhotoIdx(prev => (prev + 1) % photos.length);
+      setPhotoIdx((p) => (p + 1) % photos.length);
     }, PHOTO_INTERVAL_MS);
     return () => clearInterval(id);
   }, [hasMultiplePhotos, photos.length]);
 
-  /* ── Auto-return timer ─────────────── */
+  /* ── Auto-return ────────────────────────────────── */
   const startAutoReturn = useCallback(() => {
     if (autoReturnRef.current) clearTimeout(autoReturnRef.current);
     autoReturnRef.current = setTimeout(() => setFlipped(false), AUTO_RETURN_MS);
@@ -172,12 +1453,14 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
     } else {
       if (autoReturnRef.current) clearTimeout(autoReturnRef.current);
     }
-    return () => { if (autoReturnRef.current) clearTimeout(autoReturnRef.current); };
+    return () => {
+      if (autoReturnRef.current) clearTimeout(autoReturnRef.current);
+    };
   }, [flipped, startAutoReturn]);
 
-  /* ── Actions ───────────────────────── */
+  /* ── Handlers ───────────────────────────────────── */
   function handleFlip() {
-    setFlipped(f => !f);
+    setFlipped((f) => !f);
     if (hintVisible) setHintVisible(false);
   }
 
@@ -185,7 +1468,13 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
     e.stopPropagation();
     trackFunnel("public_card_share", { username: profile.username });
     if (navigator.share) {
-      try { await navigator.share({ title: `${displayName} on AthleteOS`, text: `${displayName}'s AthleteOS card`, url: publicUrl }); } catch { /* */ }
+      try {
+        await navigator.share({
+          title: `${displayName} on AthleteOS`,
+          text: `${displayName}'s AthleteOS card`,
+          url: publicUrl,
+        });
+      } catch { /* */ }
     } else {
       try {
         await navigator.clipboard.writeText(publicUrl);
@@ -197,31 +1486,41 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
 
   async function handleCopyUrl(e: React.MouseEvent) {
     e.stopPropagation();
-    const url = `https://athleteos.app/${profile.username}`;
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(`https://athleteos.app/${profile.username}`);
       setUrlCopied(true);
       setTimeout(() => setUrlCopied(false), 1500);
     } catch { /* */ }
   }
 
-  function stopFlip(e: React.MouseEvent) { e.stopPropagation(); resetAutoReturn(); }
+  function stopPropAndReset(e: React.MouseEvent) {
+    e.stopPropagation();
+    resetAutoReturn();
+  }
 
-  /* ── Render ────────────────────────── */
+  /* ── Render ─────────────────────────────────────── */
   return (
-    <div
-      className="min-h-dvh w-full flex items-center justify-center select-none p-4 bg-gradient-to-b from-neutral-950 via-neutral-950 to-black relative overflow-hidden"
+    <div className="min-h-dvh w-full flex items-center justify-center select-none p-4 relative overflow-hidden"
+      style={{
+        background: "radial-gradient(ellipse 70% 60% at 50% -5%, #111116, #07070a 60%)",
+      }}
     >
-      {/* Subtle radial background glow */}
+      {/* Ambient glow behind card */}
       <div
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px] pointer-events-none"
-        style={{ backgroundColor: `${accent}08` }}
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
+        style={{
+          width: "640px",
+          height: "640px",
+          background: `radial-gradient(circle, ${accent}07 0%, transparent 70%)`,
+          filter: "blur(60px)",
+        }}
+        aria-hidden
       />
 
-      {/* Perspective container */}
+      {/* 3D perspective container */}
       <div
         style={{
-          perspective: "1200px",
+          perspective: "1100px",
           width: `min(${CARD_W}px, calc(100vw - 32px))`,
           aspectRatio: `${CARD_W} / ${CARD_H}`,
           maxHeight: `min(${CARD_H}px, calc(100dvh - 32px))`,
@@ -229,135 +1528,78 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
       >
         <motion.div
           animate={{ rotateY: flipped ? 180 : 0 }}
-          transition={{ type: "spring", stiffness: 280, damping: 32, mass: 0.8 }}
+          transition={{ type: "spring", stiffness: 270, damping: 30, mass: 0.85 }}
           onClick={handleFlip}
           className="relative w-full h-full cursor-pointer group"
-          style={{
-            transformStyle: "preserve-3d",
-            borderRadius: "20px",
-          }}
+          style={{ transformStyle: "preserve-3d", borderRadius: "20px" }}
+          role="button"
+          aria-label={flipped ? "Flip card to front" : "Flip card to see more"}
+          aria-pressed={flipped}
         >
-          {/* ════════════════════════════════════════════════════
+
+          {/* ═══════════════════════════════════════════
               FRONT FACE
-             ════════════════════════════════════════════════════ */}
+          ═══════════════════════════════════════════ */}
           <div
             className="flip-card-face flex flex-col"
             style={{
-              width: "100%",
-              height: "100%",
-              boxShadow: themeObj.borderGlow ? `${themeObj.borderGlow}, 0 16px 48px -12px rgba(0,0,0,0.5)` : `
-                0 0 0 1px rgba(255,255,255,0.04),
-                0 2px 4px rgba(0,0,0,0.15),
-                0 16px 48px -12px rgba(0,0,0,0.5)
-              `,
-              "--accent-glow": accent,
               opacity: flipped ? 0 : 1,
               pointerEvents: flipped ? "none" : "auto",
               zIndex: flipped ? 0 : 1,
-              transition: "opacity 0.35s ease",
-            } as React.CSSProperties}
+              transition: "opacity 0.32s ease",
+            }}
           >
-            {/* Inner border container */}
-            <div className="glow-border-container flex flex-col w-full h-full">
-              {/* Rotating sharp track */}
-              <div className="glow-border-track" />
-
-              {/* Card content container */}
-              <div className="w-full h-full flex flex-col bg-[#111115] rounded-[18.5px] overflow-hidden relative z-10">
-            {/* Top accent line */}
-            <div
-              className="absolute top-0 inset-x-0 h-px z-20"
-              style={{ background: `linear-gradient(90deg, transparent 5%, ${accent}40 50%, transparent 95%)` }}
-            />
-
-            {/* ── Photo Hero (45%) ─────────────────── */}
-            <div className="relative flex-shrink-0" style={{ height: "45%" }}>
-              {photos.length > 0 ? (
-                <>
-                  {photos.map((url, i) => (
-                    <div
-                      key={url}
-                      className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
-                      style={{ opacity: i === photoIdx ? 1 : 0 }}
-                    >
-                      <Image
-                        src={url}
-                        alt={displayName}
-                        fill
-                        sizes="360px"
-                        className="object-cover"
-                        draggable={false}
-                        unoptimized
-                      />
-                    </div>
-                  ))}
-                </>
-              ) : (
-                <div
-                  className="absolute inset-0 flex items-center justify-center"
-                  style={{ background: `linear-gradient(160deg, ${accent}15 0%, #111115 100%)` }}
-                >
-                  <span className="text-6xl font-black" style={{ color: `${accent}25` }}>{initials}</span>
-                </div>
-              )}
-
-              {/* Vignette */}
+            <ReflectiveCard
+              blurStrength={11}
+              metalness={0.88}
+              roughness={0.38}
+              displacementStrength={22}
+              noiseScale={1.1}
+              specularConstant={1.4}
+              grayscale={0.92}
+              glassDistortion={8}
+              overlayColor="rgba(0, 0, 0, 0.20)"
+              radius={20}
+              filterId="rc-filter-front"
+              streamRef={webcamStreamRef}
+              style={{ width: "100%", height: "100%" }}
+            >
+              {/* Top accent hairline */}
               <div
-                className="absolute inset-0 pointer-events-none"
-                style={{ background: "radial-gradient(ellipse 80% 60% at 50% 35%, transparent 40%, rgba(0,0,0,0.35) 100%)" }}
+                className="absolute top-0 inset-x-0 h-px z-20 pointer-events-none"
+                style={{ background: `linear-gradient(90deg, transparent 5%, ${accent}40 50%, transparent 95%)` }}
               />
 
-              {/* Bottom fade into content area */}
-              <div
-                className="absolute inset-x-0 bottom-0 pointer-events-none"
-                style={{
-                  height: "50%",
-                  background: "linear-gradient(to top, #111115 0%, #111115e0 25%, #11111560 55%, transparent 100%)",
-                }}
+              {/* Photo hero */}
+              <AthletePhoto
+                photos={photos}
+                photoIdx={photoIdx}
+                displayName={displayName}
+                initials={initials}
+                accent={accent}
               />
 
-              {/* Top bar: logo + share + qr */}
-              <div className="absolute top-3 inset-x-3 pt-1 flex items-center justify-between z-10">
-                <div className="flex items-center gap-1.5">
-                  <Logo className="h-4.5 w-4.5 rounded-[3px]" style={{ backgroundColor: accent }} />
-                  <span className="text-[10px] font-bold tracking-widest uppercase text-white/80">AthleteOS</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  {resolvePlan(profile.plan, profile.extended_pro_until) !== "free" && (
-                    <div
-                      className="flex items-center gap-1 rounded-full pl-2 pr-2.5 h-7 backdrop-blur-md"
-                      style={{ background: "rgba(0,0,0,0.45)", border: "1px solid rgba(255,255,255,0.12)" }}
-                    >
-                      <Star className="h-3 w-3" style={{ color: accent }} fill={accent} />
-                      <span className="text-[9px] font-black tracking-wider" style={{ color: accent }}>
-                        {resolvePlan(profile.plan, profile.extended_pro_until) === "pro" ? "Pro" : "Team"}
-                      </span>
-                    </div>
-                  )}
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setShowQr(true); }}
-                    className="h-7 w-7 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-200 hover:scale-110"
-                    style={{ background: "rgba(0,0,0,0.45)", border: "1px solid rgba(255,255,255,0.12)" }}
-                  >
-                    <QrCode className="h-3 w-3 text-white/60" />
-                  </button>
-                  <button
-                    onClick={handleShare}
-                    className="h-7 w-7 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-200 hover:scale-110"
-                    style={{ background: "rgba(0,0,0,0.45)", border: "1px solid rgba(255,255,255,0.12)" }}
-                  >
-                    {copied ? (
-                      <CheckIcon className="h-3 w-3" style={{ color: accent }} />
-                    ) : (
-                      <Share2 className="h-3 w-3 text-white/60" />
-                    )}
-                  </button>
-                </div>
-              </div>
+              {/* Card header (overlaid on photo) */}
+              <CardHeader
+                accent={accent}
+                plan={plan}
+                isVerified={isVerified}
+                profile={profile}
+                onQr={(e) => { e.stopPropagation(); setShowQr(true); }}
+                onShare={handleShare}
+                copied={copied}
+              />
 
-              {/* Photo dots */}
+              {/* Photo carousel dots */}
               {hasMultiplePhotos && (
-                <div className="absolute bottom-[35%] left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
+                <div
+                  className="absolute flex items-center gap-1.5 z-10 pointer-events-none"
+                  style={{
+                    bottom: "calc(54% + 8px)",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                  }}
+                >
                   {photos.map((_, i) => (
                     <div
                       key={i}
@@ -371,535 +1613,207 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
                   ))}
                 </div>
               )}
-            </div>
 
-            {/* ── Identity Cluster ────────────────────── */}
-            <div className="flex-shrink-0 px-6 mt-1 relative z-10">
-              <div className="flex items-center gap-1.5">
-                <h1 className="text-[28px] font-black tracking-[-0.03em] leading-none text-white truncate">
-                  {displayName}
-                </h1>
-                {(profile.is_verified || resolvePlan(profile.plan, profile.extended_pro_until) === "pro") && (
-                  <span
-                    className="flex-shrink-0 flex h-[18px] w-[18px] items-center justify-center rounded-full gold-badge-glow"
-                    style={{ backgroundColor: "#FACC15" }}
-                    title="Gold Verified Athlete"
-                  >
-                    <CheckIcon className="h-2.5 w-2.5 text-[#111115]" strokeWidth={3} />
-                  </span>
-                )}
-                {classLabel && (
-                  <span className="flex-shrink-0 inline-flex items-center rounded-md px-1.5 py-0.5 text-[8px] font-bold tracking-widest uppercase text-white/40 bg-white/[0.04] border border-white/[0.08]">
-                    {classLabel}
-                  </span>
-                )}
-              </div>
-              <div className="text-[12px] text-white/50 font-medium truncate leading-none mt-1.5">
-                {[profile.sport, profile.position, profile.school].filter(Boolean).join(" · ")}
-              </div>
-            </div>
+              {/* Identity */}
+              <AthleteIdentity
+                displayName={displayName}
+                sport={profile.sport}
+                position={profile.position}
+                school={profile.school}
+                classLabel={classLabel}
+                isVerified={isVerified}
+                isPro={isPro}
+                accent={accent}
+              />
 
-            {/* ── Stats Strip (horizontal) ────────── */}
-            {allStatCells.length > 0 && (
-              <div className="flex-shrink-0 mx-6 mt-3">
-                <div
-                  className="flex items-stretch rounded-xl overflow-hidden"
-                  style={{
-                    background: "#17171b",
-                    border: "1px solid rgba(255,255,255,0.06)",
-                  }}
-                >
-                  {allStatCells.map((cell, i) => (
-                    <div
-                      key={cell.key}
-                      className="flex-1 flex flex-col items-center justify-center py-3 px-2"
-                      style={i > 0 ? { borderLeft: "1px solid rgba(255,255,255,0.06)" } : {}}
-                    >
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-white/35 mb-1 text-center line-clamp-1">
-                        {cell.label}
-                      </span>
-                      <p
-                        className={`text-[20px] font-black leading-none tracking-tight ${cell.isAccent ? "" : "text-white"}`}
-                        style={cell.isAccent ? { color: accent } : {}}
-                      >
-                        {cell.value}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+              {/* Stats strip */}
+              <AthleteStats cells={statCells} accent={accent} />
 
-            {/* ── Card URL + Copy ────────────────── */}
-            <div className="flex-shrink-0 mx-6 mb-2">
-              <button
-                onClick={handleCopyUrl}
-                className="w-full flex items-center justify-between rounded-lg px-4 py-2.5 transition-all duration-200 group"
-                style={{
-                  background: "rgba(255,255,255,0.02)",
-                  border: "1px solid rgba(255,255,255,0.06)",
-                }}
-              >
-                <span className="text-[11px] text-white/40 font-medium tracking-wide truncate">
-                  athleteos.app/{profile.username}
-                </span>
-                <span className="flex-shrink-0 ml-2">
-                  {urlCopied ? (
-                    <CheckIcon className="h-3.5 w-3.5 transition-colors" style={{ color: accent }} />
-                  ) : (
-                    <Copy className="h-3.5 w-3.5 text-white/25 group-hover:text-white/50 transition-colors" />
-                  )}
-                </span>
-              </button>
-            </div>
+              {/* Athlete ID / URL block */}
+              <AthleteIDBlock
+                username={profile.username}
+                athleteId={athleteId}
+                accent={accent}
+                urlCopied={urlCopied}
+                onCopy={handleCopyUrl}
+              />
 
-            {/* ── Flip Hint ──────────────────────── */}
-            <div className="flex items-center justify-center py-2.5 px-4 flex-shrink-0">
+              {/* Flip CTA */}
+              <FlipCTA accent={accent} hintVisible={hintVisible} />
+
+              {/* Bottom accent hairline */}
               <div
-                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full backdrop-blur-md transition-all duration-300 group-hover:scale-[1.03] group-hover:border-accent/40 ${
-                  hintVisible ? "flip-hint-pulse" : "opacity-40"
-                }`}
-                style={{
-                  background: "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid rgba(255, 255, 255, 0.12)",
-                  boxShadow: `0 2px 12px rgba(0, 0, 0, 0.3), 0 0 16px ${accent}15`,
-                }}
-              >
-                <RotateCcw
-                  className="h-3.5 w-3.5 transition-transform duration-500 group-hover:-rotate-90"
-                  style={{ color: accent }}
-                />
-                <span className="text-[10px] font-bold tracking-[0.16em] uppercase text-white/90 group-hover:text-white">
-                  Tap card to flip
-                </span>
-                <span
-                  className="h-1.5 w-1.5 rounded-full animate-ping ml-0.5"
-                  style={{ backgroundColor: accent }}
-                />
-              </div>
-            </div>
-
-                {/* Bottom accent line */}
-                <div
-                  className="absolute bottom-0 inset-x-0 h-px"
-                  style={{ background: `linear-gradient(90deg, transparent 10%, ${accent}25 50%, transparent 90%)` }}
-                />
-              </div>
-            </div>
+                className="absolute bottom-0 inset-x-0 h-px z-20 pointer-events-none"
+                style={{ background: `linear-gradient(90deg, transparent 10%, ${accent}22 50%, transparent 90%)` }}
+              />
+            </ReflectiveCard>
           </div>
 
-          {/* ════════════════════════════════════════════════════
+          {/* ═══════════════════════════════════════════
               BACK FACE
-             ════════════════════════════════════════════════════ */}
+          ═══════════════════════════════════════════ */}
           <div
             className="flip-card-face flip-card-back flex flex-col"
             style={{
-              width: "100%",
-              height: "100%",
-              boxShadow: `
-                0 0 0 1px rgba(255,255,255,0.03),
-                0 2px 4px rgba(0,0,0,0.2),
-                0 20px 60px -15px rgba(0,0,0,0.6)
-              `,
-              "--accent-glow": accent,
               opacity: flipped ? 1 : 0,
               pointerEvents: flipped ? "auto" : "none",
               zIndex: flipped ? 1 : 0,
-              transition: "opacity 0.35s ease",
-            } as React.CSSProperties}
+              transition: "opacity 0.32s ease",
+            }}
             onMouseMove={resetAutoReturn}
             onTouchStart={resetAutoReturn}
           >
-            {/* Inner border container */}
-            <div className="glow-border-container flex flex-col w-full h-full">
-              {/* Rotating sharp track */}
-              <div className="glow-border-track" />
+            <ReflectiveCard
+              blurStrength={11}
+              metalness={0.88}
+              roughness={0.38}
+              displacementStrength={22}
+              noiseScale={1.1}
+              specularConstant={1.4}
+              grayscale={0.92}
+              glassDistortion={8}
+              overlayColor="rgba(0, 0, 0, 0.20)"
+              radius={20}
+              filterId="rc-filter-back"
+              streamRef={webcamStreamRef}
+              style={{ width: "100%", height: "100%" }}
+            >
+            {/* Contact modal overlay */}
+            <AnimatePresence>
+              {showContactModal && (
+                <ContactModal
+                  profile={profile}
+                  accent={accent}
+                  onClose={() => setShowContactModal(false)}
+                  copiedEmail={copiedEmail}
+                  copiedPhone={copiedPhone}
+                  onCopyEmail={async () => {
+                    try {
+                      await navigator.clipboard.writeText(
+                        profile.contact_email || profile.email
+                      );
+                      setCopiedEmail(true);
+                      setTimeout(() => setCopiedEmail(false), 2000);
+                    } catch { /* */ }
+                  }}
+                  onCopyPhone={async () => {
+                    try {
+                      await navigator.clipboard.writeText(profile.contact_phone || "");
+                      setCopiedPhone(true);
+                      setTimeout(() => setCopiedPhone(false), 2000);
+                    } catch { /* */ }
+                  }}
+                />
+              )}
+            </AnimatePresence>
 
-              {/* Card content container */}
-              <div className="w-full h-full flex flex-col bg-[#111115] rounded-[18.5px] overflow-hidden relative z-10">
-                {/* Contact Modal Overlay */}
-                <AnimatePresence>
-                  {showContactModal && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 15 }}
-                      onClick={(e) => { e.stopPropagation(); }}
-                      className="absolute inset-0 z-30 bg-[#0D0D10]/95 backdrop-blur-md p-5 flex flex-col justify-between rounded-[18.5px]"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-1.5">
-                            <Mail className="h-3.5 w-3.5" style={{ color: accent }} />
-                            <h3 className="text-[11px] font-black text-white uppercase tracking-widest">Contact Details</h3>
-                          </div>
-                          <button
-                            onClick={() => setShowContactModal(false)}
-                            className="h-6 w-6 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white/40 hover:text-white transition-colors"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-
-                        <div className="space-y-3">
-                          {/* Email section */}
-                          <div className="rounded-xl p-3 border border-white/[0.05] bg-white/[0.02] space-y-2">
-                            <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest leading-none">Email Address</p>
-                            <p className="text-[11px] font-semibold text-white/80 truncate leading-none py-1">
-                              {profile.contact_email || profile.email}
-                            </p>
-                            <div className="flex gap-2">
-                              <a
-                                href={`mailto:${profile.contact_email || profile.email}`}
-                                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[9px] font-bold bg-accent text-bg hover:opacity-90 transition-opacity"
-                              >
-                                <Mail className="h-3 w-3" /> Email
-                              </a>
-                              <button
-                                onClick={async () => {
-                                  try {
-                                    await navigator.clipboard.writeText(profile.contact_email || profile.email);
-                                    setCopiedEmail(true);
-                                    setTimeout(() => setCopiedEmail(false), 2000);
-                                  } catch {}
-                                }}
-                                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[9px] font-bold bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white transition-all"
-                              >
-                                {copiedEmail ? "Copied!" : "Copy"}
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Phone section */}
-                          {profile.contact_phone && profile.contact_phone.trim() && (
-                            <div className="rounded-xl p-3 border border-white/[0.05] bg-white/[0.02] space-y-2">
-                              <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest leading-none">Phone Number</p>
-                              <p className="text-[11px] font-semibold text-white/80 truncate leading-none py-1">
-                                {profile.contact_phone}
-                              </p>
-                              <div className="flex gap-2">
-                                <a
-                                  href={`tel:${profile.contact_phone}`}
-                                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[9px] font-bold bg-accent text-bg hover:opacity-90 transition-opacity"
-                                >
-                                  <Phone className="h-3 w-3" /> Call
-                                </a>
-                                <button
-                                  onClick={async () => {
-                                    try {
-                                      await navigator.clipboard.writeText(profile.contact_phone || "");
-                                      setCopiedPhone(true);
-                                      setTimeout(() => setCopiedPhone(false), 2000);
-                                    } catch {}
-                                  }}
-                                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[9px] font-bold bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white transition-all"
-                                >
-                                  {copiedPhone ? "Copied!" : "Copy"}
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => setShowContactModal(false)}
-                        className="w-full py-2 rounded-lg border border-white/10 bg-white/5 text-[10px] font-bold text-white/60 hover:text-white hover:bg-white/10 transition-all text-center"
-                      >
-                        Close
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-            {/* Top accent line */}
-            <div
-              className="absolute top-0 inset-x-0 h-px z-20"
-              style={{ background: `linear-gradient(90deg, transparent 5%, ${accent}50 50%, transparent 95%)` }}
+            {/* Back header */}
+            <BackHeader
+              avatarUrl={profile.avatar_url}
+              displayName={displayName}
+              sport={profile.sport}
+              position={profile.position}
+              school={profile.school}
+              isVerified={isVerified}
+              isPro={isPro}
+              initials={initials}
+              accent={accent}
             />
 
-            {/* ── Header ───────────────────────────── */}
-            <div className="flex items-center justify-between px-5 pt-4 pb-2 flex-shrink-0">
-              <div className="flex items-center gap-2 min-w-0">
-                {profile.avatar_url ? (
-                  <Image
-                    src={profile.avatar_url}
-                    alt={displayName}
-                    width={32}
-                    height={32}
-                    className="h-8 w-8 rounded-full object-cover flex-shrink-0"
-                    style={{ border: `2px solid ${accent}30` }}
-                    draggable={false}
-                    unoptimized
-                  />
-                ) : (
-                  <div
-                    className="h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ background: `${accent}15`, border: `2px solid ${accent}30` }}
-                  >
-                    <span className="text-[10px] font-black" style={{ color: `${accent}60` }}>{initials}</span>
-                  </div>
-                )}
-                <div className="min-w-0 flex items-center gap-1.5">
-                  <p className="text-[14px] font-bold text-white truncate leading-tight">{displayName}</p>
-                  {(profile.is_verified || resolvePlan(profile.plan, profile.extended_pro_until) === "pro") && (
-                    <span
-                      className="flex-shrink-0 flex h-[16px] w-[16px] items-center justify-center rounded-full gold-badge-glow"
-                      style={{ backgroundColor: "#FACC15" }}
-                      title="Gold Verified Athlete"
-                    >
-                      <CheckIcon className="h-2 w-2 text-[#111115]" strokeWidth={3} />
-                    </span>
-                  )}
-                  {(profile.sport || profile.position) && (
-                    <p className="text-[9px] text-white/25 font-medium truncate">
-                      {[profile.sport, profile.position, profile.school].filter(Boolean).join(" · ")}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 flex-shrink-0 px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/10 group-hover:border-accent/30 text-white/80 transition-all text-[9px] font-bold tracking-wider uppercase">
-                <RotateCcw className="h-3 w-3" style={{ color: accent }} />
-                <span>Flip Back</span>
-              </div>
-            </div>
+            {/* Divider */}
+            <div
+              className="mx-4 h-px flex-shrink-0"
+              style={{
+                background: `linear-gradient(90deg, transparent, ${accent}18, transparent)`,
+              }}
+            />
 
-            {/* Separator */}
-            <div className="mx-4 h-px flex-shrink-0" style={{ background: `linear-gradient(90deg, transparent, ${accent}20, transparent)` }} />
-
-            {/* ── Scrollable content ────────────────── */}
-            <div className="flex-1 overflow-y-auto scrollbar-none px-5 pt-4 pb-6 space-y-3" onClick={stopFlip} data-lenis-prevent>
-
-              {/* Bio */}
+            {/* Scrollable content area */}
+            <div
+              className="flex-1 overflow-y-auto scrollbar-none px-4 pt-3.5 pb-4 space-y-3.5"
+              onClick={stopPropAndReset}
+              data-lenis-prevent
+            >
               {hasValidBio && (
-                <div>
-                  <div className="flex items-center gap-1.5 mb-1.5">
-                    <Sparkles className="h-3 w-3" style={{ color: `${accent}60` }} />
-                    <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: `${accent}50` }}>About</span>
-                  </div>
-                  <p className="text-[11px] leading-[1.7] text-white/40 line-clamp-4 overflow-wrap-break-word" style={{ overflowWrap: "break-word", wordBreak: "break-word" }}>
-                    {sanitize(profile.bio)}
-                  </p>
-                </div>
+                <AboutSection bio={profile.bio!} accent={accent} />
               )}
 
-              {/* Links */}
-              {displayedLinks.length > 0 && (
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <ExternalLink className="h-3 w-3" style={{ color: `${accent}60` }} />
-                    <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: `${accent}50` }}>Links</span>
-                  </div>
-                  <div className="space-y-1.5">
-                  {displayedLinks.map(link => {
-                    let domain = "";
-                    try { domain = new URL(link.url).hostname.replace("www.", ""); } catch {}
-                    return (
-                      <a
-                        key={link.url}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          resetAutoReturn();
-                          trackLinkClick(profile.id, link.label, link.url);
-                        }}
-                        className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200 group transform translate-z-0 [backface-visibility:hidden] [will-change:transform] overflow-hidden relative"
-                        style={{
-                          background: "linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)",
-                          border: `1px solid rgba(255,255,255,0.07)`,
-                          boxShadow: "0 0 1px transparent",
-                          outline: "1px solid transparent",
-                          WebkitBackfaceVisibility: "hidden",
-                          backfaceVisibility: "hidden",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = `linear-gradient(135deg, ${accent}12 0%, ${accent}05 100%)`;
-                          e.currentTarget.style.borderColor = `${accent}30`;
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = "linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)";
-                          e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)";
-                        }}
-                      >
-                        <div
-                          className="w-0.5 self-stretch rounded-full flex-shrink-0"
-                          style={{ background: `linear-gradient(to bottom, ${accent}80, ${accent}20)` }}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-[11.5px] font-semibold text-white/70 group-hover:text-white/90 transition-colors truncate leading-tight">
-                            {sanitize(link.label)}
-                          </div>
-                          {domain && (
-                            <div className="text-[9px] text-white/25 group-hover:text-white/40 transition-colors truncate mt-0.5 leading-tight">
-                              {domain}
-                            </div>
-                          )}
-                        </div>
-                        <div
-                          className="flex-shrink-0 h-5 w-5 rounded-full flex items-center justify-center transition-all duration-200 group-hover:scale-110"
-                          style={{ background: `${accent}15` }}
-                        >
-                          <ChevronRight className="h-2.5 w-2.5 transition-colors" style={{ color: `${accent}80` }} />
-                        </div>
-                      </a>
-                    );
-                  })}
-                  </div>
-                  {links.length > maxVisibleLinks && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setLinksExpanded(!linksExpanded); resetAutoReturn(); }}
-                      className="w-full text-center text-[9px] font-bold uppercase tracking-wider py-1 transition-colors"
-                      style={{ color: `${accent}80` }}
-                    >
-                      {linksExpanded ? "Show less" : `Show all ${links.length}`}
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* Highlights */}
-              {highlights.length > 0 && (
-                <div className="mb-1">
-                  <div className="flex items-center gap-1.5 mb-1.5">
-                    <Play className="h-3 w-3" style={{ color: `${accent}60` }} />
-                    <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: `${accent}50` }}>Highlights</span>
-                  </div>
-                  <div className="flex flex-wrap items-center justify-center gap-2 py-2 px-1">
-                    {highlights.map((h, i) => (
-                      <a
-                        key={i}
-                        href={h.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          resetAutoReturn();
-                          trackLinkClick(profile.id, h.title || `Highlight ${i + 1}`, h.url);
-                        }}
-                        className="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-200 hover:scale-105 transform translate-z-0 [backface-visibility:hidden] [will-change:transform]"
-                        style={{
-                          background: `${accent}10`,
-                          border: `1px solid ${accent}20`,
-                          boxShadow: "0 0 1px transparent",
-                          outline: "1px solid transparent",
-                          WebkitBackfaceVisibility: "hidden",
-                          backfaceVisibility: "hidden",
-                        }}
-                      >
-                        <Play className="h-2.5 w-2.5 flex-shrink-0" style={{ color: `${accent}90` }} fill={`${accent}90`} />
-                        <span className="text-[10px] font-semibold truncate max-w-[110px]" style={{ color: `${accent}cc` }}>
-                          {sanitize(h.title) || `Highlight ${i + 1}`}
-                        </span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Connect: socials + share */}
-              {socialLinks.length > 0 && (
-                <div className="space-y-2 mb-1">
-                  <div className="flex items-center gap-1.5">
-                    <Heart className="h-3 w-3" style={{ color: `${accent}60` }} />
-                    <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: `${accent}50` }}>Connect</span>
-                  </div>
-                  <div className="flex flex-wrap items-center justify-center gap-2.5 py-1">
-                    {socialLinks.map(({ key, Icon, href, color }) => (
-                      <a
-                        key={key}
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => { e.stopPropagation(); resetAutoReturn(); }}
-                        className="social-icon-btn h-8 w-8 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110 group transform translate-z-0 [backface-visibility:hidden] [will-change:transform]"
-                        style={{
-                          background: "rgba(255,255,255,0.05)",
-                          border: "1px solid rgba(255,255,255,0.08)",
-                          boxShadow: "0 0 1px transparent",
-                          outline: "1px solid transparent",
-                          WebkitBackfaceVisibility: "hidden",
-                          backfaceVisibility: "hidden",
-                          "--social-color": color,
-                        } as React.CSSProperties}
-                      >
-                        <Icon className="h-3.5 w-3.5 text-white/30 group-hover:text-white transition-colors duration-300" style={{ color: undefined }} />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <div className="flex items-center justify-center gap-3 pt-1">
-                <div className="h-px w-10" style={{ background: "rgba(255,255,255,0.08)" }} />
-                <ShareButtons url={publicUrl} title={`${displayName} on AthleteOS`} description={profile.bio || `Check out ${displayName}'s athlete card`} />
-                <div className="h-px w-10" style={{ background: "rgba(255,255,255,0.08)" }} />
-              </div>
-            </div>
-            {/* ── Bottom: Actions ─────────── */}
-            <div className="mt-auto flex flex-col gap-2.5 w-full px-5 pb-2 pt-2 flex-shrink-0" onClick={stopFlip}>
-
-              {/* Contact + Inquiry (2-col) */}
-              <div className="flex gap-2 w-full">
-                {hasContact && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); resetAutoReturn(); setShowContactModal(true); }}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[12px] font-black tracking-wide transition-all duration-200 hover:scale-[1.02] transform translate-z-0 [backface-visibility:hidden] [will-change:transform]"
-                    style={{
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      color: "rgba(255,255,255,0.55)",
-                      boxShadow: "0 0 1px transparent",
-                      outline: "1px solid transparent",
-                      WebkitBackfaceVisibility: "hidden",
-                      backfaceVisibility: "hidden",
-                    }}
-                  >
-                    <Mail className="h-4 w-4" />
-                    Contact
-                  </button>
-                )}
-                <button
-                  onClick={(e) => { e.stopPropagation(); resetAutoReturn(); setShowInquiry(true); }}
-                  className={`${hasContact ? "flex-1" : "w-full"} flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[12px] font-black tracking-wide transition-all duration-200 hover:scale-[1.02] transform translate-z-0 [backface-visibility:hidden] [will-change:transform]`}
-                  style={{
-                    background: `${accent}15`,
-                    border: `1px solid ${accent}30`,
-                    color: accent,
-                    boxShadow: "0 0 1px transparent",
-                    outline: "1px solid transparent",
-                    WebkitBackfaceVisibility: "hidden",
-                    backfaceVisibility: "hidden",
-                  }}
-                >
-                  <Send className="h-4 w-4" />
-                  Send Inquiry
-                </button>
-              </div>
-
-              {/* Primary CTA */}
-              <div onClick={(e) => { e.stopPropagation(); resetAutoReturn(); }}>
-                <TipButton
-                  athleteId={profile.id}
-                  athleteName={displayName}
-                  accentColor={accent}
+              {links.length > 0 && (
+                <LinksSection
+                  links={links}
+                  accent={accent}
+                  expanded={linksExpanded}
+                  onToggle={() => setLinksExpanded((v) => !v)}
+                  maxVisible={MAX_VISIBLE_LINKS}
+                  onLinkClick={(label, url) => trackLinkClick(profile.id, label, url)}
+                  onInteract={resetAutoReturn}
                 />
-              </div>
+              )}
+
+              {highlights.length > 0 && (
+                <HighlightsSection
+                  highlights={highlights}
+                  accent={accent}
+                  profileId={profile.id}
+                  onInteract={resetAutoReturn}
+                />
+              )}
+
+              {socialLinks.length > 0 && (
+                <ConnectSection
+                  socialLinks={socialLinks}
+                  publicUrl={publicUrl}
+                  displayName={displayName}
+                  bio={profile.bio}
+                  accent={accent}
+                  onInteract={resetAutoReturn}
+                />
+              )}
             </div>
 
-                {/* ── Footer ───────────────────────────── */}
-                <div
-                  className="flex items-center justify-center gap-1.5 py-1.5 flex-shrink-0"
-                  style={{ borderTop: "1px solid rgba(255,255,255,0.04)", background: "rgba(0,0,0,0.15)" }}
-                >
-                  <span className="text-[7px] font-bold tracking-[0.3em] uppercase text-white/20">Powered by</span>
-                  <Logo className="h-2 w-2 rounded-[2px]" style={{ backgroundColor: `${accent}40` }} />
-                  <span className="text-[7px] font-bold tracking-[0.3em] uppercase text-white/20">AthleteOS</span>
-                </div>
-              </div>
+            {/* Business / actions block */}
+            <div
+              className="flex-shrink-0"
+              style={{
+                borderTop: "1px solid rgba(255,255,255,0.04)",
+                background: "rgba(0,0,0,0.08)",
+              }}
+              onClick={stopPropAndReset}
+            >
+              <BusinessBlock
+                profileId={profile.id}
+                displayName={displayName}
+                accent={accent}
+                hasContact={hasContact}
+                onContactOpen={() => setShowContactModal(true)}
+                onInquiryOpen={() => setShowInquiry(true)}
+                onInteract={resetAutoReturn}
+              />
             </div>
+
+            {/* Powered by footer */}
+            <div
+              className="flex items-center justify-center gap-1.5 py-1.5 flex-shrink-0"
+              style={{
+                borderTop: "1px solid rgba(255,255,255,0.03)",
+                background: "rgba(0,0,0,0.10)",
+              }}
+            >
+              <span className="text-[7px] font-bold tracking-[0.28em] uppercase" style={{ color: "rgba(255,255,255,0.18)" }}>
+                Powered by
+              </span>
+              <Logo className="h-2 w-2 rounded-[2px]" style={{ backgroundColor: `${accent}35` }} />
+              <span className="text-[7px] font-bold tracking-[0.28em] uppercase" style={{ color: "rgba(255,255,255,0.18)" }}>
+                AthleteOS
+              </span>
+            </div>
+            </ReflectiveCard>
           </div>
+
         </motion.div>
       </div>
+
+      {/* ── Global Modals ───────────────────────────── */}
       <QrShareModal url={publicUrl} open={showQr} onClose={() => setShowQr(false)} />
       <InquiryForm
         athleteId={profile.id}
@@ -907,7 +1821,8 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
         open={showInquiry}
         onClose={() => setShowInquiry(false)}
       />
-      {/* Tip Success Modal */}
+
+      {/* Tip success modal */}
       <AnimatePresence>
         {showTipSuccess && (
           <motion.div
@@ -915,7 +1830,11 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[150] flex items-center justify-center p-4"
-            style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
+            style={{
+              background: "rgba(0,0,0,0.88)",
+              backdropFilter: "blur(14px)",
+              WebkitBackdropFilter: "blur(14px)",
+            }}
             onClick={() => setShowTipSuccess(false)}
           >
             <motion.div
@@ -923,28 +1842,35 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm rounded-3xl border border-white/[0.08] bg-[#111115] p-6 text-center shadow-2xl relative"
+              className="w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl relative"
+              style={{
+                background: "#0d0d12",
+                border: "1px solid rgba(255,255,255,0.07)",
+              }}
             >
               <button
                 onClick={() => setShowTipSuccess(false)}
-                className="absolute top-4 right-4 text-white/30 hover:text-white transition-colors"
+                aria-label="Close"
+                className="absolute top-4 right-4 text-white/30 hover:text-white/70 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
               <div
                 className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl"
-                style={{ backgroundColor: `${accent}15`, border: `1px solid ${accent}30` }}
+                style={{ background: `${accent}14`, border: `1px solid ${accent}28` }}
               >
                 <Heart className="h-7 w-7" style={{ color: accent }} fill="currentColor" />
               </div>
               <h3 className="text-xl font-black text-white">Thank You!</h3>
-              <p className="mt-2 text-sm text-white/60">
-                Your tip for <span className="font-semibold text-white">{firstName}</span> has been processed successfully. Your support helps power their athletic journey!
+              <p className="mt-2 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+                Your tip for{" "}
+                <span className="font-semibold text-white">{firstName}</span> has been
+                processed. Your support powers their athletic journey!
               </p>
               <button
                 onClick={() => setShowTipSuccess(false)}
-                className="mt-6 w-full rounded-2xl py-3 text-xs font-bold text-bg transition-all hover:brightness-110"
-                style={{ backgroundColor: accent }}
+                className="mt-6 w-full rounded-2xl py-3 text-xs font-black transition-all hover:brightness-110"
+                style={{ backgroundColor: accent, color: "#0a0a0e" }}
               >
                 Back to Profile
               </button>

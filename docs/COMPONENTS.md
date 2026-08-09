@@ -4,6 +4,66 @@
 
 ---
 
+## `<ReflectiveCard>` — `components/reflective-card.tsx` [NEW 2026-08-09]
+
+Webcam-based metallic card material shell from React Bits. Renders a live blurred + displaced + specularly-lit webcam feed as the card surface to simulate a real metallic reflection. Athlete content renders inside via `children` at `z-index: 10`.
+
+- **Used by:** `components/profile-card.tsx` — both front and back card faces
+- **Requires:** `components/reflective-card.css` (imported inside the component)
+- **Fallback:** When webcam is unavailable/denied, renders a static dark metallic gradient. No UI blocking, no error thrown.
+- **Props:**
+  | Prop | Type | Default | Description |
+  |---|---|---|---|
+  | `blurStrength` | `number` | `12` | Blur intensity applied to webcam feed (0–20 px) |
+  | `metalness` | `number` | `1` | Opacity of diagonal metallic sheen overlay (0–1) |
+  | `roughness` | `number` | `0.4` | Opacity of noise grain texture overlay (0–1) |
+  | `displacementStrength` | `number` | `20` | SVG displacement map warp scale |
+  | `noiseScale` | `number` | `1` | turbulence `baseFrequency` divisor (larger = smaller ripples) |
+  | `specularConstant` | `number` | `1.2` | SVG `feSpecularLighting` shininess |
+  | `grayscale` | `number` | `1` | 0 = full color, 1 = full grayscale (metallic gray) |
+  | `glassDistortion` | `number` | `0` | Edge glass warp via second displacement pass |
+  | `color` | `string` | `"white"` | Base text color (CSS `color`) |
+  | `overlayColor` | `string` | `"rgba(0,0,0,0.18)"` | Surface tint overlaid above the video |
+  | `radius` | `number` | `20` | Border radius in px |
+  | `filterId` | `string` | `"rc-metallic-displacement"` | Unique SVG filter ID — must differ per instance to avoid collisions |
+  | `streamRef` | `RefObject<MediaStream \| null>` | — | Shared stream ref — if set, second instance reuses stream from first |
+  | `className` / `style` | — | — | Passthrough |
+  | `children` | `ReactNode` | — | Card content rendered at z-index 10 above material layers |
+
+---
+
+## `<ProfileCard>` (rebuilt) — `components/profile-card.tsx` [REFACTORED 2026-08-09]
+
+Root public athlete identity card. Now a composition of named sub-components rather than a monolith. Uses `ReflectiveCard` as the material shell for both card faces. Spring-animated 3D flip (Framer Motion). Shared webcam stream between faces.
+
+**Sub-components (all local, not exported):**
+
+| Component | Responsibility |
+|---|---|
+| `CardHeader` | AthleteOS logo, plan/verified badge, QR button, share button |
+| `AthletePhoto` | Hero photo + vignette + grain + placeholder initials |
+| `AthleteIdentity` | Name, sport·position, school, class label, gold verified badge |
+| `AthleteStats` | 3-cell stat strip with lucide icon per stat key |
+| `AthleteIDBlock` | Athlete ID chip + URL copy row |
+| `FlipCTA` | "Tap card to flip" animated pill |
+| `BackHeader` | Mini avatar, name, verified badge, flip-back affordance |
+| `AboutSection` | Bio text block |
+| `LinksSection` | Structured link rows with expand/collapse |
+| `HighlightsSection` | Highlight reel pill links |
+| `ConnectSection` | Social icon grid + share buttons |
+| `ContactModal` | Animated overlay for email + phone |
+| `BusinessBlock` | Contact / Send Inquiry / Tip CTA section |
+| `SectionLabel` | Reusable icon + uppercase label row |
+| `ReflectiveCardShell` | **REMOVED** — replaced by `<ReflectiveCard>` |
+
+**Props (ProfileCard):**
+- `profile: Profile` — full athlete profile from Supabase
+- `totalViews?: number` — display metric (default 0)
+- `totalFollowers?: number` — display metric (default 0)
+- `nilScore?: number | null` — if > 0, appears as accent stat cell (default null)
+
+---
+
 ## Motion Primitives (`components/motion/`)
 
 These are the reusable animation building blocks. All are `"use client"`. All respect `prefers-reduced-motion`.

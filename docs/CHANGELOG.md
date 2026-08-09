@@ -5,6 +5,51 @@
 
 ---
 
+## 2026-08-09 — AthleteIdentityCard rebuild + ReflectiveCard webcam material integration
+
+### What changed
+
+- **`components/profile-card.tsx`**: Full architectural rebuild. The monolithic `ProfileCard` is now a composable system of named sub-components:
+  - `CardHeader` — logo, badge, QR, share actions
+  - `AthletePhoto` — hero image with cinematic vignette + noise grain
+  - `AthleteIdentity` — name, sport, position, school, class label, verified badge
+  - `AthleteStats` — 3-cell stat strip with icon-per-stat mapping
+  - `AthleteIDBlock` — athlete ID chip + URL copy
+  - `FlipCTA` — animated flip affordance pill
+  - `BackHeader` — back face header with mini avatar + flip-back affordance
+  - `AboutSection`, `LinksSection`, `HighlightsSection`, `ConnectSection` — scrollable back content
+  - `ContactModal` — animated overlay for email/phone contact details
+  - `BusinessBlock` — partnership/inquiry/tip CTA section (architecture boundary for future monetization blocks)
+  - The old `ReflectiveCardShell` (CSS-only glow border) has been **replaced** by the `ReflectiveCard` webcam material component on both card faces.
+  - Added `webcamStreamRef: useRef<MediaStream | null>` — shared between front and back `ReflectiveCard` instances so only one camera permission prompt fires and one stream is allocated.
+
+- **`components/reflective-card.tsx`** [NEW]: TypeScript adaptation of the React Bits `ReflectiveCard` component. Uses `navigator.mediaDevices.getUserMedia` to capture a live webcam feed, then runs it through an SVG filter chain (turbulence → luminance → displacement → specular lighting → screen blend → glass edge distortion) to produce a real-time metallic reflection surface. Accepts `children` as the card content rendered above the material layer. Includes graceful fallback (static dark metallic gradient) when webcam is unavailable or denied.
+
+- **`components/reflective-card.css`** [NEW]: All CSS for the `ReflectiveCard` component. Defines `.rc-container`, `.rc-video` (the core filter stack via CSS custom properties), `.rc-noise` (grain overlay at `mix-blend-mode: overlay`), `.rc-sheen` (diagonal specular highlight), `.rc-overlay` (surface tint), `.rc-border` (1px gradient mask-composite inset ring), `.rc-content` (children slot at z-index: 10). Respects `prefers-reduced-motion` by stripping animation and reducing filter opacity.
+
+- **`app/globals.css`**: Added `AthleteIdentityCard Premium Material System` section — `aic-shimmer`, `aic-shadow-breathe`, `aic-stat-in` keyframes; `.aic-stat-enter`, `.aic-metallic-sweep`, `.aic-business-block` utility classes; reduced-motion overrides for all AIC animations.
+
+### Why
+
+User-requested replacement of the existing monolithic `ProfileCard` with:
+1. A composable sub-component architecture (each section is independently testable and reusable).
+2. The React Bits `ReflectiveCard` webcam-reflection material shell — replacing the CSS-only glow border with a live metallic surface that reacts to real-world lighting via the user's webcam.
+3. Modular `BusinessBlock` as an explicit architecture boundary for future monetization (sponsorships, bookings, tips, shoutouts).
+
+### Files touched
+
+- `components/profile-card.tsx` (rebuilt)
+- `components/reflective-card.tsx` (new)
+- `components/reflective-card.css` (new)
+- `app/globals.css` (appended AIC material system)
+- `docs/CHANGELOG.md`, `docs/COMPONENTS.md`, `docs/DECISIONS.md`, `docs/ARCHITECTURE.md`
+
+### Commit
+
+_Pending._
+
+---
+
 ## 2026-08-06 — Fix card dimensions: eliminate dead space on front face
 
 ### What changed

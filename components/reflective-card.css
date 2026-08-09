@@ -1,0 +1,191 @@
+/* ══════════════════════════════════════════════════════
+   ReflectiveCard — Premium Metallic Surface Layer
+   ──────────────────────────────────────────────────
+   Webcam-feed reflection + SVG displacement filters
+   create a real-time metallic card material effect.
+
+   CSS custom properties are injected by the component:
+     --rc-blur          blur strength (px)
+     --rc-metalness     sheen opacity (0-1)
+     --rc-roughness     noise opacity (0-1)
+     --rc-overlay       tint color
+     --rc-saturation    video saturation (0=gray, 1=color)
+     --rc-radius        card corner radius
+   ══════════════════════════════════════════════════════ */
+
+/* ── Container ─────────────────────────────────────── */
+.rc-container {
+  position: relative;
+  border-radius: var(--rc-radius, 20px);
+  overflow: hidden;
+  isolation: isolate;
+
+  /* Outer shadow system — depth + glow */
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+    0 4px 8px  rgba(0, 0, 0, 0.35),
+    0 20px 60px rgba(0, 0, 0, 0.65),
+    0 40px 90px rgba(0, 0, 0, 0.35);
+
+  /* Hardware-accelerate the container so the SVG filter
+     doesn't cause layout repaints on every frame */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* ── Hidden SVG filter definitions ────────────────── */
+.rc-svg-filters {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* ── Webcam video — the reflective surface ─────────── */
+.rc-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  /* Mirror + slight zoom to fill card without letterbox */
+  transform: scale(1.25) scaleX(-1);
+
+  /* Core material filter stack:
+     1. Desaturate to metal-gray
+     2. Boost contrast/brightness for punchy surface
+     3. Blur to lose facial detail — we want light, not faces
+     4. Apply SVG metallic displacement + specular lighting */
+  filter:
+    saturate(var(--rc-saturation, 0))
+    contrast(125%)
+    brightness(108%)
+    blur(var(--rc-blur, 12px))
+    url(#rc-metallic-displacement);
+
+  z-index: 0;
+  opacity: 0.88;
+  transition: filter 0.4s ease, opacity 0.4s ease;
+}
+
+/* Graceful fallback when webcam is unavailable:
+   Use a static dark metallic gradient instead */
+.rc-video-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    145deg,
+    #1a1a20 0%,
+    #111116 20%,
+    #1e1e26 40%,
+    #0e0e14 60%,
+    #1a1a22 80%,
+    #0d0d12 100%
+  );
+}
+
+/* ── Noise grain — roughness / micro-texture ───────── */
+.rc-noise {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: var(--rc-roughness, 0.38);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 192px 192px;
+}
+
+/* ── Metallic sheen — directional specular highlight ─ */
+.rc-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: var(--rc-metalness, 0.9);
+
+  background: linear-gradient(
+    138deg,
+    rgba(255, 255, 255, 0.38) 0%,
+    rgba(255, 255, 255, 0.10) 35%,
+    rgba(255, 255, 255, 0.00) 50%,
+    rgba(255, 255, 255, 0.08) 65%,
+    rgba(255, 255, 255, 0.26) 100%
+  );
+}
+
+/* Secondary cross-sheen at a different angle */
+.rc-sheen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    50deg,
+    rgba(255, 255, 255, 0.00) 30%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.00) 70%
+  );
+}
+
+/* ── Border — gradient mask inset ring ─────────────── */
+.rc-border {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  border-radius: var(--rc-radius, 20px);
+
+  /* Paint gradient ONLY on the 1px border, not the fill */
+  padding: 1px;
+  background: linear-gradient(
+    138deg,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(255, 255, 255, 0.18) 45%,
+    rgba(255, 255, 255, 0.50) 100%
+  );
+
+  /* Mask trick: paint border pixels only */
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+/* ── Overlay tint — surface color wash ─────────────── */
+.rc-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: var(--rc-overlay, rgba(0, 0, 0, 0.18));
+}
+
+/* ── Content slot — athlete card UI renders here ───── */
+.rc-content {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Reduced motion: strip animations, keep structure ─ */
+@media (prefers-reduced-motion: reduce) {
+  .rc-video {
+    filter:
+      saturate(0)
+      contrast(110%)
+      brightness(105%);
+    opacity: 0.5;
+  }
+}
