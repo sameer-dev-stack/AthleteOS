@@ -5,6 +5,23 @@
 
 ---
 
+## 2026-08-09 — Card layout fix: hero image height reduction
+
+### What changed
+- **`components/profile-card.tsx`**: `AthletePhoto` height reduced from 38% to 30% of card height (~144px on 480px card). Carousel dots repositioned to sit just below the photo area.
+- **`components/profile-card-skeleton.tsx`**: Photo shimmer area updated from 38% to 30% to match.
+
+### Why
+The hero image area was too tall and visually dominated the card. Content (name, stats, ID block) was pushed down into empty space, making the card feel unbalanced. Reducing to 30% gives a clear header + content layout with proper proportions.
+
+### Files touched
+- `components/profile-card.tsx`, `components/profile-card-skeleton.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Sport-aware card refinements + accessibility
 
 ### What changed

@@ -252,7 +252,7 @@ function AthletePhoto({ photos, photoIdx, displayName, initials, accent, sport }
   return (
     <div
       className="relative flex-shrink-0"
-      style={{ height: "38%" }}
+      style={{ height: "30%" }}
     >
       {hasPhoto ? (
         <>
@@ -1617,7 +1617,7 @@ export function ProfileCard({
                 <div
                   className="absolute flex items-center gap-1.5 z-10 pointer-events-none"
                   style={{
-                    bottom: "calc(54% + 8px)",
+                    bottom: "calc(30% + 8px)",
                     left: "50%",
                     transform: "translateX(-50%)",
                   }}
