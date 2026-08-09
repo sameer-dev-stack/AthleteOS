@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-08-09 — Remove "Tap card to flip" CTA
+
+### What changed
+- **`components/profile-card.tsx`**: Removed the `<FlipCTA>` element from the front face rendering.
+- **`components/profile-card-skeleton.tsx`**: Removed the flip hint skeleton container to match.
+
+### Why
+User explicitly requested the removal of the "Tap card to flip" pill.
+
+### Files touched
+- `components/profile-card.tsx`
+- `components/profile-card-skeleton.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Remove front-face avatar
 
 ### What changed

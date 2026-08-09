@@ -1720,8 +1720,7 @@ export function ProfileCard({
                 onCopy={handleCopyUrl}
               />
 
-              {/* Flip CTA */}
-              <FlipCTA accent={accent} hintVisible={hintVisible} />
+
 
               {/* Bottom accent hairline */}
               <div
