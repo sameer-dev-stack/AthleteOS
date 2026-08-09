@@ -491,13 +491,14 @@ function AthleteIdentity({
         {(isVerified || isPro || classLabel) && (
           <span className="inline-flex items-center gap-1.5 align-middle ml-2 flex-shrink-0 relative -top-[1px]">
             {(isVerified || isPro) && (
-              <span
-                className="inline-flex h-[17px] w-[17px] items-center justify-center rounded-full gold-badge-glow flex-shrink-0"
-                style={{ backgroundColor: "#FACC15" }}
-                title="Verified Athlete"
-              >
-                <CheckIcon className="h-2.5 w-2.5 text-[#0d0d12]" strokeWidth={3.5} />
-              </span>
+              <Image
+                src="/verified.gif"
+                alt="Verified Athlete"
+                width={17}
+                height={17}
+                className="inline-block h-[17px] w-[17px] flex-shrink-0 align-middle"
+                unoptimized
+              />
             )}
             {classLabel && (
               <span
@@ -775,12 +776,14 @@ function BackHeader({
               {displayName}
             </p>
             {(isVerified || isPro) && (
-              <span
-                className="flex-shrink-0 flex h-[14px] w-[14px] items-center justify-center rounded-full gold-badge-glow"
-                style={{ backgroundColor: "#FACC15" }}
-              >
-                <CheckIcon className="h-2 w-2 text-[#0d0d12]" strokeWidth={3.5} />
-              </span>
+              <Image
+                src="/verified.gif"
+                alt="Verified Athlete"
+                width={14}
+                height={14}
+                className="flex-shrink-0 h-[14px] w-[14px]"
+                unoptimized
+              />
             )}
           </div>
           {metaParts.length > 0 && (

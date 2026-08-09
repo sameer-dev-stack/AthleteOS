@@ -5,6 +5,23 @@
 
 ---
 
+## 2026-08-09 — Replace verified badge with custom verified.gif
+
+### What changed
+- **`components/profile-card.tsx`**:
+  - Replaced the static yellow SVG checkmark verified badges on the front face (`AthleteIdentity`) and back face (`BackHeader`) with Next.js `Image` components rendering the custom `/verified.gif` asset.
+
+### Why
+To render the premium, dynamic animated verified badge requested by the client.
+
+### Files touched
+- `components/profile-card.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Enforce limits on links and highlights in profile editor
 
 ### What changed
