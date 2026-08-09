@@ -360,7 +360,7 @@ function ProfileAvatar({ photos, photoIdx, displayName, initials, accent, sport 
             alt={displayName}
             fill
             sizes="72px"
-            className="object-cover"
+            className=""
             draggable={false}
             unoptimized
           />
