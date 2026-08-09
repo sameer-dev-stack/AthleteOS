@@ -61,6 +61,7 @@ import { cleanName } from "@/lib/display-name";
 import { resolveTheme } from "@/lib/themes";
 import { ReflectiveCard } from "@/components/reflective-card";
 import { BorderGlow } from "@/components/border-glow";
+import { StrokeText } from "@/components/stroke-text";
 import { isValidPosition, getFallbackGradient } from "@/lib/sport-config";
 
 /* ══════════════════════════════════════════════════════════
@@ -475,21 +476,34 @@ function AthleteIdentity({
         copied={copied}
       />
       {/* Name row */}
-      <h1
-        className="font-black text-white line-clamp-2"
-        style={{
-          fontSize,
-          lineHeight: 1.2,
-          letterSpacing: "-0.02em",
-          wordBreak: "keep-all",
-          overflowWrap: "anywhere",
-          maxWidth: "100%",
-          minWidth: 0,
-        } as React.CSSProperties}
-      >
-        <span>{displayName}</span>
+      <div className="flex flex-col gap-1.5">
+        <h1
+          className="font-black text-white"
+          style={{
+            lineHeight: 1.1,
+            maxWidth: "100%",
+            minWidth: 0,
+          } as React.CSSProperties}
+        >
+          <StrokeText
+            text={displayName}
+            strokeColor={accent}
+            fillColor="#ffffff"
+            strokeWidth={1.5}
+            drawDuration={1.2}
+            fillDelay={0.15}
+            stagger={0.04}
+            ease="power2.out"
+            trigger="mount"
+            fillMode="wipe"
+            fontSize={32}
+            fontWeight={900}
+            letterSpacing={-1}
+            className="w-full inline-block"
+          />
+        </h1>
         {(isVerified || isPro || classLabel) && (
-          <span className="inline-flex items-center gap-1.5 align-middle ml-2 flex-shrink-0 relative -top-[1px]">
+          <div className="flex items-center gap-1.5 flex-shrink-0 mt-0.5">
             {(isVerified || isPro) && (
               <span
                 className="inline-flex h-[17px] w-[17px] items-center justify-center rounded-full gold-badge-glow flex-shrink-0"
@@ -511,9 +525,9 @@ function AthleteIdentity({
                 {classLabel}
               </span>
             )}
-          </span>
+          </div>
         )}
-      </h1>
+      </div>
 
       {/* Sport · Position */}
       {metaLine && (

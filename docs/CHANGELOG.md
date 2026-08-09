@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-08-09 — Integrate dynamic StrokeText drawing wordmark for athlete name hero
+
+### What changed
+- **`components/stroke-text.tsx`**: Implemented React Bits `<StrokeText />` component using GSAP to animate SVGs based on text character dimensions.
+- **`components/stroke-text.css`**: Created corresponding styles.
+- **`components/profile-card.tsx`**: Integrated the `<StrokeText />` component to draw the athlete's name on the front face, using the dynamic electric lime theme accent for the outline draw and wiping to solid white. Adjusted name header layout and shifted verified/class year badges below the animated wordmark.
+
+### Why
+To elevate the visual aesthetic of the profile card by adding a highly customized, premium logo/wordmark drawing animation when the card mounts.
+
+### Files touched
+- `components/stroke-text.tsx`
+- `components/stroke-text.css`
+- `components/profile-card.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Fix LCP image loading warning and local database view tracking error
 
 ### What changed
