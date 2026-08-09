@@ -252,7 +252,7 @@ function AthletePhoto({ photos, photoIdx, displayName, initials, accent, sport }
   return (
     <div
       className="relative flex-shrink-0"
-      style={{ height: "30%" }}
+      style={{ height: "24%" }}
     >
       {hasPhoto ? (
         <>
@@ -329,6 +329,59 @@ function AthletePhoto({ photos, photoIdx, displayName, initials, accent, sport }
   );
 }
 
+/* ── ProfileAvatar — circular profile picture overlapping hero/content ── */
+interface ProfileAvatarProps {
+  photos: string[];
+  photoIdx: number;
+  displayName: string;
+  initials: string;
+  accent: string;
+  sport: string | null;
+}
+
+function ProfileAvatar({ photos, photoIdx, displayName, initials, accent, sport }: ProfileAvatarProps) {
+  const hasPhoto = photos.length > 0;
+
+  return (
+    <div
+      className="absolute left-5 z-20"
+      style={{ bottom: "calc(76% - 36px)" }}
+    >
+      <div
+        className="relative w-[72px] h-[72px] rounded-full overflow-hidden"
+        style={{
+          border: `3px solid #0d0d12`,
+          boxShadow: `0 4px 20px rgba(0,0,0,0.5), 0 0 0 1px ${accent}30`,
+        }}
+      >
+        {hasPhoto ? (
+          <Image
+            src={photos[photoIdx]}
+            alt={displayName}
+            fill
+            sizes="72px"
+            className="object-cover"
+            draggable={false}
+            unoptimized
+          />
+        ) : (
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ background: getFallbackGradient(sport) }}
+          >
+            <span
+              className="text-[28px] font-black select-none"
+              style={{ color: `${accent}40` }}
+            >
+              {initials}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── AthleteIdentity ─────────────────────────────────── */
 interface AthleteIdentityProps {
   displayName: string;
@@ -370,7 +423,7 @@ function AthleteIdentity({
       : "clamp(11px, 3.2vw, 14px)";
 
   return (
-    <div className="flex-shrink-0 px-5 mt-0 relative z-10">
+    <div className="flex-shrink-0 px-5 pt-16 relative z-10">
       {/* Divider between hero and content */}
       <div
         className="absolute top-0 left-5 right-5 h-px"
@@ -1608,6 +1661,16 @@ export function ProfileCard({
                 sport={profile.sport}
               />
 
+              {/* Circular profile avatar */}
+              <ProfileAvatar
+                photos={photos}
+                photoIdx={photoIdx}
+                displayName={displayName}
+                initials={initials}
+                accent={accent}
+                sport={profile.sport}
+              />
+
               {/* Card header (overlaid on photo) */}
               <CardHeader
                 accent={accent}
@@ -1624,7 +1687,7 @@ export function ProfileCard({
                 <div
                   className="absolute flex items-center gap-1.5 z-10 pointer-events-none"
                   style={{
-                    bottom: "calc(30% + 8px)",
+                    bottom: "calc(24% + 8px)",
                     left: "50%",
                     transform: "translateX(-50%)",
                   }}
