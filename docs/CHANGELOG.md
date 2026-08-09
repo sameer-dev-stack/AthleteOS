@@ -5,6 +5,41 @@
 
 ---
 
+## 2026-08-09 — Upscale verified.gif badge sizes to match original visual volume
+
+### What changed
+- **`components/profile-card.tsx`**:
+  - Set verified badge dimensions on the front face to `28x28px` and the back face to `20x20px` to offset the GIF's internal transparent borders.
+
+### Why
+To make the visible size of the new GIF badge match the visual presence of the original SVG verified badge.
+
+### Files touched
+- `components/profile-card.tsx`
+
+### Commit
+_Pending._
+
+---
+
+## 2026-08-09 — Revert verified.gif badge dimensions to match original styles
+
+### What changed
+- **`components/profile-card.tsx`**:
+  - Reverted verified badge dimensions on the front face back to `17x17px`.
+  - Reverted verified badge dimensions on the back face back to `14x14px`.
+
+### Why
+To exactly align and style the verification badge layout to matches the original designs.
+
+### Files touched
+- `components/profile-card.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Increase verified.gif badge dimensions
 
 ### What changed
