@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-08-09 — Increase verified.gif badge dimensions
+
+### What changed
+- **`components/profile-card.tsx`**:
+  - Increased verified badge dimensions on the front face from `17x17px` to `26x26px`.
+  - Increased verified badge dimensions on the back face from `14x14px` to `20x20px`.
+
+### Why
+To make the custom verified badge clearly visible and recognizable next to the athlete name.
+
+### Files touched
+- `components/profile-card.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Replace verified badge with custom verified.gif
 
 ### What changed

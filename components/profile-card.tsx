@@ -494,9 +494,9 @@ function AthleteIdentity({
               <Image
                 src="/verified.gif"
                 alt="Verified Athlete"
-                width={17}
-                height={17}
-                className="inline-block h-[17px] w-[17px] flex-shrink-0 align-middle"
+                width={26}
+                height={26}
+                className="inline-block h-[26px] w-[26px] flex-shrink-0 align-middle"
                 unoptimized
               />
             )}
@@ -779,9 +779,9 @@ function BackHeader({
               <Image
                 src="/verified.gif"
                 alt="Verified Athlete"
-                width={14}
-                height={14}
-                className="flex-shrink-0 h-[14px] w-[14px]"
+                width={20}
+                height={20}
+                className="flex-shrink-0 h-[20px] w-[20px] align-middle"
                 unoptimized
               />
             )}
