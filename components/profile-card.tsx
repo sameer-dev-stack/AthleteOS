@@ -494,8 +494,8 @@ function AthleteIdentity({
               <Image
                 src="/verified.gif"
                 alt="Verified Athlete"
-                width={28}
-                height={28}
+                width={40}
+                height={40}
                 className="inline-block h-[28px] w-[28px] flex-shrink-0 align-middle"
                 unoptimized
               />
