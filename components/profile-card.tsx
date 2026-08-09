@@ -352,46 +352,56 @@ function AthleteIdentity({
   const metaLine = [position, sport].filter(Boolean).join(" · ");
   const schoolLine = school ?? null;
 
+  // Fluid responsive font size based on name length to ensure clean single/two-line presentation
+  const nameLen = displayName.length;
+  const fontSize =
+    nameLen <= 12
+      ? "clamp(20px, 5.5vw, 24px)"
+      : nameLen <= 20
+      ? "clamp(16px, 4.5vw, 19px)"
+      : "clamp(13px, 3.8vw, 16px)";
+
   return (
     <div className="flex-shrink-0 px-5 mt-0 relative z-10">
       {/* Name row */}
-      <div className="flex items-start gap-2 flex-wrap">
-        <h1
-          className="font-black leading-none tracking-tight text-white"
-          style={{
-            fontSize: "clamp(22px, 7vw, 30px)",
-            letterSpacing: "-0.035em",
-            wordBreak: "break-word",
-            overflowWrap: "anywhere",
-          }}
-        >
-          {displayName}
-        </h1>
-
-        <div className="flex items-center gap-1.5 mt-0.5 flex-shrink-0">
-          {(isVerified || isPro) && (
-            <span
-              className="flex h-[18px] w-[18px] items-center justify-center rounded-full gold-badge-glow flex-shrink-0"
-              style={{ backgroundColor: "#FACC15" }}
-              title="Verified Athlete"
-            >
-              <CheckIcon className="h-2.5 w-2.5 text-[#0d0d12]" strokeWidth={3.5} />
-            </span>
-          )}
-          {classLabel && (
-            <span
-              className="flex-shrink-0 inline-flex items-center rounded px-1.5 py-0.5 text-[7.5px] font-black tracking-widest uppercase"
-              style={{
-                color: "rgba(255,255,255,0.35)",
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.08)",
-              }}
-            >
-              {classLabel}
-            </span>
-          )}
-        </div>
-      </div>
+      <h1
+        className="font-black text-white line-clamp-2"
+        style={{
+          fontSize,
+          lineHeight: 1.18,
+          letterSpacing: "-0.025em",
+          overflowWrap: "break-word",
+          wordBreak: "normal",
+          textWrap: "balance",
+        } as React.CSSProperties}
+      >
+        <span>{displayName}</span>
+        {(isVerified || isPro || classLabel) && (
+          <span className="inline-flex items-center gap-1.5 align-middle ml-2 flex-shrink-0 relative -top-[1px]">
+            {(isVerified || isPro) && (
+              <span
+                className="inline-flex h-[17px] w-[17px] items-center justify-center rounded-full gold-badge-glow flex-shrink-0"
+                style={{ backgroundColor: "#FACC15" }}
+                title="Verified Athlete"
+              >
+                <CheckIcon className="h-2.5 w-2.5 text-[#0d0d12]" strokeWidth={3.5} />
+              </span>
+            )}
+            {classLabel && (
+              <span
+                className="flex-shrink-0 inline-flex items-center rounded px-1.5 py-0.5 text-[7.5px] font-black tracking-widest uppercase"
+                style={{
+                  color: "rgba(255,255,255,0.35)",
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
+              >
+                {classLabel}
+              </span>
+            )}
+          </span>
+        )}
+      </h1>
 
       {/* Sport · Position */}
       {metaLine && (

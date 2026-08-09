@@ -5,6 +5,29 @@
 
 ---
 
+## 2026-08-09 — Fix athlete name typography, wrapping, and inline badge alignment
+
+### What changed
+- **`components/profile-card.tsx`** (`AthleteIdentity`):
+  - Added fluid length-based font scaling:
+    - `<= 12` chars: `clamp(20px, 5.5vw, 24px)`
+    - `13–20` chars: `clamp(16px, 4.5vw, 19px)`
+    - `> 20` chars: `clamp(13px, 3.8vw, 16px)`
+  - Removed aggressive character-splitting CSS (`wordBreak: "break-word"`, `overflowWrap: "anywhere"`).
+  - Added `overflowWrap: "break-word"`, `wordBreak: "normal"`, `textWrap: "balance"`, and `line-clamp-2` for balanced line breaks and proper overflow protection.
+  - Positioned verified badge and class year tag inline (`inline-flex align-middle ml-2`) directly following the name.
+
+### Why
+Long athlete names or single-word strings (e.g. `lasihad311adspritecom`) were breaking arbitrarily mid-word and leaving isolated single characters (like `m`) on an orphan second line.
+
+### Files touched
+- `components/profile-card.tsx`, `docs/CHANGELOG.md`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — AthleteIdentityCard rebuild + ReflectiveCard webcam material integration
 
 ### What changed
