@@ -270,8 +270,8 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
               style={{ background: `linear-gradient(90deg, transparent 5%, ${accent}40 50%, transparent 95%)` }}
             />
 
-            {/* ── Photo Hero (33%) ─────────────────── */}
-            <div className="relative flex-shrink-0" style={{ height: "33%" }}>
+            {/* ── Photo Hero (45%) ─────────────────── */}
+            <div className="relative flex-shrink-0" style={{ height: "45%" }}>
               {photos.length > 0 ? (
                 <>
                   {photos.map((url, i) => (
