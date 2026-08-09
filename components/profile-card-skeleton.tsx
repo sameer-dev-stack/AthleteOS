@@ -11,13 +11,12 @@ export function ProfileCardSkeleton() {
         style={{
           perspective: "1200px",
           width: `min(${CARD_W}px, calc(100vw - 32px))`,
-          height: "auto",
-          minHeight: "480px",
-          maxHeight: "min(640px, calc(100dvh - 32px))",
+          aspectRatio: "360 / 540",
+          maxHeight: "min(540px, calc(100dvh - 32px))",
         }}
       >
         <div
-          className="relative w-full h-auto rounded-[20px] overflow-hidden"
+          className="relative w-full h-full rounded-[20px] overflow-hidden"
           style={{
             boxShadow: "0 20px 60px -15px rgba(0,0,0,0.6)",
           }}
@@ -28,7 +27,7 @@ export function ProfileCardSkeleton() {
           </div>
 
           {/* Card body */}
-          <div className="relative w-full h-auto bg-[#111115] rounded-[18.5px] overflow-hidden pb-4">
+          <div className="absolute inset-0 bg-[#111115] rounded-[18.5px] overflow-hidden">
             {/* Top accent shimmer */}
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 

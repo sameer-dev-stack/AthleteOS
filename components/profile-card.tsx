@@ -1645,16 +1645,15 @@ export function ProfileCard({
         style={{
           perspective: "1100px",
           width: `min(${CARD_W}px, calc(100vw - 32px))`,
-          height: "auto",
-          minHeight: "480px",
-          maxHeight: "min(640px, calc(100dvh - 32px))",
+          aspectRatio: "360 / 540",
+          maxHeight: "min(540px, calc(100dvh - 32px))",
         }}
       >
         <motion.div
           animate={{ rotateY: flipped ? 180 : 0 }}
           transition={{ type: "spring", stiffness: 270, damping: 30, mass: 0.85 }}
           onClick={handleFlip}
-          className="relative w-full h-auto cursor-pointer group"
+          className="relative w-full h-full cursor-pointer group"
           style={{ transformStyle: "preserve-3d", borderRadius: "20px" }}
           role="button"
           aria-label={flipped ? "Flip card to front" : "Flip card to see more"}
@@ -1665,10 +1664,8 @@ export function ProfileCard({
               FRONT FACE
           ═══════════════════════════════════════════ */}
           <div
-            className="flex flex-col w-full"
+            className="flip-card-face flex flex-col"
             style={{
-              position: flipped ? "absolute" : "relative",
-              inset: flipped ? 0 : "auto",
               opacity: flipped ? 0 : 1,
               pointerEvents: flipped ? "none" : "auto",
               zIndex: flipped ? 0 : 1,
@@ -1688,7 +1685,7 @@ export function ProfileCard({
               radius={20}
               filterId="rc-filter-front"
               streamRef={webcamStreamRef}
-              style={{ width: "100%", height: flipped ? "100%" : "auto" }}
+              style={{ width: "100%", height: "100%" }}
             >
               {/* Top accent hairline */}
               <div
@@ -1748,10 +1745,8 @@ export function ProfileCard({
               BACK FACE
           ═══════════════════════════════════════════ */}
           <div
-            className="flip-card-back flex flex-col w-full"
+            className="flip-card-face flip-card-back flex flex-col"
             style={{
-              position: flipped ? "relative" : "absolute",
-              inset: flipped ? "auto" : 0,
               opacity: flipped ? 1 : 0,
               pointerEvents: flipped ? "auto" : "none",
               zIndex: flipped ? 1 : 0,
@@ -1773,7 +1768,7 @@ export function ProfileCard({
               radius={20}
               filterId="rc-filter-back"
               streamRef={webcamStreamRef}
-              style={{ width: "100%", height: flipped ? "auto" : "100%" }}
+              style={{ width: "100%", height: "100%" }}
             >
             {/* Contact modal overlay */}
             <AnimatePresence>

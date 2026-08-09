@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-08-09 — Increase card height ratio to 360/540 and enable back-face scrolling
+
+### What changed
+- **`components/profile-card.tsx`**: Increased the card's aspect ratio to `360 / 540` and limited the max height to `540px` (or viewport bounds). Restored the front and back face layout containers to have symmetrical heights (`100%`) using standard 3D flip card absolute positioning.
+- **`components/profile-card-skeleton.tsx`**: Configured matching symmetrical skeleton ratios.
+
+### Why
+To keep the 3D flip animation perfectly balanced (avoiding morphing transitions) and ensure the back face content has a defined height boundary so its `overflow-y-auto` scrolling triggers and makes the inquiry forms fully visible/scrollable.
+
+### Files touched
+- `components/profile-card.tsx`
+- `components/profile-card-skeleton.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Add bottom padding to card front face
 
 ### What changed
