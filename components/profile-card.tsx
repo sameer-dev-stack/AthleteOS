@@ -454,7 +454,7 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
             </div>
 
             {/* ── Flip Hint ──────────────────────── */}
-            <div className="flex items-center justify-center gap-1.5 py-2 px-4">
+            <div className="flex items-center justify-center gap-1.5 py-2 px-4 mt-auto">
               <div className={`flex items-center gap-1.5 transition-opacity duration-500 ${hintVisible ? "flip-hint-pulse" : "opacity-25"}`}>
                 <RotateCcw className="h-3 w-3 text-white/40" />
                 <span className="text-[8px] font-bold tracking-[0.2em] uppercase text-white/40">
