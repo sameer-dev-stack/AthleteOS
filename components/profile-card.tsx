@@ -354,13 +354,13 @@ function AthleteIdentity({
 
   const nameLen = displayName.length;
   const fontSize =
-    nameLen <= 10
+    nameLen <= 8
       ? "clamp(20px, 5.5vw, 24px)"
-      : nameLen <= 16
+      : nameLen <= 14
       ? "clamp(17px, 4.8vw, 21px)"
-      : nameLen <= 24
+      : nameLen <= 20
       ? "clamp(14px, 4vw, 17px)"
-      : "clamp(12px, 3.5vw, 15px)";
+      : "clamp(11px, 3.2vw, 14px)";
 
   return (
     <div className="flex-shrink-0 px-5 mt-0 relative z-10">
