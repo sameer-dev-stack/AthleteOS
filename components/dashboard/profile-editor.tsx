@@ -110,7 +110,6 @@ export function DashboardEditor({ profile, onSaved }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   // Content state
-  const [fullName, setFullName] = useState(profile.full_name || "");
   const [bio, setBio] = useState(profile.bio || "");
   const [stats, setStats] = useState(profile.stats || []);
   const [links, setLinks] = useState(profile.links || []);
@@ -123,7 +122,6 @@ export function DashboardEditor({ profile, onSaved }: Props) {
   const [accent, setAccent] = useState(profile.theme_accent || "#C6FF3D");
 
   // Stable stringified baselines for change detection
-  const profileFullName = profile.full_name || "";
   const profileBio = profile.bio || "";
   const profileStatsStr = JSON.stringify(profile.stats || []);
   const profileLinksStr = JSON.stringify(profile.links || []);
@@ -135,7 +133,6 @@ export function DashboardEditor({ profile, onSaved }: Props) {
 
   useEffect(() => {
     queueMicrotask(() => {
-      setFullName(profile.full_name || "");
       setBio(profile.bio || "");
       setStats(profile.stats || []);
       setLinks(profile.links || []);
@@ -146,10 +143,9 @@ export function DashboardEditor({ profile, onSaved }: Props) {
       setContactPhone(profile.contact_phone || "");
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profileFullName, profileBio, profileStatsStr, profileLinksStr, profileSocialStr, profileHighlightsStr, profileAccent, profileContactEmail, profileContactPhone]);
+  }, [profileBio, profileStatsStr, profileLinksStr, profileSocialStr, profileHighlightsStr, profileAccent, profileContactEmail, profileContactPhone]);
 
   const contentChanged =
-    fullName.trim() !== profileFullName.trim() ||
     bio !== profileBio ||
     JSON.stringify(stats) !== profileStatsStr ||
     JSON.stringify(links) !== profileLinksStr ||
@@ -215,7 +211,6 @@ export function DashboardEditor({ profile, onSaved }: Props) {
     if (contentChanged) {
       promises.push(
         updateProfile({
-          full_name: fullName.trim() || null,
           bio: bio.trim() || null,
           stats: stats.filter((s) => {
             if (!s.label.trim() || !s.value.trim()) return false;
@@ -254,7 +249,7 @@ export function DashboardEditor({ profile, onSaved }: Props) {
     } else {
       onSaved?.(profile);
     }
-  }, [fullName, bio, stats, links, social, highlights, accent, contactEmail, contactPhone, contentChanged, themeChanged, contactEmailInvalid, onSaved, profile]);
+  }, [bio, stats, links, social, highlights, accent, contactEmail, contactPhone, contentChanged, themeChanged, contactEmailInvalid, onSaved, profile]);
 
   return (
     <div className="rounded-xl border border-white/[0.06] bg-[#111113]">
@@ -316,14 +311,7 @@ export function DashboardEditor({ profile, onSaved }: Props) {
         )}
 
         {tab === "bio" && (
-          <BioEditor
-            profile={profile}
-            fullName={fullName}
-            onFullNameChange={setFullName}
-            bio={bio}
-            onChange={setBio}
-            onSaved={onSaved}
-          />
+          <BioEditor profile={profile} bio={bio} onChange={setBio} onSaved={onSaved} />
         )}
 
         {tab === "stats" && (
@@ -382,15 +370,11 @@ export function DashboardEditor({ profile, onSaved }: Props) {
 
 function BioEditor({
   profile,
-  fullName,
-  onFullNameChange,
   bio,
   onChange,
   onSaved,
 }: {
   profile: Profile;
-  fullName: string;
-  onFullNameChange: (v: string) => void;
   bio: string;
   onChange: (v: string) => void;
   onSaved?: (profile: Profile) => void;
@@ -414,23 +398,6 @@ function BioEditor({
 
   return (
     <div className="space-y-5">
-      {/* Name */}
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-ink-muted">
-          Name
-        </label>
-        <input
-          type="text"
-          value={fullName}
-          onChange={(e) => onFullNameChange(e.target.value)}
-          placeholder="e.g. Jaylen Carter"
-          className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
-        />
-      </div>
-
-      {/* Divider */}
-      <div className="h-px bg-white/[0.06]" />
-
       {/* Profile Photo */}
       <div>
         <label className="mb-3 block text-sm font-medium text-ink-muted">

@@ -251,7 +251,8 @@ function AthletePhoto({ photos, photoIdx, displayName, initials, accent, sport }
 
   return (
     <div
-      className="relative flex-1 min-h-0 w-full"
+      className="relative flex-shrink-0 w-full"
+      style={{ aspectRatio: "1 / 1" }}
     >
       {hasPhoto ? (
         <>
@@ -1727,7 +1728,8 @@ export function ProfileCard({
                 copied={copied}
               />
 
-
+              {/* Flex spacer to push stats to the bottom of the card */}
+              <div className="flex-1" />
 
               {/* Stats strip */}
               <AthleteStats cells={statCells} accent={accent} />

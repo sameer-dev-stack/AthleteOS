@@ -27,12 +27,12 @@ export function ProfileCardSkeleton() {
           </div>
 
           {/* Card body */}
-          <div className="absolute inset-0 bg-[#111115] rounded-[18.5px] overflow-hidden flex flex-col">
+          <div className="absolute inset-0 bg-[#111115] rounded-[18.5px] overflow-hidden">
             {/* Top accent shimmer */}
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
             {/* Photo area shimmer */}
-            <div className="w-full relative overflow-hidden flex-1 min-h-0">
+            <div className="w-full relative overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
               <div className="absolute inset-0 bg-[#16161a]">
                 <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
               </div>

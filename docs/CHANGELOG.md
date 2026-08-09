@@ -5,40 +5,6 @@
 
 ---
 
-## 2026-08-09 — Add Edit Name field to profile editor dashboard
-
-### What changed
-- **`components/dashboard/profile-editor.tsx`**: Added a Name input field at the top of the Bio tab in `BioEditor`. Injected `fullName` and `onFullNameChange` state handlers from `DashboardEditor`, checked name modifications in `contentChanged`, and sent `full_name` updates in the `updateProfile` action payload on save.
-
-### Why
-To resolve the missing name editor option reported by the user when configuring their profile.
-
-### Files touched
-- `components/dashboard/profile-editor.tsx`
-
-### Commit
-_Pending._
-
----
-
-## 2026-08-09 — Implement flex-based photo scaling for mobile responsiveness
-
-### What changed
-- **`components/profile-card.tsx`**: Converted `AthletePhoto` to a flexbox container (`flex-1 min-h-0`) instead of using a locked aspect ratio. Removed the intermediate spacer.
-- **`components/profile-card-skeleton.tsx`**: Updated matching skeleton layouts to use `flex flex-col` on the card body and `flex-1 min-h-0` on the photo shimmer.
-
-### Why
-To ensure the card never overflows or clips at the bottom on shorter mobile viewports. On desktop, the photo naturally takes maximum space (up to square), and on mobile, it dynamically shrinks to let the text and stats fit comfortably.
-
-### Files touched
-- `components/profile-card.tsx`
-- `components/profile-card-skeleton.tsx`
-
-### Commit
-_Pending._
-
----
-
 ## 2026-08-09 — Implement square 1:1 photo hero and 360/600 card ratio
 
 ### What changed
