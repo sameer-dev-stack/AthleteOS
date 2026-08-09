@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-08-09 — Add Edit Name field to profile editor dashboard
+
+### What changed
+- **`components/dashboard/profile-editor.tsx`**: Added a Name input field at the top of the Bio tab in `BioEditor`. Injected `fullName` and `onFullNameChange` state handlers from `DashboardEditor`, checked name modifications in `contentChanged`, and sent `full_name` updates in the `updateProfile` action payload on save.
+
+### Why
+To resolve the missing name editor option reported by the user when configuring their profile.
+
+### Files touched
+- `components/dashboard/profile-editor.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Implement flex-based photo scaling for mobile responsiveness
 
 ### What changed
