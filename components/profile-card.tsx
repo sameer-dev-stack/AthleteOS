@@ -1665,7 +1665,7 @@ export function ProfileCard({
               FRONT FACE
           ═══════════════════════════════════════════ */}
           <div
-            className="flex flex-col w-full"
+            className="flex flex-col w-full pb-6"
             style={{
               position: flipped ? "absolute" : "relative",
               inset: flipped ? 0 : "auto",

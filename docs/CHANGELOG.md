@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-08-09 — Add bottom padding to card front face
+
+### What changed
+- **`components/profile-card.tsx`**: Added `pb-6` bottom padding to the card's front face container so the stats strip has proper breathing room and doesn't sit directly on the card border.
+
+### Why
+To fix the card layout appearing cut off at the bottom and provide a balanced design.
+
+### Files touched
+- `components/profile-card.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Remove front-face URL block
 
 ### What changed
