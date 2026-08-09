@@ -180,6 +180,11 @@
   justify-content: center;
 }
 
+/* Front face layout override to ensure hero image is pinned to the top */
+.rc-front-face .rc-content {
+  justify-content: flex-start;
+}
+
 /* ── Reduced motion: strip animations, keep structure ─ */
 @media (prefers-reduced-motion: reduce) {
   .rc-video {

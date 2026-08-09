@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-08-09 — Pin front face hero image to top
+
+### What changed
+- **`components/reflective-card.css`**: Added `.rc-front-face .rc-content { justify-content: flex-start; }` to override vertical centering on the front face.
+- **`components/profile-card.tsx`**: Added `className="rc-front-face"` to the front face `<ReflectiveCard>`.
+
+### Why
+With the vertical centering of the body content (`justify-content: center` on `.rc-content`), the relative `AthletePhoto` header image was shifted downwards, leaving a gap/space at the top of the card. Overriding this to `flex-start` on the front card face pins the hero image to the absolute top as desired.
+
+### Files touched
+- `components/reflective-card.css`
+- `components/profile-card.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Remove "Tap card to flip" CTA
 
 ### What changed

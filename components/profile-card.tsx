@@ -1631,6 +1631,7 @@ export function ProfileCard({
             }}
           >
             <ReflectiveCard
+              className="rc-front-face"
               blurStrength={11}
               metalness={0.88}
               roughness={0.38}
