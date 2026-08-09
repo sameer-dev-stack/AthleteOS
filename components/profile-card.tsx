@@ -374,6 +374,8 @@ function AthleteIdentity({
           letterSpacing: "-0.02em",
           wordBreak: "keep-all",
           overflowWrap: "anywhere",
+          maxWidth: "100%",
+          minWidth: 0,
         } as React.CSSProperties}
       >
         <span>{displayName}</span>

@@ -5,18 +5,19 @@
 
 ---
 
-## 2026-08-09 — Add SPORT_CONFIG: single source of truth for sport→position→stats
+## 2026-08-09 — Add name sanitization and overflow handling
 
 ### What changed
-- **`lib/sport-config.ts`** (new): Central `SPORT_CONFIG` map keyed by short code (FB, BB, SB, SOC, etc.). Each entry defines `code`, `label`, `positions[]`, and `defaultStats[]`. Exports `resolveSportConfig()`, `isValidPosition()`, `getPositionsForSport()`, `getDefaultStatsForSport()`.
-- **`components/athlete-card.tsx`**: Replaced hardcoded "Guard · Stanford Women's Basketball" and PPG/APG/Reach with values derived from `SPORT_CONFIG.BB`. Mock data is now consistent — basketball position + basketball stats.
-- **`components/profile-card.tsx`**: Added dev-only `console.warn` if an athlete's position is not in `SPORT_CONFIG[sport].positions`.
+- **`lib/display-name.ts`**: Added `sanitizeName()` that strips URL-like strings and non-name characters (only letters, spaces, hyphens, apostrophes allowed). `cleanName()` now runs sanitization before returning.
+- **`lib/actions/profile.ts`**: Added regex `/^[a-zA-ZÀ-ÿ\s'\-]+$/` to `full_name` Zod schema. Server-side sanitization strips invalid chars before DB write.
+- **`components/profile-card.tsx`**: Added `maxWidth: "100%"` and `minWidth: 0` to the AthleteIdentity h1 to prevent name overflow into badge/position row.
+- **`app/onboarding/page.tsx`**: Name input now filters non-name characters on keystroke.
 
 ### Why
-Position and stat labels were decoupled — a soccer position ("Striker") could be paired with football stats (Yards, TDs, Catch%), producing invalid combinations. SPORT_CONFIG enforces consistency at the source.
+Malformed strings (URLs, random chars) could render as athlete names. Long names had no overflow protection and could collide with the badge row.
 
 ### Files touched
-- `lib/sport-config.ts`, `components/athlete-card.tsx`, `components/profile-card.tsx`
+- `lib/display-name.ts`, `lib/actions/profile.ts`, `components/profile-card.tsx`, `app/onboarding/page.tsx`
 
 ### Commit
 _Pending._

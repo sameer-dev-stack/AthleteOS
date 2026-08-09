@@ -675,7 +675,7 @@ export default function OnboardingPage() {
                       id="fullName"
                       type="text"
                       value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
+                      onChange={(e) => setFullName(e.target.value.replace(/[^a-zA-ZÀ-ÿ\s'\-]/g, ""))}
                       onBlur={() => markTouched("fullName")}
                       placeholder="Maya Reyes"
                       maxLength={100}

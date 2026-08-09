@@ -72,7 +72,7 @@ const SocialSchema = z.object({
 
 const UpdateProfileSchema = z.object({
   username: z.string().min(3).max(30).regex(/^[a-z0-9_-]+$/).optional(),
-  full_name: z.string().min(1).max(100).optional(),
+  full_name: z.string().min(1).max(100).regex(/^[a-zA-ZÀ-ÿ\s'\-]+$/, "Name can only contain letters, spaces, hyphens, and apostrophes").optional(),
   sport: z.string().min(1).max(50).optional(),
   school: z.string().min(1).max(100).optional(),
   class_year: z.string().max(20).nullable().optional(),
@@ -198,6 +198,13 @@ export async function updateProfile(
       }
 
       validated.username = clean;
+    }
+
+    if (validated.full_name) {
+      validated.full_name = validated.full_name
+        .replace(/[^a-zA-ZÀ-ÿ\s'\-]/g, "")
+        .replace(/\s{2,}/g, " ")
+        .trim();
     }
 
     // Fetch old values before update for change logging
