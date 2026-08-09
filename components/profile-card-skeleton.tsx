@@ -11,12 +11,13 @@ export function ProfileCardSkeleton() {
         style={{
           perspective: "1200px",
           width: `min(${CARD_W}px, calc(100vw - 32px))`,
-          aspectRatio: `${CARD_W} / ${CARD_H}`,
-          maxHeight: `min(${CARD_H}px, calc(100dvh - 32px))`,
+          height: "auto",
+          minHeight: "480px",
+          maxHeight: "min(640px, calc(100dvh - 32px))",
         }}
       >
         <div
-          className="relative w-full h-full rounded-[20px] overflow-hidden"
+          className="relative w-full h-auto rounded-[20px] overflow-hidden"
           style={{
             boxShadow: "0 20px 60px -15px rgba(0,0,0,0.6)",
           }}
@@ -27,12 +28,12 @@ export function ProfileCardSkeleton() {
           </div>
 
           {/* Card body */}
-          <div className="absolute inset-0 bg-[#111115] rounded-[18.5px] overflow-hidden">
+          <div className="relative w-full h-auto bg-[#111115] rounded-[18.5px] overflow-hidden pb-4">
             {/* Top accent shimmer */}
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
             {/* Photo area shimmer */}
-            <div className="w-full h-[52%] relative overflow-hidden">
+            <div className="w-full relative overflow-hidden" style={{ aspectRatio: "16 / 11" }}>
               <div className="absolute inset-0 bg-[#16161a]">
                 <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
               </div>

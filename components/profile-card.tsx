@@ -251,8 +251,8 @@ function AthletePhoto({ photos, photoIdx, displayName, initials, accent, sport }
 
   return (
     <div
-      className="relative flex-shrink-0"
-      style={{ height: "52%" }}
+      className="relative flex-shrink-0 w-full"
+      style={{ aspectRatio: "16 / 11" }}
     >
       {hasPhoto ? (
         <>
@@ -325,6 +325,30 @@ function AthletePhoto({ photos, photoIdx, displayName, initials, accent, sport }
           opacity: 0.025,
         }}
       />
+
+      {/* Photo carousel dots inside photo block */}
+      {photos.length > 1 && (
+        <div
+          className="absolute flex items-center gap-1.5 z-10 pointer-events-none"
+          style={{
+            bottom: "8px",
+            left: "50%",
+            transform: "translateX(-50%)",
+          }}
+        >
+          {photos.map((_, i) => (
+            <div
+              key={i}
+              className={`rounded-full transition-all duration-500 ${i === photoIdx ? "dot-active" : ""}`}
+              style={{
+                width: i === photoIdx ? "16px" : "4px",
+                height: "4px",
+                background: i === photoIdx ? accent : "rgba(255,255,255,0.3)",
+              }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -1621,15 +1645,16 @@ export function ProfileCard({
         style={{
           perspective: "1100px",
           width: `min(${CARD_W}px, calc(100vw - 32px))`,
-          aspectRatio: `${CARD_W} / ${CARD_H}`,
-          maxHeight: `min(${CARD_H}px, calc(100dvh - 32px))`,
+          height: "auto",
+          minHeight: "480px",
+          maxHeight: "min(640px, calc(100dvh - 32px))",
         }}
       >
         <motion.div
           animate={{ rotateY: flipped ? 180 : 0 }}
           transition={{ type: "spring", stiffness: 270, damping: 30, mass: 0.85 }}
           onClick={handleFlip}
-          className="relative w-full h-full cursor-pointer group"
+          className="relative w-full h-auto cursor-pointer group"
           style={{ transformStyle: "preserve-3d", borderRadius: "20px" }}
           role="button"
           aria-label={flipped ? "Flip card to front" : "Flip card to see more"}
@@ -1640,8 +1665,10 @@ export function ProfileCard({
               FRONT FACE
           ═══════════════════════════════════════════ */}
           <div
-            className="flip-card-face flex flex-col"
+            className="flex flex-col w-full"
             style={{
+              position: flipped ? "absolute" : "relative",
+              inset: flipped ? 0 : "auto",
               opacity: flipped ? 0 : 1,
               pointerEvents: flipped ? "none" : "auto",
               zIndex: flipped ? 0 : 1,
@@ -1661,7 +1688,7 @@ export function ProfileCard({
               radius={20}
               filterId="rc-filter-front"
               streamRef={webcamStreamRef}
-              style={{ width: "100%", height: "100%" }}
+              style={{ width: "100%", height: flipped ? "100%" : "auto" }}
             >
               {/* Top accent hairline */}
               <div
@@ -1681,29 +1708,7 @@ export function ProfileCard({
 
 
 
-              {/* Photo carousel dots */}
-              {hasMultiplePhotos && (
-                <div
-                  className="absolute flex items-center gap-1.5 z-10 pointer-events-none"
-                  style={{
-                    bottom: "calc(52% + 8px)",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                  }}
-                >
-                  {photos.map((_, i) => (
-                    <div
-                      key={i}
-                      className={`rounded-full transition-all duration-500 ${i === photoIdx ? "dot-active" : ""}`}
-                      style={{
-                        width: i === photoIdx ? "16px" : "4px",
-                        height: "4px",
-                        background: i === photoIdx ? accent : "rgba(255,255,255,0.3)",
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
+
 
               {/* Identity */}
               <AthleteIdentity
@@ -1747,8 +1752,10 @@ export function ProfileCard({
               BACK FACE
           ═══════════════════════════════════════════ */}
           <div
-            className="flip-card-face flip-card-back flex flex-col"
+            className="flip-card-back flex flex-col w-full"
             style={{
+              position: flipped ? "relative" : "absolute",
+              inset: flipped ? "auto" : 0,
               opacity: flipped ? 1 : 0,
               pointerEvents: flipped ? "auto" : "none",
               zIndex: flipped ? 1 : 0,
@@ -1770,7 +1777,7 @@ export function ProfileCard({
               radius={20}
               filterId="rc-filter-back"
               streamRef={webcamStreamRef}
-              style={{ width: "100%", height: "100%" }}
+              style={{ width: "100%", height: flipped ? "auto" : "100%" }}
             >
             {/* Contact modal overlay */}
             <AnimatePresence>

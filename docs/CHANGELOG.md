@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-08-09 — Make digital card height dynamic and responsive to zoom
+
+### What changed
+- **`components/profile-card.tsx`**: Removed the fixed `aspect-ratio` and `max-height` constraints on the perspective container. Implemented a dual-state flow layout where the currently active face is `relative` (stretching the card wrapper naturally to fit its contents) and the inactive face is `absolute inset-0`. Set card boundaries to a flexible `min-height` of `480px` and `max-height` of `min(640px, calc(100dvh - 32px))`. Refactored `AthletePhoto` to use a proportional `aspect-ratio: 16 / 11` instead of parent percentage height, and moved carousel dots inside `AthletePhoto`.
+- **`components/profile-card-skeleton.tsx`**: Updated the skeleton containers and photo shimmer height to use matching dynamic height styles.
+- **`components/reflective-card.css`**: Updated `.rc-content` height to `auto` and `min-height` to `100%` so the metallic video layers expand dynamically.
+
+### Why
+To fix card content overflow and ensure the card scales and shifts layout seamlessly when zooming in/out or viewing on varied screen sizes.
+
+### Files touched
+- `components/profile-card.tsx`
+- `components/profile-card-skeleton.tsx`
+- `components/reflective-card.css`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Relocate logo, QR, and share header
 
 ### What changed
