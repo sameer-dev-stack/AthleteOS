@@ -1685,7 +1685,12 @@ export function ProfileCard({
               radius={20}
               filterId="rc-filter-front"
               streamRef={webcamStreamRef}
-              style={{ width: "100%", height: "100%" }}
+              style={{
+                width: "100%",
+                height: "100%",
+                "--rc-accent-glow": `${accent}1f`,
+                "--rc-accent-glow-hover": `${accent}40`,
+              } as React.CSSProperties}
             >
               {/* Top accent hairline */}
               <div
@@ -1768,7 +1773,12 @@ export function ProfileCard({
               radius={20}
               filterId="rc-filter-back"
               streamRef={webcamStreamRef}
-              style={{ width: "100%", height: "100%" }}
+              style={{
+                width: "100%",
+                height: "100%",
+                "--rc-accent-glow": `${accent}1f`,
+                "--rc-accent-glow-hover": `${accent}40`,
+              } as React.CSSProperties}
             >
             {/* Contact modal overlay */}
             <AnimatePresence>

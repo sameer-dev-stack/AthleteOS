@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-08-09 — Implement premium dynamic border glow
+
+### What changed
+- **`components/reflective-card.css`**: Added box-shadow configuration on `.rc-container` referencing `--rc-accent-glow` and `--rc-accent-glow-hover` variables. Set a smooth bezier hover transition.
+- **`components/profile-card.tsx`**: Injected the lime accent color properties (`accent` + opacity hex modifiers) directly into the `ReflectiveCard` styles for both front and back faces.
+- **`components/profile-card-skeleton.tsx`**: Added a matching static lime glow box-shadow to the skeleton state.
+
+### Why
+To add visual excellence, depth, and a premium interactive look to the card container on hover.
+
+### Files touched
+- `components/reflective-card.css`
+- `components/profile-card.tsx`
+- `components/profile-card-skeleton.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Increase card height ratio to 360/540 and enable back-face scrolling
 
 ### What changed

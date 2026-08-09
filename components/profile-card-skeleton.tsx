@@ -18,7 +18,7 @@ export function ProfileCardSkeleton() {
         <div
           className="relative w-full h-full rounded-[20px] overflow-hidden"
           style={{
-            boxShadow: "0 20px 60px -15px rgba(0,0,0,0.6)",
+            boxShadow: "0 20px 60px -15px rgba(0,0,0,0.6), 0 0 20px -5px rgba(198, 255, 61, 0.12)",
           }}
         >
           {/* Glow border skeleton */}
