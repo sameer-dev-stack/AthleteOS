@@ -8,10 +8,10 @@
 ## 2026-08-06 — Fix stats strip: remove unused gap below stats on card front
 
 ### What changed
-- **`components/profile-card.tsx`**: removed `mt-auto` spacer div between stats strip and URL bar; reduced stats strip top margin from `mt-4` to `mt-3`.
+- **`components/profile-card.tsx`**: removed standalone `mt-auto` spacer; moved `mt-auto` to the flip hint div so it pushes to the absolute bottom of the card while URL bar sits directly below stats.
 
 ### Why
-The `mt-auto` spacer was pushing the URL bar to the bottom of the card, creating a large unused gap between the stats strip and the URL copy button. Removing it lets the URL sit directly below the stats.
+The card's fixed 360x504 aspect ratio leaves dead space when content doesn't fill the height. Moving `mt-auto` to the flip hint keeps it pinned to the bottom while the URL bar stays tight against the stats strip.
 
 ### Files touched
 - `components/profile-card.tsx`, `docs/CHANGELOG.md`
