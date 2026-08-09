@@ -421,6 +421,7 @@ function AthleteIdentity({
         <p
           className="text-[10.5px] mt-0.5 leading-none font-medium truncate"
           style={{ color: "rgba(255,255,255,0.28)" }}
+          title={schoolLine}
         >
           {schoolLine}
         </p>
@@ -677,6 +678,7 @@ function BackHeader({
             <p
               className="text-[9px] font-medium truncate leading-tight"
               style={{ color: "rgba(255,255,255,0.28)" }}
+              title={metaParts.join(" · ")}
             >
               {metaParts.join(" · ")}
             </p>

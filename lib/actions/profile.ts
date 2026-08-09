@@ -207,6 +207,12 @@ export async function updateProfile(
         .trim();
     }
 
+    if (validated.school) {
+      validated.school = validated.school
+        .replace(/\s{2,}/g, " ")
+        .trim();
+    }
+
     // Fetch old values before update for change logging
     const TRACKED_FIELDS = ["bio", "full_name", "sport", "school", "position", "class_year", "avatar_url", "stats", "links", "social", "highlights", "contact_phone", "contact_email"] as const;
     const { data: oldProfile } = await admin
