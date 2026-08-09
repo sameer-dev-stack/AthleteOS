@@ -43,6 +43,17 @@ export function ProfileCardSkeleton() {
 
             {/* Identity area */}
             <div className="px-4 pt-6 relative z-10">
+              {/* Header skeleton (Logo, QR, Share) */}
+              <div className="flex items-center justify-between mb-4 w-full">
+                <div className="flex items-center gap-2">
+                  <div className="h-5 w-5 rounded-[4px] bg-white/[0.05] animate-pulse" />
+                  <div className="h-2.5 w-14 rounded bg-white/[0.04] animate-pulse" />
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="h-10 w-10 rounded-full bg-white/[0.05] animate-pulse" />
+                  <div className="h-10 w-10 rounded-full bg-white/[0.05] animate-pulse" />
+                </div>
+              </div>
               {/* Name skeleton */}
               <div className="flex items-center gap-2">
                 <div className="h-6 w-32 rounded-md bg-white/[0.06] animate-pulse" />

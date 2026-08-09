@@ -5,18 +5,18 @@
 
 ---
 
-## 2026-08-09 — Pin front face hero image to top
+## 2026-08-09 — Relocate logo, QR, and share header
 
 ### What changed
-- **`components/reflective-card.css`**: Added `.rc-front-face .rc-content { justify-content: flex-start; }` to override vertical centering on the front face.
-- **`components/profile-card.tsx`**: Added `className="rc-front-face"` to the front face `<ReflectiveCard>`.
+- **`components/profile-card.tsx`**: Updated `CardHeader` to be a regular flow flex container (removed absolute overlay layout). Relocated it inside the `AthleteIdentity` component (just below the hero image divider) and passed down the necessary props.
+- **`components/profile-card-skeleton.tsx`**: Added matching shimmers for the logo and buttons inside the skeleton's identity area layout.
 
 ### Why
-With the vertical centering of the body content (`justify-content: center` on `.rc-content`), the relative `AthletePhoto` header image was shifted downwards, leaving a gap/space at the top of the card. Overriding this to `flex-start` on the front card face pins the hero image to the absolute top as desired.
+User requested moving the brand logo, QR code, and Share actions down into the identity area below the hero image.
 
 ### Files touched
-- `components/reflective-card.css`
 - `components/profile-card.tsx`
+- `components/profile-card-skeleton.tsx`
 
 ### Commit
 _Pending._

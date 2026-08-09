@@ -162,7 +162,7 @@ function CardHeader({ accent, plan, isVerified, onQr, onShare, copied }: CardHea
   const isPro = plan === "pro" || plan === "team";
 
   return (
-    <div className="absolute top-0 inset-x-0 pt-3.5 px-4 flex items-center justify-between z-20 pointer-events-none">
+    <div className="flex items-center justify-between w-full mb-4 z-20">
       {/* Brand mark */}
       <div className="flex items-center gap-2 pointer-events-auto">
         <Logo
@@ -392,6 +392,10 @@ interface AthleteIdentityProps {
   isVerified: boolean;
   isPro: boolean;
   accent: string;
+  plan: string;
+  onQr: (e: React.MouseEvent) => void;
+  onShare: (e: React.MouseEvent) => void;
+  copied: boolean;
 }
 
 function AthleteIdentity({
@@ -403,6 +407,10 @@ function AthleteIdentity({
   isVerified,
   isPro,
   accent,
+  plan,
+  onQr,
+  onShare,
+  copied,
 }: AthleteIdentityProps) {
   let resolvedPosition = position;
   if (process.env.NODE_ENV === "development" && sport && position && !isValidPosition(sport, position)) {
@@ -430,6 +438,16 @@ function AthleteIdentity({
         style={{
           background: `linear-gradient(90deg, transparent, ${accent}30, transparent)`,
         }}
+      />
+      {/* Card Header (Logo, QR, Share) relocated here */}
+      <CardHeader
+        accent={accent}
+        plan={plan}
+        isVerified={isVerified}
+        profile={{} as any} // Profile is not used inside CardHeader, passed empty mock to satisfy TS
+        onQr={onQr}
+        onShare={onShare}
+        copied={copied}
       />
       {/* Name row */}
       <h1
@@ -1631,7 +1649,6 @@ export function ProfileCard({
             }}
           >
             <ReflectiveCard
-              className="rc-front-face"
               blurStrength={11}
               metalness={0.88}
               roughness={0.38}
@@ -1662,16 +1679,7 @@ export function ProfileCard({
                 sport={profile.sport}
               />
 
-              {/* Card header (overlaid on photo) */}
-              <CardHeader
-                accent={accent}
-                plan={plan}
-                isVerified={isVerified}
-                profile={profile}
-                onQr={(e) => { e.stopPropagation(); setShowQr(true); }}
-                onShare={handleShare}
-                copied={copied}
-              />
+
 
               {/* Photo carousel dots */}
               {hasMultiplePhotos && (
@@ -1707,6 +1715,10 @@ export function ProfileCard({
                 isVerified={isVerified}
                 isPro={isPro}
                 accent={accent}
+                plan={plan}
+                onQr={(e) => { e.stopPropagation(); setShowQr(true); }}
+                onShare={handleShare}
+                copied={copied}
               />
 
               {/* Stats strip */}
