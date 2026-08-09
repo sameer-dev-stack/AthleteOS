@@ -4,6 +4,11 @@ import { SPORT_CONFIG } from "@/lib/sport-config";
 const MOCK_SPORT = SPORT_CONFIG.BB;
 const MOCK_POSITION = MOCK_SPORT.positions[0];
 const MOCK_SCHOOL = "Stanford";
+const MOCK_STATS = [
+  { label: MOCK_SPORT.statsSchema[0].label, value: "18.4" },
+  { label: MOCK_SPORT.statsSchema[1].label, value: "8.2" },
+  { label: MOCK_SPORT.statsSchema[2].label, value: "5.1" },
+];
 
 export function AthleteCard() {
   return (
@@ -101,8 +106,8 @@ export function AthleteCard() {
 
           {/* Stats — derived from sport config */}
           <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3">
-            {MOCK_SPORT.defaultStats.map((s, i) => (
-              <Stat key={s.label} label={s.label} value={["18.4", "8.2", "5.1"][i]} />
+            {MOCK_STATS.map((s) => (
+              <Stat key={s.label} label={s.label} value={s.value} />
             ))}
           </div>
 

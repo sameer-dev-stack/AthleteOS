@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-08-09 — Sport-aware card refinements + accessibility
+
+### What changed
+- **`components/profile-card.tsx`**: `AthletePhoto` now uses `getFallbackGradient(sport)` for sport-specific placeholder gradients when no photo is available. Top-right QR/Share icon chips increased from 28px to 40x40px for better tap targets. `AthleteIdentity` dev-time validation now falls back to "Athlete" label when position is invalid for sport (with console.warn).
+- **`components/athlete-card.tsx`**: Mock stats now derived from `SPORT_CONFIG.BB.statsSchema` instead of hardcoded labels.
+- **`lib/sport-config.ts`**: `getFallbackGradient()` exported for sport-specific hero gradients.
+
+### Why
+Generic accent-tinted placeholder looked the same for every sport. Small icon tap targets (28px) failed accessibility guidelines (minimum 44px). Dev-time validation logged warnings but didn't provide a visual fallback.
+
+### Files touched
+- `components/profile-card.tsx`, `components/athlete-card.tsx`, `lib/sport-config.ts`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Add name sanitization and overflow handling
 
 ### What changed

@@ -40,8 +40,8 @@ Root public athlete identity card. Now a composition of named sub-components rat
 
 | Component | Responsibility |
 |---|---|
-| `CardHeader` | AthleteOS logo, plan/verified badge, QR button, share button |
-| `AthletePhoto` | Hero photo + vignette + grain + placeholder initials |
+| `CardHeader` | AthleteOS logo, plan/verified badge, QR button, share button (40x40 tap targets) |
+| `AthletePhoto` | Hero photo + vignette + grain + sport-aware fallback gradient placeholder |
 | `AthleteIdentity` | Name, sport·position, school, class label, gold verified badge |
 | `AthleteStats` | 3-cell stat strip with lucide icon per stat key |
 | `AthleteIDBlock` | Athlete ID chip + URL copy row |

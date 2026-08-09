@@ -60,7 +60,7 @@ import { CARD_W, CARD_H } from "@/lib/constants";
 import { cleanName } from "@/lib/display-name";
 import { resolveTheme } from "@/lib/themes";
 import { ReflectiveCard } from "@/components/reflective-card";
-import { isValidPosition } from "@/lib/sport-config";
+import { isValidPosition, getFallbackGradient } from "@/lib/sport-config";
 
 /* ══════════════════════════════════════════════════════════
    CONSTANTS & MAPS
@@ -204,21 +204,21 @@ function CardHeader({ accent, plan, isVerified, onQr, onShare, copied }: CardHea
         <button
           onClick={onQr}
           aria-label="Show QR code"
-          className="h-7 w-7 rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
+          className="h-10 w-10 rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
           style={{
             background: "rgba(0,0,0,0.5)",
             border: "1px solid rgba(255,255,255,0.10)",
             backdropFilter: "blur(12px)",
           }}
         >
-          <QrCode className="h-3 w-3" style={{ color: "rgba(255,255,255,0.55)" }} />
+          <QrCode className="h-4 w-4" style={{ color: "rgba(255,255,255,0.55)" }} />
         </button>
 
         {/* Share */}
         <button
           onClick={onShare}
           aria-label="Share profile"
-          className="h-7 w-7 rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
+          className="h-10 w-10 rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
           style={{
             background: "rgba(0,0,0,0.5)",
             border: "1px solid rgba(255,255,255,0.10)",
@@ -226,9 +226,9 @@ function CardHeader({ accent, plan, isVerified, onQr, onShare, copied }: CardHea
           }}
         >
           {copied ? (
-            <CheckIcon className="h-3 w-3" style={{ color: accent }} />
+            <CheckIcon className="h-4 w-4" style={{ color: accent }} />
           ) : (
-            <Share2 className="h-3 w-3" style={{ color: "rgba(255,255,255,0.55)" }} />
+            <Share2 className="h-4 w-4" style={{ color: "rgba(255,255,255,0.55)" }} />
           )}
         </button>
       </div>
@@ -243,9 +243,10 @@ interface AthletePhotoProps {
   displayName: string;
   initials: string;
   accent: string;
+  sport: string | null;
 }
 
-function AthletePhoto({ photos, photoIdx, displayName, initials, accent }: AthletePhotoProps) {
+function AthletePhoto({ photos, photoIdx, displayName, initials, accent, sport }: AthletePhotoProps) {
   const hasPhoto = photos.length > 0;
 
   return (
@@ -278,11 +279,11 @@ function AthletePhoto({ photos, photoIdx, displayName, initials, accent }: Athle
           ))}
         </>
       ) : (
-        /* Placeholder with initials */
+        /* Placeholder with initials — sport-aware fallback gradient */
         <div
           className="absolute inset-0 flex items-center justify-center"
           style={{
-            background: `linear-gradient(160deg, ${accent}18 0%, #0d0d12 100%)`,
+            background: getFallbackGradient(sport),
           }}
         >
           <span
@@ -350,7 +351,12 @@ function AthleteIdentity({
   isPro,
   accent,
 }: AthleteIdentityProps) {
-  const metaLine = [position, sport].filter(Boolean).join(" · ");
+  let resolvedPosition = position;
+  if (process.env.NODE_ENV === "development" && sport && position && !isValidPosition(sport, position)) {
+    console.warn(`[AthleteOS] Position "${position}" is not valid for sport "${sport}". Falling back to "Athlete".`);
+    resolvedPosition = "Athlete";
+  }
+  const metaLine = [resolvedPosition, sport].filter(Boolean).join(" · ");
   const schoolLine = school ?? null;
 
   const nameLen = displayName.length;
@@ -1402,14 +1408,6 @@ export function ProfileCard({
     profile.class_year?.toLowerCase() === "junior"    ? "JR" :
     profile.class_year?.toLowerCase() === "senior"    ? "SR" : null;
 
-  if (process.env.NODE_ENV === "development" && profile.sport && profile.position) {
-    if (!isValidPosition(profile.sport, profile.position)) {
-      console.warn(
-        `[AthleteOS] Position "${profile.position}" is not valid for sport "${profile.sport}".`,
-      );
-    }
-  }
-
   /* Stats filtering */
   const PLACEHOLDER_RE = /^(test|asdf|foo|bar|baz|aaa|123|000|xxx|yyy|zzz|na|n\/a|none|sample|demo|example|temp|placeholder)$/i;
   const cleanStats = (profile.stats ?? []).filter((s) => {
@@ -1600,6 +1598,7 @@ export function ProfileCard({
                 displayName={displayName}
                 initials={initials}
                 accent={accent}
+                sport={profile.sport}
               />
 
               {/* Card header (overlaid on photo) */}

@@ -1,8 +1,15 @@
+export type StatSchema = {
+  key: string;
+  label: string;
+  unit: string;
+};
+
 export type SportConfig = {
   code: string;
   label: string;
   positions: string[];
-  defaultStats: { label: string }[];
+  statsSchema: StatSchema[];
+  fallbackGradient: string;
 };
 
 export const SPORT_CONFIG: Record<string, SportConfig> = {
@@ -14,13 +21,23 @@ export const SPORT_CONFIG: Record<string, SportConfig> = {
       "Offensive Line", "Defensive Line", "Linebacker", "Cornerback",
       "Safety", "Kicker", "Punter", "Return Specialist",
     ],
-    defaultStats: [{ label: "Yards" }, { label: "TDs" }, { label: "Tackles" }],
+    statsSchema: [
+      { key: "yards", label: "Yards", unit: "yds" },
+      { key: "tds", label: "TDs", unit: "" },
+      { key: "tackles", label: "Tackles", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #1a3a1a 0%, #0d2818 40%, #0a1a12 100%)",
   },
   BB: {
     code: "BB",
     label: "Basketball",
     positions: ["Point Guard", "Shooting Guard", "Small Forward", "Power Forward", "Center"],
-    defaultStats: [{ label: "PPG" }, { label: "RPG" }, { label: "APG" }],
+    statsSchema: [
+      { key: "ppg", label: "PPG", unit: "pts" },
+      { key: "rpg", label: "RPG", unit: "reb" },
+      { key: "apg", label: "APG", unit: "ast" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #3a2a0a 0%, #2a1a08 40%, #1a1005 100%)",
   },
   SB: {
     code: "SB",
@@ -29,61 +46,111 @@ export const SPORT_CONFIG: Record<string, SportConfig> = {
       "Pitcher", "Catcher", "First Base", "Second Base",
       "Shortstop", "Third Base", "Left Field", "Center Field", "Right Field",
     ],
-    defaultStats: [{ label: "AVG" }, { label: "HR" }, { label: "RBI" }],
+    statsSchema: [
+      { key: "avg", label: "AVG", unit: "" },
+      { key: "hr", label: "HR", unit: "" },
+      { key: "rbi", label: "RBI", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #1a2a3a 0%, #0d1a28 40%, #0a1218 100%)",
   },
   SOC: {
     code: "SOC",
     label: "Soccer",
     positions: ["Goalkeeper", "Defender", "Midfielder", "Forward", "Striker", "Wing"],
-    defaultStats: [{ label: "Goals" }, { label: "Assists" }, { label: "Apps" }],
+    statsSchema: [
+      { key: "goals", label: "Goals", unit: "" },
+      { key: "assists", label: "Assists", unit: "" },
+      { key: "apps", label: "Apps", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #0a2a1a 0%, #081a12 40%, #05120a 100%)",
   },
   TN: {
     code: "TN",
     label: "Tennis",
     positions: ["Singles", "Doubles"],
-    defaultStats: [{ label: "Ranking" }, { label: "Win-Loss" }, { label: "Aces" }],
+    statsSchema: [
+      { key: "ranking", label: "Ranking", unit: "" },
+      { key: "win-loss", label: "Win-Loss", unit: "" },
+      { key: "aces", label: "Aces", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #2a3a0a 0%, #1a2a08 40%, #121a05 100%)",
   },
   SW: {
     code: "SW",
     label: "Swimming",
     positions: ["Freestyle", "Backstroke", "Breaststroke", "Butterfly", "IM"],
-    defaultStats: [{ label: "100 Free" }, { label: "200 IM" }, { label: "Best Time" }],
+    statsSchema: [
+      { key: "100-free", label: "100 Free", unit: "s" },
+      { key: "200-im", label: "200 IM", unit: "s" },
+      { key: "best-time", label: "Best Time", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #0a1a3a 0%, #081228 40%, #050a18 100%)",
   },
   TF: {
     code: "TF",
     label: "Track & Field",
     positions: ["Sprints", "Distance", "Hurdles", "Jumps", "Throws", "Multi"],
-    defaultStats: [{ label: "100m" }, { label: "200m" }, { label: "State Rank" }],
+    statsSchema: [
+      { key: "100m", label: "100m", unit: "s" },
+      { key: "200m", label: "200m", unit: "s" },
+      { key: "state-rank", label: "State Rank", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #2a1a0a 0%, #1a1208 40%, #120a05 100%)",
   },
   VB: {
     code: "VB",
     label: "Volleyball",
-    positions: ["Outside Hitter", "Middle Blocker", "Setter", "Libero", "Opposite", " Defensive Specialist"],
-    defaultStats: [{ label: "Kills" }, { label: "Assists" }, { label: "Digs" }],
+    positions: ["Outside Hitter", "Middle Blocker", "Setter", "Libero", "Opposite", "Defensive Specialist"],
+    statsSchema: [
+      { key: "kills", label: "Kills", unit: "" },
+      { key: "assists", label: "Assists", unit: "" },
+      { key: "digs", label: "Digs", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #2a0a2a 0%, #1a081a 40%, #120512 100%)",
   },
   WR: {
     code: "WR",
     label: "Wrestling",
     positions: ["Lightweight", "Welterweight", "Middleweight", "Heavyweight"],
-    defaultStats: [{ label: "Record" }, { label: "Pins" }, { label: "State Place" }],
+    statsSchema: [
+      { key: "record", label: "Record", unit: "" },
+      { key: "pins", label: "Pins", unit: "" },
+      { key: "state-place", label: "State Place", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #3a1a0a 0%, #2a1208 40%, #1a0a05 100%)",
   },
   GL: {
     code: "GL",
     label: "Golf",
     positions: ["Individual"],
-    defaultStats: [{ label: "Avg Score" }, { label: "Wins" }, { label: "Handicap" }],
+    statsSchema: [
+      { key: "avg-score", label: "Avg Score", unit: "" },
+      { key: "wins", label: "Wins", unit: "" },
+      { key: "handicap", label: "Handicap", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #0a3a1a 0%, #082a12 40%, #051a0a 100%)",
   },
   LX: {
     code: "LX",
     label: "Lacrosse",
     positions: ["Attack", "Midfield", "Defense", "Goalie"],
-    defaultStats: [{ label: "Goals" }, { label: "Assists" }, { label: "GB" }],
+    statsSchema: [
+      { key: "goals", label: "Goals", unit: "" },
+      { key: "assists", label: "Assists", unit: "" },
+      { key: "gb", label: "GB", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #1a3a2a 0%, #0d2a1a 40%, #0a1a12 100%)",
   },
   HK: {
     code: "HK",
     label: "Hockey",
     positions: ["Center", "Left Wing", "Right Wing", "Defense", "Goaltender"],
-    defaultStats: [{ label: "Goals" }, { label: "Assists" }, { label: "Points" }],
+    statsSchema: [
+      { key: "goals", label: "Goals", unit: "" },
+      { key: "assists", label: "Assists", unit: "" },
+      { key: "points", label: "Points", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #0a2a3a 0%, #081a2a 40%, #05121a 100%)",
   },
 };
 
@@ -112,7 +179,12 @@ export function getPositionsForSport(sportName: string | null): string[] {
   return cfg?.positions ?? [];
 }
 
-export function getDefaultStatsForSport(sportName: string | null): { label: string }[] {
+export function getStatsSchemaForSport(sportName: string | null): StatSchema[] {
   const cfg = resolveSportConfig(sportName);
-  return cfg?.defaultStats ?? [];
+  return cfg?.statsSchema ?? [];
+}
+
+export function getFallbackGradient(sportName: string | null): string {
+  const cfg = resolveSportConfig(sportName);
+  return cfg?.fallbackGradient ?? "linear-gradient(160deg, #1a1a2a 0%, #0d0d18 40%, #08080f 100%)";
 }
