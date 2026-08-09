@@ -5,20 +5,19 @@
 
 ---
 
-## 2026-08-09 — Integrate dynamic StrokeText drawing wordmark for athlete name hero
+## 2026-08-09 — Enforce limits on links and highlights in profile editor
 
 ### What changed
-- **`components/stroke-text.tsx`**: Implemented React Bits `<StrokeText />` component using GSAP to animate SVGs based on text character dimensions.
-- **`components/stroke-text.css`**: Created corresponding styles.
-- **`components/profile-card.tsx`**: Integrated the `<StrokeText />` component to draw the athlete's name on the front face, using the dynamic electric lime theme accent for the outline draw and wiping to solid white. Adjusted name header layout and shifted verified/class year badges below the animated wordmark.
+- **`components/dashboard/profile-editor.tsx`**:
+  - Limited links to a maximum of 3 (changed limit from 10).
+  - Limited highlights to a maximum of 2 (changed limit from 10).
+  - Updated the button render checks and UI text descriptions to clearly display the 3-link and 2-highlight limits.
 
 ### Why
-To elevate the visual aesthetic of the profile card by adding a highly customized, premium logo/wordmark drawing animation when the card mounts.
+To adhere to design layout restrictions, preventing overflow on the back face of the public profile card.
 
 ### Files touched
-- `components/stroke-text.tsx`
-- `components/stroke-text.css`
-- `components/profile-card.tsx`
+- `components/dashboard/profile-editor.tsx`
 
 ### Commit
 _Pending._

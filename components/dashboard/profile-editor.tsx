@@ -800,7 +800,7 @@ function LinksEditor({
   onChange: (v: { label: string; url: string }[]) => void;
 }) {
   function addLink() {
-    if (links.length >= 10) return;
+    if (links.length >= 3) return;
     onChange([...links, { label: "", url: "" }]);
   }
 
@@ -818,7 +818,7 @@ function LinksEditor({
     <div className="space-y-3">
       <p className="text-xs text-ink-dim">
         Add links you want on your public card (Hudl, Instagram, merch store,
-        etc.). Up to 4 appear on the back of your card.
+        etc.). Limit of 3 links.
       </p>
       {links.length === 0 ? (
         <EmptyState
@@ -855,7 +855,7 @@ function LinksEditor({
               </button>
             </div>
           ))}
-          {links.length < 10 && (
+          {links.length < 3 && (
             <button
               onClick={addLink}
               className="flex items-center gap-1.5 text-sm text-ink-muted hover:text-accent transition-colors"
@@ -918,7 +918,7 @@ function HighlightsEditor({
   onChange: (v: { title: string; url: string }[]) => void;
 }) {
   function addHighlight() {
-    if (highlights.length >= 10) return;
+    if (highlights.length >= 2) return;
     onChange([...highlights, { title: "", url: "" }]);
   }
 
@@ -935,7 +935,7 @@ function HighlightsEditor({
   return (
     <div className="space-y-3">
       <p className="text-xs text-ink-dim">
-        Add highlight videos or articles (YouTube, Hudl, news features, etc.). Up to 3 appear on the back of your card.
+        Add highlight videos or articles (YouTube, Hudl, news features, etc.). Limit of 2 highlights.
       </p>
       {highlights.length === 0 ? (
         <EmptyState
@@ -972,7 +972,7 @@ function HighlightsEditor({
               </button>
             </div>
           ))}
-          {highlights.length < 10 && (
+          {highlights.length < 2 && (
             <button
               onClick={addHighlight}
               className="flex items-center gap-1.5 text-sm text-ink-muted hover:text-accent transition-colors"
