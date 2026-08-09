@@ -1665,7 +1665,7 @@ export function ProfileCard({
               FRONT FACE
           ═══════════════════════════════════════════ */}
           <div
-            className="flex flex-col w-full pb-6"
+            className="flex flex-col w-full"
             style={{
               position: flipped ? "absolute" : "relative",
               inset: flipped ? 0 : "auto",
@@ -1728,6 +1728,9 @@ export function ProfileCard({
 
               {/* Stats strip */}
               <AthleteStats cells={statCells} accent={accent} />
+
+              {/* Bottom spacing to keep stats block off the card border */}
+              <div className="h-6" />
 
 
 
