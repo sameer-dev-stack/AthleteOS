@@ -32,7 +32,7 @@ export function ProfileCardSkeleton() {
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
             {/* Photo area shimmer */}
-            <div className="w-full h-[30%] relative overflow-hidden">
+            <div className="w-full h-[24%] relative overflow-hidden">
               <div className="absolute inset-0 bg-[#16161a]">
                 <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
               </div>

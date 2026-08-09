@@ -252,7 +252,7 @@ function AthletePhoto({ photos, photoIdx, displayName, initials, accent, sport }
   return (
     <div
       className="relative flex-shrink-0"
-      style={{ height: "30%" }}
+      style={{ height: "24%" }}
     >
       {hasPhoto ? (
         <>
@@ -371,6 +371,13 @@ function AthleteIdentity({
 
   return (
     <div className="flex-shrink-0 px-5 mt-0 relative z-10">
+      {/* Divider between hero and content */}
+      <div
+        className="absolute top-0 left-5 right-5 h-px"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${accent}30, transparent)`,
+        }}
+      />
       {/* Name row */}
       <h1
         className="font-black text-white line-clamp-2"
@@ -453,7 +460,7 @@ function AthleteStats({ cells, accent }: AthleteStatsProps) {
   if (cells.length === 0) return null;
 
   return (
-    <div className="flex-shrink-0 mx-4 mt-3">
+    <div className="flex-shrink-0 mx-4 mt-2">
       {/* Subtle rule above */}
       <div
         className="mb-2 h-px"
@@ -522,7 +529,7 @@ interface AthleteIDBlockProps {
 
 function AthleteIDBlock({ username, athleteId, accent, urlCopied, onCopy }: AthleteIDBlockProps) {
   return (
-    <div className="flex-shrink-0 mx-4 mt-3">
+    <div className="flex-shrink-0 mx-4 mt-2">
       <button
         onClick={onCopy}
         className="w-full flex items-center justify-between rounded-lg px-3.5 py-2.5 group transition-all duration-200"
@@ -572,7 +579,7 @@ interface FlipCTAProps {
 
 function FlipCTA({ accent, hintVisible }: FlipCTAProps) {
   return (
-    <div className="flex items-center justify-center py-3 px-4 flex-shrink-0">
+    <div className="flex items-center justify-center py-2 px-4 flex-shrink-0">
       <div
         className={`inline-flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 group-hover:scale-[1.03] ${
           hintVisible ? "flip-hint-pulse" : "opacity-40"
@@ -1617,7 +1624,7 @@ export function ProfileCard({
                 <div
                   className="absolute flex items-center gap-1.5 z-10 pointer-events-none"
                   style={{
-                    bottom: "calc(30% + 8px)",
+                    bottom: "calc(24% + 8px)",
                     left: "50%",
                     transform: "translateX(-50%)",
                   }}

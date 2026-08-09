@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-08-09 — Card layout rebalance: tighter body, centered content
+
+### What changed
+- **`components/profile-card.tsx`**: Hero height reduced from 30% to 24% (~115px). Stats, ID block, and FlipCTA spacing tightened (mt-3 → mt-2, py-3 → py.2). Accent divider added between hero and identity. Carousel dots repositioned for 24% height.
+- **`components/profile-card-skeleton.tsx`**: Photo shimmer updated to 24%.
+- **`components/reflective-card.css`**: Added `justify-content: center` to `.rc-content` to vertically center body content.
+
+### Why
+Previous 30% hero still dominated the card. Content felt sparse and pushed down. The fix reduces hero proportion AND tightens body spacing AND vertically centers the content cluster, creating a balanced two-zone layout.
+
+### Files touched
+- `components/profile-card.tsx`, `components/profile-card-skeleton.tsx`, `components/reflective-card.css`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Card layout fix: hero image height reduction
 
 ### What changed
