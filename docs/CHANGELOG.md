@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-08-09 — Align photo hero to card ceiling
+
+### What changed
+- **`components/reflective-card.css`**: Changed `.rc-content` alignment from `justify-content: center` to `justify-content: flex-start` to ensure that content sits flush at the top.
+- **`components/profile-card.tsx`**: Added a `<div className="flex-1" />` spacer between `AthleteIdentity` and `AthleteStats` on the front face to distribute the remaining vertical space and keep the stats anchored cleanly at the bottom.
+
+### Why
+To make sure the top of the photo hero touches the ceiling (top edge) of the card and gets masked correctly by the card's rounded corners, instead of being pushed down by vertical centering.
+
+### Files touched
+- `components/reflective-card.css`
+- `components/profile-card.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Implement premium dynamic border glow
 
 ### What changed
