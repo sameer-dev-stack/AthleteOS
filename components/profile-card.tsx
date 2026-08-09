@@ -60,6 +60,7 @@ import { CARD_W, CARD_H } from "@/lib/constants";
 import { cleanName } from "@/lib/display-name";
 import { resolveTheme } from "@/lib/themes";
 import { ReflectiveCard } from "@/components/reflective-card";
+import { isValidPosition } from "@/lib/sport-config";
 
 /* ══════════════════════════════════════════════════════════
    CONSTANTS & MAPS
@@ -1396,6 +1397,14 @@ export function ProfileCard({
     profile.class_year?.toLowerCase() === "sophomore" ? "SO" :
     profile.class_year?.toLowerCase() === "junior"    ? "JR" :
     profile.class_year?.toLowerCase() === "senior"    ? "SR" : null;
+
+  if (process.env.NODE_ENV === "development" && profile.sport && profile.position) {
+    if (!isValidPosition(profile.sport, profile.position)) {
+      console.warn(
+        `[AthleteOS] Position "${profile.position}" is not valid for sport "${profile.sport}".`,
+      );
+    }
+  }
 
   /* Stats filtering */
   const PLACEHOLDER_RE = /^(test|asdf|foo|bar|baz|aaa|123|000|xxx|yyy|zzz|na|n\/a|none|sample|demo|example|temp|placeholder)$/i;

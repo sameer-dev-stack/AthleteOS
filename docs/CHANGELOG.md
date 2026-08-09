@@ -5,22 +5,21 @@
 
 ---
 
-## 2026-08-09 — Increase card height + reduce font size for long names
+## 2026-08-09 — Add SPORT_CONFIG: single source of truth for sport→position→stats
 
 ### What changed
-- **`lib/constants.ts`**: `CARD_H` increased from `420` to `480` (aspect ratio now 3:4).
-- **`components/profile-card.tsx`** (`AthleteIdentity`):
-  - Font-size breakpoints shifted: `>20` chars renders at `clamp(11px, 3.2vw, 14px)`.
-  - CSS: `wordBreak: "keep-all"`, `overflowWrap: "anywhere"`, `lineHeight: 1.2`.
+- **`lib/sport-config.ts`** (new): Central `SPORT_CONFIG` map keyed by short code (FB, BB, SB, SOC, etc.). Each entry defines `code`, `label`, `positions[]`, and `defaultStats[]`. Exports `resolveSportConfig()`, `isValidPosition()`, `getPositionsForSport()`, `getDefaultStatsForSport()`.
+- **`components/athlete-card.tsx`**: Replaced hardcoded "Guard · Stanford Women's Basketball" and PPG/APG/Reach with values derived from `SPORT_CONFIG.BB`. Mock data is now consistent — basketball position + basketball stats.
+- **`components/profile-card.tsx`**: Added dev-only `console.warn` if an athlete's position is not in `SPORT_CONFIG[sport].positions`.
 
 ### Why
-Long unbroken names like `lasihad311adspritecom` (21 chars) were orphaning a single character on line 2. Taller card gives more vertical breathing room; smaller font ensures the name fits on one line at mobile widths.
+Position and stat labels were decoupled — a soccer position ("Striker") could be paired with football stats (Yards, TDs, Catch%), producing invalid combinations. SPORT_CONFIG enforces consistency at the source.
 
 ### Files touched
-- `lib/constants.ts`, `components/profile-card.tsx`
+- `lib/sport-config.ts`, `components/athlete-card.tsx`, `components/profile-card.tsx`
 
-### Commits
-`bfca936`, `d8a3450`
+### Commit
+_Pending._
 
 ---
 

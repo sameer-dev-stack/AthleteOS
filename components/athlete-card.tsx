@@ -1,4 +1,9 @@
 import { BadgeCheck, MapPin, Trophy, Heart, Share2, Sparkles, Calendar, DollarSign } from "lucide-react";
+import { SPORT_CONFIG } from "@/lib/sport-config";
+
+const MOCK_SPORT = SPORT_CONFIG.BB;
+const MOCK_POSITION = MOCK_SPORT.positions[0];
+const MOCK_SCHOOL = "Stanford";
 
 export function AthleteCard() {
   return (
@@ -82,7 +87,7 @@ export function AthleteCard() {
               <BadgeCheck className="h-4 w-4 text-accent" />
             </div>
             <p className="mt-1 text-[12px] text-ink-muted">
-              Guard · Stanford Women&apos;s Basketball
+              {MOCK_POSITION} · {MOCK_SCHOOL} Women&apos;s {MOCK_SPORT.label}
             </p>
             <div className="mt-1.5 flex items-center gap-3 text-[11px] text-ink-dim">
               <span className="flex items-center gap-1">
@@ -94,11 +99,11 @@ export function AthleteCard() {
             </div>
           </div>
 
-          {/* Stats */}
+          {/* Stats — derived from sport config */}
           <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3">
-            <Stat label="PPG" value="18.4" />
-            <Stat label="APG" value="6.2" />
-            <Stat label="Reach" value="142K" highlight />
+            {MOCK_SPORT.defaultStats.map((s, i) => (
+              <Stat key={s.label} label={s.label} value={["18.4", "8.2", "5.1"][i]} />
+            ))}
           </div>
 
           {/* Action grid */}
