@@ -231,7 +231,7 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
           animate={{ rotateY: flipped ? 180 : 0 }}
           transition={{ type: "spring", stiffness: 280, damping: 32, mass: 0.8 }}
           onClick={handleFlip}
-          className="relative w-full h-full cursor-pointer"
+          className="relative w-full h-full cursor-pointer group"
           style={{
             transformStyle: "preserve-3d",
             borderRadius: "20px",
@@ -270,8 +270,8 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
               style={{ background: `linear-gradient(90deg, transparent 5%, ${accent}40 50%, transparent 95%)` }}
             />
 
-            {/* ── Photo Hero (40%) ─────────────────── */}
-            <div className="relative flex-shrink-0" style={{ height: "40%" }}>
+            {/* ── Photo Hero (33%) ─────────────────── */}
+            <div className="relative flex-shrink-0" style={{ height: "33%" }}>
               {photos.length > 0 ? (
                 <>
                   {photos.map((url, i) => (
@@ -454,12 +454,28 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
             </div>
 
             {/* ── Flip Hint ──────────────────────── */}
-            <div className="flex items-center justify-center gap-1.5 py-2 px-4 mt-auto">
-              <div className={`flex items-center gap-1.5 transition-opacity duration-500 ${hintVisible ? "flip-hint-pulse" : "opacity-25"}`}>
-                <RotateCcw className="h-3 w-3 text-white/40" />
-                <span className="text-[8px] font-bold tracking-[0.2em] uppercase text-white/40">
-                  Tap to flip
+            <div className="flex items-center justify-center py-2.5 px-4 flex-shrink-0">
+              <div
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full backdrop-blur-md transition-all duration-300 group-hover:scale-[1.03] group-hover:border-accent/40 ${
+                  hintVisible ? "flip-hint-pulse" : "opacity-40"
+                }`}
+                style={{
+                  background: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  boxShadow: `0 2px 12px rgba(0, 0, 0, 0.3), 0 0 16px ${accent}15`,
+                }}
+              >
+                <RotateCcw
+                  className="h-3.5 w-3.5 transition-transform duration-500 group-hover:-rotate-90"
+                  style={{ color: accent }}
+                />
+                <span className="text-[10px] font-bold tracking-[0.16em] uppercase text-white/90 group-hover:text-white">
+                  Tap card to flip
                 </span>
+                <span
+                  className="h-1.5 w-1.5 rounded-full animate-ping ml-0.5"
+                  style={{ backgroundColor: accent }}
+                />
               </div>
             </div>
 
@@ -641,9 +657,9 @@ export function ProfileCard({ profile, totalViews = 0, totalFollowers = 0, nilSc
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-1 flex-shrink-0 opacity-30">
-                <RotateCcw className="h-3 w-3 text-white/50" />
-                <span className="text-[8px] font-bold text-white/50 tracking-wider uppercase">Flip</span>
+              <div className="flex items-center gap-1.5 flex-shrink-0 px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/10 group-hover:border-accent/30 text-white/80 transition-all text-[9px] font-bold tracking-wider uppercase">
+                <RotateCcw className="h-3 w-3" style={{ color: accent }} />
+                <span>Flip Back</span>
               </div>
             </div>
 
