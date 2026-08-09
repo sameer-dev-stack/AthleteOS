@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-08-09 — Hero image size increase
+
+### What changed
+- **`components/profile-card.tsx`**: Increased hero `AthletePhoto` height from 24% to 52% of the card height. Adjusted `ProfileAvatar` bottom offset from `calc(76% - 36px)` to `calc(48% - 36px)` and the photo carousel dots bottom offset to `calc(52% + 8px)`.
+- **`components/profile-card-skeleton.tsx`**: Updated the skeleton's photo area shimmer height to 52% and its avatar position to match the main component.
+- **`docs/COMPONENTS.md`**: Updated documentation reference for `<ProfileCard>` components.
+
+### Why
+To fulfill the user request to make the hero image bigger so it covers mostly the card, giving the card a stronger visual focus on the athlete's photo/gradient background.
+
+### Files touched
+- `components/profile-card.tsx`
+- `components/profile-card-skeleton.tsx`
+- `docs/COMPONENTS.md`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-09 — Card layout rebalance: tighter body, centered content
 
 ### What changed

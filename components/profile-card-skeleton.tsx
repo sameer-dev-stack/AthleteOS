@@ -32,7 +32,7 @@ export function ProfileCardSkeleton() {
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
             {/* Photo area shimmer */}
-            <div className="w-full h-[24%] relative overflow-hidden">
+            <div className="w-full h-[52%] relative overflow-hidden">
               <div className="absolute inset-0 bg-[#16161a]">
                 <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
               </div>
@@ -44,7 +44,7 @@ export function ProfileCardSkeleton() {
             {/* Avatar skeleton */}
             <div
               className="absolute left-4 z-20 w-[72px] h-[72px] rounded-full bg-white/[0.06] animate-pulse"
-              style={{ bottom: "calc(76% - 36px)", border: "3px solid #111115" }}
+              style={{ bottom: "calc(48% - 36px)", border: "3px solid #111115" }}
             />
 
             {/* Identity area */}

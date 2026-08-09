@@ -252,7 +252,7 @@ function AthletePhoto({ photos, photoIdx, displayName, initials, accent, sport }
   return (
     <div
       className="relative flex-shrink-0"
-      style={{ height: "24%" }}
+      style={{ height: "52%" }}
     >
       {hasPhoto ? (
         <>
@@ -345,7 +345,7 @@ function ProfileAvatar({ photos, photoIdx, displayName, initials, accent, sport 
   return (
     <div
       className="absolute left-5 z-20"
-      style={{ bottom: "calc(76% - 36px)" }}
+      style={{ bottom: "calc(48% - 36px)" }}
     >
       <div
         className="relative w-[72px] h-[72px] rounded-full overflow-hidden"
@@ -1687,7 +1687,7 @@ export function ProfileCard({
                 <div
                   className="absolute flex items-center gap-1.5 z-10 pointer-events-none"
                   style={{
-                    bottom: "calc(24% + 8px)",
+                    bottom: "calc(52% + 8px)",
                     left: "50%",
                     transform: "translateX(-50%)",
                   }}
