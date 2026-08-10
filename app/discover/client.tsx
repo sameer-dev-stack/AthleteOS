@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
@@ -8,7 +8,6 @@ import {
   Search,
   SlidersHorizontal,
   X,
-  Check,
   Users,
   ChevronLeft,
   ChevronRight,
@@ -20,9 +19,14 @@ import {
 } from "lucide-react";
 import { searchPublicAthletes, type DiscoveryAthlete } from "@/lib/actions/discovery";
 import { Logo } from "@/components/logo";
+import { Tilt } from "@/components/motion/tilt";
+import { Spotlight } from "@/components/motion/spotlight";
+import { getFallbackGradient } from "@/lib/sport-config";
 
 type Props = {
   initialAthletes: DiscoveryAthlete[];
+  initialProAthletes: DiscoveryAthlete[];
+  initialRegularAthletes: DiscoveryAthlete[];
   initialTotal: number;
   sports: string[];
 };
@@ -33,14 +37,316 @@ function formatFollowers(n: number): string {
   return n.toString();
 }
 
-export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props) {
+/* ── Pro badge (glass style, matches profile-card.tsx) ── */
+const PRO_ACCENT = "#C6FF3D";
+
+function ProBadge() {
+  return (
+    <div
+      className="flex items-center gap-1 rounded-full px-2 py-0.5 h-5 flex-shrink-0"
+      style={{
+        background: "rgba(0,0,0,0.5)",
+        border: `1px solid ${PRO_ACCENT}30`,
+        backdropFilter: "blur(12px)",
+        boxShadow: "0 0 8px 0 rgba(198,255,61,0.18)",
+      }}
+    >
+      <Star className="h-2.5 w-2.5" style={{ color: PRO_ACCENT }} fill={PRO_ACCENT} />
+      <span className="text-[8px] font-black tracking-wider" style={{ color: PRO_ACCENT }}>
+        PRO
+      </span>
+    </div>
+  );
+}
+
+/* ── Verified badge (animated GIF) ── */
+function VerifiedBadge() {
+  return (
+    <Image
+      src="/verified.gif"
+      alt="Verified"
+      width={16}
+      height={16}
+      unoptimized
+      className="flex-shrink-0"
+    />
+  );
+}
+
+/* ── Pro Spotlight Card (horizontal strip) ── */
+function ProSpotlightCard({ athlete, index }: { athlete: DiscoveryAthlete; index: number }) {
+  const gradient = getFallbackGradient(athlete.sport);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+      className="snap-start"
+    >
+      <Tilt max={8} scale={1.015}>
+        <Spotlight size={280} color="rgba(198,255,61,0.10)">
+          <Link
+            href={`/${athlete.username}`}
+            className="block min-w-[280px] sm:min-w-[320px] rounded-2xl border border-accent/20 bg-bg-card overflow-hidden transition-colors hover:border-accent/40"
+            style={{ boxShadow: "0 0 0 1px rgba(198,255,61,0.06), 0 8px 40px -16px rgba(0,0,0,0.7)" }}
+          >
+            {/* Hero gradient */}
+            <div
+              className="relative h-20 w-full overflow-hidden"
+              style={{ background: gradient }}
+            >
+              <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-bg-card to-transparent" />
+            </div>
+
+            {/* Avatar (overlaps hero/content boundary) */}
+            <div className="relative px-5 pt-0">
+              <div
+                className="absolute -top-7 left-5 h-14 w-14 rounded-full border-2 border-bg-card overflow-hidden bg-bg-card"
+                style={{ boxShadow: "0 0 0 1px rgba(198,255,61,0.2)" }}
+              >
+                {athlete.avatar_url ? (
+                  <Image
+                    src={athlete.avatar_url}
+                    alt={athlete.full_name ?? athlete.username ?? "Athlete"}
+                    width={56}
+                    height={56}
+                    unoptimized
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-accent/10 text-lg font-bold text-accent">
+                    {(athlete.full_name || athlete.username || "?")[0].toUpperCase()}
+                  </div>
+                )}
+              </div>
+
+              {/* Content */}
+              <div className="pt-10 pb-4">
+                {/* Name + badges */}
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <h3 className="truncate text-sm font-semibold text-white">
+                    {athlete.full_name || "Unnamed Athlete"}
+                  </h3>
+                  {athlete.is_verified && <VerifiedBadge />}
+                  <ProBadge />
+                </div>
+
+                {/* Sport + school chips */}
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {athlete.sport && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
+                      <Trophy className="h-3 w-3" />
+                      {athlete.sport}
+                    </span>
+                  )}
+                  {athlete.school && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
+                      <MapPin className="h-3 w-3" />
+                      {athlete.school}
+                    </span>
+                  )}
+                </div>
+
+                {/* Followers footer */}
+                <div className="mt-3 flex items-center justify-between border-t border-white/[0.04] pt-3">
+                  <div className="flex items-center gap-1.5 text-xs text-ink-muted">
+                    <Users className="h-3.5 w-3.5" />
+                    {athlete.total_followers > 0 ? (
+                      <span>
+                        <span className="font-medium text-white">{formatFollowers(athlete.total_followers)}</span>{" "}
+                        followers
+                      </span>
+                    ) : (
+                      <span className="text-ink-dim">No socials linked</span>
+                    )}
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-accent">
+                    View
+                    <ExternalLink className="h-3 w-3" />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </Spotlight>
+      </Tilt>
+    </motion.div>
+  );
+}
+
+/* ── Regular athlete grid card ── */
+function AthleteCard({ athlete, index }: { athlete: DiscoveryAthlete; index: number }) {
+  const isPro = athlete.plan === "pro";
+  const gradient = getFallbackGradient(athlete.sport);
+
+  const cardContent = (
+    <Link
+      href={`/${athlete.username}`}
+      className={`group block rounded-2xl border bg-bg-card overflow-hidden transition-all duration-300 ${
+        isPro
+          ? "border-accent/20 hover:border-accent/40 hover:shadow-[0_0_40px_-12px_rgba(198,255,61,0.15)]"
+          : "border-white/[0.06] hover:border-white/[0.12]"
+      }`}
+    >
+      {/* Hero area */}
+      <div
+        className="relative h-20 overflow-hidden"
+        style={{ background: gradient }}
+      >
+        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-bg-card to-transparent" />
+      </div>
+
+      {/* Avatar (overlaps hero boundary) */}
+      <div className="relative px-4">
+        <div className="absolute -top-6 left-4 h-12 w-12 rounded-full border-2 border-bg-card overflow-hidden bg-bg-card">
+          {athlete.avatar_url ? (
+            <Image
+              src={athlete.avatar_url}
+              alt={athlete.full_name ?? athlete.username ?? "Athlete"}
+              width={48}
+              height={48}
+              unoptimized
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-accent/10 text-sm font-bold text-accent">
+              {(athlete.full_name || athlete.username || "?")[0].toUpperCase()}
+            </div>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="pt-8 pb-3">
+          {/* Name row */}
+          <div className="flex items-center gap-1.5 min-w-0">
+            <h3 className="truncate text-sm font-semibold text-white">
+              {athlete.full_name || "Unnamed Athlete"}
+            </h3>
+            {athlete.is_verified && <VerifiedBadge />}
+            {isPro && <ProBadge />}
+          </div>
+          {athlete.username && (
+            <p className="mt-0.5 text-xs text-ink-dim">/{athlete.username}</p>
+          )}
+
+          {/* Chips */}
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
+            {athlete.sport && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
+                <Trophy className="h-3 w-3" />
+                {athlete.sport}
+              </span>
+            )}
+            {athlete.school && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
+                <MapPin className="h-3 w-3" />
+                {athlete.school}
+              </span>
+            )}
+            {athlete.position && (
+              <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
+                {athlete.position}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Bio */}
+      <div className="px-4">
+        {athlete.bio ? (
+          <p className="line-clamp-2 text-xs leading-relaxed text-ink-dim">{athlete.bio}</p>
+        ) : (
+          <p className="text-xs italic text-ink-dim/50">No bio yet</p>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="mt-2 flex items-center justify-between border-t border-white/[0.04] px-4 py-2.5">
+        <div className="flex items-center gap-1.5 text-xs text-ink-muted">
+          <Users className="h-3.5 w-3.5" />
+          {athlete.total_followers > 0 ? (
+            <span>
+              <span className="font-medium text-white">{formatFollowers(athlete.total_followers)}</span>{" "}
+              followers
+            </span>
+          ) : (
+            <span className="text-ink-dim">No socials linked</span>
+          )}
+        </div>
+        <span className="inline-flex items-center gap-1 text-xs font-medium text-accent opacity-0 transition-opacity group-hover:opacity-100">
+          View
+          <ExternalLink className="h-3 w-3" />
+        </span>
+      </div>
+    </Link>
+  );
+
+  const wrapped = isPro ? (
+    <Tilt max={6} scale={1.01}>
+      <Spotlight size={240} color="rgba(198,255,61,0.08)">
+        {cardContent}
+      </Spotlight>
+    </Tilt>
+  ) : (
+    cardContent
+  );
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3), ease: [0.16, 1, 0.3, 1] }}
+    >
+      {wrapped}
+    </motion.div>
+  );
+}
+
+/* ── Loading skeleton card ── */
+function SkeletonCard() {
+  return (
+    <div className="rounded-2xl border border-white/[0.06] bg-bg-card overflow-hidden">
+      <div className="relative h-20 bg-white/[0.04] animate-pulse" />
+      <div className="relative px-4">
+        <div className="absolute -top-6 left-4 h-12 w-12 rounded-full bg-white/[0.06] animate-pulse border-2 border-bg-card" />
+        <div className="pt-8 pb-3 space-y-2">
+          <div className="h-3.5 w-32 rounded bg-white/[0.04] animate-pulse" />
+          <div className="h-2.5 w-20 rounded bg-white/[0.04] animate-pulse" />
+          <div className="flex gap-1.5 mt-2.5">
+            <div className="h-5 w-16 rounded-full bg-white/[0.04] animate-pulse" />
+            <div className="h-5 w-20 rounded-full bg-white/[0.04] animate-pulse" />
+          </div>
+        </div>
+      </div>
+      <div className="px-4 pb-3">
+        <div className="h-2.5 w-full rounded bg-white/[0.04] animate-pulse" />
+        <div className="h-2.5 w-3/4 rounded bg-white/[0.04] animate-pulse mt-1.5" />
+      </div>
+      <div className="border-t border-white/[0.04] px-4 py-2.5">
+        <div className="h-2.5 w-20 rounded bg-white/[0.04] animate-pulse" />
+      </div>
+    </div>
+  );
+}
+
+/* ── Main client component ── */
+export function DiscoverClient({
+  initialAthletes,
+  initialProAthletes,
+  initialRegularAthletes,
+  initialTotal,
+  sports,
+}: Props) {
   const [athletes, setAthletes] = useState<DiscoveryAthlete[]>(initialAthletes);
+  const [proAthletes, setProAthletes] = useState<DiscoveryAthlete[]>(initialProAthletes);
+  const [regularAthletes, setRegularAthletes] = useState<DiscoveryAthlete[]>(initialRegularAthletes);
   const [total, setTotal] = useState(initialTotal);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  // Filter state
   const [query, setQuery] = useState("");
   const [sport, setSport] = useState("");
   const [school, setSchool] = useState("");
@@ -73,10 +379,12 @@ export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props)
         const result = await searchPublicAthletes(filters);
         if (result.ok) {
           setAthletes(result.data ?? []);
+          setProAthletes(result.proAthletes ?? []);
+          setRegularAthletes(result.regularAthletes ?? []);
           setTotal(result.total ?? 0);
         }
       } catch {
-        // Network error - keep existing results
+        // Network error — keep existing results
       } finally {
         setLoading(false);
       }
@@ -84,7 +392,6 @@ export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props)
     [query, sport, school, position, minFollowers]
   );
 
-  // Debounced text search
   const handleQueryChange = (value: string) => {
     setQuery(value);
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -125,10 +432,12 @@ export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props)
   const hasActiveFilters = query || sport || school || position || minFollowers > 0;
   const totalPages = Math.ceil(total / pageSize);
 
-  // Listen for Enter key on school/position inputs
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") e.preventDefault();
   };
+
+  // When search is active show all results (pro+regular interleaved); otherwise show only regular in grid
+  const gridAthletes = hasActiveFilters ? athletes : regularAthletes;
 
   return (
     <div className="min-h-screen bg-bg">
@@ -174,52 +483,27 @@ export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props)
         </div>
       </section>
 
-      {/* Athlete Spotlight */}
-      {athletes.length > 0 && (
-        <section className="border-b border-white/[0.06] bg-gradient-to-b from-accent/[0.03] to-transparent">
+      {/* Pro Spotlight strip */}
+      {proAthletes.length > 0 && (
+        <section className="border-b border-white/[0.06] bg-gradient-to-b from-accent/[0.04] to-transparent">
           <div className="container-tight py-8">
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-5">
               <Sparkles className="h-4 w-4 text-accent" />
-              <span className="text-xs font-bold uppercase tracking-wider text-accent">Featured Athlete</span>
-            </div>
-            <Link
-              href={`/${athletes[0].username}`}
-              className="group flex items-center gap-4 rounded-2xl border border-accent/20 bg-accent/[0.03] p-4 transition-all hover:border-accent/40 hover:bg-accent/[0.06]"
-            >
-              <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border border-accent/20">
-                {athletes[0].avatar_url ? (
-                  <Image src={athletes[0].avatar_url} alt="" unoptimized width={56} height={56} className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-accent/10 text-lg font-bold text-accent">
-                    {(athletes[0].full_name || athletes[0].username || "?")[0].toUpperCase()}
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-semibold text-white truncate">
-                    {athletes[0].full_name || "Unnamed Athlete"}
-                  </h3>
-                  {athletes[0].is_verified && (
-                    <span className="flex-shrink-0 flex h-4 w-4 items-center justify-center rounded-full" style={{ backgroundColor: "#FACC15" }}>
-                      <Check className="h-2.5 w-2.5 text-[#111115]" strokeWidth={3} />
-                    </span>
-                  )}
-                  {athletes[0].plan !== "free" && (
-                    <span className="flex-shrink-0 rounded-full bg-accent/15 px-1.5 py-0.5 text-[9px] font-bold uppercase text-accent">
-                      {athletes[0].plan}
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-ink-dim mt-0.5">
-                  {[athletes[0].sport, athletes[0].school].filter(Boolean).join(" · ")}
-                </p>
-              </div>
-              <span className="text-xs font-semibold text-accent opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                View
-                <ExternalLink className="h-3 w-3" />
+              <span className="text-xs font-bold uppercase tracking-wider text-accent">
+                Pro Athletes
               </span>
-            </Link>
+              <span className="ml-1 rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-bold text-accent">
+                {proAthletes.length}
+              </span>
+            </div>
+            <div
+              className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory"
+              style={{ scrollbarWidth: "none" }}
+            >
+              {proAthletes.map((athlete, i) => (
+                <ProSpotlightCard key={athlete.id} athlete={athlete} index={i} />
+              ))}
+            </div>
           </div>
         </section>
       )}
@@ -227,7 +511,6 @@ export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props)
       {/* Search + Filters */}
       <section className="border-b border-white/[0.06] bg-bg-elev/50">
         <div className="container-tight py-5">
-          {/* Search bar */}
           <div className="flex gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-dim" />
@@ -265,7 +548,6 @@ export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props)
             </button>
           </div>
 
-          {/* Filter panel */}
           <AnimatePresence>
             {filtersOpen && (
               <motion.div
@@ -276,7 +558,6 @@ export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props)
                 className="overflow-hidden"
               >
                 <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                  {/* Sport dropdown */}
                   <div>
                     <label className="mb-1.5 block text-xs font-medium text-ink-dim">Sport</label>
                     <select
@@ -293,7 +574,6 @@ export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props)
                     </select>
                   </div>
 
-                  {/* School input */}
                   <div>
                     <label className="mb-1.5 block text-xs font-medium text-ink-dim">School</label>
                     <input
@@ -306,7 +586,6 @@ export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props)
                     />
                   </div>
 
-                  {/* Position input */}
                   <div>
                     <label className="mb-1.5 block text-xs font-medium text-ink-dim">Position</label>
                     <input
@@ -319,7 +598,6 @@ export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props)
                     />
                   </div>
 
-                  {/* Min followers slider */}
                   <div>
                     <label className="mb-1.5 block text-xs font-medium text-ink-dim">
                       Min followers: {minFollowers > 0 ? formatFollowers(minFollowers) : "Any"}
@@ -358,7 +636,6 @@ export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props)
 
       {/* Results */}
       <section className="container-tight py-8 sm:py-12">
-        {/* Results header */}
         <div className="mb-6 flex items-center justify-between">
           <p className="text-sm text-ink-muted">
             {loading ? (
@@ -371,14 +648,10 @@ export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props)
           </p>
         </div>
 
-        {/* Card grid */}
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-64 rounded-2xl border border-white/[0.06] bg-[#0D0D0F] animate-pulse"
-              />
+              <SkeletonCard key={i} />
             ))}
           </div>
         ) : athletes.length === 0 ? (
@@ -397,13 +670,12 @@ export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props)
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {athletes.map((athlete, i) => (
+            {gridAthletes.map((athlete, i) => (
               <AthleteCard key={athlete.id} athlete={athlete} index={i} />
             ))}
           </div>
         )}
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="mt-8 flex items-center justify-center gap-2">
             <button
@@ -444,9 +716,7 @@ export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props)
       {/* Footer CTA */}
       <section className="border-t border-white/[0.06] bg-bg-elev/30">
         <div className="container-tight py-12 text-center">
-          <h2 className="text-display-md font-bold text-white">
-            Are you an athlete?
-          </h2>
+          <h2 className="text-display-md font-bold text-white">Are you an athlete?</h2>
           <p className="mx-auto mt-3 max-w-md text-ink-muted">
             Claim your card and get discovered by brands and sponsors.
           </p>
@@ -456,114 +726,5 @@ export function DiscoverClient({ initialAthletes, initialTotal, sports }: Props)
         </div>
       </section>
     </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Athlete Card
-// ---------------------------------------------------------------------------
-
-function AthleteCard({ athlete, index }: { athlete: DiscoveryAthlete; index: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.3), ease: [0.16, 1, 0.3, 1] }}
-    >
-      <Link
-        href={`/${athlete.username}`}
-        className="group block rounded-2xl border border-white/[0.06] bg-[#111113] transition-all duration-300 hover:border-accent/20 hover:shadow-[0_0_40px_-12px_rgba(198,255,61,0.15)]"
-      >
-        {/* Avatar + badges */}
-        <div className="relative overflow-hidden rounded-t-2xl bg-gradient-to-b from-white/[0.03] to-transparent p-5 pb-3">
-          <div className="flex items-start gap-3.5">
-            <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border border-white/[0.08] bg-white/[0.06]">
-              {athlete.avatar_url ? (
-                <Image
-                  src={athlete.avatar_url}
-                  alt={athlete.full_name ?? athlete.username ?? "Athlete"}
-                  width={56}
-                  height={56}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-lg font-bold text-accent/60">
-                  {(athlete.full_name || athlete.username || "?")[0].toUpperCase()}
-                </div>
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5">
-                <h3 className="truncate text-sm font-semibold text-white">
-                  {athlete.full_name || "Unnamed Athlete"}
-                </h3>
-                {athlete.is_verified && (
-                  <span className="flex-shrink-0 flex h-4 w-4 items-center justify-center rounded-full" style={{ backgroundColor: "#FACC15" }}>
-                    <Check className="h-2.5 w-2.5 text-[#111115]" strokeWidth={3} />
-                  </span>
-                )}
-                {athlete.plan !== "free" && (
-                  <span className="flex-shrink-0 rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-accent">
-                    {athlete.plan}
-                  </span>
-                )}
-              </div>
-              {athlete.username && (
-                <p className="mt-0.5 text-xs text-ink-dim">/{athlete.username}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Sport / School / Position */}
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {athlete.sport && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
-                <Trophy className="h-3 w-3" />
-                {athlete.sport}
-              </span>
-            )}
-            {athlete.school && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
-                <MapPin className="h-3 w-3" />
-                {athlete.school}
-              </span>
-            )}
-            {athlete.position && (
-              <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
-                {athlete.position}
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Bio */}
-        <div className="px-5">
-          {athlete.bio ? (
-            <p className="line-clamp-2 text-xs leading-relaxed text-ink-dim">{athlete.bio}</p>
-          ) : (
-            <p className="text-xs italic text-ink-dim/50">No bio yet</p>
-          )}
-        </div>
-
-        {/* Footer: followers + CTA */}
-        <div className="mt-3 flex items-center justify-between border-t border-white/[0.04] px-5 py-3">
-          <div className="flex items-center gap-1.5 text-xs text-ink-muted">
-            <Users className="h-3.5 w-3.5" />
-            {athlete.total_followers > 0 ? (
-              <span>
-                <span className="font-medium text-white">{formatFollowers(athlete.total_followers)}</span>{" "}
-                followers
-              </span>
-            ) : (
-              <span className="text-ink-dim">No socials linked</span>
-            )}
-          </div>
-          <span className="inline-flex items-center gap-1 text-xs font-medium text-accent opacity-0 transition-opacity group-hover:opacity-100">
-            View card
-            <ExternalLink className="h-3 w-3" />
-          </span>
-        </div>
-      </Link>
-    </motion.div>
   );
 }

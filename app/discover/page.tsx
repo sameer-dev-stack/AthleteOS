@@ -31,6 +31,8 @@ export default async function DiscoverPage() {
   return (
     <DiscoverClient
       initialAthletes={athletesResult.ok ? athletesResult.data ?? [] : []}
+      initialProAthletes={athletesResult.ok ? athletesResult.proAthletes ?? [] : []}
+      initialRegularAthletes={athletesResult.ok ? athletesResult.regularAthletes ?? [] : []}
       initialTotal={athletesResult.total ?? 0}
       sports={sportsResult.ok ? sportsResult.data ?? [] : []}
     />

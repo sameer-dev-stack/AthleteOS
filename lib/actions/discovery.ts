@@ -48,7 +48,7 @@ export type DiscoveryFilters = z.infer<typeof SearchSchema>;
 
 export async function searchPublicAthletes(
   filters: DiscoveryFilters
-): Promise<{ ok: boolean; data?: DiscoveryAthlete[]; total?: number; error?: string }> {
+): Promise<{ ok: boolean; data?: DiscoveryAthlete[]; proAthletes?: DiscoveryAthlete[]; regularAthletes?: DiscoveryAthlete[]; total?: number; error?: string }> {
   const parsed = SearchSchema.safeParse(filters);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
 
@@ -90,7 +90,7 @@ export async function searchPublicAthletes(
     .range(from, to);
 
   if (error) return { ok: false, error: error.message };
-  if (!profiles || profiles.length === 0) return { ok: true, data: [], total: count ?? 0 };
+  if (!profiles || profiles.length === 0) return { ok: true, data: [], proAthletes: [], regularAthletes: [], total: count ?? 0 };
 
   // Fetch aggregated follower counts from social_accounts
   const profileIds = profiles.map((p) => p.id);
@@ -130,13 +130,19 @@ export async function searchPublicAthletes(
   }
 
   // Priority Discover Ranking: Pro users & Gold Verified athletes are boosted to the top
+  // Tiebreakers: follower count desc, then alphabetical by name
   athletes.sort((a, b) => {
     const aWeight = (a.plan === "pro" ? 2 : 0) + (a.is_verified ? 1 : 0);
     const bWeight = (b.plan === "pro" ? 2 : 0) + (b.is_verified ? 1 : 0);
-    return bWeight - aWeight;
+    if (bWeight !== aWeight) return bWeight - aWeight;
+    if (b.total_followers !== a.total_followers) return b.total_followers - a.total_followers;
+    return (a.full_name || a.username || "").localeCompare(b.full_name || b.username || "");
   });
 
-  return { ok: true, data: athletes, total: athletes.length };
+  const proAthletes = athletes.filter((a) => a.plan === "pro");
+  const regularAthletes = athletes.filter((a) => a.plan !== "pro");
+
+  return { ok: true, data: athletes, proAthletes, regularAthletes, total: athletes.length };
 }
 
 export async function getDiscoverySports(): Promise<{ ok: boolean; data?: string[]; error?: string }> {

@@ -5,6 +5,25 @@
 
 ---
 
+## 2026-08-10 — Discover page: Pro Spotlight strip + card redesign
+
+### What changed
+- **`lib/actions/discovery.ts`**: Added follower-count + alpha tiebreakers to sort; split result into `proAthletes` / `regularAthletes` arrays; updated return type and empty-result early-return.
+- **`app/discover/page.tsx`**: Passes `initialProAthletes` and `initialRegularAthletes` to `<DiscoverClient>`.
+- **`app/discover/client.tsx`**: Full redesign — `ProBadge` (glass), `VerifiedBadge` (verified.gif), `ProSpotlightCard` (Tilt+Spotlight, sport-gradient hero, overlapping avatar, staggered entrance), `AthleteCard` (sport-gradient hero, overlapping avatar, PRO badge, Tilt+Spotlight on Pro), `SkeletonCard` matching new layout, updated state/props for proAthletes/regularAthletes. Replaced single-athlete spotlight with horizontal scroll strip showing ALL Pro users.
+
+### Why
+Fix ranking bug (only 1 of 2 Pro users was shown) and modernise the card UI.
+
+### Files touched
+- `lib/actions/discovery.ts`
+- `app/discover/page.tsx`
+- `app/discover/client.tsx`
+
+### Commit
+_Pending._
+
+
 ## 2026-08-09 — Upscale verified.gif badge sizes to match original visual volume
 
 ### What changed
