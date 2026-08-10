@@ -5,14 +5,14 @@
 
 ---
 
-## 2026-08-10 — Profile Card: Add NIL ACTIVE status badge for Pro Plan users
+## 2026-08-10 — Profile Card: Display personalized Name / ABOUT watermark for Pro Plan users
 
 ### What changed
 - **`components/profile-card.tsx`**:
-  - Replaced the blank space / empty fallback on CardHeader left with a sleek, glassmorphic `NIL ACTIVE` status badge featuring a pulsing theme-colored status dot when the user is on the Pro or Team plan (`isPro` is true).
+  - Replaced the generic `NIL ACTIVE` status badge on the CardHeader left actions slot with a personalized, glassmorphic path watermark displaying `[displayName] / ABOUT` for users on the Pro/Team plan (`isPro` is true).
 
 ### Why
-Ensures that Pro/Team athlete profiles don't show empty spaces while keeping them clean, white-labeled, and functional.
+Fills the card's top-left corner space with a high-end vanity watermark customized for the athlete, enhancing card ownership and visual layout alignment.
 
 ### Files touched
 - `components/profile-card.tsx`

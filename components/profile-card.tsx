@@ -157,9 +157,10 @@ interface CardHeaderProps {
   onQr: (e: React.MouseEvent) => void;
   onShare: (e: React.MouseEvent) => void;
   copied: boolean;
+  displayName: string;
 }
 
-function CardHeader({ accent, plan, isVerified, onQr, onShare, copied }: CardHeaderProps) {
+function CardHeader({ accent, plan, isVerified, onQr, onShare, copied, displayName }: CardHeaderProps) {
   const isPro = plan === "pro" || plan === "team";
 
   return (
@@ -191,9 +192,8 @@ function CardHeader({ accent, plan, isVerified, onQr, onShare, copied }: CardHea
             backdropFilter: "blur(12px)",
           }}
         >
-          <div className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ backgroundColor: accent }} />
-          <span className="text-[8px] font-black tracking-wider uppercase text-white/70">
-            NIL ACTIVE
+          <span className="text-[8px] font-black tracking-wider uppercase text-white/90">
+            {displayName} <span className="text-white/40">/ ABOUT</span>
           </span>
         </div>
       )}
@@ -472,6 +472,7 @@ function AthleteIdentity({
         onQr={onQr}
         onShare={onShare}
         copied={copied}
+        displayName={displayName}
       />
       {/* Name row */}
       <h1
