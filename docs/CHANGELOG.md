@@ -5,14 +5,14 @@
 
 ---
 
-## 2026-08-10 — Profile Card: Remove CardHeader NIL PASSPORT badge
+## 2026-08-10 — Profile Card: Hide brand watermark for Pro Plan users
 
 ### What changed
 - **`components/profile-card.tsx`**:
-  - Removed the `NIL PASSPORT` / `NIL ATHLETE` capsule badge from the `CardHeader` right actions container.
+  - Added conditional logic to hide the `AthleteOS` brand watermark/logo in `CardHeader` for users with a Pro or Team plan (`isPro` is true).
 
 ### Why
-Restores simplicity and keeps only the brand mark (symmetrical to QR/Share actions) on the top header, removing the redundant pill badges.
+Keeps Pro/Team athlete profiles clean and white-labeled by removing platform branding from their primary identity card header.
 
 ### Files touched
 - `components/profile-card.tsx`

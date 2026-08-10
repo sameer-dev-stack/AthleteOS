@@ -165,22 +165,26 @@ function CardHeader({ accent, plan, isVerified, onQr, onShare, copied }: CardHea
   return (
     <div className="flex items-center justify-between w-full mb-4 z-20">
       {/* Brand mark */}
-      <div
-        className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 h-6 pointer-events-auto"
-        style={{
-          background: "rgba(0,0,0,0.5)",
-          border: "1px solid rgba(255,255,255,0.12)",
-          backdropFilter: "blur(12px)",
-        }}
-      >
-        <Logo
-          className="h-3.5 w-3.5 rounded-[3px] flex-shrink-0"
-          style={{ backgroundColor: accent }}
-        />
-        <span className="text-[8.5px] font-black tracking-[0.18em] uppercase text-white/90">
-          ATHLETE<span style={{ color: accent }}>OS</span>
-        </span>
-      </div>
+      {!isPro ? (
+        <div
+          className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 h-6 pointer-events-auto"
+          style={{
+            background: "rgba(0,0,0,0.5)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            backdropFilter: "blur(12px)",
+          }}
+        >
+          <Logo
+            className="h-3.5 w-3.5 rounded-[3px] flex-shrink-0"
+            style={{ backgroundColor: accent }}
+          />
+          <span className="text-[8.5px] font-black tracking-[0.18em] uppercase text-white/90">
+            ATHLETE<span style={{ color: accent }}>OS</span>
+          </span>
+        </div>
+      ) : (
+        <div />
+      )}
 
       {/* Right actions */}
       <div className="flex items-center gap-1.5 pointer-events-auto">
