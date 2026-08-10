@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
@@ -22,6 +22,7 @@ import { Logo } from "@/components/logo";
 import { Tilt } from "@/components/motion/tilt";
 import { Spotlight } from "@/components/motion/spotlight";
 import { getFallbackGradient } from "@/lib/sport-config";
+import { BorderGlow } from "@/components/border-glow";
 
 type Props = {
   initialAthletes: DiscoveryAthlete[];
@@ -82,93 +83,103 @@ function ProSpotlightCard({ athlete, index }: { athlete: DiscoveryAthlete; index
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
-      className="snap-start"
+      className="snap-start min-w-[280px] sm:min-w-[320px]"
     >
       <Tilt max={8} scale={1.015}>
         <Spotlight size={280} color="rgba(198,255,61,0.10)">
-          <Link
-            href={`/${athlete.username}`}
-            className="block min-w-[280px] sm:min-w-[320px] rounded-2xl border border-accent/20 bg-bg-card overflow-hidden transition-colors hover:border-accent/40"
-            style={{ boxShadow: "0 0 0 1px rgba(198,255,61,0.06), 0 8px 40px -16px rgba(0,0,0,0.7)" }}
+          <BorderGlow
+            glowColor="79 100 62"
+            backgroundColor="#101012"
+            borderRadius={16}
+            glowIntensity={0.9}
+            coneSpread={30}
+            colors={["#C6FF3D", "#a8e63a", "#d4ff7a"]}
+            fillOpacity={0.35}
+            className="w-full"
           >
-            {/* Hero gradient */}
-            <div
-              className="relative h-20 w-full overflow-hidden"
-              style={{ background: gradient }}
+            <Link
+              href={`/${athlete.username}`}
+              className="block rounded-2xl bg-bg-card overflow-hidden transition-colors"
             >
-              <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-bg-card to-transparent" />
-            </div>
-
-            {/* Avatar (overlaps hero/content boundary) */}
-            <div className="relative px-5 pt-0">
+              {/* Hero gradient */}
               <div
-                className="absolute -top-7 left-5 h-14 w-14 rounded-full border-2 border-bg-card overflow-hidden bg-bg-card"
-                style={{ boxShadow: "0 0 0 1px rgba(198,255,61,0.2)" }}
+                className="relative h-20 w-full rounded-t-2xl overflow-hidden"
+                style={{ background: gradient }}
               >
-                {athlete.avatar_url ? (
-                  <Image
-                    src={athlete.avatar_url}
-                    alt={athlete.full_name ?? athlete.username ?? "Athlete"}
-                    width={56}
-                    height={56}
-                    unoptimized
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-accent/10 text-lg font-bold text-accent">
-                    {(athlete.full_name || athlete.username || "?")[0].toUpperCase()}
-                  </div>
-                )}
+                <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-bg-card to-transparent" />
               </div>
 
-              {/* Content */}
-              <div className="pt-10 pb-4">
-                {/* Name + badges */}
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <h3 className="truncate text-sm font-semibold text-white">
-                    {athlete.full_name || "Unnamed Athlete"}
-                  </h3>
-                  {athlete.is_verified && <VerifiedBadge />}
-                  <ProBadge />
-                </div>
-
-                {/* Sport + school chips */}
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {athlete.sport && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
-                      <Trophy className="h-3 w-3" />
-                      {athlete.sport}
-                    </span>
-                  )}
-                  {athlete.school && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
-                      <MapPin className="h-3 w-3" />
-                      {athlete.school}
-                    </span>
+              {/* Avatar (overlaps hero/content boundary) */}
+              <div className="relative px-5 pt-0">
+                <div
+                  className="absolute -top-7 left-5 h-14 w-14 rounded-full border-2 border-bg-card overflow-hidden bg-bg-card"
+                  style={{ boxShadow: "0 0 0 1px rgba(198,255,61,0.2)" }}
+                >
+                  {athlete.avatar_url ? (
+                    <Image
+                      src={athlete.avatar_url}
+                      alt={athlete.full_name ?? athlete.username ?? "Athlete"}
+                      width={56}
+                      height={56}
+                      unoptimized
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-accent/10 text-lg font-bold text-accent">
+                      {(athlete.full_name || athlete.username || "?")[0].toUpperCase()}
+                    </div>
                   )}
                 </div>
 
-                {/* Followers footer */}
-                <div className="mt-3 flex items-center justify-between border-t border-white/[0.04] pt-3">
-                  <div className="flex items-center gap-1.5 text-xs text-ink-muted">
-                    <Users className="h-3.5 w-3.5" />
-                    {athlete.total_followers > 0 ? (
-                      <span>
-                        <span className="font-medium text-white">{formatFollowers(athlete.total_followers)}</span>{" "}
-                        followers
+                {/* Content */}
+                <div className="pt-10 pb-4">
+                  {/* Name + badges */}
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <h3 className="truncate text-sm font-semibold text-white">
+                      {athlete.full_name || "Unnamed Athlete"}
+                    </h3>
+                    {athlete.is_verified && <VerifiedBadge />}
+                    <ProBadge />
+                  </div>
+
+                  {/* Sport + school chips */}
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {athlete.sport && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
+                        <Trophy className="h-3 w-3" />
+                        {athlete.sport}
                       </span>
-                    ) : (
-                      <span className="text-ink-dim">No socials linked</span>
+                    )}
+                    {athlete.school && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
+                        <MapPin className="h-3 w-3" />
+                        {athlete.school}
+                      </span>
                     )}
                   </div>
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-accent">
-                    View
-                    <ExternalLink className="h-3 w-3" />
-                  </span>
+
+                  {/* Followers footer */}
+                  <div className="mt-3 flex items-center justify-between border-t border-white/[0.04] pt-3">
+                    <div className="flex items-center gap-1.5 text-xs text-ink-muted">
+                      <Users className="h-3.5 w-3.5" />
+                      {athlete.total_followers > 0 ? (
+                        <span>
+                          <span className="font-medium text-white">{formatFollowers(athlete.total_followers)}</span>{" "}
+                          followers
+                        </span>
+                      ) : (
+                        <span className="text-ink-dim">No socials linked</span>
+                      )}
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-accent">
+                      View
+                      <ExternalLink className="h-3 w-3" />
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+          </BorderGlow>
         </Spotlight>
       </Tilt>
     </motion.div>
@@ -183,15 +194,15 @@ function AthleteCard({ athlete, index }: { athlete: DiscoveryAthlete; index: num
   const cardContent = (
     <Link
       href={`/${athlete.username}`}
-      className={`group block rounded-2xl border bg-bg-card overflow-hidden transition-all duration-300 ${
+      className={`group block rounded-2xl overflow-hidden transition-all duration-300 ${
         isPro
-          ? "border-accent/20 hover:border-accent/40 hover:shadow-[0_0_40px_-12px_rgba(198,255,61,0.15)]"
-          : "border-white/[0.06] hover:border-white/[0.12]"
+          ? "bg-bg-card"
+          : "border border-white/[0.06] bg-bg-card hover:border-white/[0.12]"
       }`}
     >
       {/* Hero area */}
       <div
-        className="relative h-20 overflow-hidden"
+        className="relative h-20 rounded-t-2xl overflow-hidden"
         style={{ background: gradient }}
       >
         <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-bg-card to-transparent" />
@@ -286,7 +297,18 @@ function AthleteCard({ athlete, index }: { athlete: DiscoveryAthlete; index: num
   const wrapped = isPro ? (
     <Tilt max={6} scale={1.01}>
       <Spotlight size={240} color="rgba(198,255,61,0.08)">
-        {cardContent}
+        <BorderGlow
+          glowColor="79 100 62"
+          backgroundColor="#101012"
+          borderRadius={16}
+          glowIntensity={0.8}
+          coneSpread={28}
+          colors={["#C6FF3D", "#a8e63a", "#d4ff7a"]}
+          fillOpacity={0.3}
+          className="w-full"
+        >
+          {cardContent}
+        </BorderGlow>
       </Spotlight>
     </Tilt>
   ) : (
