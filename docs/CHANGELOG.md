@@ -5,14 +5,15 @@
 
 ---
 
-## 2026-08-10 — Profile Card: Display personalized Name / ABOUT watermark for Pro Plan users
+## 2026-08-10 — Profile Card: Relocate Name Header to CardHeader for Pro Plan users
 
 ### What changed
 - **`components/profile-card.tsx`**:
-  - Replaced the generic `NIL ACTIVE` status badge on the CardHeader left actions slot with a personalized, glassmorphic path watermark displaying `[displayName] / ABOUT` for users on the Pro/Team plan (`isPro` is true).
+  - Relocated the large `h1` Name Header row (containing name, verified badge, and class year badge) from the bottom (`AthleteIdentity`) to the top-left corner (`CardHeader`) when the user is on the Pro or Team plan (`isPro` is true).
+  - Keeps the name block at the bottom (`AthleteIdentity`) for free plan users who display the standard `AthleteOS` brand logo watermark at the top.
 
 ### Why
-Fills the card's top-left corner space with a high-end vanity watermark customized for the athlete, enhancing card ownership and visual layout alignment.
+Fills the card's top-left corner space on Pro profiles with the athlete's actual name branding, aligning it cleanly next to the action buttons and avoiding duplication at the bottom.
 
 ### Files touched
 - `components/profile-card.tsx`
