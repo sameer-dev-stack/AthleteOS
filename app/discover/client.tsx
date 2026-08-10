@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
@@ -22,6 +22,7 @@ import { Logo } from "@/components/logo";
 import { Tilt } from "@/components/motion/tilt";
 import { Spotlight } from "@/components/motion/spotlight";
 import { getFallbackGradient } from "@/lib/sport-config";
+import { BorderGlow } from "@/components/border-glow";
 
 type Props = {
   initialAthletes: DiscoveryAthlete[];
@@ -82,106 +83,106 @@ function ProSpotlightCard({ athlete, index }: { athlete: DiscoveryAthlete; index
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
-      className="snap-start min-w-[280px] sm:min-w-[320px] group/card"
+      className="snap-start min-w-[280px] sm:min-w-[320px]"
     >
       <Tilt max={8} scale={1.015}>
         <Spotlight size={280} color="rgba(198,255,61,0.12)">
-          <Link
-            href={`/${athlete.username}`}
-            className="block rounded-2xl bg-bg-card overflow-hidden transition-all duration-300"
-            style={{
-              border: "1px solid rgba(198,255,61,0.18)",
-              boxShadow: "0 0 0 0 rgba(198,255,61,0), inset 0 0 0 0 rgba(198,255,61,0)",
-            }}
-            onMouseEnter={e => {
-              const el = e.currentTarget as HTMLElement;
-              el.style.boxShadow = "0 0 24px -4px rgba(198,255,61,0.35), inset 0 0 0 1px rgba(198,255,61,0.3)";
-              el.style.borderColor = "rgba(198,255,61,0.4)";
-            }}
-            onMouseLeave={e => {
-              const el = e.currentTarget as HTMLElement;
-              el.style.boxShadow = "0 0 0 0 rgba(198,255,61,0), inset 0 0 0 0 rgba(198,255,61,0)";
-              el.style.borderColor = "rgba(198,255,61,0.18)";
-            }}
+          <BorderGlow
+            edgeSensitivity={30}
+            glowColor="78 100 62"
+            backgroundColor="#101012"
+            borderRadius={16}
+            glowRadius={40}
+            glowIntensity={1.0}
+            coneSpread={28}
+            animated={true}
+            colors={['#C6FF3D', '#a5d933', '#85b029']}
+            fillOpacity={0.35}
+            className="w-full"
           >
-            {/* Hero gradient */}
-            <div
-              className="relative h-20 w-full overflow-hidden"
-              style={{ background: gradient }}
+            <Link
+              href={`/${athlete.username}`}
+              className="block rounded-2xl overflow-hidden"
             >
-              <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-bg-card to-transparent" />
-            </div>
-
-            {/* Avatar (overlaps hero/content boundary) */}
-            <div className="relative px-5 pt-0">
+              {/* Hero gradient */}
               <div
-                className="absolute -top-7 left-5 h-14 w-14 rounded-full border-2 border-bg-card overflow-hidden bg-bg-card"
-                style={{ boxShadow: "0 0 0 1px rgba(198,255,61,0.25)" }}
+                className="relative h-20 w-full overflow-hidden"
+                style={{ background: gradient }}
               >
-                {athlete.avatar_url ? (
-                  <Image
-                    src={athlete.avatar_url}
-                    alt={athlete.full_name ?? athlete.username ?? "Athlete"}
-                    width={56}
-                    height={56}
-                    unoptimized
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-accent/10 text-lg font-bold text-accent">
-                    {(athlete.full_name || athlete.username || "?")[0].toUpperCase()}
-                  </div>
-                )}
+                <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#101012] to-transparent" />
               </div>
 
-              {/* Content */}
-              <div className="pt-10 pb-4">
-                {/* Name + badges */}
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <h3 className="truncate text-sm font-semibold text-white">
-                    {athlete.full_name || "Unnamed Athlete"}
-                  </h3>
-                  {athlete.is_verified && <VerifiedBadge />}
-                  <ProBadge />
-                </div>
-
-                {/* Sport + school chips */}
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {athlete.sport && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
-                      <Trophy className="h-3 w-3" />
-                      {athlete.sport}
-                    </span>
-                  )}
-                  {athlete.school && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
-                      <MapPin className="h-3 w-3" />
-                      {athlete.school}
-                    </span>
+              {/* Avatar (overlaps hero/content boundary) */}
+              <div className="relative px-5 pt-0">
+                <div
+                  className="absolute -top-7 left-5 h-14 w-14 rounded-full border-2 border-[#101012] overflow-hidden bg-[#101012]"
+                  style={{ boxShadow: "0 0 0 1px rgba(198,255,61,0.25)" }}
+                >
+                  {athlete.avatar_url ? (
+                    <Image
+                      src={athlete.avatar_url}
+                      alt={athlete.full_name ?? athlete.username ?? "Athlete"}
+                      width={56}
+                      height={56}
+                      unoptimized
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-accent/10 text-lg font-bold text-accent">
+                      {(athlete.full_name || athlete.username || "?")[0].toUpperCase()}
+                    </div>
                   )}
                 </div>
 
-                {/* Followers footer */}
-                <div className="mt-3 flex items-center justify-between border-t border-white/[0.04] pt-3">
-                  <div className="flex items-center gap-1.5 text-xs text-ink-muted">
-                    <Users className="h-3.5 w-3.5" />
-                    {athlete.total_followers > 0 ? (
-                      <span>
-                        <span className="font-medium text-white">{formatFollowers(athlete.total_followers)}</span>{" "}
-                        followers
+                {/* Content */}
+                <div className="pt-10 pb-4">
+                  {/* Name + badges */}
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <h3 className="truncate text-sm font-semibold text-white">
+                      {athlete.full_name || "Unnamed Athlete"}
+                    </h3>
+                    {athlete.is_verified && <VerifiedBadge />}
+                    <ProBadge />
+                  </div>
+
+                  {/* Sport + school chips */}
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {athlete.sport && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
+                        <Trophy className="h-3 w-3" />
+                        {athlete.sport}
                       </span>
-                    ) : (
-                      <span className="text-ink-dim">No socials linked</span>
+                    )}
+                    {athlete.school && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
+                        <MapPin className="h-3 w-3" />
+                        {athlete.school}
+                      </span>
                     )}
                   </div>
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-accent">
-                    View
-                    <ExternalLink className="h-3 w-3" />
-                  </span>
+
+                  {/* Followers footer */}
+                  <div className="mt-3 flex items-center justify-between border-t border-white/[0.04] pt-3">
+                    <div className="flex items-center gap-1.5 text-xs text-ink-muted">
+                      <Users className="h-3.5 w-3.5" />
+                      {athlete.total_followers > 0 ? (
+                        <span>
+                          <span className="font-medium text-white">{formatFollowers(athlete.total_followers)}</span>{" "}
+                          followers
+                        </span>
+                      ) : (
+                        <span className="text-ink-dim">No socials linked</span>
+                      )}
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-accent">
+                      View
+                      <ExternalLink className="h-3 w-3" />
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+          </BorderGlow>
         </Spotlight>
       </Tilt>
     </motion.div>
@@ -196,25 +197,8 @@ function AthleteCard({ athlete, index }: { athlete: DiscoveryAthlete; index: num
   const cardContent = (
     <Link
       href={`/${athlete.username}`}
-      className={`group block rounded-2xl bg-bg-card overflow-hidden transition-all duration-300`}
-      style={isPro ? {
-        border: "1px solid rgba(198,255,61,0.18)",
-        boxShadow: "0 0 0 0 rgba(198,255,61,0)",
-        transition: "border-color 0.2s, box-shadow 0.2s",
-      } : {
-        border: "1px solid rgba(255,255,255,0.06)",
-        transition: "border-color 0.2s",
-      }}
-      onMouseEnter={isPro ? e => {
-        const el = e.currentTarget as HTMLElement;
-        el.style.boxShadow = "0 0 24px -4px rgba(198,255,61,0.3), inset 0 0 0 1px rgba(198,255,61,0.25)";
-        el.style.borderColor = "rgba(198,255,61,0.35)";
-      } : undefined}
-      onMouseLeave={isPro ? e => {
-        const el = e.currentTarget as HTMLElement;
-        el.style.boxShadow = "0 0 0 0 rgba(198,255,61,0)";
-        el.style.borderColor = "rgba(198,255,61,0.18)";
-      } : undefined}
+      className="group block rounded-2xl bg-bg-card overflow-hidden transition-all duration-300"
+      style={!isPro ? { border: "1px solid rgba(255,255,255,0.06)" } : undefined}
     >
       {/* Hero area */}
       <div
@@ -313,7 +297,20 @@ function AthleteCard({ athlete, index }: { athlete: DiscoveryAthlete; index: num
   const wrapped = isPro ? (
     <Tilt max={6} scale={1.01}>
       <Spotlight size={240} color="rgba(198,255,61,0.08)">
-        {cardContent}
+        <BorderGlow
+          edgeSensitivity={30}
+          glowColor="78 100 62"
+          backgroundColor="#101012"
+          borderRadius={16}
+          glowRadius={40}
+          glowIntensity={1.0}
+          coneSpread={28}
+          colors={['#C6FF3D', '#a5d933', '#85b029']}
+          fillOpacity={0.3}
+          className="w-full h-full"
+        >
+          {cardContent}
+        </BorderGlow>
       </Spotlight>
     </Tilt>
   ) : (

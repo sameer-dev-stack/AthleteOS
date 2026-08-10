@@ -5,6 +5,28 @@
 
 ---
 
+## 2026-08-10 — BorderGlow: Fix concentric corner radius geometry
+
+### What changed
+- **`components/border-glow.css`**:
+  - Calculated concentric border radius for outer `.edge-light`: `border-radius: calc(var(--border-radius) + var(--glow-padding))`.
+  - Set inner `.edge-light::before` radius back to `var(--border-radius)` for accurate 0-inset alignment.
+  - Set `.border-glow-inner` to `border-radius: inherit; overflow: hidden;` so child card contents clip cleanly to rounded corners without boxy 90° edges.
+- **`app/discover/client.tsx`**:
+  - Restored `BorderGlow` cursor-following animated edge light wrapping on `ProSpotlightCard` and Pro `AthleteCard`.
+
+### Why
+Fix boxy 90° corner clipping artifacts on cards while retaining the mouse-tracking `BorderGlow` animated edge lighting effect.
+
+### Files touched
+- `components/border-glow.css`
+- `app/discover/client.tsx`
+
+### Commit
+_Pending._
+
+
+
 ## 2026-08-10 — Discover page: Pro Spotlight strip + card redesign
 
 ### What changed
