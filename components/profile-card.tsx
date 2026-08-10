@@ -489,14 +489,14 @@ function AthleteIdentity({
       >
         <span>{displayName}</span>
         {(isVerified || isPro || classLabel) && (
-          <span className="inline-flex items-center gap-1.5 align-middle ml-2 flex-shrink-0 relative -top-[1px]">
+          <span className="inline-flex items-center gap-1 align-middle ml-1 flex-shrink-0 relative -top-[1px]">
             {(isVerified || isPro) && (
               <Image
                 src="/verified.gif"
                 alt="Verified Athlete"
                 width={48}
                 height={48}
-                className="inline-block h-[36px] w-[36px] flex-shrink-0 align-middle"
+                className="inline-block h-[32px] w-[32px] flex-shrink-0 align-middle"
                 unoptimized
               />
             )}
@@ -779,9 +779,9 @@ function BackHeader({
               <Image
                 src="/verified.gif"
                 alt="Verified Athlete"
-                width={20}
-                height={20}
-                className="flex-shrink-0 h-[20px] w-[20px] align-middle"
+                width={36}
+                height={36}
+                className="flex-shrink-0 h-[26px] w-[26px] align-middle"
                 unoptimized
               />
             )}

@@ -5,14 +5,15 @@
 
 ---
 
-## 2026-08-10 — Profile Card: Increase verified logo size for Pro athletes
+## 2026-08-10 — Profile Card: Tighten name badge spacing & enlarge back-face verified logo
 
 ### What changed
 - **`components/profile-card.tsx`**:
-  - Increased `verified.gif` badge size from `28px x 28px` (`h-[28px] w-[28px]`) to `36px x 36px` (`h-[36px] w-[36px]`, `width={48} height={48}`) on the main athlete profile card header next to `displayName`.
+  - Tightened spacing on front face name row (`ml-1` margin-left, `gap-1` gap) so the athlete name, verified badge, and class label sit neatly together without excessive gaps.
+  - Enlarged the back face `verified.gif` badge from `20px x 20px` (`h-[20px] w-[20px]`) to `26px x 26px` (`h-[26px] w-[26px]`, `width={36} height={36}`).
 
 ### Why
-Makes the animated verified badge more prominent and visually distinct for Pro plan athletes on their primary operating system profile card.
+Improves visual alignment and badge prominence across both front and back faces of the main athlete profile card.
 
 ### Files touched
 - `components/profile-card.tsx`
