@@ -5,16 +5,14 @@
 
 ---
 
-## 2026-08-10 — Profile Card: Redesign CardHeader brand mark into glassmorphism capsule pill
+## 2026-08-10 — Profile Card: Remove CardHeader NIL PASSPORT badge
 
 ### What changed
 - **`components/profile-card.tsx`**:
-  - Redesigned the left `[M] AthleteOS` brand mark in `CardHeader` into a glassmorphism capsule pill (`backdrop-blur-md`, `rounded-full`, `border-white/12`).
-  - Added subtle color hierarchy: `ATHLETE` in 90% white, `OS` highlighted in the electric lime `accent` color.
-  - Matches the symmetrical `NIL PASSPORT` capsule pill on the top right for a balanced, high-tech hardware badge appearance.
+  - Removed the `NIL PASSPORT` / `NIL ATHLETE` capsule badge from the `CardHeader` right actions container.
 
 ### Why
-Replaces the plain favicon-style brand mark with an ultra-sleek glassmorphic hardware badge that aligns perfectly with the right header action bar.
+Restores simplicity and keeps only the brand mark (symmetrical to QR/Share actions) on the top header, removing the redundant pill badges.
 
 ### Files touched
 - `components/profile-card.tsx`
