@@ -85,8 +85,8 @@ function ProSpotlightCard({ athlete, index }: { athlete: DiscoveryAthlete; index
       transition={{ duration: 0.5, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
       className="snap-start min-w-[280px] sm:min-w-[320px]"
     >
-      <Tilt max={8} scale={1.015}>
-        <Spotlight size={280} color="rgba(198,255,61,0.12)">
+      <Tilt max={8} scale={1.015} className="rounded-2xl overflow-hidden">
+        <Spotlight size={280} color="rgba(198,255,61,0.12)" className="rounded-2xl overflow-hidden">
           <BorderGlow
             edgeSensitivity={30}
             glowColor="78 100 62"
@@ -295,8 +295,8 @@ function AthleteCard({ athlete, index }: { athlete: DiscoveryAthlete; index: num
   );
 
   const wrapped = isPro ? (
-    <Tilt max={6} scale={1.01}>
-      <Spotlight size={240} color="rgba(198,255,61,0.08)">
+    <Tilt max={6} scale={1.01} className="rounded-2xl overflow-hidden">
+      <Spotlight size={240} color="rgba(198,255,61,0.08)" className="rounded-2xl overflow-hidden">
         <BorderGlow
           edgeSensitivity={30}
           glowColor="78 100 62"

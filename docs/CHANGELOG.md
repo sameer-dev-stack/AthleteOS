@@ -5,18 +5,16 @@
 
 ---
 
-## 2026-08-10 — BorderGlow: Fix concentric corner radius geometry
+## 2026-08-10 — BorderGlow: WebKit mask prefixing & Tilt/Spotlight corner radius alignment
 
 ### What changed
 - **`components/border-glow.css`**:
-  - Calculated concentric border radius for outer `.edge-light`: `border-radius: calc(var(--border-radius) + var(--glow-padding))`.
-  - Set inner `.edge-light::before` radius back to `var(--border-radius)` for accurate 0-inset alignment.
-  - Set `.border-glow-inner` to `border-radius: inherit; overflow: hidden;` so child card contents clip cleanly to rounded corners without boxy 90° edges.
+  - Added `-webkit-mask-image` and `-webkit-mask-composite` vendor prefixes to `.border-glow-card::before`, `.border-glow-card::after`, and `.border-glow-card > .edge-light`. Without WebKit prefixes, Chrome, Edge, and Safari ignored CSS mask clipping, rendering unmasked 100% full rectangular glow/mesh gradient layers around rounded card corners.
 - **`app/discover/client.tsx`**:
-  - Restored `BorderGlow` cursor-following animated edge light wrapping on `ProSpotlightCard` and Pro `AthleteCard`.
+  - Added `className="rounded-2xl overflow-hidden"` to `<Tilt>` and `<Spotlight>` wrappers around `ProSpotlightCard` and Pro `AthleteCard`. Previously, `Spotlight`'s radial gradient overlay and `Tilt`'s sheen overlay used `rounded-[inherit]` without an explicit radius on their parent containers, causing their motion overlays to render as 0px square 90° rectangles.
 
 ### Why
-Fix boxy 90° corner clipping artifacts on cards while retaining the mouse-tracking `BorderGlow` animated edge lighting effect.
+Fixes shader/glow leakage where unmasked glow pseudo-elements rendered as sharp-cornered rectangular boxes around rounded cards in Chrome, Edge, and Safari browsers.
 
 ### Files touched
 - `components/border-glow.css`
