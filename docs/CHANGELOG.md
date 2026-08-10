@@ -5,20 +5,17 @@
 
 ---
 
-## 2026-08-10 — Discover: Unified background gradient overlay & zero-seam card layout
+## 2026-08-10 — Profile Card: Increase verified logo size for Pro athletes
 
 ### What changed
-- **`app/discover/client.tsx`**:
-  - Replaced the 80px fixed hero `div` block with an `absolute inset-x-0 top-0 h-44` continuous background gradient overlay (`bg-gradient-to-b from-transparent via-[#101012]/40 to-[#101012]`).
-  - Placed avatar and card content in `relative z-10` sitting naturally over the gradient overlay.
-  - Removed `border-t border-white/[0.04]` from `SkeletonCard` footer.
-  - Eliminates the 80px horizontal height seam and subpixel split lines across `ProSpotlightCard` and `AthleteCard`.
+- **`components/profile-card.tsx`**:
+  - Increased `verified.gif` badge size from `28px x 28px` (`h-[28px] w-[28px]`) to `36px x 36px` (`h-[36px] w-[36px]`, `width={48} height={48}`) on the main athlete profile card header next to `displayName`.
 
 ### Why
-Fixes horizontal split line seam below cover photo section, unifying card surface into a single smooth gradient transition from top to bottom.
+Makes the animated verified badge more prominent and visually distinct for Pro plan athletes on their primary operating system profile card.
 
 ### Files touched
-- `app/discover/client.tsx`
+- `components/profile-card.tsx`
 
 ### Commit
 _Pending._
