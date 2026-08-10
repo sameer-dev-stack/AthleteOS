@@ -113,18 +113,18 @@ function ProSpotlightCard({ athlete, index }: { athlete: DiscoveryAthlete; index
               </div>
 
               {/* Card Body Content */}
-              <div className="relative z-10 px-5 pt-5">
+              <div className="relative z-10 px-4 pt-4">
                 {/* Avatar */}
                 <div
-                  className="h-14 w-14 rounded-full border-2 border-[#101012] overflow-hidden bg-[#101012]"
+                  className="h-12 w-12 rounded-full border-2 border-[#101012] overflow-hidden bg-[#101012]"
                   style={{ boxShadow: "0 0 0 1px rgba(198,255,61,0.25)" }}
                 >
                   {athlete.avatar_url ? (
                     <Image
                       src={athlete.avatar_url}
                       alt={athlete.full_name ?? athlete.username ?? "Athlete"}
-                      width={56}
-                      height={56}
+                      width={48}
+                      height={48}
                       unoptimized
                       className="h-full w-full object-cover"
                     />
@@ -136,7 +136,7 @@ function ProSpotlightCard({ athlete, index }: { athlete: DiscoveryAthlete; index
                 </div>
 
                 {/* Content */}
-                <div className="pt-3 pb-4">
+                <div className="pt-2.5 pb-3">
                   {/* Name + badges */}
                   <div className="flex items-center gap-1.5 min-w-0">
                     <h3 className="truncate text-sm font-semibold text-white">
@@ -147,7 +147,7 @@ function ProSpotlightCard({ athlete, index }: { athlete: DiscoveryAthlete; index
                   </div>
 
                   {/* Sport + school chips */}
-                  <div className="mt-2 flex flex-wrap gap-1.5">
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
                     {athlete.sport && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
                         <Trophy className="h-3 w-3" />
@@ -163,7 +163,7 @@ function ProSpotlightCard({ athlete, index }: { athlete: DiscoveryAthlete; index
                   </div>
 
                   {/* Followers footer */}
-                  <div className="mt-3 flex items-center justify-between pt-1">
+                  <div className="mt-2 flex items-center justify-between">
                     <div className="flex items-center gap-1.5 text-xs text-ink-muted">
                       <Users className="h-3.5 w-3.5" />
                       {athlete.total_followers > 0 ? (
@@ -229,7 +229,7 @@ function AthleteCard({ athlete, index }: { athlete: DiscoveryAthlete; index: num
         </div>
 
         {/* Content */}
-        <div className="pt-3 pb-3">
+        <div className="pt-2 pb-2.5">
           {/* Name row */}
           <div className="flex items-center gap-1.5 min-w-0">
             <h3 className="truncate text-sm font-semibold text-white">
@@ -243,7 +243,7 @@ function AthleteCard({ athlete, index }: { athlete: DiscoveryAthlete; index: num
           )}
 
           {/* Chips */}
-          <div className="mt-2.5 flex flex-wrap gap-1.5">
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
             {athlete.sport && (
               <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] text-ink-muted">
                 <Trophy className="h-3 w-3" />
@@ -274,7 +274,7 @@ function AthleteCard({ athlete, index }: { athlete: DiscoveryAthlete; index: num
         </div>
 
         {/* Footer */}
-        <div className="mt-2.5 flex items-center justify-between pb-3">
+        <div className="mt-2 flex items-center justify-between pb-2.5">
           <div className="flex items-center gap-1.5 text-xs text-ink-muted">
             <Users className="h-3.5 w-3.5" />
             {athlete.total_followers > 0 ? (

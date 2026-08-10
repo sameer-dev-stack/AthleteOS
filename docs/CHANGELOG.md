@@ -5,7 +5,7 @@
 
 ---
 
-## 2026-08-10 — Profile Card: Centered Contact Details Modal & Single-line Row Polish
+## 2026-08-10 — Profile Card: Dynamic Theme Border Glow, Tightened Name Header Gap & Modal Polish
 
 ### What changed
 - **`lib/actions/profile.ts`**:
@@ -19,7 +19,9 @@
   - Passed `isPro` status down to the back-face card footer section, conditionally hiding the `"Powered by AthleteOS"` logo footer for Pro plan users (`!isPro` check).
   - Updated `BusinessBlock` to dynamically adjust its bottom padding (`pb-4` if Pro, `pb-2` otherwise) to maintain visual balance when the footer is hidden.
   - Polished the `"Partnership & Inquiries"` section label style inside `BusinessBlock` to match high-contrast `SectionLabel` (increased icon size, full accent color, and raised text size/opacity to `8.5px` and `85% white` respectively) to make it fully legible.
-  - Updated the `ContactModal` overlay wrapper to use `justify-center` and `gap-5` instead of `justify-between`. This clusters the contact cards and close button vertically in the center of the card, completely removing the awkward giant empty black void in the middle of the modal.
+  - Updated the `ContactModal` overlay wrapper to use `justify-center` and `gap-5` instead of `justify-between`. This clusters the contact cards and close button vertically in the center of the card, removing the bottom redundant close button.
+  - Tightened the bottom margin of `CardHeader` for Pro plan profiles from `mb-4` to `mb-1`, eliminating the excessive vertical gap between the Athlete Name (`h1`) and the sport/position/school subtitle line.
+  - Dynamically bound the `BorderGlow` component's `colors` prop to the athlete's active theme accent color (`colors={[accent, \`${accent}cc\`, \`${accent}88\`]}`) on both the front and back card faces, replacing the previous hardcoded electric lime green array (`['#C6FF3D', '#a5d933', '#85b029']`).
 - **`components/inquiry-form.tsx`**:
   - Fixed native browser dropdown rendering inside the dark theme modal by giving the `<select>` tag a solid dark background (`bg-[#1a1a1c]`) and styling all `<option>` tags with explicit solid dark backgrounds (`bg-[#111113]`) and white text. This prevents browsers from drawing white option lists with white text.
 - **`components/share-buttons.tsx`**:
@@ -29,7 +31,7 @@
   - Locked custom icon selection behind the Pro/Paid plan (`isPro` check) with a Lock badge and disabled state for free users.
 
 ### Why
-Improves layout balance of the overlay sheet, grouping email/phone fields close to controls and removing user confusion about missing content or blank areas.
+Ensures that the animated card border glow dynamically changes color to match whichever solid or metallic theme (Amber, Coral, Cyber Neon, Titanium, Rose Gold, etc.) the user selects.
 
 ### Files touched
 - `lib/actions/profile.ts`

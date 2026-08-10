@@ -198,7 +198,7 @@ function CardHeader({
       : "clamp(11px, 3.2vw, 13px)";
 
   return (
-    <div className="flex items-center justify-between w-full mb-4 z-20">
+    <div className={`flex items-center justify-between w-full z-20 ${isPro ? "mb-1" : "mb-3.5"}`}>
       {/* Brand mark / Athlete Name */}
       {!isPro ? (
         <div
@@ -1284,18 +1284,6 @@ function ContactModal({
           )}
         </div>
       </div>
-
-      <button
-        onClick={onClose}
-        className="w-full py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
-        style={{
-          border: "1px solid rgba(255,255,255,0.08)",
-          background: "rgba(255,255,255,0.04)",
-          color: "rgba(255,255,255,0.45)",
-        }}
-      >
-        Close
-      </button>
     </motion.div>
   );
 }
@@ -1758,7 +1746,7 @@ export function ProfileCard({
               glowIntensity={1.2}
               coneSpread={25}
               animated={true}
-              colors={['#C6FF3D', '#a5d933', '#85b029']}
+              colors={[accent, `${accent}cc`, `${accent}88`]}
               className="w-full h-full"
             >
               <ReflectiveCard
@@ -1861,7 +1849,7 @@ export function ProfileCard({
               glowIntensity={1.2}
               coneSpread={25}
               animated={true}
-              colors={['#C6FF3D', '#a5d933', '#85b029']}
+              colors={[accent, `${accent}cc`, `${accent}88`]}
               className="w-full h-full"
             >
               <ReflectiveCard
