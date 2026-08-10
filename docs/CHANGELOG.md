@@ -5,15 +5,15 @@
 
 ---
 
-## 2026-08-10 — Profile Card: Tighten name badge spacing & enlarge back-face verified logo
+## 2026-08-10 — Profile Card: Replace header VERIFIED badge with NIL PASSPORT / NIL ATHLETE pill
 
 ### What changed
 - **`components/profile-card.tsx`**:
-  - Tightened spacing on front face name row (`ml-1` margin-left, `gap-1` gap) so the athlete name, verified badge, and class label sit neatly together without excessive gaps.
-  - Enlarged the back face `verified.gif` badge from `20px x 20px` (`h-[20px] w-[20px]`) to `26px x 26px` (`h-[26px] w-[26px]`, `width={36} height={36}`).
+  - Replaced the misleading `VERIFIED` / `ShieldCheck` pill badge in `CardHeader` with **`NIL PASSPORT`** (for Pro/Team plan athletes) and **`NIL ATHLETE`** (for Free plan athletes).
+  - Used `<Sparkles className="h-3 w-3" />` icon to represent official NIL operating system card status without making unverified KYC claims.
 
 ### Why
-Improves visual alignment and badge prominence across both front and back faces of the main athlete profile card.
+Accurately reflects the athlete's digital NIL Operating System passport status on AthleteOS without falsely implying identity KYC verification.
 
 ### Files touched
 - `components/profile-card.tsx`

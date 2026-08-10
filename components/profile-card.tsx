@@ -180,26 +180,20 @@ function CardHeader({ accent, plan, isVerified, onQr, onShare, copied }: CardHea
 
       {/* Right actions */}
       <div className="flex items-center gap-1.5 pointer-events-auto">
-        {/* Verified / Pro badge */}
-        {(isVerified || isPro) && (
-          <div
-            className="flex items-center gap-1 rounded-full px-2 py-0.5 h-6"
-            style={{
-              background: "rgba(0,0,0,0.5)",
-              border: `1px solid ${accent}30`,
-              backdropFilter: "blur(12px)",
-            }}
-          >
-            {isVerified ? (
-              <ShieldCheck className="h-3 w-3" style={{ color: accent }} />
-            ) : (
-              <Star className="h-3 w-3" style={{ color: accent }} fill={accent} />
-            )}
-            <span className="text-[8px] font-black tracking-wider" style={{ color: accent }}>
-              {isVerified ? "VERIFIED" : isPro ? "PRO" : ""}
-            </span>
-          </div>
-        )}
+        {/* NIL Passport / Member Status badge */}
+        <div
+          className="flex items-center gap-1 rounded-full px-2.5 py-0.5 h-6"
+          style={{
+            background: "rgba(0,0,0,0.5)",
+            border: `1px solid ${accent}30`,
+            backdropFilter: "blur(12px)",
+          }}
+        >
+          <Sparkles className="h-3 w-3" style={{ color: accent }} />
+          <span className="text-[8px] font-black tracking-wider uppercase" style={{ color: accent }}>
+            {isPro ? "NIL PASSPORT" : "NIL ATHLETE"}
+          </span>
+        </div>
 
         {/* QR */}
         <button
