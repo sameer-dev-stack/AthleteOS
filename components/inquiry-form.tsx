@@ -150,10 +150,12 @@ export function InquiryForm({ athleteId, athleteName, open, onClose }: Props) {
                 <label className="text-xs font-medium text-white/50 mb-1.5 block">Inquiry Type</label>
                 <select
                   name="inquiry_type"
-                  className="h-10 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 text-sm text-white focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/20"
+                  className="h-10 w-full rounded-lg border border-white/[0.08] bg-[#1a1a1c] px-3 text-sm text-white focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/20"
                 >
                   {INQUIRY_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
+                    <option key={t.value} value={t.value} className="bg-[#111113] text-white">
+                      {t.label}
+                    </option>
                   ))}
                 </select>
               </div>

@@ -5,6 +5,44 @@
 
 ---
 
+## 2026-08-10 — Profile Card: Centered Contact Details Modal & Single-line Row Polish
+
+### What changed
+- **`lib/actions/profile.ts`**:
+  - Updated the `Profile` type definition and the `StatSchema` validation to support an optional, customizable `icon` field per stat.
+- **`components/profile-card.tsx`**:
+  - Expanded `STAT_ICON_MAP` with customizable icon keys and updated `getStatIcon` to resolve the custom icon if defined.
+  - Linked `icon` from profile stats data through to the public front-face card rendering cell layout.
+  - Polished the `AthleteStats` layout to make the icons/labels pop significantly more (increased icon sizes to `h-3.5 w-3.5`, increased icon opacity to `65%` (default) and `95%` (accent), and raised label opacity/visibility to `45%` white/accent).
+  - Modified the back-face card `ConnectSection` to display all social icons and share buttons in a single centered horizontal row (`flex-nowrap`, `justify-center`, reduced size to `h-7 w-7` for social buttons, and added `overflow-x-auto` support for mobile responsive scrolling).
+  - Modified the back-face card `HighlightsSection` to display all highlight link pills in a single centered horizontal row (`flex-nowrap`, `justify-center`, `flex-shrink-0`, and added `overflow-x-auto` support for mobile responsive scrolling).
+  - Passed `isPro` status down to the back-face card footer section, conditionally hiding the `"Powered by AthleteOS"` logo footer for Pro plan users (`!isPro` check).
+  - Updated `BusinessBlock` to dynamically adjust its bottom padding (`pb-4` if Pro, `pb-2` otherwise) to maintain visual balance when the footer is hidden.
+  - Polished the `"Partnership & Inquiries"` section label style inside `BusinessBlock` to match high-contrast `SectionLabel` (increased icon size, full accent color, and raised text size/opacity to `8.5px` and `85% white` respectively) to make it fully legible.
+  - Updated the `ContactModal` overlay wrapper to use `justify-center` and `gap-5` instead of `justify-between`. This clusters the contact cards and close button vertically in the center of the card, completely removing the awkward giant empty black void in the middle of the modal.
+- **`components/inquiry-form.tsx`**:
+  - Fixed native browser dropdown rendering inside the dark theme modal by giving the `<select>` tag a solid dark background (`bg-[#1a1a1c]`) and styling all `<option>` tags with explicit solid dark backgrounds (`bg-[#111113]`) and white text. This prevents browsers from drawing white option lists with white text.
+- **`components/share-buttons.tsx`**:
+  - Removed the Facebook share button to reduce overall width of the share strip, allowing social + share icons to easily fit in a single line.
+- **`components/dashboard/profile-editor.tsx`**:
+  - Enhanced the Stats tab editor with a visual inline icon picker dropdown grid for each stat row.
+  - Locked custom icon selection behind the Pro/Paid plan (`isPro` check) with a Lock badge and disabled state for free users.
+
+### Why
+Improves layout balance of the overlay sheet, grouping email/phone fields close to controls and removing user confusion about missing content or blank areas.
+
+### Files touched
+- `lib/actions/profile.ts`
+- `components/profile-card.tsx`
+- `components/inquiry-form.tsx`
+- `components/share-buttons.tsx`
+- `components/dashboard/profile-editor.tsx`
+
+### Commit
+_Pending._
+
+---
+
 ## 2026-08-10 — Profile Card: Relocate Name Header to CardHeader for Pro Plan users
 
 ### What changed

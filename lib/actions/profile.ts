@@ -18,7 +18,7 @@ export type Profile = {
   class_year: string | null;
   position: string | null;
   bio: string | null;
-  stats: { label: string; value: string }[];
+  stats: { label: string; value: string; icon?: string | null }[];
   links: { label: string; url: string }[];
   social: { twitter?: string; instagram?: string; tiktok?: string; youtube?: string };
   highlights: { title: string; url: string }[];
@@ -61,6 +61,7 @@ const HighlightSchema = z.object({
 const StatSchema = z.object({
   label: z.string().min(1).max(50),
   value: z.string().min(1).max(50),
+  icon: z.string().max(50).optional().nullable(),
 });
 
 const SocialSchema = z.object({

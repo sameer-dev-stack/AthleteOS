@@ -73,14 +73,24 @@ const PHOTO_INTERVAL_MS = 4_000;
 /** Maps well-known stat keys to lucide icons */
 const STAT_ICON_MAP: Record<string, React.ElementType> = {
   gpa: GraduationCap,
+  graduationcap: GraduationCap,
   "40-yd": Timer,
+  timer: Timer,
   ppg: Trophy,
+  trophy: Trophy,
   yards: TrendingUp,
+  trendingup: TrendingUp,
   td: Target,
+  target: Target,
   "catch %": Percent,
+  percent: Percent,
   receptions: Zap,
+  zap: Zap,
   touchdowns: Target,
   tackles: Medal,
+  medal: Medal,
+  heart: Heart,
+  star: Star,
   default: Trophy,
 };
 
@@ -105,7 +115,11 @@ function sanitize(t: string | null): string {
     .replace(/\0/g, "\\\\");
 }
 
-function getStatIcon(label: string): React.ElementType {
+function getStatIcon(label: string, customIconName?: string | null): React.ElementType {
+  if (customIconName) {
+    const key = customIconName.toLowerCase().trim();
+    if (STAT_ICON_MAP[key]) return STAT_ICON_MAP[key];
+  }
   const key = label.toLowerCase().trim();
   return STAT_ICON_MAP[key] ?? STAT_ICON_MAP.default;
 }
@@ -597,6 +611,7 @@ interface StatCell {
   label: string;
   value: string;
   isAccent: boolean;
+  icon?: string | null;
 }
 
 interface AthleteStatsProps {
@@ -625,11 +640,11 @@ function AthleteStats({ cells, accent }: AthleteStatsProps) {
         }}
       >
         {cells.map((cell, i) => {
-          const Icon = getStatIcon(cell.label);
+          const Icon = getStatIcon(cell.label, cell.icon);
           return (
             <div
               key={cell.key}
-              className="flex-1 flex flex-col items-center justify-center py-3 px-2 relative"
+              className="flex-1 flex flex-col items-center justify-center py-3.5 px-2 relative"
               style={
                 i > 0
                   ? { borderLeft: "1px solid rgba(255,255,255,0.055)" }
@@ -638,12 +653,15 @@ function AthleteStats({ cells, accent }: AthleteStatsProps) {
             >
               {/* Icon micro-indicator */}
               <Icon
-                className="h-2.5 w-2.5 mb-1.5 opacity-30"
-                style={{ color: cell.isAccent ? accent : "rgba(255,255,255,0.5)" }}
+                className="h-3.5 w-3.5 mb-1.5 transition-all"
+                style={{
+                  color: cell.isAccent ? accent : "rgba(255,255,255,0.5)",
+                  opacity: cell.isAccent ? 0.95 : 0.65,
+                }}
               />
               {/* Value */}
               <span
-                className="text-[19px] font-black leading-none tracking-tight"
+                className="text-[20px] font-black leading-none tracking-tight"
                 style={{
                   color: cell.isAccent ? accent : "rgba(255,255,255,0.95)",
                   letterSpacing: "-0.03em",
@@ -653,8 +671,10 @@ function AthleteStats({ cells, accent }: AthleteStatsProps) {
               </span>
               {/* Label */}
               <span
-                className="text-[8px] font-bold uppercase tracking-widest mt-1 text-center leading-none"
-                style={{ color: "rgba(255,255,255,0.30)" }}
+                className="text-[8.5px] font-bold uppercase tracking-widest mt-1.5 text-center leading-none"
+                style={{
+                  color: cell.isAccent ? `${accent}cc` : "rgba(255,255,255,0.45)",
+                }}
               >
                 {cell.label}
               </span>
@@ -1043,7 +1063,7 @@ function HighlightsSection({ highlights, accent, profileId, onInteract }: Highli
         label="Highlights"
         accent={accent}
       />
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-nowrap items-center justify-center gap-1.5 w-full overflow-x-auto scrollbar-none">
         {highlights.map((h, i) => (
           <a
             key={i}
@@ -1055,7 +1075,7 @@ function HighlightsSection({ highlights, accent, profileId, onInteract }: Highli
               onInteract();
               trackLinkClick(profileId, h.title || `Highlight ${i + 1}`, h.url);
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-200 hover:scale-105"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-200 hover:scale-105 flex-shrink-0"
             style={{
               background: `${accent}0e`,
               border: `1px solid ${accent}1e`,
@@ -1095,7 +1115,7 @@ function ConnectSection({ socialLinks, publicUrl, displayName, bio, accent, onIn
   return (
     <div>
       <SectionLabel icon={<Heart className="h-2.5 w-2.5" />} label="Connect" accent={accent} />
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-nowrap items-center justify-center gap-1.5 w-full overflow-x-auto scrollbar-none">
         {socialLinks.map(({ key, Icon, href, color, label }) => (
           <a
             key={key}
@@ -1107,18 +1127,18 @@ function ConnectSection({ socialLinks, publicUrl, displayName, bio, accent, onIn
               e.stopPropagation();
               onInteract();
             }}
-            className="social-icon-btn h-8 w-8 rounded-lg flex items-center justify-center transition-all duration-300"
+            className="social-icon-btn h-7 w-7 rounded-lg flex items-center justify-center transition-all duration-300 flex-shrink-0"
             style={{
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(255,255,255,0.07)",
               "--social-color": color,
             } as React.CSSProperties}
           >
-            <Icon className="h-3.5 w-3.5 text-white/30" />
+            <Icon className="h-3 w-3 text-white/30" />
           </a>
         ))}
         {/* Separator + share buttons */}
-        <div className="flex items-center gap-2 ml-1">
+        <div className="flex items-center gap-1.5 ml-0.5 flex-shrink-0">
           <div className="h-4 w-px" style={{ background: "rgba(255,255,255,0.06)" }} />
           <ShareButtons
             url={publicUrl}
@@ -1159,7 +1179,7 @@ function ContactModal({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
       onClick={(e) => e.stopPropagation()}
-      className="absolute inset-0 z-30 flex flex-col justify-between p-5 rounded-[18.5px]"
+      className="absolute inset-0 z-30 flex flex-col justify-center gap-5 p-5 rounded-[18.5px]"
       style={{
         background: "rgba(10,10,14,0.96)",
         backdropFilter: "blur(16px)",
@@ -1301,6 +1321,7 @@ interface BusinessBlockProps {
   onContactOpen: () => void;
   onInquiryOpen: () => void;
   onInteract: () => void;
+  isPro?: boolean;
 }
 
 function BusinessBlock({
@@ -1311,13 +1332,14 @@ function BusinessBlock({
   onContactOpen,
   onInquiryOpen,
   onInteract,
+  isPro,
 }: BusinessBlockProps) {
   return (
-    <div className="flex flex-col gap-2 w-full px-4 pb-2 pt-2 flex-shrink-0">
+    <div className={`flex flex-col gap-2 w-full px-4 pt-2 flex-shrink-0 ${isPro ? "pb-4" : "pb-2"}`}>
       {/* Sponsor / business affordance label */}
       <div className="flex items-center gap-1.5 mb-0.5">
-        <Briefcase className="h-2.5 w-2.5" style={{ color: `${accent}40` }} />
-        <span className="text-[8px] font-black uppercase tracking-widest" style={{ color: `${accent}35` }}>
+        <Briefcase className="h-2.5 w-2.5" style={{ color: accent }} />
+        <span className="text-[8.5px] font-black uppercase tracking-widest" style={{ color: "rgba(255, 255, 255, 0.85)" }}>
           Partnership &amp; Inquiries
         </span>
       </div>
@@ -1582,7 +1604,7 @@ export function ProfileCard({
     ...(nilScore !== null && nilScore > 0
       ? [{ key: "nil", label: "NIL", value: String(nilScore), isAccent: true }]
       : []),
-    ...cleanStats.map((s) => ({ key: s.label, label: sanitize(s.label), value: s.value, isAccent: false })),
+    ...cleanStats.map((s) => ({ key: s.label, label: sanitize(s.label), value: s.value, isAccent: false, icon: s.icon })),
   ];
 
   const links = (profile.links ?? []).slice(0, 6);
@@ -1972,25 +1994,28 @@ export function ProfileCard({
                 onContactOpen={() => setShowContactModal(true)}
                 onInquiryOpen={() => setShowInquiry(true)}
                 onInteract={resetAutoReturn}
+                isPro={isPro}
               />
             </div>
 
             {/* Powered by footer */}
-            <div
-              className="flex items-center justify-center gap-1.5 py-1.5 flex-shrink-0"
-              style={{
-                borderTop: "1px solid rgba(255,255,255,0.03)",
-                background: "rgba(0,0,0,0.10)",
-              }}
-            >
-              <span className="text-[7px] font-bold tracking-[0.28em] uppercase" style={{ color: "rgba(255,255,255,0.18)" }}>
-                Powered by
-              </span>
-              <Logo className="h-2 w-2 rounded-[2px]" style={{ backgroundColor: `${accent}35` }} />
-              <span className="text-[7px] font-bold tracking-[0.28em] uppercase" style={{ color: "rgba(255,255,255,0.18)" }}>
-                AthleteOS
-              </span>
-            </div>
+            {!isPro && (
+              <div
+                className="flex items-center justify-center gap-1.5 py-1.5 flex-shrink-0"
+                style={{
+                  borderTop: "1px solid rgba(255,255,255,0.03)",
+                  background: "rgba(0,0,0,0.10)",
+                }}
+              >
+                <span className="text-[7px] font-bold tracking-[0.28em] uppercase" style={{ color: "rgba(255,255,255,0.18)" }}>
+                  Powered by
+                </span>
+                <Logo className="h-2 w-2 rounded-[2px]" style={{ backgroundColor: `${accent}35` }} />
+                <span className="text-[7px] font-bold tracking-[0.28em] uppercase" style={{ color: "rgba(255,255,255,0.18)" }}>
+                  AthleteOS
+                </span>
+              </div>
+            )}
               </ReflectiveCard>
             </BorderGlow>
           </div>

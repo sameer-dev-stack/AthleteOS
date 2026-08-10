@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { Loader2, Plus, X, Save, BarChart3, Link2, Play, Palette, Check } from "lucide-react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import {
+  Loader2, Plus, X, Save, BarChart3, Link2, Play, Palette, Check,
+  Trophy, Zap, Target, Timer, GraduationCap, Medal, TrendingUp, Percent, Heart, Star, Lock
+} from "lucide-react";
 import { updateProfile, updateTheme, type Profile } from "@/lib/actions/profile";
 import { resolvePlan } from "@/lib/referral-reward";
 import { EmptyState } from "./empty-state";
@@ -370,7 +373,12 @@ export function DashboardEditor({ profile, onSaved }: Props) {
         )}
 
         {tab === "stats" && (
-          <StatsEditor stats={stats} onChange={setStats} sport={profile.sport ?? undefined} />
+          <StatsEditor
+            stats={stats}
+            onChange={setStats}
+            sport={profile.sport ?? undefined}
+            isPro={resolvePlan(profile.plan, profile.extended_pro_until) === "pro"}
+          />
         )}
 
         {tab === "links" && (
@@ -663,30 +671,46 @@ function BioEditor({
   );
 }
 
+const STAT_ICONS = [
+  { name: "trophy", Icon: Trophy, label: "Trophy" },
+  { name: "zap", Icon: Zap, label: "Speed/Power" },
+  { name: "target", Icon: Target, label: "Accuracy" },
+  { name: "timer", Icon: Timer, label: "Time" },
+  { name: "graduationcap", Icon: GraduationCap, label: "Academic" },
+  { name: "medal", Icon: Medal, label: "Medal" },
+  { name: "trendingup", Icon: TrendingUp, label: "Growth" },
+  { name: "percent", Icon: Percent, label: "Percentage" },
+  { name: "heart", Icon: Heart, label: "Heart" },
+  { name: "star", Icon: Star, label: "Star" },
+];
+
 function StatsEditor({
   stats,
   onChange,
   sport,
+  isPro,
 }: {
-  stats: { label: string; value: string }[];
-  onChange: (v: { label: string; value: string }[]) => void;
+  stats: { label: string; value: string; icon?: string | null }[];
+  onChange: (v: { label: string; value: string; icon?: string | null }[]) => void;
   sport?: string;
+  isPro: boolean;
 }) {
   const templates = sport ? getStatTemplatesForSport(sport) : null;
   const usedLabels = new Set(stats.map((s) => s.label.toLowerCase()));
   const availableTemplates = templates?.filter((t) => !usedLabels.has(t.label.toLowerCase())) || [];
+  const [activePicker, setActivePicker] = useState<number | null>(null);
 
   function addStat() {
     if (stats.length >= 10) return;
-    onChange([...stats, { label: "", value: "" }]);
+    onChange([...stats, { label: "", value: "", icon: null }]);
   }
 
   function addFromTemplate(template: { label: string; placeholder: string; example: string }) {
     if (stats.length >= 10) return;
-    onChange([...stats, { label: template.label, value: "" }]);
+    onChange([...stats, { label: template.label, value: "", icon: null }]);
   }
 
-  function updateStat(index: number, field: "label" | "value", value: string) {
+  function updateStat(index: number, field: "label" | "value" | "icon", value: string | null) {
     const updated = [...stats];
     updated[index] = { ...updated[index], [field]: value };
     onChange(updated);
@@ -714,50 +738,111 @@ function StatsEditor({
         <>
           <div className="flex items-center gap-2 px-1">
             <span className="w-9 shrink-0" />
-            <span className="w-1/2 text-[10px] font-bold uppercase tracking-widest text-ink-dim">
+            <span className="w-9 shrink-0 text-[10px] font-bold uppercase tracking-widest text-ink-dim text-center">
+              Icon
+            </span>
+            <span className="w-[45%] text-[10px] font-bold uppercase tracking-widest text-ink-dim">
               Stat Label
             </span>
-            <span className="w-1/2 text-[10px] font-bold uppercase tracking-widest text-ink-dim">
+            <span className="w-[45%] text-[10px] font-bold uppercase tracking-widest text-ink-dim">
               Value
             </span>
             <span className="w-9 shrink-0" />
           </div>
-          {stats.map((stat, i) => (
-            <div key={i} className="flex items-center gap-2">
-              {i < 3 ? (
-                <span
-                  className="flex w-9 shrink-0 justify-center rounded-md border border-accent/30 bg-accent/10 text-[8px] font-bold uppercase tracking-wide text-accent"
-                  title="Featured on the front of your card"
+          {stats.map((stat, i) => {
+            const selectedIconObj = STAT_ICONS.find(item => item.name === (stat.icon || "").toLowerCase()) || STAT_ICONS[0];
+            const SelectedIcon = selectedIconObj.Icon;
+
+            return (
+              <div key={i} className="flex items-center gap-2">
+                {i < 3 ? (
+                  <span
+                    className="flex w-9 shrink-0 justify-center rounded-md border border-accent/30 bg-accent/10 text-[8px] font-bold uppercase tracking-wide text-accent py-1"
+                    title="Featured on the front of your card"
+                  >
+                    ★
+                  </span>
+                ) : (
+                  <span className="w-9 shrink-0" />
+                )}
+
+                {/* Icon Selector / Locked state */}
+                {!isPro ? (
+                  <button
+                    type="button"
+                    disabled
+                    className="flex items-center justify-center h-9 w-9 rounded-lg border border-white/[0.06] bg-white/[0.01] text-white/30 cursor-not-allowed relative flex-shrink-0"
+                    title="Pro Feature: Customize stat icons"
+                  >
+                    <SelectedIcon className="h-4 w-4 opacity-40" />
+                    <Lock className="absolute -bottom-1 -right-1 h-3 w-3 text-amber-500/70" />
+                  </button>
+                ) : (
+                  <div className="relative flex-shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setActivePicker(activePicker === i ? null : i)}
+                      className="flex items-center justify-center h-9 w-9 rounded-lg border border-white/[0.08] bg-white/[0.03] text-white/70 hover:border-accent/40 hover:text-accent transition-colors"
+                      title="Choose stat icon"
+                    >
+                      <SelectedIcon className="h-4 w-4" />
+                    </button>
+                    {activePicker === i && (
+                      <>
+                        <div className="fixed inset-0 z-10" onClick={() => setActivePicker(null)} />
+                        <div className="absolute left-0 mt-1.5 z-20 grid grid-cols-5 gap-1 p-2 rounded-xl border border-white/[0.08] bg-neutral-950 shadow-2xl w-[220px]">
+                          {STAT_ICONS.map((opt) => {
+                            const OptIcon = opt.Icon;
+                            return (
+                              <button
+                                key={opt.name}
+                                type="button"
+                                onClick={() => {
+                                  updateStat(i, "icon", opt.name);
+                                  setActivePicker(null);
+                                }}
+                                className={`flex items-center justify-center p-2 rounded-lg transition-colors ${
+                                  stat.icon === opt.name
+                                    ? "bg-accent/20 text-accent"
+                                    : "text-white/60 hover:bg-white/[0.06] hover:text-white"
+                                }`}
+                                title={opt.label}
+                              >
+                                <OptIcon className="h-4 w-4" />
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                <input
+                  type="text"
+                  value={stat.label}
+                  onChange={(e) => updateStat(i, "label", e.target.value)}
+                  placeholder="e.g., 40-yard"
+                  maxLength={50}
+                  className="w-[45%] rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+                />
+                <input
+                  type="text"
+                  value={stat.value}
+                  onChange={(e) => updateStat(i, "value", e.target.value)}
+                  placeholder="e.g., 4.5s"
+                  maxLength={50}
+                  className="w-[45%] rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+                />
+                <button
+                  onClick={() => removeStat(i)}
+                  className="w-9 shrink-0 rounded-lg border border-white/[0.06] p-2 text-ink-dim hover:text-red-400 transition-colors"
                 >
-                  ★
-                </span>
-              ) : (
-                <span className="w-9 shrink-0" />
-              )}
-              <input
-                type="text"
-                value={stat.label}
-                onChange={(e) => updateStat(i, "label", e.target.value)}
-                placeholder="e.g., 40-yard"
-                maxLength={50}
-                className="w-1/2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
-              />
-              <input
-                type="text"
-                value={stat.value}
-                onChange={(e) => updateStat(i, "value", e.target.value)}
-                placeholder="e.g., 4.5s"
-                maxLength={50}
-                className="w-1/2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
-              />
-              <button
-                onClick={() => removeStat(i)}
-                className="w-9 shrink-0 rounded-lg border border-white/[0.06] p-2 text-ink-dim hover:text-red-400 transition-colors"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          ))}
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            );
+          })}
           {stats.length < 10 && (
             <button
               onClick={addStat}

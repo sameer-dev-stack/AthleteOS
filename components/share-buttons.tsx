@@ -1,6 +1,6 @@
 "use client";
 
-import { Twitter, Facebook, Linkedin, Copy, Share2, Check } from "lucide-react";
+import { Twitter, Linkedin, Copy, Share2, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface ShareButtonsProps {
@@ -23,7 +23,6 @@ export function ShareButtons({ url, title, description }: ShareButtonsProps) {
 
   const shareLinks = {
     twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
     linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
   };
 
@@ -72,14 +71,6 @@ export function ShareButtons({ url, title, description }: ShareButtonsProps) {
         aria-label="Share on Twitter"
       >
         <Twitter className="h-3 w-3" />
-      </button>
-      <button
-        onClick={() => openShare(shareLinks.facebook)}
-        className="h-7 w-7 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 text-white/25 hover:text-white/60"
-        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}
-        aria-label="Share on Facebook"
-      >
-        <Facebook className="h-3 w-3" />
       </button>
       <button
         onClick={() => openShare(shareLinks.linkedin)}
