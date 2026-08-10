@@ -5,15 +5,16 @@
 
 ---
 
-## 2026-08-10 — Profile Card: Replace header VERIFIED badge with NIL PASSPORT / NIL ATHLETE pill
+## 2026-08-10 — Profile Card: Redesign CardHeader brand mark into glassmorphism capsule pill
 
 ### What changed
 - **`components/profile-card.tsx`**:
-  - Replaced the misleading `VERIFIED` / `ShieldCheck` pill badge in `CardHeader` with **`NIL PASSPORT`** (for Pro/Team plan athletes) and **`NIL ATHLETE`** (for Free plan athletes).
-  - Used `<Sparkles className="h-3 w-3" />` icon to represent official NIL operating system card status without making unverified KYC claims.
+  - Redesigned the left `[M] AthleteOS` brand mark in `CardHeader` into a glassmorphism capsule pill (`backdrop-blur-md`, `rounded-full`, `border-white/12`).
+  - Added subtle color hierarchy: `ATHLETE` in 90% white, `OS` highlighted in the electric lime `accent` color.
+  - Matches the symmetrical `NIL PASSPORT` capsule pill on the top right for a balanced, high-tech hardware badge appearance.
 
 ### Why
-Accurately reflects the athlete's digital NIL Operating System passport status on AthleteOS without falsely implying identity KYC verification.
+Replaces the plain favicon-style brand mark with an ultra-sleek glassmorphic hardware badge that aligns perfectly with the right header action bar.
 
 ### Files touched
 - `components/profile-card.tsx`
