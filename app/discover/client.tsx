@@ -102,20 +102,21 @@ function ProSpotlightCard({ athlete, index }: { athlete: DiscoveryAthlete; index
           >
             <Link
               href={`/${athlete.username}`}
-              className="block rounded-2xl overflow-hidden"
+              className="relative block rounded-2xl bg-bg-card overflow-hidden"
             >
-              {/* Hero gradient */}
+              {/* Continuous background gradient overlay */}
               <div
-                className="relative h-20 w-full overflow-hidden"
+                className="absolute inset-x-0 top-0 h-44 pointer-events-none"
                 style={{ background: gradient }}
               >
-                <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#101012] to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#101012]/40 to-[#101012]" />
               </div>
 
-              {/* Avatar (overlaps hero/content boundary) */}
-              <div className="relative px-5 pt-0">
+              {/* Card Body Content */}
+              <div className="relative z-10 px-5 pt-5">
+                {/* Avatar */}
                 <div
-                  className="absolute -top-7 left-5 h-14 w-14 rounded-full border-2 border-[#101012] overflow-hidden bg-[#101012]"
+                  className="h-14 w-14 rounded-full border-2 border-[#101012] overflow-hidden bg-[#101012]"
                   style={{ boxShadow: "0 0 0 1px rgba(198,255,61,0.25)" }}
                 >
                   {athlete.avatar_url ? (
@@ -135,7 +136,7 @@ function ProSpotlightCard({ athlete, index }: { athlete: DiscoveryAthlete; index
                 </div>
 
                 {/* Content */}
-                <div className="pt-10 pb-4">
+                <div className="pt-3 pb-4">
                   {/* Name + badges */}
                   <div className="flex items-center gap-1.5 min-w-0">
                     <h3 className="truncate text-sm font-semibold text-white">
@@ -197,20 +198,20 @@ function AthleteCard({ athlete, index }: { athlete: DiscoveryAthlete; index: num
   const cardContent = (
     <Link
       href={`/${athlete.username}`}
-      className="group block rounded-2xl bg-bg-card overflow-hidden transition-all duration-300"
+      className="group relative block rounded-2xl bg-bg-card overflow-hidden transition-all duration-300"
       style={!isPro ? { border: "1px solid rgba(255,255,255,0.06)" } : undefined}
     >
-      {/* Hero area */}
+      {/* Continuous background gradient overlay */}
       <div
-        className="relative h-20 overflow-hidden"
+        className="absolute inset-x-0 top-0 h-44 pointer-events-none"
         style={{ background: gradient }}
       >
-        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-bg-card to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-bg-card/40 to-bg-card" />
       </div>
 
-      {/* Avatar (overlaps hero boundary) */}
-      <div className="relative px-4">
-        <div className="absolute -top-6 left-4 h-12 w-12 rounded-full border-2 border-bg-card overflow-hidden bg-bg-card">
+      {/* Avatar & Content */}
+      <div className="relative z-10 px-4 pt-4">
+        <div className="h-12 w-12 rounded-full border-2 border-bg-card overflow-hidden bg-bg-card">
           {athlete.avatar_url ? (
             <Image
               src={athlete.avatar_url}
@@ -228,7 +229,7 @@ function AthleteCard({ athlete, index }: { athlete: DiscoveryAthlete; index: num
         </div>
 
         {/* Content */}
-        <div className="pt-8 pb-3">
+        <div className="pt-3 pb-3">
           {/* Name row */}
           <div className="flex items-center gap-1.5 min-w-0">
             <h3 className="truncate text-sm font-semibold text-white">
@@ -262,34 +263,34 @@ function AthleteCard({ athlete, index }: { athlete: DiscoveryAthlete; index: num
             )}
           </div>
         </div>
-      </div>
 
-      {/* Bio */}
-      <div className="px-4">
-        {athlete.bio ? (
-          <p className="line-clamp-2 text-xs leading-relaxed text-ink-dim">{athlete.bio}</p>
-        ) : (
-          <p className="text-xs italic text-ink-dim/50">No bio yet</p>
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className="mt-2 flex items-center justify-between px-4 pb-3">
-        <div className="flex items-center gap-1.5 text-xs text-ink-muted">
-          <Users className="h-3.5 w-3.5" />
-          {athlete.total_followers > 0 ? (
-            <span>
-              <span className="font-medium text-white">{formatFollowers(athlete.total_followers)}</span>{" "}
-              followers
-            </span>
+        {/* Bio */}
+        <div>
+          {athlete.bio ? (
+            <p className="line-clamp-2 text-xs leading-relaxed text-ink-dim">{athlete.bio}</p>
           ) : (
-            <span className="text-ink-dim">No socials linked</span>
+            <p className="text-xs italic text-ink-dim/50">No bio yet</p>
           )}
         </div>
-        <span className="inline-flex items-center gap-1 text-xs font-medium text-accent opacity-0 transition-opacity group-hover:opacity-100">
-          View
-          <ExternalLink className="h-3 w-3" />
-        </span>
+
+        {/* Footer */}
+        <div className="mt-2.5 flex items-center justify-between pb-3">
+          <div className="flex items-center gap-1.5 text-xs text-ink-muted">
+            <Users className="h-3.5 w-3.5" />
+            {athlete.total_followers > 0 ? (
+              <span>
+                <span className="font-medium text-white">{formatFollowers(athlete.total_followers)}</span>{" "}
+                followers
+              </span>
+            ) : (
+              <span className="text-ink-dim">No socials linked</span>
+            )}
+          </div>
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-accent opacity-0 transition-opacity group-hover:opacity-100">
+            View
+            <ExternalLink className="h-3 w-3" />
+          </span>
+        </div>
       </div>
     </Link>
   );
@@ -348,7 +349,7 @@ function SkeletonCard() {
         <div className="h-2.5 w-full rounded bg-white/[0.04] animate-pulse" />
         <div className="h-2.5 w-3/4 rounded bg-white/[0.04] animate-pulse mt-1.5" />
       </div>
-      <div className="border-t border-white/[0.04] px-4 py-2.5">
+      <div className="px-4 py-2.5">
         <div className="h-2.5 w-20 rounded bg-white/[0.04] animate-pulse" />
       </div>
     </div>
