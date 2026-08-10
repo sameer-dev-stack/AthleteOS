@@ -5,14 +5,14 @@
 
 ---
 
-## 2026-08-10 — Profile Card: Hide brand watermark for Pro Plan users
+## 2026-08-10 — Profile Card: Add NIL ACTIVE status badge for Pro Plan users
 
 ### What changed
 - **`components/profile-card.tsx`**:
-  - Added conditional logic to hide the `AthleteOS` brand watermark/logo in `CardHeader` for users with a Pro or Team plan (`isPro` is true).
+  - Replaced the blank space / empty fallback on CardHeader left with a sleek, glassmorphic `NIL ACTIVE` status badge featuring a pulsing theme-colored status dot when the user is on the Pro or Team plan (`isPro` is true).
 
 ### Why
-Keeps Pro/Team athlete profiles clean and white-labeled by removing platform branding from their primary identity card header.
+Ensures that Pro/Team athlete profiles don't show empty spaces while keeping them clean, white-labeled, and functional.
 
 ### Files touched
 - `components/profile-card.tsx`

@@ -183,7 +183,19 @@ function CardHeader({ accent, plan, isVerified, onQr, onShare, copied }: CardHea
           </span>
         </div>
       ) : (
-        <div />
+        <div
+          className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 h-6 pointer-events-auto"
+          style={{
+            background: "rgba(0,0,0,0.5)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            backdropFilter: "blur(12px)",
+          }}
+        >
+          <div className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ backgroundColor: accent }} />
+          <span className="text-[8px] font-black tracking-wider uppercase text-white/70">
+            NIL ACTIVE
+          </span>
+        </div>
       )}
 
       {/* Right actions */}
