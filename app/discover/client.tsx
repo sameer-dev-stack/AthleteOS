@@ -162,7 +162,7 @@ function ProSpotlightCard({ athlete, index }: { athlete: DiscoveryAthlete; index
                   </div>
 
                   {/* Followers footer */}
-                  <div className="mt-3 flex items-center justify-between border-t border-white/[0.04] pt-3">
+                  <div className="mt-3 flex items-center justify-between pt-1">
                     <div className="flex items-center gap-1.5 text-xs text-ink-muted">
                       <Users className="h-3.5 w-3.5" />
                       {athlete.total_followers > 0 ? (
@@ -274,7 +274,7 @@ function AthleteCard({ athlete, index }: { athlete: DiscoveryAthlete; index: num
       </div>
 
       {/* Footer */}
-      <div className="mt-2 flex items-center justify-between border-t border-white/[0.04] px-4 py-2.5">
+      <div className="mt-2 flex items-center justify-between px-4 pb-3">
         <div className="flex items-center gap-1.5 text-xs text-ink-muted">
           <Users className="h-3.5 w-3.5" />
           {athlete.total_followers > 0 ? (

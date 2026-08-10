@@ -5,18 +5,21 @@
 
 ---
 
-## 2026-08-10 — BorderGlow: WebKit mask prefixing & Tilt/Spotlight corner radius alignment
+## 2026-08-10 — BorderGlow: Smooth 2D radial-gradient spotlight mask & footer line removal
 
 ### What changed
-- **`components/border-glow.css`**:
-  - Added `-webkit-mask-image` and `-webkit-mask-composite` vendor prefixes to `.border-glow-card::before`, `.border-glow-card::after`, and `.border-glow-card > .edge-light`. Without WebKit prefixes, Chrome, Edge, and Safari ignored CSS mask clipping, rendering unmasked 100% full rectangular glow/mesh gradient layers around rounded card corners.
+- **`components/border-glow.tsx` & `components/border-glow.css`**:
+  - Replaced angular `conic-gradient` masks with 2D `radial-gradient` masks centered dynamically at `--cursor-x` and `--cursor-y` (`radial-gradient(circle at var(--cursor-x) var(--cursor-y), black 0%, transparent 100%)`).
+  - Added real-time `--cursor-x` and `--cursor-y` CSS variable tracking on mouse movement and sweep animation in `border-glow.tsx`.
+  - Eliminates the harsh 90° horizontal cutoff line halfway down the right edge of cards. The glow now fades 100% smoothly and continuously around all 4 edges and corners.
 - **`app/discover/client.tsx`**:
-  - Added `className="rounded-2xl overflow-hidden"` to `<Tilt>` and `<Spotlight>` wrappers around `ProSpotlightCard` and Pro `AthleteCard`. Previously, `Spotlight`'s radial gradient overlay and `Tilt`'s sheen overlay used `rounded-[inherit]` without an explicit radius on their parent containers, causing their motion overlays to render as 0px square 90° rectangles.
+  - Removed `border-t border-white/[0.04]` from `ProSpotlightCard` and `AthleteCard` footers so the card body is completely seamless without any horizontal divider lines above the follower/CTA section.
 
 ### Why
-Fixes shader/glow leakage where unmasked glow pseudo-elements rendered as sharp-cornered rectangular boxes around rounded cards in Chrome, Edge, and Safari browsers.
+Fixes right-edge horizontal glow cutoff artifact and makes card body surface completely smooth.
 
 ### Files touched
+- `components/border-glow.tsx`
 - `components/border-glow.css`
 - `app/discover/client.tsx`
 
