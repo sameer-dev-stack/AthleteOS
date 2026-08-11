@@ -3,6 +3,21 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-11 — Fix production build: orphaned JSX in NIL Value dashboard
+
+### What changed
+- **`app/dashboard/nil/client.tsx`**:
+  - Removed an orphaned `)}` closing token at the end of the render tree (left over from an earlier conditional wrapper). The `{!hasVerified && (...)}` banner block was already self-contained, so the dangling token broke the JSX parse and failed the TypeScript build.
+
+### Why
+`next build` failed with a JSX parse error at line 315, blocking deploy.
+
+### Files touched
+- `app/dashboard/nil/client.tsx`
+
+### Commit
+TBD — set after push
+
 ## 2026-08-11 — Interactive NIL Deal Package Calculator & Complete Unlocked NIL Value Dashboard
 
 ### What changed
