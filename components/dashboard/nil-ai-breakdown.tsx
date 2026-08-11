@@ -21,7 +21,7 @@ export function NilAiBreakdown({
   loading,
 }: Props) {
   return (
-    <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-6 h-full flex flex-col justify-between">
+    <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-6 flex flex-col justify-between">
       <div>
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">

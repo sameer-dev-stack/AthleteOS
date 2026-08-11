@@ -191,7 +191,7 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
   };
 
   return (
-    <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-6 h-full flex flex-col justify-between">
+    <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-6 flex flex-col justify-between">
       <div>
         <div className="flex items-center gap-2 mb-6">
           <Link2 className="h-4.5 w-4.5" style={{ color: themeAccent }} />
