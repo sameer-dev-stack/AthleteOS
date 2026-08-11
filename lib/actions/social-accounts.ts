@@ -3,6 +3,20 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
+
+// Writes go through the service role (20260812 hardening: users can no
+// longer INSERT/UPDATE/DELETE social_accounts via RLS). Every write below
+// is scoped with the authenticated user's own id.
+const service = () =>
+  createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+// Platforms with OAuth verification cannot accept self-reported follower
+// counts; the numbers must come from the IG/TikTok API or Apify scrape.
+const OAUTH_VERIFIED_PLATFORMS = new Set(["instagram", "tiktok"]);
 
 export type SocialAccount = {
   id: string;
@@ -72,14 +86,19 @@ export async function upsertSocialAccount(
 
     const cleanHandle = handle.trim();
 
-    const { data, error } = await supabase
+    const isOauthPlatform = OAUTH_VERIFIED_PLATFORMS.has(parsed.data.platform);
+
+    const { data, error } = await service()
       .from("social_accounts")
       .upsert(
         {
           profile_id: user.id,
           platform: parsed.data.platform,
           handle: cleanHandle,
-          followers: parsed.data.followers,
+          // OAuth platforms: zero followers + unverified until the user
+          // connects the account (prevents self-reported "verified" metrics).
+          followers: isOauthPlatform ? 0 : parsed.data.followers,
+          verification_status: isOauthPlatform ? "UNVERIFIED" : "MANUAL",
           updated_at: new Date().toISOString(),
         },
         { onConflict: "profile_id, platform" }
@@ -106,7 +125,7 @@ export async function deleteSocialAccount(id: string): Promise<{ ok: boolean; er
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { ok: false, error: "Not authenticated" };
 
-    const { error } = await supabase
+    const { error } = await service()
       .from("social_accounts")
       .delete()
       .eq("id", id)
@@ -131,7 +150,7 @@ export async function disconnectSocialAccount(id: string): Promise<{ ok: boolean
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { ok: false, error: "Not authenticated" };
 
-    const { error } = await supabase
+    const { error } = await service()
       .from("social_accounts")
       .update({
         access_token: null,
@@ -191,7 +210,7 @@ export async function refreshSocialFollowers(id: string): Promise<{ ok: boolean;
       return { ok: false, error: "Platform does not support auto-refresh" };
     }
 
-    await supabase
+    await service()
       .from("social_accounts")
       .update({ followers, updated_at: new Date().toISOString() })
       .eq("id", id)
@@ -224,13 +243,14 @@ export async function queueSocialScrape(
     if (!cleanHandle) return { ok: false, error: "Invalid username handle" };
 
     // Insert / update a PENDING row immediately so the UI can show the pending state
-    const { error: upsertErr } = await supabase
+    const { error: upsertErr } = await service()
       .from("social_accounts")
       .upsert(
         {
           profile_id: user.id,
           platform,
           handle: `@${cleanHandle}`,
+          followers: 0,
           verification_status: "PENDING",
           updated_at: new Date().toISOString(),
         },
@@ -335,7 +355,7 @@ export async function queueSocialScrape(
         error: e?.message,
         stack: e?.stack,
       });
-      await supabase
+      await service()
         .from("social_accounts")
         .update({ verification_status: "ERROR" })
         .eq("profile_id", user.id)
@@ -352,7 +372,7 @@ export async function queueSocialScrape(
         webhookUrl,
         body: errText,
       });
-      await supabase
+      await service()
         .from("social_accounts")
         .update({ verification_status: "ERROR" })
         .eq("profile_id", user.id)

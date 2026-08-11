@@ -19,10 +19,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { updateProfile } from "@/lib/actions/profile";
-import {
-  getSystemNotifications,
-  type SystemNotification,
-} from "@/lib/actions/notifications";
+import type { SystemNotification } from "@/lib/actions/notifications";
 
 type EmailPrefs = {
   welcome: boolean;
@@ -113,12 +110,17 @@ export default function NotificationsPage() {
       }
     });
 
-    getSystemNotifications().then((res) => {
-      if (res.ok && res.data) {
-        setNotifications(res.data);
-      }
-      setLoadingNotifs(false);
-    });
+    fetch("/api/notifications")
+      .then((r) => r.json())
+      .then((res) => {
+        if (res?.ok && res?.data) {
+          setNotifications(res.data);
+        }
+        setLoadingNotifs(false);
+      })
+      .catch(() => {
+        setLoadingNotifs(false);
+      });
   }, []);
 
   async function handleSave() {

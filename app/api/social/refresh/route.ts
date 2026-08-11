@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -31,6 +32,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No access token — reconnect via OAuth" }, { status: 400 });
   }
 
+  // Followers are only writable via service role (20260812 hardening);
+  // the read above already scoped the row to the authenticated user.
+  const service = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
   try {
     if (account.platform === "instagram") {
       const res = await fetch(
@@ -42,7 +50,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: data.error.message, needs_reconnect: true }, { status: 401 });
       }
 
-      await supabase
+      await service
         .from("social_accounts")
         .update({
           followers: data.followers_count || 0,
@@ -67,7 +75,7 @@ export async function POST(request: Request) {
 
       const followerCount = data?.data?.user?.follower_count || 0;
 
-      await supabase
+      await service
         .from("social_accounts")
         .update({
           followers: followerCount,

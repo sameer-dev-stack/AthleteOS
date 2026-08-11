@@ -68,38 +68,16 @@ export async function recordAiUsage(
 
     const periodStart = getCurrentPeriod();
 
-    const { error: insertError } = await supabase
-      .from("ai_usage")
-      .insert({
-        user_id: user.id,
-        tool: "all",
-        used_count: 1,
-        period_start: periodStart,
-      });
+    // Quota is only writable through the SECURITY DEFINER RPC (20260812
+    // hardening) — direct INSERT/UPDATE on ai_usage is revoked for users.
+    const { error: rpcError } = await supabase.rpc("increment_ai_usage", {
+      p_user_id: user.id,
+      p_period_start: periodStart,
+    });
 
-    if (insertError) {
-      const { error: rpcError } = await supabase.rpc("increment_ai_usage", {
-        p_user_id: user.id,
-        p_period_start: periodStart,
-      });
-      if (rpcError) {
-        const { data: current } = await supabase
-          .from("ai_usage")
-          .select("used_count")
-          .eq("user_id", user.id)
-          .eq("tool", "all")
-          .eq("period_start", periodStart)
-          .single();
-
-        if (current) {
-          await supabase
-            .from("ai_usage")
-            .update({ used_count: current.used_count + 1 })
-            .eq("user_id", user.id)
-            .eq("tool", "all")
-            .eq("period_start", periodStart);
-        }
-      }
+    if (rpcError) {
+      console.error("[ai-usage] increment_ai_usage failed:", rpcError.message);
+      return { success: false, error: "Failed to record usage" };
     }
 
     return { success: true };

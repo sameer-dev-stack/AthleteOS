@@ -7,10 +7,7 @@ import Image from "next/image";
 import { dashboardNavItems, dashboardNavSections } from "@/config/dashboard-nav";
 import { Logo } from "@/components/logo";
 import { signOut } from "@/lib/actions/auth";
-import {
-  getSystemNotifications,
-  type SystemNotification,
-} from "@/lib/actions/notifications";
+import type { SystemNotification } from "@/lib/actions/notifications";
 import {
   Menu,
   X,
@@ -112,9 +109,13 @@ export function Header({ profile, email }: HeaderProps) {
   // Fetch real notifications on mount & periodic polling
   const fetchNotifs = useCallback(async () => {
     setLoadingNotifs(true);
-    const res = await getSystemNotifications();
-    if (res.ok && res.data) {
-      setNotifications(res.data);
+    try {
+      const res = await fetch("/api/notifications").then((r) => r.json());
+      if (res?.ok && res?.data) {
+        setNotifications(res.data);
+      }
+    } catch {
+      // Ignore fetch errors
     }
     setLoadingNotifs(false);
   }, []);

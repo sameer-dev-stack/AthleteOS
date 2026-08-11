@@ -6,6 +6,8 @@ const db = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+const STATE_COOKIE = "athleteos_oauth_state";
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
@@ -15,6 +17,33 @@ export async function GET(request: Request) {
   if (error || !code || !state) {
     return NextResponse.redirect(`${origin}/dashboard/nil?error=tiktok-oauth-failed`);
   }
+
+  // Nonce + cookie binding (20260812 hardening) — see instagram/callback.
+  const cookieState = request.cookies.get(STATE_COOKIE)?.value;
+  if (!cookieState || cookieState !== state) {
+    return NextResponse.redirect(`${origin}/dashboard/nil?error=tiktok-oauth-failed`);
+  }
+
+  const stateRow = await db
+    .from("social_oauth_states")
+    .select("profile_id, created_at")
+    .eq("state", state)
+    .single();
+
+  if (stateRow.error || !stateRow.data) {
+    return NextResponse.redirect(`${origin}/dashboard/nil?error=tiktok-oauth-failed`);
+  }
+
+  const createdMs = new Date(stateRow.data.created_at).getTime();
+  if (Date.now() - createdMs > 10 * 60 * 1000) {
+    await db.from("social_oauth_states").delete().eq("state", state);
+    return NextResponse.redirect(`${origin}/dashboard/nil?error=tiktok-oauth-expired`);
+  }
+
+  const profileId = stateRow.data.profile_id;
+
+  // One-time use — consume immediately, before any writes.
+  await db.from("social_oauth_states").delete().eq("state", state);
 
   try {
     const tokenRes = await fetch("https://open.tiktokapis.com/v2/oauth/token/", {
@@ -49,7 +78,7 @@ export async function GET(request: Request) {
 
     await db.from("social_accounts").upsert(
       {
-        profile_id: state,
+        profile_id: profileId,
         platform: "tiktok",
         handle: userInfo?.display_name || "",
         followers: userInfo?.follower_count || 0,
@@ -61,7 +90,9 @@ export async function GET(request: Request) {
       { onConflict: "profile_id, platform" }
     );
 
-    return NextResponse.redirect(`${origin}/dashboard/nil?tiktok=connected`);
+    const res = NextResponse.redirect(`${origin}/dashboard/nil?tiktok=connected`);
+    res.cookies.delete(STATE_COOKIE);
+    return res;
   } catch (err) {
     console.error("[tiktok-callback]", err);
     return NextResponse.redirect(`${origin}/dashboard/nil?error=tiktok-oauth-failed`);
