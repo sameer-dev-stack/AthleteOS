@@ -3,6 +3,42 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-11 — NIL Value Engine Honesty & Transparency Audit
+
+### What changed
+- **`components/dashboard/nil-score-card.tsx`**:
+  - Added `hasRealData` awareness. Distinguishes baseline context scores from full verified assessments.
+- **`components/dashboard/nil-rate-table.tsx`**:
+  - Added `hasFollowerData` empty state ("Pricing guidance unavailable — connect a social account to receive an estimated calculation").
+  - Transparently labels rate model source ("Estimated using a CPM baseline formula").
+- **`components/dashboard/nil-ai-breakdown.tsx`**:
+  - Displays an honest empty state when no personalized data exists ("Market insights are not available yet") instead of hardcoded generic advice.
+- **`components/dashboard/nil-deal-checker.tsx`**:
+  - Updated copy to accurately describe functionality ("evaluate offer amounts against estimated rates") rather than overclaiming contract analysis.
+- **`components/dashboard/nil-score-history.tsx`**:
+  - Requires at least 2 historical score records before rendering a trend table, showing an explicit empty state when <2 entries exist.
+- **`components/dashboard/nil-package-calculator.tsx`**:
+  - Renamed authoritative overclaims ("Fair Market Range" → "Estimated Range", "Recommended Target Payout" → "Suggested Package Price").
+- **`components/dashboard/nil-metrics-strip.tsx`**:
+  - Displays `"Not connected"` when `followersTotal === 0` instead of displaying misleading zeros.
+
+### Why
+Ensures the NIL Value Engine is transparent, trustworthy, and explicit about data sources and empty states.
+
+### Files touched
+- `components/dashboard/nil-score-card.tsx`
+- `components/dashboard/nil-rate-table.tsx`
+- `components/dashboard/nil-ai-breakdown.tsx`
+- `components/dashboard/nil-deal-checker.tsx`
+- `components/dashboard/nil-score-history.tsx`
+- `components/dashboard/nil-package-calculator.tsx`
+- `components/dashboard/nil-metrics-strip.tsx`
+- `app/dashboard/nil/client.tsx`
+
+### Commit
+`a86ade6`
+
+
 ## 2026-08-11 — Fix production build: orphaned JSX in NIL Value dashboard
 
 ### What changed
