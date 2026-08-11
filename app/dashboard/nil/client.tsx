@@ -311,8 +311,7 @@ export function NilDashboardClient({
 
           {/* Interactive Deal Package Calculator */}
           <NilPackageCalculator rates={scoreDetails.rates} themeAccent={themeAccent} />
-        </div>
-      )}
+      </div>
     </div>
   );
 }
