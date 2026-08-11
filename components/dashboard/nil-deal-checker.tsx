@@ -75,7 +75,7 @@ export function NilDealChecker({ plan, themeAccent }: Props) {
   const VerdictIcon = result ? getVerdictStyles(result.verdict).icon : null;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#111113] p-6 h-full flex flex-col justify-between min-h-[350px]">
+    <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#111113] p-6 flex flex-col justify-between">
       <div>
         <div className="flex items-center gap-2 mb-6">
           <ShieldCheck className="h-4.5 w-4.5" style={{ color: themeAccent }} />
@@ -83,7 +83,7 @@ export function NilDealChecker({ plan, themeAccent }: Props) {
         </div>
 
         {isFree ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center h-full">
+          <div className="flex flex-col items-center justify-center py-4 text-center">
             <div className="h-12 w-12 rounded-full bg-white/[0.02] border border-white/[0.08] flex items-center justify-center mb-4">
               <Lock className="h-5 w-5 text-white/30" />
             </div>

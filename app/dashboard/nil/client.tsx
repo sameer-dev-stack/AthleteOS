@@ -261,7 +261,7 @@ export function NilDashboardClient({
           engagementDelta={metrics?.engagement_delta_percent}
         />
 
-        {/* Core valuation layout grid */}
+        {/* Core valuation layout — strict 3 columns */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Column 1: Score Circle + Social Editor */}
           <div className="space-y-6">
@@ -280,7 +280,7 @@ export function NilDashboardClient({
             />
           </div>
 
-          {/* Column 2: Rates + Deal checker */}
+          {/* Column 2: Rates + Deal Checker */}
           <div className="space-y-6">
             <RateTableBlock
               rates={scoreDetails.rates}
@@ -295,7 +295,7 @@ export function NilDashboardClient({
             />
           </div>
 
-          {/* Column 3: AI Breakdown */}
+          {/* Column 3: AI Market Breakdown only */}
           <div className="space-y-6">
             <NilAiBreakdown
               breakdown={knowledgeBreakdown}
@@ -305,11 +305,13 @@ export function NilDashboardClient({
               themeAccent={themeAccent}
               loading={breakdownLoading}
             />
-            <NilScoreHistory profileId={profile.id} themeAccent={themeAccent} />
           </div>
         </div>
 
-        {/* Interactive Deal Package Calculator — Full Width Below Grid */}
+        {/* NIL Score Trend — Full Width */}
+        <NilScoreHistory profileId={profile.id} themeAccent={themeAccent} />
+
+        {/* Interactive Deal Package Calculator — Full Width */}
         <NilPackageCalculator rates={scoreDetails.rates} themeAccent={themeAccent} />
       </div>
     </div>
