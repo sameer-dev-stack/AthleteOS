@@ -4,6 +4,19 @@
 
 ---
 
+## `<NilPackageCalculator>` — `components/dashboard/nil-package-calculator.tsx` [NEW 2026-08-11]
+
+Interactive NIL deal scenario builder for custom brand sponsorship packages. Combines sponsored feed posts, short video reels, hourly in-person appearances, content licensing rights (1–12 months), and category exclusivity terms. Computes real-time target payouts, market valuation ranges ($Min - $Max), and provides 1-click copy proposal pitch text to send directly to brand sponsors.
+
+- **Used by:** `app/dashboard/nil/client.tsx`
+- **Props:**
+  | Prop | Type | Default | Description |
+  |---|---|---|---|
+  | `rates` | `{ post: RateRange; appearance: RateRange; campaign: RateRange }` | — | Base deliverable rate ranges derived from the athlete's NIL valuation engine |
+  | `themeAccent` | `string` | `"#C6FF3D"` | Accent color used for buttons, highlights, and badge styling |
+
+---
+
 ## `<ReflectiveCard>` — `components/reflective-card.tsx` [NEW 2026-08-09]
 
 Webcam-based metallic card material shell from React Bits. Renders a live blurred + displaced + specularly-lit webcam feed as the card surface to simulate a real metallic reflection. Athlete content renders inside via `children` at `z-index: 10`.

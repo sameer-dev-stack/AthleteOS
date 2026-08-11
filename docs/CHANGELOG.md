@@ -3,6 +3,38 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-11 — Interactive NIL Deal Package Calculator & Complete Unlocked NIL Value Dashboard
+
+### What changed
+- **`components/dashboard/nil-package-calculator.tsx`**:
+  - Built interactive deal package calculator allowing athletes to combine sponsored feed posts, video reels, hourly in-person appearances, content licensing rights (1 to 12 months), and category exclusivity terms.
+  - Computes real-time target payouts, market value ranges ($Min - $Max), deliverable line-item costs, and provides a 1-click copy proposal pitch text to send directly to brand sponsors.
+- **`app/dashboard/nil/page.tsx`**:
+  - Removed hardcoded `redirect("/dashboard")` blocking the NIL Value page. Replaced with full Server Component renderer fetching profile, metrics, social accounts, and quota data.
+- **`app/dashboard/nil/client.tsx`**:
+  - Unlocked the NIL Value Engine dashboard for all users by default so every athlete gets an immediate score, rate table, deal checker, and package calculator on Day 1.
+  - Fixed 3-column layout grid closing tags and positioned `NilPackageCalculator` cleanly full-width across the bottom section.
+- **`app/api/notifications/route.ts`**:
+  - Created REST API endpoint (`GET`) to serve system notifications to client components, preventing Turbopack HMR action instantiation errors during dev server hot reloads.
+- **`app/api/social/instagram/callback/route.ts` & `app/api/social/tiktok/callback/route.ts`**:
+  - Updated request parameter type signature to `NextRequest` for strict TypeScript cookie handling.
+
+### Why
+Unlocks the NIL Value Engine for all users without blocking new profiles, adds a custom deal package calculator for sponsor pitching, and resolves HMR route handler dev errors.
+
+### Files touched
+- `components/dashboard/nil-package-calculator.tsx`
+- `app/dashboard/nil/page.tsx`
+- `app/dashboard/nil/client.tsx`
+- `app/api/notifications/route.ts`
+- `app/api/social/instagram/callback/route.ts`
+- `app/api/social/tiktok/callback/route.ts`
+
+### Commit
+`bd0af00`
+
+
+
 ## 2026-08-11 — Platform Launch Offer: First 500 Athletes 3-Month Pro Trial Campaign
 
 ### What changed
