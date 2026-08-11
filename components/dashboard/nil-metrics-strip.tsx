@@ -54,7 +54,7 @@ export function NilMetricsStrip({
     },
     {
       label: "Followers",
-      value: followersTotal.toLocaleString(),
+      value: followersTotal > 0 ? followersTotal.toLocaleString() : "Not connected",
       icon: Users,
       delta: followerDelta,
       isLocked: false,

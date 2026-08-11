@@ -25,16 +25,18 @@ function RateTableBlock({
   themeAccent,
   blurred,
   locked,
+  hasFollowerData = true,
 }: {
   rates: ReturnType<typeof computeNilScoreAndRates>["rates"];
   plan: string;
   themeAccent: string;
   blurred: boolean;
   locked: boolean;
+  hasFollowerData?: boolean;
 }) {
   return (
     <div className="relative">
-      <NilRateTable rates={rates} plan={plan} themeAccent={themeAccent} />
+      <NilRateTable rates={rates} plan={plan} themeAccent={themeAccent} hasFollowerData={hasFollowerData} />
       {locked && (
         <div className="absolute inset-0 z-10 rounded-2xl bg-[#0A0A0C]/40 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center gap-3">
           <div className="rounded-full bg-white/[0.04] border border-white/[0.1] p-3">
@@ -186,16 +188,18 @@ export function NilDashboardClient({
     (a) => a.verification_status === "VERIFIED"
   );
 
+  const followersTotal = metrics?.followers_total || socialAccounts.reduce((acc, a) => acc + (a.followers || 0), 0);
+  const hasFollowerData = followersTotal > 0;
+  const hasRealData = hasFollowerData || (metrics?.card_views || 0) > 0;
+
   return (
-    <div className="space-y-8">
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-white/[0.06] pb-6">
+    <div className="space-y-6">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-6">
         <div>
           <div className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" style={{ color: themeAccent }} />
-            <h1 className="text-2xl font-black text-white uppercase tracking-wider">
-              NIL Value Engine
-            </h1>
+            <h1 className="text-xl font-black text-white tracking-tight">NIL VALUE ENGINE</h1>
           </div>
           <p className="text-xs text-white/50 mt-1">
             Analyze profile engagement, calculate market value score, and get automated contract guidance.
@@ -205,19 +209,10 @@ export function NilDashboardClient({
         <button
           onClick={handleRefresh}
           disabled={loading}
-          className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider rounded-xl px-5 py-2.5 bg-white text-black hover:bg-white/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg"
+          className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-black text-black hover:bg-white/90 transition-all disabled:opacity-50"
         >
-          {loading ? (
-            <>
-              <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-              Calculating...
-            </>
-          ) : (
-            <>
-              <RefreshCw className="h-3.5 w-3.5" />
-              Recalculate NIL Score
-            </>
-          )}
+          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+          {loading ? "Calculating..." : "RECALCULATE NIL SCORE"}
         </button>
       </div>
 
@@ -255,7 +250,7 @@ export function NilDashboardClient({
           linkClicks={metrics?.link_clicks || 0}
           clickThroughRate={metrics?.click_through_rate || 0}
           tipsAmount={metrics?.tips_amount || 0}
-          followersTotal={metrics?.followers_total || socialAccounts.reduce((acc, a) => acc + (a.followers || 0), 0)}
+          followersTotal={followersTotal}
           themeAccent={themeAccent}
           followerDelta={metrics?.follower_delta_percent}
           engagementDelta={metrics?.engagement_delta_percent}
@@ -271,6 +266,7 @@ export function NilDashboardClient({
               themeAccent={themeAccent}
               onRefresh={handleRefresh}
               loading={loading}
+              hasRealData={hasRealData}
             />
             <SocialAccountsEditor
               accounts={socialAccounts}
@@ -288,6 +284,7 @@ export function NilDashboardClient({
               themeAccent={themeAccent}
               blurred={anyPending}
               locked={false}
+              hasFollowerData={hasFollowerData}
             />
             <NilDealChecker
               plan={quotaState.plan}

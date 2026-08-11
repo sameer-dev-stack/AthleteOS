@@ -318,7 +318,7 @@ Recommended Target: $${calculation.targetTotal.toLocaleString()}`;
             {/* Target Big Price Display */}
             <div className="mt-4 text-center rounded-xl bg-black/40 border border-accent/20 p-5">
               <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">
-                Recommended Target Payout
+                Suggested Package Price
               </span>
               <div className="mt-1 flex items-baseline justify-center gap-1">
                 <span className="text-4xl font-black tracking-tight text-accent">
@@ -326,7 +326,7 @@ Recommended Target: $${calculation.targetTotal.toLocaleString()}`;
                 </span>
               </div>
               <p className="mt-2 text-[11px] font-medium text-white/50">
-                Fair Market Range: <strong style={{ color: "#ffffff" }}>${calculation.minTotal.toLocaleString()}</strong> – <strong style={{ color: "#ffffff" }}>${calculation.maxTotal.toLocaleString()}</strong>
+                Estimated Range: <strong style={{ color: "#ffffff" }}>${calculation.minTotal.toLocaleString()}</strong> – <strong style={{ color: "#ffffff" }}>${calculation.maxTotal.toLocaleString()}</strong>
               </p>
             </div>
 

@@ -52,7 +52,7 @@ export function NilAiBreakdown({
             <div className="h-4 bg-white/5 rounded w-1/2" />
             <div className="h-4 bg-white/5 rounded w-5/6" />
           </div>
-        ) : breakdown ? (
+        ) : breakdown && breakdown.isPersonalized ? (
           <div className="space-y-4">
             {/* Section 1: Market Position */}
             <div className="rounded-xl bg-white/[0.03] border border-white/[0.04] p-4">
@@ -93,7 +93,7 @@ export function NilAiBreakdown({
                 <div className="flex items-center gap-2 mb-3">
                   <Target className="h-3.5 w-3.5 flex-shrink-0" style={{ color: themeAccent }} />
                   <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">
-                    This Week&apos;s Focus
+                    Action Plan
                   </span>
                 </div>
                 <ol className="space-y-2">
@@ -113,11 +113,12 @@ export function NilAiBreakdown({
             )}
           </div>
         ) : (
-          // Fallback when no breakdown at all yet
-          <div className="text-center py-8">
-            <Sparkles className="h-8 w-8 mx-auto mb-3 text-white/10" />
-            <p className="text-xs text-white/30 leading-relaxed">
-              Click &ldquo;Recalculate NIL Score&rdquo; above to generate your personalized AI breakdown.
+          // Empty state when no personalized data exists
+          <div className="rounded-xl border border-white/[0.06] bg-[#0A0A0C]/50 p-6 text-center space-y-2 my-2">
+            <Sparkles className="h-6 w-6 mx-auto text-white/20" />
+            <h4 className="text-xs font-bold text-white/80">Market insights are not available yet</h4>
+            <p className="text-[11px] text-white/40 leading-relaxed max-w-[240px] mx-auto">
+              Connect a social account and complete your athlete profile to generate data-based insights.
             </p>
           </div>
         )}

@@ -37,11 +37,10 @@ export function NilScoreHistory({ themeAccent }: Props) {
         </h3>
       </div>
       {rows === null ? (
-        <p className="text-[11px] text-white/40">Loading…</p>
-      ) : rows.length === 0 ? (
-        <p className="text-[11px] text-white/40">
-          No score history yet. Recalculate your NIL Score to start tracking the
-          trend.
+        <p className="text-[11px] text-white/40">Loading score history…</p>
+      ) : rows.length < 2 ? (
+        <p className="text-[11px] text-white/40 leading-relaxed">
+          Your NIL assessment trend will appear here after your score has been calculated more than once.
         </p>
       ) : (
         <div className="space-y-2">

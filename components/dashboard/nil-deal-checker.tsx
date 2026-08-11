@@ -88,8 +88,8 @@ export function NilDealChecker({ plan, themeAccent }: Props) {
               <Lock className="h-5 w-5 text-white/30" />
             </div>
             <h4 className="text-xs font-bold text-white mb-1">Deal Checker is Locked</h4>
-            <p className="text-[10px] text-white/40 max-w-[200px] mb-4">
-              Unlock the AI Deal Checker to instantly evaluate offer parameters, contract terms, and deliverables against your market rates.
+            <p className="text-[10px] text-white/40 max-w-[220px] mb-4">
+              Deal rate comparison is a Pro feature. Upgrade to Pro to evaluate brand offer amounts against your estimated rates.
             </p>
             <Link
               href="/dashboard/billing"
