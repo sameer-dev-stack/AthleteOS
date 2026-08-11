@@ -8,7 +8,7 @@ import { headers } from "next/headers";
 
 const IP_HASH_SECRET = process.env.ANALYTICS_IP_HASH_SECRET;
 if (!IP_HASH_SECRET) {
-  console.error("[analytics] ANALYTICS_IP_HASH_SECRET not set — IP hashing will use an insecure fallback");
+  console.error("[analytics] ANALYTICS_IP_HASH_SECRET not set — IP hashing disabled (fail closed)");
 }
 
 function getSupabaseServiceRole() {
@@ -17,23 +17,31 @@ function getSupabaseServiceRole() {
   return createServiceClient(url, key);
 }
 
-async function hashIp(ip: string): Promise<string> {
-  const secret = IP_HASH_SECRET || "fallback-secret-hash-for-local-dev";
+// Fail CLOSED: without a secret we never hash — and therefore never persist —
+// viewer IPs (privacy posture). Views still get recorded without a hash.
+async function hashIp(ip: string | null): Promise<string | null> {
+  if (!IP_HASH_SECRET || !ip) return null;
   const { createHash } = await import("crypto");
-  return createHash("sha256").update(`${secret}:${ip}`).digest("hex");
+  return createHash("sha256").update(`${IP_HASH_SECRET}:${ip}`).digest("hex");
 }
 
-async function getClientIp(): Promise<string> {
+// On Vercel the connecting client can forge the leftmost entries of
+// x-forwarded-for; only trust the rightmost value (appended by the proxy)
+// or x-real-ip, which Vercel sets from the actual connection.
+async function getClientIp(): Promise<string | null> {
   const h = await headers();
-  const forwarded = h.get("x-forwarded-for");
-  if (forwarded) {
-    return forwarded.split(",")[0].trim();
-  }
   const realIp = h.get("x-real-ip");
   if (realIp) {
-    return realIp;
+    return realIp.trim();
   }
-  return "unknown";
+  const forwarded = h.get("x-forwarded-for");
+  if (forwarded) {
+    const parts = forwarded.split(",").map((p) => p.trim()).filter(Boolean);
+    if (parts.length > 0) {
+      return parts[parts.length - 1];
+    }
+  }
+  return null;
 }
 
 async function getUserAgent(): Promise<string | null> {

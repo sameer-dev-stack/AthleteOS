@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const db = createClient(
@@ -8,7 +8,7 @@ const db = createClient(
 
 const STATE_COOKIE = "athleteos_oauth_state";
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const state = searchParams.get("state");
