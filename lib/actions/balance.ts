@@ -201,5 +201,24 @@ export async function createPayout(): Promise<{
     return { ok: false, error: "Failed to request withdrawal. Please try again." };
   }
 
+  // Fire-and-forget: email the athlete confirming their withdrawal request
+  try {
+    const { sendPayoutRequestedEmail } = await import("./emails");
+    const { data: emailProfile } = await admin
+      .from("profiles")
+      .select("email, full_name, payout_settings")
+      .eq("id", user.id)
+      .single();
+    if (emailProfile?.email) {
+      const paypalEmail = (emailProfile.payout_settings as Record<string, string> | null)?.email ?? "";
+      sendPayoutRequestedEmail(
+        emailProfile.email,
+        emailProfile.full_name,
+        (available / 100).toFixed(2),
+        paypalEmail
+      ).catch(() => {});
+    }
+  } catch { /* non-blocking */ }
+
   return { ok: true, data: { payoutId: payout.id, amount: available } };
 }

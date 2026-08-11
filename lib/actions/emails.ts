@@ -460,6 +460,104 @@ export async function sendPaymentFailedEmail(
   }
 }
 
+export async function sendProUpgradeEmail(
+  email: string,
+  name: string | null,
+  billingLabel: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!RESEND_API_KEY) return { ok: false, error: "RESEND_API_KEY is not set" };
+  const displayName = name || "there";
+
+  try {
+    const { Resend } = await import("resend");
+    const resend = new Resend(RESEND_API_KEY);
+
+    await resend.emails.send({
+      from: "AthleteOS <onboarding@resend.dev>",
+      to: email,
+      subject: "You're now on AthleteOS Pro",
+      html: emailLayout(`
+        <div style="margin-bottom:24px;">${brandBadge()}</div>
+        <h1 style="color:#FFFFFF;font-size:24px;font-weight:700;margin:0 0 16px;line-height:1.3;">Pro access unlocked</h1>
+        <p style="color:#88888A;font-size:15px;line-height:1.6;margin:0 0 24px;">
+          Hey ${escapeHtml(displayName)}, your AthleteOS Pro subscription is now active (${escapeHtml(billingLabel)}).
+        </p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+          <tr>
+            <td style="padding:12px 16px;background-color:#16161A;border-radius:10px;border:1px solid rgba(198,255,61,0.1);">
+              <p style="color:#C6FF3D;font-size:13px;font-weight:700;margin:0 0 4px;">Keep 100% of every tip</p>
+              <p style="color:#88888A;font-size:13px;margin:0;">No platform fee on fan tips.</p>
+            </td>
+          </tr>
+          <tr><td style="height:8px;"></td></tr>
+          <tr>
+            <td style="padding:12px 16px;background-color:#16161A;border-radius:10px;border:1px solid rgba(198,255,61,0.1);">
+              <p style="color:#C6FF3D;font-size:13px;font-weight:700;margin:0 0 4px;">Custom theme & Gold badge</p>
+              <p style="color:#88888A;font-size:13px;margin:0;">Full brand control + Gold Verified badge on your card.</p>
+            </td>
+          </tr>
+          <tr><td style="height:8px;"></td></tr>
+          <tr>
+            <td style="padding:12px 16px;background-color:#16161A;border-radius:10px;border:1px solid rgba(198,255,61,0.1);">
+              <p style="color:#C6FF3D;font-size:13px;font-weight:700;margin:0 0 4px;">Advanced analytics</p>
+              <p style="color:#88888A;font-size:13px;margin:0;">Full 90-day view history, referral tracking, and growth trends.</p>
+            </td>
+          </tr>
+        </table>
+        <a href="${SITE_URL}/dashboard" style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:14px;padding:12px 24px;border-radius:10px;text-decoration:none;">Go to dashboard</a>
+      `),
+    });
+
+    return { ok: true };
+  } catch (err) {
+    console.error("[resend] pro upgrade email failed:", err);
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to send email" };
+  }
+}
+
+export async function sendPayoutRequestedEmail(
+  email: string,
+  name: string | null,
+  amountDollars: string,
+  paypalEmail: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!RESEND_API_KEY) return { ok: false, error: "RESEND_API_KEY is not set" };
+  const displayName = name || "there";
+
+  try {
+    const { Resend } = await import("resend");
+    const resend = new Resend(RESEND_API_KEY);
+
+    await resend.emails.send({
+      from: "AthleteOS <onboarding@resend.dev>",
+      to: email,
+      subject: `Payout of $${amountDollars} requested`,
+      html: emailLayout(`
+        <div style="margin-bottom:24px;">${brandBadge()}</div>
+        <h1 style="color:#FFFFFF;font-size:24px;font-weight:700;margin:0 0 16px;line-height:1.3;">Withdrawal requested</h1>
+        <p style="color:#88888A;font-size:15px;line-height:1.6;margin:0 0 24px;">
+          Hey ${escapeHtml(displayName)}, your payout request of <strong style="color:#C6FF3D;">$${escapeHtml(amountDollars)}</strong> has been submitted and is being processed.
+        </p>
+        <div style="background-color:#16161A;border-radius:12px;border:1px solid rgba(255,255,255,0.04);padding:20px;margin-bottom:24px;">
+          <p style="color:#88888A;font-size:13px;margin:0 0 6px;">Sending to:</p>
+          <p style="color:#FFFFFF;font-size:15px;font-weight:600;margin:0;">${escapeHtml(paypalEmail)} (PayPal)</p>
+        </div>
+        <p style="color:#88888A;font-size:13px;line-height:1.6;margin:0 0 24px;">
+          Payouts are reviewed and sent within 1-3 business days. You will receive a follow-up email when your funds are on the way.
+        </p>
+        <a href="${SITE_URL}/dashboard/billing" style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:14px;padding:12px 24px;border-radius:10px;text-decoration:none;">View payout history</a>
+      `),
+    });
+
+    return { ok: true };
+  } catch (err) {
+    console.error("[resend] payout requested email failed:", err);
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to send email" };
+  }
+}
+
+
+
 export async function sendWelcomeEmail(
   email: string,
   firstName: string,

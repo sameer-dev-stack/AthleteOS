@@ -132,6 +132,24 @@ export async function POST(request: NextRequest) {
           console.log("[webhook] checkout.session.completed plan updated:", { userId, tier, subscriptionId, isPromoTrial });
           revalidatePath("/dashboard");
           revalidatePath("/dashboard/billing");
+
+          // Fire-and-forget: send Pro upgrade confirmation email
+          try {
+            const { sendProUpgradeEmail } = await import("@/lib/actions/emails");
+            const { data: upgradedProfile } = await supabase
+              .from("profiles")
+              .select("email, full_name")
+              .eq("id", userId)
+              .single();
+            if (upgradedProfile?.email) {
+              const interval = session.metadata?.interval || "monthly";
+              const intervalLabel =
+                interval === "annual" ? "billed annually" :
+                interval === "semi_annual" ? "billed every 6 months" :
+                "billed monthly";
+              sendProUpgradeEmail(upgradedProfile.email, upgradedProfile.full_name, intervalLabel).catch(() => {});
+            }
+          } catch { /* non-blocking */ }
         } else if (athleteId && session.amount_total) {
           // Platform-collected tip: the full amount lands in AthleteOS's own
           // Stripe account. Compute the platform fee & athlete net ourselves.
