@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { randomInt } from "crypto";
 import { REFERRAL_CODE_CHARS } from "@/lib/constants";
 import { hashIp } from "@/lib/referral-click";
 import { isDisposableEmail, isProfileQualifiedForReferral, getReferralMilestoneStatus } from "@/lib/referral-reward";
@@ -15,10 +16,12 @@ function createAdmin() {
   );
 }
 
+// Crypto-secure code generation — Math.random() codes are predictable and
+// would let an attacker enumerate another athlete's referral code.
 function generateCode(): string {
   let code = "";
   for (let i = 0; i < 8; i++) {
-    code += REFERRAL_CODE_CHARS[Math.floor(Math.random() * REFERRAL_CODE_CHARS.length)];
+    code += REFERRAL_CODE_CHARS[randomInt(REFERRAL_CODE_CHARS.length)];
   }
   return code;
 }
@@ -246,9 +249,21 @@ export async function checkAndRewardReferral(referredUserId: string): Promise<bo
 
     const milestoneStatus = getReferralMilestoneStatus(completedCount || 0);
 
-    // Extend referrer's Pro access based on earned milestone days (up to 365 days max cap)
+    // Extend referrer's Pro access based on earned milestone days (up to 365 days max cap).
+    // Never SHRINK an existing window: take the max of current vs new expiry.
     if (milestoneStatus.totalDaysEarned > 0) {
-      const proUntilDate = new Date(Date.now() + milestoneStatus.totalDaysEarned * 24 * 60 * 60 * 1000).toISOString();
+      const { data: referrerProfile } = await admin
+        .from("profiles")
+        .select("extended_pro_until")
+        .eq("id", referral.referrer_id)
+        .single();
+
+      const existingUntil = referrerProfile?.extended_pro_until
+        ? new Date(referrerProfile.extended_pro_until).getTime()
+        : 0;
+      const newUntil = Date.now() + milestoneStatus.totalDaysEarned * 24 * 60 * 60 * 1000;
+      const proUntilDate = new Date(Math.max(existingUntil, newUntil)).toISOString();
+
       await admin
         .from("profiles")
         .update({ extended_pro_until: proUntilDate })
@@ -256,7 +271,18 @@ export async function checkAndRewardReferral(referredUserId: string): Promise<bo
     }
 
     // Grant 30 days Pro bonus to the newly joined athlete as well
-    const welcomeProDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: referredProfile } = await admin
+      .from("profiles")
+      .select("extended_pro_until")
+      .eq("id", referredUserId)
+      .single();
+
+    const existingReferredUntil = referredProfile?.extended_pro_until
+      ? new Date(referredProfile.extended_pro_until).getTime()
+      : 0;
+    const welcomeProDate = new Date(
+      Math.max(existingReferredUntil, Date.now() + 30 * 24 * 60 * 60 * 1000)
+    ).toISOString();
     await admin
       .from("profiles")
       .update({ extended_pro_until: welcomeProDate })

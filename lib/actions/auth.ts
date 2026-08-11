@@ -7,6 +7,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { isAdmin as checkIsAdmin } from "@/lib/admin";
+import { isDisposableEmail } from "@/lib/referral-reward";
 import { generateToken, sendConfirmationEmail } from "./emails";
 
 export type AuthResult = {

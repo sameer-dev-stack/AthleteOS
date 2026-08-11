@@ -109,13 +109,27 @@ export async function POST(request: NextRequest) {
 
         if (userId && tier) {
           const isPromoTrial = session.metadata?.promo_trial === "launch_500";
+
+          // Authoritative 500-slot cap: claim atomically BEFORE granting the
+          // trial. If the promotion is exhausted the user still gets a normal
+          // (paying) pro plan — no trial flag, no oversell.
+          let slotClaimed = !isPromoTrial;
+          if (isPromoTrial) {
+            const { claimPromoSlot } = await import("@/lib/launch-promo");
+            const claimed = await claimPromoSlot();
+            slotClaimed = claimed !== null;
+            if (!slotClaimed) {
+              console.warn("[webhook] promo slot exhausted — granting paid plan without trial:", { userId });
+            }
+          }
+
           const updatePayload: Record<string, unknown> = {
             plan: tier,
             stripe_subscription_id: subscriptionId,
             updated_at: new Date().toISOString(),
           };
 
-          if (isPromoTrial) {
+          if (isPromoTrial && slotClaimed) {
             updatePayload.has_claimed_promo_trial = true;
           }
 

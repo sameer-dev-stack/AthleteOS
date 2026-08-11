@@ -121,6 +121,24 @@ INSERT INTO public.promo_slots (id, capacity, claimed)
 SELECT 1, 500, COUNT(*) FROM public.profiles WHERE has_claimed_promo_trial = TRUE
 ON CONFLICT (id) DO NOTHING;
 
+-- Atomic slot claim: row-lock serializes concurrent redemptions; returns the
+-- new claimed count, or NULL when the promotion is exhausted. Service role
+-- only — the Stripe webhook is the single enforcement point.
+CREATE OR REPLACE FUNCTION public.claim_promo_slot()
+RETURNS integer
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+  UPDATE public.promo_slots
+  SET claimed = claimed + 1, updated_at = now()
+  WHERE id = 1 AND claimed < capacity
+  RETURNING claimed;
+$$;
+
+REVOKE ALL ON FUNCTION public.claim_promo_slot() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.claim_promo_slot() TO service_role;
+
 -- ------------------------------------------------------------
 -- 6. PAYOUTS: block double-withdraw races — at most one open request
 --    per athlete. Existing duplicate open rows (if any) are failed first

@@ -197,6 +197,12 @@ export async function createPayout(): Promise<{
     .single();
 
   if (error) {
+    // 23505 = unique index idx_payouts_one_open_per_athlete (20260812):
+    // a concurrent request already created an open payout for this athlete.
+    if (error.code === "23505") {
+      console.warn("[balance] createPayout blocked by one-open-payout guard:", user.id);
+      return { ok: false, error: "A withdrawal request is already being processed. You'll be able to request another once it's completed." };
+    }
     console.error("[balance] createPayout insert failed:", error);
     return { ok: false, error: "Failed to request withdrawal. Please try again." };
   }

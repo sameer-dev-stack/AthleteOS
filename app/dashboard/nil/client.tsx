@@ -14,6 +14,7 @@ import { NilAiBreakdown } from "@/components/dashboard/nil-ai-breakdown";
 import { NilScoreHistory } from "@/components/dashboard/nil-score-history";
 import { NilDealChecker } from "@/components/dashboard/nil-deal-checker";
 import { SocialAccountsEditor } from "@/components/dashboard/social-accounts-editor";
+import { NilPackageCalculator } from "@/components/dashboard/nil-package-calculator";
 
 // Wraps the Suggested NIL Rates table. While accounts sync (PENDING) it shows a
 // glassmorphism "tuning" blur; when zero verified channels exist it shows a
@@ -339,6 +340,9 @@ export function NilDashboardClient({
               <NilScoreHistory profileId={profile.id} themeAccent={themeAccent} />
             </div>
           </div>
+
+          {/* Interactive Deal Package Calculator */}
+          <NilPackageCalculator rates={scoreDetails.rates} themeAccent={themeAccent} />
         </div>
       )}
     </div>
