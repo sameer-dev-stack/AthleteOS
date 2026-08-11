@@ -295,22 +295,22 @@ export function NilDashboardClient({
             />
           </div>
 
-            {/* Column 3: AI Breakdown */}
-            <div className="space-y-6">
-              <NilAiBreakdown
-                breakdown={knowledgeBreakdown}
-                quotaUsed={quotaState.used}
-                quotaLimit={quotaState.limit}
-                plan={quotaState.plan}
-                themeAccent={themeAccent}
-                loading={breakdownLoading}
-              />
-              <NilScoreHistory profileId={profile.id} themeAccent={themeAccent} />
-            </div>
+          {/* Column 3: AI Breakdown */}
+          <div className="space-y-6">
+            <NilAiBreakdown
+              breakdown={knowledgeBreakdown}
+              quotaUsed={quotaState.used}
+              quotaLimit={quotaState.limit}
+              plan={quotaState.plan}
+              themeAccent={themeAccent}
+              loading={breakdownLoading}
+            />
+            <NilScoreHistory profileId={profile.id} themeAccent={themeAccent} />
           </div>
+        </div>
 
-          {/* Interactive Deal Package Calculator */}
-          <NilPackageCalculator rates={scoreDetails.rates} themeAccent={themeAccent} />
+        {/* Interactive Deal Package Calculator — Full Width Below Grid */}
+        <NilPackageCalculator rates={scoreDetails.rates} themeAccent={themeAccent} />
       </div>
     </div>
   );

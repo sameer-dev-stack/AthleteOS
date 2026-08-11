@@ -23,10 +23,11 @@ export default async function NilDashboardPage() {
     redirect("/auth/sign-in?redirect=/dashboard/nil");
   }
 
-  const profile = await getMyProfile();
-  if (!profile) {
+  const profileRes = await getMyProfile();
+  if (!profileRes.ok || !profileRes.data) {
     redirect("/auth/sign-in");
   }
+  const profile = profileRes.data;
 
   const metricsRes = await getNilMetrics();
   const socialRes = await getSocialAccounts();
