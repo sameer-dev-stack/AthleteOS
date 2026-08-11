@@ -178,9 +178,6 @@ export function NilDashboardClient({
     }
   };
 
-  // If no metrics ever computed, show an empty state panel
-  const showEmptyState = !metrics && socialAccounts.length === 0;
-
   // While any social account is mid-sync, blur the valuation table (cleared automatically on VERIFIED)
   const anyPending = socialAccounts.some((a) => a.verification_status === "PENDING");
 
@@ -207,8 +204,7 @@ export function NilDashboardClient({
 
         <button
           onClick={handleRefresh}
-          disabled={loading || !hasVerified}
-          title={!hasVerified ? "Connect at least one social media account to calculate your score." : undefined}
+          disabled={loading}
           className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider rounded-xl px-5 py-2.5 bg-white text-black hover:bg-white/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg"
         >
           {loading ? (
@@ -235,97 +231,69 @@ export function NilDashboardClient({
         </div>
       )}
 
-      {showEmptyState ? (
-        <div className="space-y-8">
-          {/* Intro — flat, no container card */}
-          <div className="text-center max-w-2xl mx-auto">
-            <div className="h-14 w-14 rounded-full bg-white/[0.02] border border-white/[0.08] flex items-center justify-center mb-6 mx-auto">
-              <TrendingUp className="h-6 w-6 text-white/30" />
+      {/* Optional prompt banner for users without connected social profiles */}
+      {!hasVerified && (
+        <div className="rounded-2xl border border-accent/20 bg-accent/[0.03] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-accent/15 p-2 text-accent">
+              <TrendingUp className="h-4 w-4" />
             </div>
-            <h2 className="text-lg font-bold text-white mb-2">No NIL Valuation Setup Yet</h2>
-            <p className="text-xs text-white/40 leading-relaxed">
-              Connect a public Instagram or TikTok account to verify your audience and unlock your personalized, verified NIL rates.
-            </p>
-          </div>
-
-          {/* Onboarding step guide — flat borders-only accent card */}
-          <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="text-left border border-white/[0.06] rounded-xl p-4">
-                <h5 className="text-xs font-bold text-white mb-1">1. Connect a Public Profile</h5>
-                <p className="text-[10px] text-white/40">Link your Instagram or TikTok handle so our engine can verify real engagement.</p>
-              </div>
-              <div className="text-left border border-white/[0.06] rounded-xl p-4">
-                <h5 className="text-xs font-bold text-white mb-1">2. Unlock Verified Rates</h5>
-                <p className="text-[10px] text-white/40">We calculate your market value and recommended price ranges automatically.</p>
-              </div>
+            <div>
+              <p className="text-xs font-bold text-white">Boost Your Verified NIL Market Valuation</p>
+              <p className="text-[11px] text-white/50 mt-0.5">
+                Connect your Instagram or TikTok account below to verify your reach and increase your score accuracy.
+              </p>
             </div>
           </div>
-
-          {/* Suggested NIL Rates — locked preview, direct block on the canvas */}
-          <RateTableBlock
-            rates={scoreDetails.rates}
-            plan={quotaState.plan}
-            themeAccent={themeAccent}
-            blurred={anyPending}
-            locked={!hasVerified}
-          />
-
-          {/* Social Network Setup — direct block on the canvas */}
-          <SocialAccountsEditor
-            accounts={socialAccounts}
-            themeAccent={themeAccent}
-            onUpdate={handleSocialUpdate}
-            plan={quotaState.plan}
-          />
         </div>
-      ) : (
-        <div className="space-y-6">
-          {/* Analytics Stats bar */}
-          <NilMetricsStrip
-            cardViews={metrics?.card_views || 0}
-            linkClicks={metrics?.link_clicks || 0}
-            clickThroughRate={metrics?.click_through_rate || 0}
-            tipsAmount={metrics?.tips_amount || 0}
-            followersTotal={metrics?.followers_total || socialAccounts.reduce((acc, a) => acc + (a.followers || 0), 0)}
-            themeAccent={themeAccent}
-            followerDelta={metrics?.follower_delta_percent}
-            engagementDelta={metrics?.engagement_delta_percent}
-          />
+      )}
 
-          {/* Core valuation layout grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Column 1: Score Circle + Social Editor */}
-            <div className="space-y-6">
-              <NilScoreCard
-                score={scoreDetails.nilScore}
-                label={scoreDetails.label}
-                themeAccent={themeAccent}
-                onRefresh={handleRefresh}
-                loading={loading}
-              />
-              <SocialAccountsEditor
-                accounts={socialAccounts}
-                themeAccent={themeAccent}
-                onUpdate={handleSocialUpdate}
-                plan={quotaState.plan}
-              />
-            </div>
+      <div className="space-y-6">
+        {/* Analytics Stats bar */}
+        <NilMetricsStrip
+          cardViews={metrics?.card_views || 0}
+          linkClicks={metrics?.link_clicks || 0}
+          clickThroughRate={metrics?.click_through_rate || 0}
+          tipsAmount={metrics?.tips_amount || 0}
+          followersTotal={metrics?.followers_total || socialAccounts.reduce((acc, a) => acc + (a.followers || 0), 0)}
+          themeAccent={themeAccent}
+          followerDelta={metrics?.follower_delta_percent}
+          engagementDelta={metrics?.engagement_delta_percent}
+        />
 
-            {/* Column 2: Rates + Deal checker */}
-            <div className="space-y-6">
-              <RateTableBlock
-                rates={scoreDetails.rates}
-                plan={quotaState.plan}
-                themeAccent={themeAccent}
-                blurred={anyPending}
-                locked={!hasVerified}
-              />
-              <NilDealChecker
-                plan={quotaState.plan}
-                themeAccent={themeAccent}
-              />
-            </div>
+        {/* Core valuation layout grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Column 1: Score Circle + Social Editor */}
+          <div className="space-y-6">
+            <NilScoreCard
+              score={scoreDetails.nilScore}
+              label={scoreDetails.label}
+              themeAccent={themeAccent}
+              onRefresh={handleRefresh}
+              loading={loading}
+            />
+            <SocialAccountsEditor
+              accounts={socialAccounts}
+              themeAccent={themeAccent}
+              onUpdate={handleSocialUpdate}
+              plan={quotaState.plan}
+            />
+          </div>
+
+          {/* Column 2: Rates + Deal checker */}
+          <div className="space-y-6">
+            <RateTableBlock
+              rates={scoreDetails.rates}
+              plan={quotaState.plan}
+              themeAccent={themeAccent}
+              blurred={anyPending}
+              locked={false}
+            />
+            <NilDealChecker
+              plan={quotaState.plan}
+              themeAccent={themeAccent}
+            />
+          </div>
 
             {/* Column 3: AI Breakdown */}
             <div className="space-y-6">

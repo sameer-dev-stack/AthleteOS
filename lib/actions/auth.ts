@@ -48,6 +48,13 @@ export async function signUp(
       return { ok: false, message: "Please enter a valid email address." };
     }
 
+    // Anti-cheat: temporary/disposable addresses are the primary vehicle for
+    // promo-farming and referral fraud — reject them at the door (consistent
+    // with the referral reward rules).
+    if (isDisposableEmail(email)) {
+      return { ok: false, message: "Temporary/disposable email addresses are not allowed." };
+    }
+
     const supabase = await createClient();
 
     const { data, error } = await supabase.auth.signUp({
@@ -149,10 +156,20 @@ export async function signIn(
 export async function signInWithGoogle(): Promise<void> {
   const supabase = await createClient();
 
+  // Host allowlist: never trust x-forwarded-host blindly — it is attacker
+  // controllable and would let an attacker steer the OAuth redirect to their
+  // own domain (session-token theft). Allow only the configured site URL and
+  // localhost (dev).
   const headersList = await headers();
-  const host = headersList.get("x-forwarded-host") ?? headersList.get("host");
+  const siteHost = new URL(SITE_URL).host;
+  const forwardedHost = headersList.get("x-forwarded-host") ?? headersList.get("host");
+  const host = forwardedHost ? forwardedHost.split(",")[0].trim() : siteHost;
+  const hostName = host.replace(/:\d+$/, "");
   const proto = headersList.get("x-forwarded-proto") ?? "https";
-  const origin = host ? `${proto}://${host}` : SITE_URL;
+  const origin =
+    hostName === siteHost || hostName === "localhost" || hostName === "127.0.0.1"
+      ? `${proto}://${host}`
+      : SITE_URL;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",

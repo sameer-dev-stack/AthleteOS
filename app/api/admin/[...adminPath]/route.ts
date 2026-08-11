@@ -95,7 +95,14 @@ export async function GET(
 
   // 1. GET /api/admin/profiles
   if (path[0] === "profiles" && path.length === 1) {
-    const search = (url.searchParams.get("search") || "").toLowerCase();
+    const rawSearch = (url.searchParams.get("search") || "").toLowerCase();
+    // Strip control chars + wildcard abuse (matches lib/actions/admin.ts
+    // sanitizeSearch) so a % or _ in search cannot force full-table scans.
+    const search = rawSearch
+      .replace(/[\x00-\x1F\x7F]/g, "")
+      .replace(/[%_]/g, "\\$&")
+      .trim()
+      .slice(0, 100);
     const page = parseInt(url.searchParams.get("page") || "1", 10);
     const pageSize = Math.min(parseInt(url.searchParams.get("pageSize") || "10", 10), 100);
 
