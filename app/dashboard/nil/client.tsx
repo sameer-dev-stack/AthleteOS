@@ -12,9 +12,6 @@ import { NilRateTable } from "@/components/dashboard/nil-rate-table";
 import { NilMetricsStrip } from "@/components/dashboard/nil-metrics-strip";
 import { NilAiBreakdown } from "@/components/dashboard/nil-ai-breakdown";
 import { NilScoreHistory } from "@/components/dashboard/nil-score-history";
-import { NilDealChecker } from "@/components/dashboard/nil-deal-checker";
-import { SocialAccountsEditor } from "@/components/dashboard/social-accounts-editor";
-import { NilPackageCalculator } from "@/components/dashboard/nil-package-calculator";
 
 // Wraps the Suggested NIL Rates table. While accounts sync (PENDING) it shows a
 // glassmorphism "tuning" blur; when zero verified channels exist it shows a
@@ -258,7 +255,7 @@ export function NilDashboardClient({
 
         {/* Core valuation layout — strict 3 columns */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Column 1: Score Circle + Social Editor */}
+          {/* Column 1: Score Circle */}
           <div className="space-y-6">
             <NilScoreCard
               score={scoreDetails.nilScore}
@@ -268,15 +265,9 @@ export function NilDashboardClient({
               loading={loading}
               hasRealData={hasRealData}
             />
-            <SocialAccountsEditor
-              accounts={socialAccounts}
-              themeAccent={themeAccent}
-              onUpdate={handleSocialUpdate}
-              plan={quotaState.plan}
-            />
           </div>
 
-          {/* Column 2: Rates + Deal Checker */}
+          {/* Column 2: Rates */}
           <div className="space-y-6">
             <RateTableBlock
               rates={scoreDetails.rates}
@@ -286,13 +277,9 @@ export function NilDashboardClient({
               locked={false}
               hasFollowerData={hasFollowerData}
             />
-            <NilDealChecker
-              plan={quotaState.plan}
-              themeAccent={themeAccent}
-            />
           </div>
 
-          {/* Column 3: AI Market Breakdown only */}
+          {/* Column 3: AI Market Breakdown */}
           <div className="space-y-6">
             <NilAiBreakdown
               breakdown={knowledgeBreakdown}
@@ -307,9 +294,6 @@ export function NilDashboardClient({
 
         {/* NIL Score Trend — Full Width */}
         <NilScoreHistory profileId={profile.id} themeAccent={themeAccent} />
-
-        {/* Interactive Deal Package Calculator — Full Width */}
-        <NilPackageCalculator rates={scoreDetails.rates} themeAccent={themeAccent} />
       </div>
     </div>
   );
