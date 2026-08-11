@@ -1,4 +1,4 @@
-import { LayoutDashboard, User, Sparkles, BarChart3, CreditCard, ShieldCheck, LineChart, Store, Calendar, Settings, UserPlus, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, User, Sparkles, BarChart3, CreditCard, LineChart, Store, Calendar, Settings, UserPlus, type LucideIcon } from "lucide-react";
 
 export type NavItem = {
   title: string;
@@ -37,8 +37,7 @@ export const dashboardNavSections: NavSection[] = [
   {
     label: "Account",
     items: [
-      { title: "Compliance", href: "/dashboard/compliance", icon: ShieldCheck },
-      { title: "Billing", href: "/dashboard/billing", icon: CreditCard },
+      { title: "Billing & Payouts", href: "/dashboard/billing", icon: CreditCard },
       { title: "Settings", href: "/dashboard/settings", icon: Settings },
     ],
   },

@@ -38,6 +38,7 @@ function SubmitButton() {
 }
 
 const PERKS = [
+  { icon: CheckCircle2, text: "🚀 Launch Promo: 3 Months Pro Free Trial ($0 today)" },
   { icon: CheckCircle2, text: "Instant public athlete profile & QR code" },
   { icon: CheckCircle2, text: "Stripe-powered tip jar & monetization" },
 ];

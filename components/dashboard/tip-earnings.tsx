@@ -147,9 +147,10 @@ export function TipEarnings({
           <div>
             <Link
               href="/dashboard/billing"
-              className="w-full flex justify-center bg-accent text-bg font-bold text-xs rounded-lg py-2.5 hover:opacity-90 transition-opacity"
+              className="w-full flex justify-center items-center gap-1.5 bg-accent text-bg font-bold text-xs rounded-xl py-2.5 hover:opacity-90 transition-opacity"
             >
-              Manage payouts
+              <span>Withdraw Funds to PayPal</span>
+              <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
         )}

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { ALL_THEMES } from "@/lib/themes";
 
 export type Profile = {
   id: string;
@@ -40,6 +41,7 @@ export type Profile = {
   payout_method: string | null;
   payout_settings: Record<string, any> | null;
   email_preferences: Record<string, boolean> | null;
+  has_claimed_promo_trial?: boolean;
 };
 
 export type ProfileResult = {
@@ -331,7 +333,10 @@ export async function updateTheme(
   if (!user) return { ok: false, error: "Not authenticated" };
 
   const ThemeSchema = z.object({
-    accent: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Invalid hex color"),
+    accent: z.string().refine(
+      (val) => /^#[0-9A-Fa-f]{6}$/.test(val) || ALL_THEMES.some((t) => t.id === val),
+      { message: "Invalid theme or color selected" }
+    ),
     layout: z.enum(["compact", "classic", "wide"]),
   });
 

@@ -7,9 +7,8 @@ import type { Profile } from "@/lib/actions/profile";
 import { cleanName } from "@/lib/display-name";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { updateProfile } from "@/lib/actions/profile";
-import { ProfileScore } from "@/components/dashboard/profile-score";
 import { TipEarnings } from "@/components/dashboard/tip-earnings";
-import { Camera, Bookmark, QrCode, Database, Link as LinkIcon, Film, EyeOff, Share2, Copy, Check, Zap } from "lucide-react";
+import { Camera, QrCode, EyeOff, Share2, Copy, Check, Zap } from "lucide-react";
 import { sendCardPublishedEmail } from "@/lib/actions/emails";
 import { getTipEarnings, type TipEarnings as TipEarningsData } from "@/lib/actions/tips";
 import { getBalanceSummary, type BalanceSummary } from "@/lib/actions/balance";
@@ -22,9 +21,7 @@ import { getSocialAccounts, type SocialAccount } from "@/lib/actions/social-acco
 import { resolvePlan } from "@/lib/referral-reward";
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton";
 import { ReferralCard } from "@/components/dashboard/referral-card";
-import { BusinessDashboard } from "@/components/dashboard/business-dashboard";
 import { LaunchChecklist } from "@/components/dashboard/launch-checklist";
-import { SystemStatus } from "@/components/dashboard/system-status";
 import { WhatsNewBanner } from "@/components/dashboard/whats-new-banner";
 import { TodaysDigest } from "@/components/dashboard/todays-digest";
 import { getInquiryCount } from "@/lib/actions/inquiries";
@@ -254,14 +251,15 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
                 tipsAmount={earnings ? earnings.totalEarned / 100 : 0}
                 followersTotal={socialAccounts.reduce((sum, a) => sum + a.followers, 0)}
                 themeAccent={accentColor}
+                isPro={resolvePlan(profile.plan, profile.extended_pro_until) !== "free"}
               />
             </div>
             <div className="md:hidden">
               <SwipeCards>
                 {[
                   { label: "Card Views", value: (analytics?.totalViews ?? 0).toLocaleString() },
-                  { label: "Link Clicks", value: (analytics?.totalClicks ?? 0).toLocaleString() },
-                  { label: "Click-Through", value: `${analytics && analytics.totalViews > 0 ? ((analytics.totalClicks / analytics.totalViews) * 100).toFixed(1) : "0.0"}%` },
+                  { label: "Link Clicks", value: resolvePlan(profile.plan, profile.extended_pro_until) !== "free" ? (analytics?.totalClicks ?? 0).toLocaleString() : "🔒 Pro" },
+                  { label: "Click-Through", value: resolvePlan(profile.plan, profile.extended_pro_until) !== "free" ? `${analytics && analytics.totalViews > 0 ? ((analytics.totalClicks / analytics.totalViews) * 100).toFixed(1) : "0.0"}%` : "🔒 Pro" },
                   { label: "Tips Earned", value: `$${(earnings ? earnings.totalEarned / 100 : 0).toFixed(2)}` },
                   { label: "Followers", value: socialAccounts.reduce((sum, a) => sum + a.followers, 0).toLocaleString() },
                 ].map((stat) => (
@@ -303,64 +301,8 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
           {/* Referral Card (Full width - spacious & unclipped) */}
           <ReferralCard />
 
-          {/* Profile Score & Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <ProfileScore profile={profile} />
-
-            <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-6 flex flex-col justify-between transition-colors hover:border-white/[0.1]">
-              <div>
-                <h3 className="text-sm font-semibold text-ink-muted">Quick Stats</h3>
-                <div className="mt-4 space-y-2.5 text-xs text-white/70">
-                  <div className="flex justify-between items-center border-l-2 border-accent/30 pl-3 py-2.5">
-                    <div className="flex items-center gap-1.5">
-                      <Database className="h-3.5 w-3.5 text-accent/60 flex-shrink-0" />
-                      <span>Stats entries</span>
-                    </div>
-                    <span className="font-bold text-white">{profile.stats?.length || 0}</span>
-                  </div>
-                  <div className="flex justify-between items-center border-l-2 border-accent/30 pl-3 py-2.5">
-                    <div className="flex items-center gap-1.5">
-                      <LinkIcon className="h-3.5 w-3.5 text-accent/60 flex-shrink-0" />
-                      <span>Custom links</span>
-                    </div>
-                    <span className="font-bold text-white">{profile.links?.length || 0}</span>
-                  </div>
-                  <div className="flex justify-between items-center border-l-2 border-accent/30 pl-3 py-2.5">
-                    <div className="flex items-center gap-1.5">
-                      <Film className="h-3.5 w-3.5 text-accent/60 flex-shrink-0" />
-                      <span>Highlight reels</span>
-                    </div>
-                    <span className="font-bold text-white">{profile.highlights?.length || 0}</span>
-                  </div>
-                  <div className="flex justify-between items-center border-l-2 border-accent/30 pl-3 py-2.5">
-                    <div className="flex items-center gap-1.5 opacity-50 cursor-not-allowed select-none">
-                      <Bookmark className="h-3.5 w-3.5 text-accent/60 flex-shrink-0" />
-                      <span>Saved Assets</span>
-                    </div>
-                    <span className="font-bold text-white">{savedAssetsCount}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-4 pt-3 border-t border-white/[0.04] flex justify-between items-center">
-                <span className="text-[10px] uppercase tracking-wider text-ink-dim">Card Status</span>
-                <span
-                  className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                  style={{
-                    backgroundColor: profile.profile_published ? `${accentColor}15` : "rgba(255,255,255,0.06)",
-                    color: profile.profile_published ? accentColor : "rgba(255,255,255,0.4)",
-                  }}
-                >
-                  {profile.profile_published ? "Published" : "Draft"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Launch Checklist & Business Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <LaunchChecklist profile={profile} />
-            <BusinessDashboard themeAccent={accentColor} username={profile.username} />
-          </div>
+          {/* Launch Checklist */}
+          <LaunchChecklist profile={profile} />
         </div>
 
         {/* Right Section (col-span-1 / 1-third width) */}
@@ -579,8 +521,6 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
               )}
             </div>
           </div>
-
-          <SystemStatus />
         </div>
       </div>
       {profile.username && (

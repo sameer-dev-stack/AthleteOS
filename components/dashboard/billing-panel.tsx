@@ -118,6 +118,32 @@ export function BillingPanel({ subscription: initial }: Props) {
   const upgradedTier = searchParams.get("upgraded");
 
   const [subscription, setSubscription] = useState(initial);
+  const [billingInterval, setBillingInterval] = useState<"monthly" | "semi_annual" | "annual">("annual");
+
+  const PRO_INTERVALS = [
+    {
+      key: "monthly" as const,
+      label: "1 Month",
+      monthlyRate: "$14",
+      totalBilled: "$14 billed monthly",
+      badge: null,
+    },
+    {
+      key: "semi_annual" as const,
+      label: "6 Months",
+      monthlyRate: "$11",
+      totalBilled: "$66 billed every 6 mo",
+      badge: "Save 21%",
+    },
+    {
+      key: "annual" as const,
+      label: "1 Year",
+      monthlyRate: "$9",
+      totalBilled: "$108 billed annually",
+      badge: "BEST VALUE · Save 36%",
+      highlight: true,
+    },
+  ];
   const [loading, setLoading] = useState<
     "pro" | "portal" | "cancel" | null
   >(null);
@@ -178,7 +204,7 @@ export function BillingPanel({ subscription: initial }: Props) {
     setError(null);
     trackFunnel("upgrade_click", { tier });
 
-    const result = await createCheckoutSessionAction({ tier });
+    const result = await createCheckoutSessionAction({ tier, interval: billingInterval });
     setLoading(null);
 
     if (result.ok && result.url) {
@@ -386,19 +412,66 @@ export function BillingPanel({ subscription: initial }: Props) {
             </>
           )}
 
-          <div className="grid gap-3 sm:grid-cols-2">
+          {/* ── Pro Billing Interval Selector ────────────────────── */}
+          {subscription.plan === "free" && (
+            <div className="mb-6 rounded-2xl border border-accent/20 bg-accent/[0.03] p-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-1.5">
+                  <Crown className="h-3.5 w-3.5 text-accent" />
+                  Select Pro Billing Cycle
+                </span>
+                <span className="text-[10px] font-bold text-accent">
+                  Save up to 36% on Annual
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                {PRO_INTERVALS.map((opt) => {
+                  const isSelected = billingInterval === opt.key;
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => setBillingInterval(opt.key)}
+                      className={`relative flex flex-col justify-between rounded-xl p-3.5 text-left border transition-all ${
+                        isSelected
+                          ? "border-accent bg-accent/15 ring-1 ring-accent/40 shadow-[0_0_20px_rgba(198,255,61,0.2)]"
+                          : "border-white/[0.08] bg-white/[0.02] hover:border-white/20"
+                      }`}
+                    >
+                      {opt.badge && (
+                        <span className="absolute -top-2.5 right-2 rounded-full bg-accent px-2 py-0.5 text-[9px] font-black text-black uppercase shadow-sm">
+                          {opt.badge}
+                        </span>
+                      )}
+                      <div>
+                        <span className="text-xs font-bold text-white">{opt.label}</span>
+                        <div className="mt-1 flex items-baseline gap-1">
+                          <span className="text-xl font-black text-accent">{opt.monthlyRate}</span>
+                          <span className="text-[11px] text-white/50">/ mo</span>
+                        </div>
+                      </div>
+                      <p className="mt-2 text-[10px] font-medium text-white/40">{opt.totalBilled}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="grid gap-3 sm:grid-cols-1">
             {PLANS.filter((p) => p.id !== "free").map((plan) => {
               const isCurrent = subscription.plan === plan.id;
-              const isDowngrade =
-                subscription.plan === "elite" && plan.id === "pro";
+              const activeOpt = PRO_INTERVALS.find((i) => i.key === billingInterval) || PRO_INTERVALS[2];
+              const displayPrice = isCurrent ? plan.price : activeOpt.monthlyRate;
+              const displayPeriod = isCurrent ? plan.period : "/ mo";
 
               return (
                 <div
                   key={plan.id}
-                  className={`relative rounded-xl border p-4 transition-all ${
+                  className={`relative rounded-xl border p-5 transition-all ${
                     isCurrent
                       ? "border-accent/30 bg-accent/5 ring-1 ring-accent/10"
-                      : "border-white/[0.06] bg-white/[0.02]"
+                      : "border-accent/40 bg-accent/[0.02]"
                   }`}
                 >
                   {isCurrent && (
@@ -406,26 +479,35 @@ export function BillingPanel({ subscription: initial }: Props) {
                   )}
                   <div className="flex items-center gap-2">
                     <Zap className="h-4 w-4 text-accent" />
-                    <span className="text-sm font-semibold text-white">
-                      {plan.name}
+                    <span className="text-base font-bold text-white">
+                      AthleteOS Pro
                     </span>
-                    {isCurrent && (
-                      <span className="ml-auto rounded-md bg-accent/15 px-1.5 py-0.5 text-[10px] font-bold text-accent">
-                        CURRENT
+                    {isCurrent ? (
+                      <span className="ml-auto rounded-md bg-accent/15 px-2 py-0.5 text-[10px] font-bold text-accent">
+                        CURRENT PLAN
+                      </span>
+                    ) : (
+                      <span className="ml-auto rounded-full bg-accent/20 border border-accent/30 px-2.5 py-0.5 text-[10px] font-bold text-accent">
+                        {activeOpt.label} ({activeOpt.totalBilled})
                       </span>
                     )}
                   </div>
-                  <div className="mt-2">
-                    <span className="text-2xl font-bold text-white">
-                      {plan.price}
+                  <div className="mt-3 flex items-baseline gap-2">
+                    <span className="text-3xl font-black text-white">
+                      {displayPrice}
                     </span>
-                    <span className="text-sm text-ink-dim">{plan.period}</span>
+                    <span className="text-sm font-medium text-ink-dim">{displayPeriod}</span>
+                    {!isCurrent && (
+                      <span className="ml-2 text-xs font-semibold text-accent">
+                        ({activeOpt.totalBilled})
+                      </span>
+                    )}
                   </div>
-                  <ul className="mt-3 space-y-1.5">
+                  <ul className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {plan.features.map((f) => (
                       <li
                         key={f}
-                        className="flex items-start gap-1.5 text-xs text-ink-muted"
+                        className="flex items-start gap-1.5 text-xs text-white/80"
                       >
                         {f === "Gold Verified Badge" ? (
                           <span className="mt-0.5 flex h-3 w-3 flex-shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: "#FACC15" }}>
@@ -439,24 +521,20 @@ export function BillingPanel({ subscription: initial }: Props) {
                     ))}
                   </ul>
                   <button
-                    onClick={() => isDowngrade ? handleManage() : handleUpgrade(plan.id)}
+                    onClick={() => handleUpgrade("pro")}
                     disabled={loading !== null || isCurrent}
-                    className={`mt-4 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                    className={`mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-xs font-black uppercase tracking-wider transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                       isCurrent
                         ? "bg-accent/15 text-accent"
-                        : isDowngrade
-                          ? "border border-white/10 bg-white/[0.02] text-ink-muted hover:bg-white/[0.05]"
-                          : "bg-accent text-bg hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)]"
+                        : "bg-accent text-bg hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] hover:scale-[1.01]"
                     }`}
                   >
-                    {loading === plan.id || loading === "portal" ? (
+                    {loading === "pro" || loading === "portal" ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : null}
                     {isCurrent
-                      ? "Current plan"
-                      : isDowngrade
-                        ? `Downgrade to ${plan.name}`
-                        : `Upgrade to ${plan.name}`}
+                      ? "Active Pro Subscription"
+                      : `Upgrade to Pro — ${activeOpt.label} (${activeOpt.totalBilled})`}
                   </button>
                 </div>
               );

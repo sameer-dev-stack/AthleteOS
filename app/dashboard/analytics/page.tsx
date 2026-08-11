@@ -13,8 +13,10 @@ export default async function AnalyticsPage() {
   }
 
   const profile = profileResult.data;
+  const isPro = profile.plan === "pro" || profile.plan === "team";
   const accentColor = profile.theme_accent || "#C6FF3D";
-  const initialAnalytics = await getAnalyticsData(profile.id, "30d");
+  const defaultRange = isPro ? "30d" : "7d";
+  const initialAnalytics = await getAnalyticsData(profile.id, defaultRange);
 
   return (
     <div className="space-y-8">
@@ -44,7 +46,7 @@ export default async function AnalyticsPage() {
         </div>
       ) : (
         <div className="space-y-8 max-w-5xl">
-          <AnalyticsPanel athleteId={profile.id} initialData={initialAnalytics} themeAccent={accentColor} />
+          <AnalyticsPanel athleteId={profile.id} initialData={initialAnalytics} themeAccent={accentColor} isPro={isPro} />
         </div>
       )}
     </div>

@@ -61,7 +61,7 @@ export function BalanceOverview() {
     if (result.ok && result.data) {
       setWithdrawResult({
         ok: true,
-        message: `Withdrawal of ${formatCents(result.data.amount)} requested. It will be sent to you within 48 hours.`,
+        message: `Withdrawal of ${formatCents(result.data.amount)} requested. It will be sent to your PayPal account within 24-48 hours.`,
       });
       const [summaryRes, payoutsRes] = await Promise.all([getBalanceSummary(), getPayoutHistory()]);
       if (mountedRef.current && summaryRes.ok && summaryRes.data) setSummary(summaryRes.data);
@@ -101,28 +101,28 @@ export function BalanceOverview() {
     {
       label: "Earned",
       value: formatCents(s.earned),
-      sub: "After 5% fee",
+      sub: "Free: 80% net · Pro: 100% net",
       Icon: TrendingUp,
       accent: true,
     },
     {
       label: "Pending",
       value: formatCents(s.pending),
-      sub: "In-flight payouts",
+      sub: "In-flight PayPal payouts",
       Icon: Clock,
       accent: false,
     },
     {
       label: "Available",
       value: formatCents(s.available),
-      sub: "Ready to withdraw",
+      sub: "Ready for PayPal withdrawal",
       Icon: DollarSign,
       accent: false,
     },
     {
       label: "Withdrawn",
       value: formatCents(s.withdrawn),
-      sub: "Sent to you",
+      sub: "Sent to PayPal",
       Icon: ArrowDownToLine,
       accent: false,
     },
@@ -130,11 +130,14 @@ export function BalanceOverview() {
 
   return (
     <div className="rounded-2xl border border-white/[0.06] bg-[#111113]">
-      <div className="border-b border-white/[0.06] px-6 py-4">
+      <div className="border-b border-white/[0.06] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <DollarSign className="h-5 w-5 text-accent" />
-          <h2 className="text-lg font-bold text-white">Balance</h2>
+          <h2 className="text-lg font-bold text-white">PayPal Tip Balance</h2>
         </div>
+        <span className="rounded-md bg-accent/15 px-2.5 py-1 text-[11px] font-bold text-accent">
+          PayPal Payouts Only
+        </span>
       </div>
 
       <div className="p-6 space-y-6">
@@ -162,9 +165,9 @@ export function BalanceOverview() {
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="text-sm font-semibold text-white">Withdraw to your account</p>
+                <p className="text-sm font-semibold text-white">Withdraw to PayPal</p>
                 <p className="mt-0.5 text-[11px] text-white/30">
-                  Minimum ${(MINIMUM_PAYOUT_CENTS / 100).toFixed(2)} · Sent within 48 hours
+                  Minimum ${(MINIMUM_PAYOUT_CENTS / 100).toFixed(2)} · Transfer within 24-48 hours
                 </p>
               </div>
               {s.available < MINIMUM_PAYOUT_CENTS && (
@@ -180,7 +183,7 @@ export function BalanceOverview() {
             {s.available < MINIMUM_PAYOUT_CENTS && (
               <div className="mb-3">
                 <div className="flex items-center justify-between text-[11px] text-white/40 mb-1.5">
-                  <span>Progress to ${(MINIMUM_PAYOUT_CENTS / 100).toFixed(2)} minimum</span>
+                  <span>Progress to ${(MINIMUM_PAYOUT_CENTS / 100).toFixed(2)} PayPal minimum</span>
                   <span>{formatCents(s.available)} / ${(MINIMUM_PAYOUT_CENTS / 100).toFixed(2)}</span>
                 </div>
                 <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
@@ -192,11 +195,10 @@ export function BalanceOverview() {
                 {showBreakdown && (
                   <div className="mt-3 space-y-1.5 text-[11px] text-white/40">
                     <div className="flex justify-between"><span>Available balance</span><span className="text-white/60">{formatCents(s.available)}</span></div>
-                    <div className="flex justify-between"><span>Minimum threshold</span><span className="text-white/60">${(MINIMUM_PAYOUT_CENTS / 100).toFixed(2)}</span></div>
+                    <div className="flex justify-between"><span>Minimum PayPal threshold</span><span className="text-white/60">${(MINIMUM_PAYOUT_CENTS / 100).toFixed(2)}</span></div>
                     <div className="flex justify-between"><span>Still needed</span><span className="text-white/60">{formatCents(Math.max(0, MINIMUM_PAYOUT_CENTS - s.available))}</span></div>
-                    <div className="flex justify-between"><span>Withdrawal fee (Stripe)</span><span className="text-white/60">Free</span></div>
-                    <div className="flex justify-between"><span>Platform fee already deducted</span><span className="text-white/60">5% per tip</span></div>
-                    <div className="flex justify-between"><span>Estimated arrival</span><span className="text-white/60">Within 48 hours</span></div>
+                    <div className="flex justify-between"><span>Tip Split</span><span className="text-white/60">Free 80% · Pro 100%</span></div>
+                    <div className="flex justify-between"><span>Transfer arrival</span><span className="text-white/60">Within 24-48 hours</span></div>
                   </div>
                 )}
               </div>
@@ -204,8 +206,8 @@ export function BalanceOverview() {
 
             {s.available >= MINIMUM_PAYOUT_CENTS && !withdrawResult && (
               <div className="text-[11px] text-white/40 mb-3 flex items-center gap-4">
-                <span>No Stripe fees</span>
-                <span>Sent within 48 hours</span>
+                <span>Exclusive PayPal Payout</span>
+                <span>Sent within 24-48 hours</span>
               </div>
             )}
 
@@ -237,8 +239,8 @@ export function BalanceOverview() {
                 <ArrowDownToLine className="h-4 w-4" />
               )}
               {withdrawing
-                ? "Requesting withdrawal..."
-                : `Withdraw ${formatCents(s.available)}`}
+                ? "Processing PayPal Request..."
+                : `Withdraw ${formatCents(s.available)} to PayPal`}
             </button>
           </div>
         )}

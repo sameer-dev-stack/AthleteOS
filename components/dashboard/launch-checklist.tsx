@@ -87,10 +87,10 @@ export function LaunchChecklist({ profile }: { profile: Profile }) {
     },
     {
       id: "stripe",
-      label: "Set up payouts",
-      description: "Connect Stripe to receive tips and payments",
-      done: profile.stripe_onboarding_complete,
-      href: "/dashboard/billing",
+      label: "Connect PayPal",
+      description: "Connect your PayPal account to receive fan tips",
+      done: profile.stripe_onboarding_complete || profile.payout_method === "paypal",
+      href: "/dashboard/nil",
     },
   ];
 

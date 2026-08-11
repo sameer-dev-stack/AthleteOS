@@ -8,35 +8,75 @@ const PRICE_IDS = {
 type CheckoutTier = "pro";
 type PlanTier = "free" | "pro";
 
+export type BillingInterval = "monthly" | "semi_annual" | "annual";
+
 export async function createCheckoutSession({
   userId,
   email,
   tier,
+  interval = "annual",
+  trialDays,
 }: {
   userId: string;
   email: string;
   tier: CheckoutTier;
+  interval?: BillingInterval;
+  trialDays?: number;
 }): Promise<{ url: string | null; error?: string }> {
-  const priceId = PRICE_IDS[tier];
-  if (!priceId) {
-    return { url: null, error: "Invalid tier" };
-  }
+  // Check env override price IDs if present
+  let priceId = "";
+  if (interval === "annual") priceId = process.env.STRIPE_PRICE_ID_PRO_1Y || "";
+  else if (interval === "semi_annual") priceId = process.env.STRIPE_PRICE_ID_PRO_6M || "";
+  else priceId = process.env.STRIPE_PRICE_ID_PRO || "";
+
+  // Line item definition with fallback inline price_data if Price ID is not set
+  const unitAmount = interval === "annual" ? 10800 : interval === "semi_annual" ? 6600 : 1400; // $108/yr, $66/6mo, $14/mo
+  const recurringInterval = interval === "annual" ? "year" : "month";
+  const intervalCount = interval === "semi_annual" ? 6 : 1;
+
+  const lineItems = priceId ? [{ price: priceId, quantity: 1 }] : [
+    {
+      price_data: {
+        currency: "usd",
+        product_data: {
+          name: "AthleteOS Pro Plan",
+          description:
+            interval === "annual"
+              ? "Annual Pro Membership ($9/mo - Save 36%)"
+              : interval === "semi_annual"
+                ? "6-Month Pro Membership ($11/mo - Save 21%)"
+                : "Monthly Pro Membership ($14/mo)",
+        },
+        unit_amount: unitAmount,
+        recurring: {
+          interval: recurringInterval as "year" | "month",
+          interval_count: intervalCount,
+        },
+      },
+      quantity: 1,
+    },
+  ];
 
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer_email: email,
-    line_items: [{ price: priceId, quantity: 1 }],
+    line_items: lineItems,
     subscription_data: {
+      trial_period_days: trialDays || undefined,
       metadata: {
         athleteos_user_id: userId,
         tier,
+        interval,
+        promo_trial: trialDays ? "launch_500" : null,
       },
     },
     metadata: {
       athleteos_user_id: userId,
       tier,
+      interval,
+      promo_trial: trialDays ? "launch_500" : null,
     },
-    success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app"}/dashboard?upgraded=${tier}`,
+    success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app"}/dashboard?upgraded=${tier}${trialDays ? "&trial=claimed" : ""}`,
     cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app"}/dashboard?cancelled=true`,
   });
 

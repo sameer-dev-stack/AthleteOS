@@ -50,6 +50,7 @@ export interface ReflectiveCardProps {
   /* Surface */
   color?:                string;
   overlayColor?:         string;
+  backgroundGradient?:   string;
   radius?:               number;
   /* Instance */
   filterId?:             string;
@@ -73,6 +74,7 @@ export function ReflectiveCard({
   glassDistortion      = 0,
   color                = "white",
   overlayColor         = "rgba(0, 0, 0, 0.18)",
+  backgroundGradient,
   radius               = 20,
   filterId             = "rc-metallic-displacement",
   streamRef,
@@ -297,6 +299,21 @@ export function ReflectiveCard({
       {/* ── Material layers ───────────────────────── */}
       <div className="rc-noise"   aria-hidden="true" />
       <div className="rc-sheen"   aria-hidden="true" />
+      {backgroundGradient && (
+        <div
+          className="rc-theme-gradient"
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 2,
+            pointerEvents: "none",
+            background: backgroundGradient,
+            opacity: 0.70,
+            mixBlendMode: "overlay",
+          }}
+          aria-hidden="true"
+        />
+      )}
       <div className="rc-overlay" aria-hidden="true" />
       <div className="rc-border"  aria-hidden="true" />
 

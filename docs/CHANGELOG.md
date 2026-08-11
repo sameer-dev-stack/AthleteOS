@@ -3,6 +3,48 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-11 — Platform Launch Offer: First 500 Athletes 3-Month Pro Trial Campaign
+
+### What changed
+- **`supabase/migrations/20260811_launch_500_promo.sql`**:
+  - Added `has_claimed_promo_trial` boolean column to `profiles` table with index to track and limit single-claim 3-month free trials per user.
+- **`lib/launch-promo.ts`**:
+  - Created launch promo module with `getLaunchPromoStats` to atomically query remaining slots out of 500 total.
+- **`lib/stripe-billing.ts`**:
+  - Updated `createCheckoutSession` to accept `trialDays` (90 days) and attach `trial_period_days: 90` & `promo_trial: "launch_500"` metadata to Stripe Checkout sessions.
+- **`lib/actions/billing.ts`**:
+  - Added `claimLaunchPromoTrialAction()` server action which validates authenticated users, checks remaining promo slots, and returns Stripe Checkout trial URL.
+- **`app/api/stripe/webhook/route.ts`**:
+  - Updated `checkout.session.completed` handler to inspect `promo_trial === "launch_500"` metadata and update `has_claimed_promo_trial: true` on profile upgrade.
+- **`components/promo/launch-offer-banner.tsx`**:
+  - Built high-conversion dark-themed promotional banner with live slot progress bar (`X / 500 Spots Remaining`), Stripe $0.00 card verification details, and direct trial claim CTA button.
+- **`components/announcement-bar.tsx`**:
+  - Updated top announcement bar copy and link to launch the 3-Month Free Trial sign-up flow.
+- **`app/dashboard/page.tsx` & `app/dashboard/billing/page.tsx`**:
+  - Embedded `LaunchOfferBanner` at the top of the main Dashboard and Billing page for free-tier users.
+- **`app/api/health/route.ts`**:
+  - Added dedicated `/api/health` route handler returning HTTP 200 OK with service status details for uptime monitors, health probes, and Vercel.
+- **`app/auth/sign-up/page.tsx`**:
+  - Featured the 3-Month Pro Free Trial as a top perk on the sign-up form.
+
+### Why
+Launches a growth acquisition campaign offering the first 500 athletes 3 months of Pro Plan for free upon card verification via Stripe.
+
+### Files touched
+- `supabase/migrations/20260811_launch_500_promo.sql`
+- `lib/launch-promo.ts`
+- `lib/stripe-billing.ts`
+- `lib/actions/billing.ts`
+- `app/api/stripe/webhook/route.ts`
+- `components/promo/launch-offer-banner.tsx`
+- `components/announcement-bar.tsx`
+- `app/dashboard/page.tsx`
+- `app/dashboard/billing/page.tsx`
+- `app/auth/sign-up/page.tsx`
+
+### Commit
+`3cb9498`
+
 ---
 
 ## 2026-08-10 — Profile Card: Dynamic Theme Border Glow, Tightened Name Header Gap & Modal Polish

@@ -16,6 +16,7 @@ interface BorderGlowProps {
   animated?: boolean;
   colors?: string[];
   fillOpacity?: number;
+  style?: React.CSSProperties;
 }
 
 interface HSL {
@@ -98,6 +99,7 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
   animated = false,
   colors = ['#c084fc', '#f472b6', '#38bdf8'],
   fillOpacity = 0.5,
+  style,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -187,6 +189,7 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
     '--fill-opacity': fillOpacity,
     ...glowVars,
     ...buildGradientVars(colors),
+    ...style,
   };
 
   return (

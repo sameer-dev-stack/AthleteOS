@@ -108,13 +108,20 @@ export async function POST(request: NextRequest) {
         });
 
         if (userId && tier) {
+          const isPromoTrial = session.metadata?.promo_trial === "launch_500";
+          const updatePayload: Record<string, unknown> = {
+            plan: tier,
+            stripe_subscription_id: subscriptionId,
+            updated_at: new Date().toISOString(),
+          };
+
+          if (isPromoTrial) {
+            updatePayload.has_claimed_promo_trial = true;
+          }
+
           const { error: updateError } = await supabase
             .from("profiles")
-            .update({
-              plan: tier,
-              stripe_subscription_id: subscriptionId,
-              updated_at: new Date().toISOString(),
-            })
+            .update(updatePayload)
             .eq("id", userId);
 
           if (updateError) {
@@ -122,7 +129,7 @@ export async function POST(request: NextRequest) {
             throw new Error(`Failed to update plan for user ${userId}: ${updateError.message}`);
           }
 
-          console.log("[webhook] checkout.session.completed plan updated:", { userId, tier, subscriptionId });
+          console.log("[webhook] checkout.session.completed plan updated:", { userId, tier, subscriptionId, isPromoTrial });
           revalidatePath("/dashboard");
           revalidatePath("/dashboard/billing");
         } else if (athleteId && session.amount_total) {

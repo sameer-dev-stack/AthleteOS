@@ -8,16 +8,26 @@ import { dashboardNavItems, dashboardNavSections } from "@/config/dashboard-nav"
 import { Logo } from "@/components/logo";
 import { signOut } from "@/lib/actions/auth";
 import {
+  getSystemNotifications,
+  type SystemNotification,
+} from "@/lib/actions/notifications";
+import {
   Menu,
   X,
   LogOut,
-  Search,
   Bell,
   ChevronRight,
   Settings,
   User,
   CreditCard,
   Lock,
+  MessageCircle,
+  DollarSign,
+  UserPlus,
+  Zap,
+  CheckCircle2,
+  SlidersHorizontal,
+  Check,
 } from "lucide-react";
 import type { Profile } from "@/lib/actions/profile";
 
@@ -26,14 +36,58 @@ type HeaderProps = {
   email: string;
 };
 
+const READ_NOTIFS_STORAGE_KEY = "athleteos_read_notifications";
+
+function getNotificationIcon(type: SystemNotification["type"]) {
+  switch (type) {
+    case "inquiry":
+      return <MessageCircle className="h-3.5 w-3.5 text-[#C6FF3D]" />;
+    case "tip":
+      return <DollarSign className="h-3.5 w-3.5 text-emerald-400" />;
+    case "referral":
+      return <UserPlus className="h-3.5 w-3.5 text-cyan-400" />;
+    case "milestone":
+      return <Zap className="h-3.5 w-3.5 text-amber-400" />;
+    case "published":
+      return <CheckCircle2 className="h-3.5 w-3.5 text-[#C6FF3D]" />;
+    default:
+      return <Bell className="h-3.5 w-3.5 text-white/50" />;
+  }
+}
+
+function formatTimeAgo(isoString: string): string {
+  try {
+    const now = new Date();
+    const date = new Date(isoString);
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    if (seconds < 60) return "Just now";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  } catch {
+    return "Recently";
+  }
+}
+
 export function Header({ profile, email }: HeaderProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+
+  // User avatar dropdown state
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Notifications state
+  const [notifsOpen, setNotifsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<SystemNotification[]>([]);
+  const [readIds, setReadIds] = useState<Set<string>>(new Set());
+  const [notifFilter, setNotifFilter] = useState<"all" | "unread">("all");
+  const [loadingNotifs, setLoadingNotifs] = useState(false);
+  const notifsRef = useRef<HTMLDivElement>(null);
 
   const accentColor = profile.theme_accent || "#C6FF3D";
   const initials = (profile.full_name || profile.username || "A")
@@ -42,6 +96,62 @@ export function Header({ profile, email }: HeaderProps) {
     .join("")
     .slice(0, 2)
     .toUpperCase();
+
+  // Load read notification IDs from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(READ_NOTIFS_STORAGE_KEY);
+      if (stored) {
+        setReadIds(new Set(JSON.parse(stored)));
+      }
+    } catch {
+      // Ignore localStorage read errors
+    }
+  }, []);
+
+  // Fetch real notifications on mount & periodic polling
+  const fetchNotifs = useCallback(async () => {
+    setLoadingNotifs(true);
+    const res = await getSystemNotifications();
+    if (res.ok && res.data) {
+      setNotifications(res.data);
+    }
+    setLoadingNotifs(false);
+  }, []);
+
+  useEffect(() => {
+    fetchNotifs();
+    const interval = setInterval(() => {
+      fetchNotifs();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [fetchNotifs]);
+
+  // Save read notification IDs to localStorage
+  const markAsRead = (id: string) => {
+    setReadIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      try {
+        localStorage.setItem(READ_NOTIFS_STORAGE_KEY, JSON.stringify(Array.from(next)));
+      } catch {
+        // Ignore localStorage write errors
+      }
+      return next;
+    });
+  };
+
+  const markAllAsRead = () => {
+    const allIds = notifications.map((n) => n.id);
+    setReadIds(new Set(allIds));
+    try {
+      localStorage.setItem(READ_NOTIFS_STORAGE_KEY, JSON.stringify(allIds));
+    } catch {
+      // Ignore localStorage write errors
+    }
+  };
+
+  const unreadCount = notifications.filter((n) => !readIds.has(n.id)).length;
 
   // Build breadcrumb segments from pathname
   const pathSegments = pathname.split("/").filter(Boolean);
@@ -56,280 +166,346 @@ export function Header({ profile, email }: HeaderProps) {
     return { href, label, sectionLabel, isLast: index === pathSegments.length - 1 };
   });
 
-  // Cmd+K / Ctrl+K to open search
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setSearchOpen((prev) => !prev);
-      }
-      if (e.key === "Escape") {
-        setSearchOpen(false);
-        setDropdownOpen(false);
-      }
-    }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  // Focus search input when opened
-  useEffect(() => {
-    if (searchOpen && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  }, [searchOpen]);
-
-  // Close dropdown on outside click
+  // Close dropdowns on outside click or ESC
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
       }
+      if (notifsRef.current && !notifsRef.current.contains(e.target as Node)) {
+        setNotifsOpen(false);
+      }
     }
-    if (dropdownOpen) {
-      document.addEventListener("mousedown", handleClick);
-      return () => document.removeEventListener("mousedown", handleClick);
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setDropdownOpen(false);
+        setNotifsOpen(false);
+      }
     }
-  }, [dropdownOpen]);
-
-  const handleSearchSelect = useCallback((href: string) => {
-    setSearchOpen(false);
-    setSearchQuery("");
-    window.location.href = href;
+    document.addEventListener("mousedown", handleClick);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
-  const filteredItems = searchQuery
-    ? dashboardNavItems.filter(
-        (item) =>
-          !item.comingSoon &&
-          (item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.href.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
-    : dashboardNavItems.filter((item) => !item.comingSoon);
+  const visibleNotifications = notifications.filter((n) => {
+    if (notifFilter === "unread") return !readIds.has(n.id);
+    return true;
+  });
 
   return (
     <>
       <header className="sticky top-0 z-30 h-14 w-full border-b border-white/[0.06] bg-[#0A0A0F]/80 backdrop-blur-md md:pl-[240px]">
         <div className="flex h-full items-center w-full max-w-7xl mx-auto px-4 md:px-8">
-        {/* Left: Breadcrumb */}
-        <nav className="flex items-center gap-1.5 min-w-0 flex-1">
-          {/* Mobile hamburger */}
-          <button
-            onClick={() => setMobileMenuOpen(true)}
-            className="md:hidden p-2 -ml-2 mr-1 text-white/50 hover:text-white rounded-lg transition-colors"
-            aria-label="Open menu"
-          >
-            <Menu className="h-4 w-4" />
-          </button>
-
-          {/* Breadcrumbs — hidden on very small screens */}
-          <ol className="hidden sm:flex items-center gap-1.5 text-xs min-w-0">
-            {breadcrumbs.map((crumb) => (
-              <li key={crumb.href} className="flex items-center gap-1.5 min-w-0">
-                {crumb.isLast ? (
-                  <span className="font-semibold text-white truncate">{crumb.label}</span>
-                ) : (
-                  <>
-                    <Link
-                      href={crumb.href}
-                      className="font-medium text-white/40 hover:text-white/70 transition-colors truncate max-w-[120px]"
-                    >
-                      {crumb.label}
-                    </Link>
-                    <span className="text-white/20 select-none flex-shrink-0" aria-hidden="true">/</span>
-                  </>
-                )}
-              </li>
-            ))}
-          </ol>
-
-          {/* Mobile: just the current page title */}
-          <span className="sm:hidden text-xs font-semibold text-white truncate">
-            {breadcrumbs[breadcrumbs.length - 1]?.label || "Dashboard"}
-          </span>
-        </nav>
-
-        {/* Right: Search + Notifications + Avatar */}
-        <div className="flex items-center gap-1 ml-4">
-          {/* Search trigger */}
-          <button
-            onClick={() => setSearchOpen(true)}
-            className="flex items-center gap-2 h-8 px-3 rounded-lg bg-white/[0.04] border border-white/[0.06] text-white/40 hover:text-white/60 hover:bg-white/[0.06] transition-all text-xs"
-          >
-            <Search className="h-3.5 w-3.5" />
-            <span className="hidden md:inline">Search</span>
-            <kbd className="hidden md:inline-flex items-center gap-0.5 ml-1 text-[10px] text-white/25 font-mono">
-              <span className="text-[10px]">&#8984;</span>K
-            </kbd>
-          </button>
-
-          {/* Notification bell */}
-          <button
-            className="relative h-8 w-8 rounded-lg flex items-center justify-center text-white/40 hover:text-white/70 hover:bg-white/[0.04] transition-colors"
-            aria-label="Notifications"
-          >
-            <Bell className="h-4 w-4" />
-            <span
-              className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full ring-2 ring-[#0A0A0F]"
-              style={{ backgroundColor: accentColor }}
-            />
-          </button>
-
-          {/* User avatar dropdown */}
-          <div className="relative" ref={dropdownRef}>
+          {/* Left: Breadcrumb */}
+          <nav className="flex items-center gap-1.5 min-w-0 flex-1">
+            {/* Mobile hamburger */}
             <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 h-8 pl-1 pr-2 rounded-lg hover:bg-white/[0.04] transition-colors"
+              onClick={() => setMobileMenuOpen(true)}
+              className="md:hidden p-2 -ml-2 mr-1 text-white/50 hover:text-white rounded-lg transition-colors"
+              aria-label="Open menu"
             >
-              <div
-                className="relative h-6 w-6 rounded-full overflow-hidden border border-white/[0.1] flex-shrink-0"
-                style={{ backgroundColor: "#16161A" }}
-              >
-                {profile.avatar_url ? (
-                  <Image
-                    src={profile.avatar_url}
-                    alt={profile.full_name || profile.username || ""}
-                    fill
-                    className="object-cover"
-                    unoptimized
-                  />
-                ) : (
-                  <span
-                    className="absolute inset-0 flex items-center justify-center text-[8px] font-black"
-                    style={{ color: accentColor }}
-                  >
-                    {initials}
-                  </span>
-                )}
-              </div>
-              <span className="hidden lg:block text-xs font-medium text-white/70 max-w-[100px] truncate">
-                {profile.full_name || profile.username || "Athlete"}
-              </span>
+              <Menu className="h-4 w-4" />
             </button>
 
-            {/* Dropdown */}
-            {dropdownOpen && (
-              <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-white/[0.08] bg-[#111113] shadow-2xl shadow-black/40 py-1.5 animate-in fade-in slide-in-from-top-2 duration-150">
-                {/* User info header */}
-                <div className="px-4 py-3 border-b border-white/[0.06]">
-                  <p className="text-sm font-semibold text-white truncate">
-                    {profile.full_name || profile.username || "Athlete"}
-                  </p>
-                  <p className="text-xs text-white/30 truncate mt-0.5">{email}</p>
-                </div>
+            {/* Breadcrumbs — hidden on very small screens */}
+            <ol className="hidden sm:flex items-center gap-1.5 text-xs min-w-0">
+              {breadcrumbs.map((crumb) => (
+                <li key={crumb.href} className="flex items-center gap-1.5 min-w-0">
+                  {crumb.isLast ? (
+                    <span className="font-semibold text-white truncate">{crumb.label}</span>
+                  ) : (
+                    <>
+                      <Link
+                        href={crumb.href}
+                        className="font-medium text-white/40 hover:text-white/70 transition-colors truncate max-w-[120px]"
+                      >
+                        {crumb.label}
+                      </Link>
+                      <span className="text-white/20 select-none flex-shrink-0" aria-hidden="true">
+                        /
+                      </span>
+                    </>
+                  )}
+                </li>
+              ))}
+            </ol>
 
-                {/* Quick actions */}
-                <div className="py-1.5">
-                  <Link
-                    href="/dashboard/profile"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2 text-xs text-white/60 hover:text-white hover:bg-white/[0.04] transition-colors"
-                  >
-                    <User className="h-3.5 w-3.5" />
-                    Edit Profile
-                  </Link>
-                  <Link
-                    href="/dashboard/settings"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2 text-xs text-white/60 hover:text-white hover:bg-white/[0.04] transition-colors"
-                  >
-                    <Settings className="h-3.5 w-3.5" />
-                    Settings
-                  </Link>
-                  <Link
-                    href="/dashboard/billing"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2 text-xs text-white/60 hover:text-white hover:bg-white/[0.04] transition-colors"
-                  >
-                    <CreditCard className="h-3.5 w-3.5" />
-                    Billing
-                  </Link>
-                </div>
+            {/* Mobile: just current page title */}
+            <span className="sm:hidden text-xs font-semibold text-white truncate">
+              {breadcrumbs[breadcrumbs.length - 1]?.label || "Dashboard"}
+            </span>
+          </nav>
 
-                {/* Sign out */}
-                <div className="border-t border-white/[0.06] pt-1.5">
-                  <form action={signOut}>
+          {/* Right: Notifications + User Avatar */}
+          <div className="flex items-center gap-2 ml-4">
+            {/* Notification Bell Dropdown */}
+            <div className="relative" ref={notifsRef}>
+              <button
+                onClick={() => {
+                  setNotifsOpen(!notifsOpen);
+                  setDropdownOpen(false);
+                  fetchNotifs();
+                }}
+                className={`relative h-9 w-9 rounded-xl border flex items-center justify-center transition-all ${
+                  notifsOpen
+                    ? "bg-white/[0.08] border-white/[0.15] text-white"
+                    : "bg-white/[0.03] border-white/[0.06] text-white/60 hover:text-white hover:bg-white/[0.06]"
+                }`}
+                aria-label="Notifications"
+              >
+                <Bell className="h-4 w-4" />
+                {unreadCount > 0 && (
+                  <span
+                    className="absolute -top-1 -right-1 h-4 min-w-[16px] px-1 rounded-full text-[9px] font-black flex items-center justify-center text-bg ring-2 ring-[#0A0A0F]"
+                    style={{ backgroundColor: accentColor }}
+                  >
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notifications Popover Menu */}
+              {notifsOpen && (
+                <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl border border-white/[0.14] bg-[#121216] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9)] py-2 animate-in fade-in slide-in-from-top-2 duration-150 z-50 overflow-hidden">
+                  {/* Header */}
+                  <div className="px-4 py-3 border-b border-white/[0.08] bg-[#16161B] flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-white tracking-wide uppercase">
+                        Notifications
+                      </span>
+                      {unreadCount > 0 && (
+                        <span
+                          className="px-1.5 py-0.5 rounded-md text-[10px] font-bold"
+                          style={{ backgroundColor: `${accentColor}20`, color: accentColor }}
+                        >
+                          {unreadCount} new
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {unreadCount > 0 && (
+                        <button
+                          onClick={markAllAsRead}
+                          className="text-[11px] font-semibold text-white/50 hover:text-[#C6FF3D] transition-colors"
+                        >
+                          Mark all read
+                        </button>
+                      )}
+                      <Link
+                        href="/dashboard/notifications"
+                        onClick={() => setNotifsOpen(false)}
+                        className="p-1 rounded-md text-white/50 hover:text-white hover:bg-white/[0.08] transition-colors"
+                        title="Notification Settings"
+                      >
+                        <SlidersHorizontal className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Filter tabs */}
+                  <div className="px-4 py-2 border-b border-white/[0.06] bg-[#121216] flex items-center gap-2">
                     <button
-                      type="submit"
-                      className="flex items-center gap-2.5 w-full px-4 py-2 text-xs text-white/60 hover:text-red-400 hover:bg-white/[0.04] transition-colors"
+                      onClick={() => setNotifFilter("all")}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                        notifFilter === "all"
+                          ? "bg-white/[0.12] text-white"
+                          : "text-white/40 hover:text-white/70"
+                      }`}
                     >
-                      <LogOut className="h-3.5 w-3.5" />
-                      Sign Out
+                      All ({notifications.length})
                     </button>
-                  </form>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        </div>
-      </header>
+                    <button
+                      onClick={() => setNotifFilter("unread")}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                        notifFilter === "unread"
+                          ? "bg-white/[0.12] text-white"
+                          : "text-white/40 hover:text-white/70"
+                      }`}
+                    >
+                      Unread ({unreadCount})
+                    </button>
+                  </div>
 
-      {/* Search Modal */}
-      {searchOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
-          <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => {
-              setSearchOpen(false);
-              setSearchQuery("");
-            }}
-          />
-          <div className="relative w-full max-w-lg mx-4 rounded-2xl border border-white/[0.08] bg-[#111113] shadow-2xl shadow-black/60 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-150">
-            {/* Search input */}
-            <div className="flex items-center gap-3 px-5 border-b border-white/[0.06]">
-              <Search className="h-4 w-4 text-white/30 flex-shrink-0" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search pages..."
-                className="flex-1 h-12 bg-transparent text-sm text-white placeholder-white/30 outline-none"
-              />
-              <kbd className="flex-shrink-0 text-[10px] text-white/20 font-mono bg-white/[0.04] rounded px-1.5 py-0.5">
-                ESC
-              </kbd>
+                  {/* List items */}
+                  <div className="max-h-80 overflow-y-auto divide-y divide-white/[0.06] bg-[#121216]">
+                    {loadingNotifs && notifications.length === 0 ? (
+                      <div className="px-4 py-8 text-center text-xs text-white/40">
+                        Loading notifications...
+                      </div>
+                    ) : visibleNotifications.length === 0 ? (
+                      <div className="px-4 py-8 text-center space-y-1.5 bg-[#121216]">
+                        <Check className="h-5 w-5 text-white/30 mx-auto" />
+                        <p className="text-xs font-bold text-white/60">You&apos;re all caught up!</p>
+                        <p className="text-[10px] text-white/35">
+                          {notifFilter === "unread"
+                            ? "No unread notifications"
+                            : "New inquiries and tips will show up here"}
+                        </p>
+                      </div>
+                    ) : (
+                      visibleNotifications.map((notif) => {
+                        const isRead = readIds.has(notif.id);
+                        return (
+                          <div
+                            key={notif.id}
+                            onClick={() => {
+                              markAsRead(notif.id);
+                              if (notif.link) {
+                                setNotifsOpen(false);
+                                window.location.href = notif.link;
+                              }
+                            }}
+                            className={`px-4 py-3 flex items-start gap-3 cursor-pointer transition-colors ${
+                              isRead
+                                ? "bg-[#121216] opacity-75 hover:opacity-100 hover:bg-[#18181F]"
+                                : "bg-[#181820] hover:bg-[#1E1E28]"
+                            }`}
+                          >
+                            <div className="h-7 w-7 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center flex-shrink-0 mt-0.5">
+                              {getNotificationIcon(notif.type)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-1">
+                                <p className="text-xs font-bold text-white truncate">
+                                  {notif.title}
+                                </p>
+                                <span className="text-[9px] text-white/40 flex-shrink-0">
+                                  {formatTimeAgo(notif.createdAt)}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-white/70 mt-0.5 leading-snug line-clamp-2">
+                                {notif.message}
+                              </p>
+                            </div>
+                            {!isRead && (
+                              <span
+                                className="h-2 w-2 rounded-full flex-shrink-0 mt-1.5 shadow-[0_0_8px_rgba(198,255,61,0.6)]"
+                                style={{ backgroundColor: accentColor }}
+                              />
+                            )}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  {/* Footer */}
+                  <div className="px-4 py-2.5 border-t border-white/[0.06] text-center bg-white/[0.01]">
+                    <Link
+                      href="/dashboard/notifications"
+                      onClick={() => setNotifsOpen(false)}
+                      className="text-[11px] font-bold text-[#C6FF3D] hover:underline"
+                    >
+                      Manage Email & System Preferences →
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Results */}
-            <div className="max-h-80 overflow-y-auto py-2">
-              {filteredItems.length === 0 ? (
-                <div className="px-5 py-8 text-center">
-                  <p className="text-sm text-white/30">No results found</p>
-                </div>
-              ) : (
-                filteredItems.map((item) => {
-                  const Icon = item.icon;
-                  const section = dashboardNavSections.find((s) =>
-                    s.items.some((i) => i.href === item.href)
-                  );
-                  return (
-                    <button
-                      key={item.href}
-                      onClick={() => handleSearchSelect(item.href)}
-                      className="flex items-center gap-3 w-full px-5 py-2.5 text-left hover:bg-white/[0.04] transition-colors group"
+            {/* User Avatar Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => {
+                  setDropdownOpen(!dropdownOpen);
+                  setNotifsOpen(false);
+                }}
+                className="flex items-center gap-2 h-9 pl-1 pr-2 rounded-xl border border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
+              >
+                <div
+                  className="relative h-6 w-6 rounded-full overflow-hidden border border-white/[0.1] flex-shrink-0"
+                  style={{ backgroundColor: "#16161A" }}
+                >
+                  {profile.avatar_url ? (
+                    <Image
+                      src={profile.avatar_url}
+                      alt={profile.full_name || profile.username || ""}
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  ) : (
+                    <span
+                      className="absolute inset-0 flex items-center justify-center text-[8px] font-black"
+                      style={{ color: accentColor }}
                     >
-                      <div className="h-7 w-7 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center flex-shrink-0 group-hover:border-white/[0.12] transition-colors">
-                        <Icon className="h-3.5 w-3.5 text-white/40" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-white/80 group-hover:text-white transition-colors">
-                          {item.title}
-                        </p>
-                        <p className="text-[11px] text-white/25 truncate">
-                          {section?.label}
-                        </p>
-                      </div>
-                      <ChevronRight className="h-3 w-3 text-white/15 group-hover:text-white/30 transition-colors flex-shrink-0" />
-                    </button>
-                  );
-                })
+                      {initials}
+                    </span>
+                  )}
+                </div>
+                <span className="hidden lg:block text-xs font-medium text-white/70 max-w-[100px] truncate">
+                  {profile.full_name || profile.username || "Athlete"}
+                </span>
+              </button>
+
+              {/* Dropdown */}
+              {dropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-white/[0.14] bg-[#121216] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9)] py-1.5 animate-in fade-in slide-in-from-top-2 duration-150 z-50 overflow-hidden">
+                  {/* User info header */}
+                  <div className="px-4 py-3 border-b border-white/[0.06]">
+                    <p className="text-sm font-semibold text-white truncate">
+                      {profile.full_name || profile.username || "Athlete"}
+                    </p>
+                    <p className="text-xs text-white/30 truncate mt-0.5">{email}</p>
+                  </div>
+
+                  {/* Quick actions */}
+                  <div className="py-1.5">
+                    <Link
+                      href="/dashboard/profile"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2 text-xs text-white/60 hover:text-white hover:bg-white/[0.04] transition-colors"
+                    >
+                      <User className="h-3.5 w-3.5" />
+                      Edit Profile
+                    </Link>
+                    <Link
+                      href="/dashboard/settings"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2 text-xs text-white/60 hover:text-white hover:bg-white/[0.04] transition-colors"
+                    >
+                      <Settings className="h-3.5 w-3.5" />
+                      Settings
+                    </Link>
+                    <Link
+                      href="/dashboard/billing"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2 text-xs text-white/60 hover:text-white hover:bg-white/[0.04] transition-colors"
+                    >
+                      <CreditCard className="h-3.5 w-3.5" />
+                      Billing
+                    </Link>
+                    <Link
+                      href="/dashboard/notifications"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2 text-xs text-white/60 hover:text-white hover:bg-white/[0.04] transition-colors"
+                    >
+                      <Bell className="h-3.5 w-3.5" />
+                      Notifications Preferences
+                    </Link>
+                  </div>
+
+                  {/* Sign out */}
+                  <div className="border-t border-white/[0.06] pt-1.5">
+                    <form action={signOut}>
+                      <button
+                        type="submit"
+                        className="flex items-center gap-2.5 w-full px-4 py-2 text-xs text-white/60 hover:text-red-400 hover:bg-white/[0.04] transition-colors"
+                      >
+                        <LogOut className="h-3.5 w-3.5" />
+                        Sign Out
+                      </button>
+                    </form>
+                  </div>
+                </div>
               )}
             </div>
           </div>
         </div>
-      )}
+      </header>
 
       {/* Mobile Drawer Navigation */}
       {mobileMenuOpen && (

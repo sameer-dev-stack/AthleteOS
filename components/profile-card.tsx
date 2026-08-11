@@ -1748,18 +1748,22 @@ export function ProfileCard({
               animated={true}
               colors={[accent, `${accent}cc`, `${accent}88`]}
               className="w-full h-full"
+              style={{
+                boxShadow: themeObj.borderGlow || `0 0 25px ${accent}33`,
+              }}
             >
               <ReflectiveCard
-              blurStrength={11}
-              metalness={0.88}
-              roughness={0.38}
-              displacementStrength={22}
-              noiseScale={1.1}
-              specularConstant={1.4}
-              grayscale={0.92}
-              glassDistortion={8}
-              overlayColor="rgba(0, 0, 0, 0.20)"
-              radius={20}
+                backgroundGradient={themeObj.backgroundGradient}
+                blurStrength={11}
+                metalness={0.88}
+                roughness={0.38}
+                displacementStrength={22}
+                noiseScale={1.1}
+                specularConstant={1.4}
+                grayscale={0.92}
+                glassDistortion={8}
+                overlayColor={themeObj.isPro ? "rgba(0, 0, 0, 0.35)" : "rgba(0, 0, 0, 0.20)"}
+                radius={20}
               filterId="rc-filter-front"
               streamRef={webcamStreamRef}
               style={{
@@ -1851,18 +1855,22 @@ export function ProfileCard({
               animated={true}
               colors={[accent, `${accent}cc`, `${accent}88`]}
               className="w-full h-full"
+              style={{
+                boxShadow: themeObj.borderGlow || `0 0 25px ${accent}33`,
+              }}
             >
               <ReflectiveCard
-              blurStrength={11}
-              metalness={0.88}
-              roughness={0.38}
-              displacementStrength={22}
-              noiseScale={1.1}
-              specularConstant={1.4}
-              grayscale={0.92}
-              glassDistortion={8}
-              overlayColor="rgba(0, 0, 0, 0.20)"
-              radius={20}
+                backgroundGradient={themeObj.backgroundGradient}
+                blurStrength={11}
+                metalness={0.88}
+                roughness={0.38}
+                displacementStrength={22}
+                noiseScale={1.1}
+                specularConstant={1.4}
+                grayscale={0.92}
+                glassDistortion={8}
+                overlayColor={themeObj.isPro ? "rgba(0, 0, 0, 0.35)" : "rgba(0, 0, 0, 0.20)"}
+                radius={20}
               filterId="rc-filter-back"
               streamRef={webcamStreamRef}
               style={{

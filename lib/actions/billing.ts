@@ -8,6 +8,7 @@ import {
   createCustomerPortalSession,
   getSubscriptionByUserId,
 } from "@/lib/stripe-billing";
+import { getLaunchPromoStats, PROMO_TRIAL_DAYS } from "@/lib/launch-promo";
 
 export type BillingResult = {
   ok: boolean;
@@ -41,10 +42,11 @@ export type SubscriptionStatus = {
 
 const CheckoutSchema = z.object({
   tier: z.enum(["pro"]),
+  interval: z.enum(["monthly", "semi_annual", "annual"]).optional().default("annual"),
 });
 
 export async function createCheckoutSessionAction(
-  formData: { tier: string }
+  formData: { tier: string; interval?: "monthly" | "semi_annual" | "annual" }
 ): Promise<BillingResult> {
   try {
     const parsed = CheckoutSchema.safeParse(formData);
@@ -62,6 +64,7 @@ export async function createCheckoutSessionAction(
       userId: user.id,
       email: user.email || "",
       tier: parsed.data.tier,
+      interval: parsed.data.interval,
     });
 
     if (error) return { ok: false, error };
@@ -71,6 +74,47 @@ export async function createCheckoutSessionAction(
   } catch (err) {
     console.error("[billing] createCheckoutSessionAction error:", err);
     return { ok: false, error: "Failed to create checkout session" };
+  }
+}
+
+export async function claimLaunchPromoTrialAction(): Promise<BillingResult> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { ok: false, error: "Not authenticated" };
+
+    const promoStats = await getLaunchPromoStats();
+    if (!promoStats.isAvailable) {
+      return { ok: false, error: "Launch promotion has ended (all 500 slots claimed)." };
+    }
+
+    // Check if user has already claimed the promo
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("has_claimed_promo_trial, plan")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.has_claimed_promo_trial) {
+      return { ok: false, error: "You have already claimed your 3-Month Pro Trial." };
+    }
+
+    const { url, error } = await createCheckoutSession({
+      userId: user.id,
+      email: user.email || "",
+      tier: "pro",
+      trialDays: PROMO_TRIAL_DAYS,
+    });
+
+    if (error) return { ok: false, error };
+    if (!url) return { ok: false, error: "Failed to create trial checkout session" };
+
+    return { ok: true, url };
+  } catch (err) {
+    console.error("[billing] claimLaunchPromoTrialAction error:", err);
+    return { ok: false, error: "Failed to initiate 3-Month Pro Trial" };
   }
 }
 

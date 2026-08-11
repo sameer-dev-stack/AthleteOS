@@ -70,11 +70,11 @@ export async function getBalanceSummary(): Promise<{
 
   const { data: profile } = await admin
     .from("profiles")
-    .select("payout_method")
+    .select("payout_method, payout_settings")
     .eq("id", user.id)
     .single();
 
-  const hasPayoutMethod = !!profile?.payout_method;
+  const hasPayoutMethod = profile?.payout_method === "paypal" && !!profile?.payout_settings?.email;
 
   const { earned, withdrawn, pending } = await getEarnedAndWithdrawn(admin, user.id);
   const available = Math.max(0, earned - withdrawn - pending);
@@ -157,8 +157,8 @@ export async function createPayout(): Promise<{
     .eq("id", user.id)
     .single();
 
-  if (!profile?.payout_method) {
-    return { ok: false, error: "Set up a payout method first" };
+  if (profile?.payout_method !== "paypal" || !profile?.payout_settings?.email) {
+    return { ok: false, error: "Tip withdrawals are processed exclusively via PayPal. Connect your PayPal account to request a payout." };
   }
 
   // Prevent double-withdrawal: block if a withdrawal was requested recently
