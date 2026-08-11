@@ -3,6 +3,23 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-11 — Removed NIL Deal Checker, Social Network Setup & Deal Package Builder
+
+### What changed
+- **`app/dashboard/nil/client.tsx`**:
+  - Removed `NilDealChecker`, `SocialAccountsEditor`, and `NilPackageCalculator` components as requested.
+  - Simplified NIL Value Engine dashboard layout to focus strictly on the top metrics bar, 3 core assessment cards (Score, Rates, AI Breakdown), and historical trend chart.
+
+### Why
+Streamlines the NIL Value Engine dashboard by removing unfinished or requested components.
+
+### Files touched
+- `app/dashboard/nil/client.tsx`
+
+### Commit
+`b027096`
+
+
 ## 2026-08-11 — NIL Value Engine Honesty & Transparency Audit
 
 ### What changed
