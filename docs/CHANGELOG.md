@@ -3,6 +3,23 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-13 — Unlocked NIL Value Navigation Sidebar Tab
+
+### What changed
+- **`config/dashboard-nav.ts`**:
+  - Removed `comingSoon: true` flag from the `NIL Value` navigation item.
+  - The NIL Value tab in the left dashboard navigation sidebar is now fully unlocked and clickable for all users.
+
+### Why
+Gives athletes direct navigation access to the NIL Value Engine from the dashboard sidebar.
+
+### Files touched
+- `config/dashboard-nav.ts`
+
+### Commit
+`e2b53f6`
+
+
 ## 2026-08-13 — NIL Value Engine V1 Launch (Pro Gating, Editable Rates, 3-in-1 Pitch Generator)
 
 ### What changed
