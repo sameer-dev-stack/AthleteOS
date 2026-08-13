@@ -52,6 +52,14 @@ export default function SignInPage() {
   useEffect(() => {
     if (state.ok) {
       let cancelled = false;
+      // ponytail: honor a deep-link redirect set by middleware (e.g. a guarded
+      // route visited while logged out), but only for internal same-origin
+      // paths — blocks open-redirect via ?redirect=//evil.com or other schemes.
+      const redirectParam = new URLSearchParams(window.location.search).get("redirect");
+      const safeRedirect =
+        redirectParam && redirectParam.startsWith("/") && !redirectParam.startsWith("//")
+          ? redirectParam
+          : null;
       const checkProfile = async () => {
         try {
           const res = await fetch("/api/auth/profile-status");
@@ -59,25 +67,25 @@ export default function SignInPage() {
           if (cancelled) return;
 
           if (data.isAdmin) {
-            router.push("/admin");
+            router.push(safeRedirect ?? "/admin");
           } else if (!data.onboardingCompleted) {
-            router.push("/onboarding");
+            router.push(safeRedirect ?? "/onboarding");
           } else {
-            router.push("/dashboard");
+            router.push(safeRedirect ?? "/dashboard");
           }
         } catch {
           if (cancelled) return;
-          router.push("/dashboard");
+          router.push(safeRedirect ?? "/dashboard");
         }
       };
       checkProfile();
       return () => {
         cancelled = true;
       };
-    } else if (state.message) {
-      queueMicrotask(() => setProcessing(false));
+    } else {
+      setProcessing(false);
     }
-  }, [state.ok, state.message, router]);
+  }, [state, router]);
 
   return (
     <AuthLayout
@@ -195,22 +203,29 @@ export default function SignInPage() {
         </div>
 
         {/* Password Field */}
-        <div className="space-y-1">
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor="password"
+              className="block text-xs font-medium text-ink-muted tracking-wide uppercase"
+            >
+              Password
+            </label>
+            <Link
+              href="/auth/forgot-password"
+              className="text-xs font-medium text-accent hover:text-accent-soft transition-colors"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <PasswordField
             id="password"
             name="password"
             autoComplete="current-password"
             placeholder="At least 6 characters"
+            label=""
           />
-          <div className="flex items-center justify-between pt-1">
-            <p className="text-[10px] text-ink-dim">{securedNote()}</p>
-            <Link
-              href="/auth/forgot-password"
-              className="text-xs text-accent/80 hover:text-accent hover:underline transition-colors"
-            >
-              Forgot password?
-            </Link>
-          </div>
+          <p className="text-[11px] text-ink-dim pt-0.5">{securedNote()}</p>
         </div>
 
         {/* Submit Button */}
@@ -221,7 +236,7 @@ export default function SignInPage() {
       <div className="mt-6 text-center text-xs text-ink-dim">
         Don&apos;t have an account?{" "}
         <Link href="/auth/sign-up" className="text-accent font-medium hover:underline ml-1">
-          Create free card
+          Create free account
         </Link>
       </div>
     </AuthLayout>
