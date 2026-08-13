@@ -26,7 +26,6 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { checkUsername, updateProfile } from "@/lib/actions/profile";
-import { assignFirst500ProBenefit } from "@/lib/actions/first-500-pro";
 import { sendWelcomeEmail } from "@/lib/actions/emails";
 import { recordReferral } from "@/lib/actions/referrals";
 import confetti from "canvas-confetti";
@@ -431,7 +430,6 @@ export default function OnboardingPage() {
       });
       if (result.ok) {
         trackFunnel("onboarding_complete");
-        assignFirst500ProBenefit().catch(() => {});
         if (referredBy) {
           recordReferral(referredBy).then((r) => {
             if (!r.ok) console.warn("[referral] recordReferral failed:", r.error);
