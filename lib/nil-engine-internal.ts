@@ -154,29 +154,44 @@ export async function computeAndSaveMetricsInternal(
     const scoreResult = computeNilScoreAndRates(metricsInput, profileInput);
 
     // Write/update nil_value_metrics table
-    const { data, error } = await admin
+    const payload: Record<string, any> = {
+      profile_id: profileId,
+      period_start: start,
+      period_end: end,
+      card_views: viewsNum,
+      link_clicks: clicksNum,
+      click_through_rate: clickThroughRate,
+      tips_amount: tipsAmount,
+      tips_count: tipsCount,
+      followers_total: followersTotal,
+      engagement_rate: engagementRate,
+      follower_delta_percent: followerDelta,
+      engagement_delta_percent: engagementDelta,
+      nil_score: scoreResult.nilScore,
+      computed_at: new Date().toISOString(),
+    };
+
+    let { data, error } = await admin
       .from("nil_value_metrics")
-      .upsert(
-        {
-          profile_id: profileId,
-          period_start: start,
-          period_end: end,
-          card_views: viewsNum,
-          link_clicks: clicksNum,
-          click_through_rate: clickThroughRate,
-          tips_amount: tipsAmount,
-          tips_count: tipsCount,
-          followers_total: followersTotal,
-          engagement_rate: engagementRate,
-          follower_delta_percent: followerDelta,
-          engagement_delta_percent: engagementDelta,
-          nil_score: scoreResult.nilScore,
-          computed_at: new Date().toISOString(),
-        },
-        { onConflict: "profile_id, period_start, period_end" }
-      )
+      .upsert(payload, { onConflict: "profile_id, period_start, period_end" })
       .select()
       .single();
+
+    // Fallback if remote database lacks delta columns
+    if (error && (error.message.includes("engagement_delta_percent") || error.message.includes("follower_delta_percent") || error.message.includes("schema cache"))) {
+      console.warn("[nil-engine-internal] Retrying upsert without delta columns due to schema error:", error.message);
+      delete payload.follower_delta_percent;
+      delete payload.engagement_delta_percent;
+
+      const fallbackRes = await admin
+        .from("nil_value_metrics")
+        .upsert(payload, { onConflict: "profile_id, period_start, period_end" })
+        .select()
+        .single();
+
+      data = fallbackRes.data;
+      error = fallbackRes.error;
+    }
 
     if (error) {
       console.error("[nil-engine-internal] Error upserting nil_value_metrics:", error.message);
@@ -195,8 +210,7 @@ export async function computeAndSaveMetricsInternal(
       });
 
     if (historyErr) {
-      console.error("[nil-engine-internal] Error inserting nil_score_history:", historyErr.message);
-      return { ok: false, error: historyErr.message };
+      console.warn("[nil-engine-internal] Non-fatal history insert warning:", historyErr.message);
     }
 
     revalidatePath("/dashboard/nil");
