@@ -3,6 +3,34 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-13 — NIL Value Engine V1 Launch (Pro Gating, Editable Rates, 3-in-1 Pitch Generator)
+
+### What changed
+- **`components/dashboard/nil-pro-preview.tsx`**:
+  - Built high-converting preview card for Free Plan athletes displaying Pro feature highlights (NIL Score, Rate Card, Sponsor Pitch Generator) and upgrade CTA to `/dashboard/billing`.
+- **`components/dashboard/nil-pitch-generator.tsx`**:
+  - Created 3-in-1 Sponsor Pitch Proposal Generator with 3 copyable outreach templates:
+    1. Instagram / TikTok DM Pitch
+    2. Formal Email Proposal
+    3. 48-Hour Follow-Up Nudge
+- **`components/dashboard/nil-rate-table.tsx`**:
+  - Added inline target rate editing so Pro athletes can customize and save custom target rates for Posts, Reels, and Appearances.
+- **`app/dashboard/nil/client.tsx`**:
+  - Wired Pro plan access control gate (`plan === "pro"` or `"elite"`). Free tier users see the `NilProPreviewCard`, while Pro users get full access to the V1 suite.
+
+### Why
+Launches a simple, high-utility, Pro-exclusive NIL Value Engine focused on helping student-athletes quote prices and pitch brand sponsors.
+
+### Files touched
+- `components/dashboard/nil-pro-preview.tsx`
+- `components/dashboard/nil-pitch-generator.tsx`
+- `components/dashboard/nil-rate-table.tsx`
+- `app/dashboard/nil/client.tsx`
+
+### Commit
+`7b925fc`
+
+
 ## 2026-08-11 — Removed NIL Deal Checker, Social Network Setup & Deal Package Builder
 
 ### What changed
