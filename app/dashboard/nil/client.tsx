@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { TrendingUp, RefreshCw, AlertCircle, Lock } from "lucide-react";
 import { Profile } from "@/lib/actions/profile";
-import { NILMetricsRow, runNilValueEngine, getNilMetrics } from "@/lib/actions/nil-engine";
+import { NILMetricsRow, runNilValueEngine } from "@/lib/actions/nil-engine";
 import { getNilValueBreakdown, type NilBreakdown } from "@/lib/actions/athlete-knowledge";
 import { getSocialAccounts, SocialAccount } from "@/lib/actions/social-accounts";
 import { computeNilScoreAndRates } from "@/lib/nil-score";
@@ -12,10 +12,9 @@ import { NilRateTable } from "@/components/dashboard/nil-rate-table";
 import { NilMetricsStrip } from "@/components/dashboard/nil-metrics-strip";
 import { NilAiBreakdown } from "@/components/dashboard/nil-ai-breakdown";
 import { NilScoreHistory } from "@/components/dashboard/nil-score-history";
+import { NilPitchGenerator } from "@/components/dashboard/nil-pitch-generator";
+import { NilProPreviewCard } from "@/components/dashboard/nil-pro-preview";
 
-// Wraps the Suggested NIL Rates table. While accounts sync (PENDING) it shows a
-// glassmorphism "tuning" blur; when zero verified channels exist it shows a
-// locked preview with a padlock + unlock copy. Both clear once VERIFIED.
 function RateTableBlock({
   rates,
   plan,
@@ -87,8 +86,11 @@ export function NilDashboardClient({
   const [knowledgeBreakdown, setKnowledgeBreakdown] = useState<NilBreakdown | null>(null);
   const [breakdownLoading, setBreakdownLoading] = useState(true);
 
-  // Load personalized knowledge breakdown on mount (non-blocking)
+  const isPro = quotaState.plan === "pro" || quotaState.plan === "elite";
+
+  // Load personalized knowledge breakdown on mount for Pro users
   useEffect(() => {
+    if (!isPro) return;
     let cancelled = false;
     queueMicrotask(() => setBreakdownLoading(true));
     getNilValueBreakdown(profile.id)
@@ -99,7 +101,7 @@ export function NilDashboardClient({
       .catch(() => {})
       .finally(() => { if (!cancelled) setBreakdownLoading(false); });
     return () => { cancelled = true; };
-  }, [profile.id]);
+  }, [profile.id, isPro]);
 
   const scoreDetails = metrics
     ? computeNilScoreAndRates(
@@ -149,7 +151,6 @@ export function NilDashboardClient({
           remaining: Math.max(0, res.data.quotaLimit - res.data.quotaUsed),
           plan: res.data.plan as any,
         });
-        // Refresh breakdown after recalculation
         setBreakdownLoading(true);
         let breakdownCancelled = false;
         getNilValueBreakdown(profile.id)
@@ -166,25 +167,7 @@ export function NilDashboardClient({
     }
   };
 
-  const handleSocialUpdate = async () => {
-    try {
-      const res = await getSocialAccounts();
-      if (res.ok && res.data) {
-        setSocialAccounts(res.data);
-      }
-    } catch (e) {
-      console.error("Error updating social accounts list:", e);
-    }
-  };
-
-  // While any social account is mid-sync, blur the valuation table (cleared automatically on VERIFIED)
   const anyPending = socialAccounts.some((a) => a.verification_status === "PENDING");
-
-  // True once at least one verified (connected) social channel exists
-  const hasVerified = socialAccounts.some(
-    (a) => a.verification_status === "VERIFIED"
-  );
-
   const followersTotal = metrics?.followers_total || socialAccounts.reduce((acc, a) => acc + (a.followers || 0), 0);
   const hasFollowerData = followersTotal > 0;
   const hasRealData = hasFollowerData || (metrics?.card_views || 0) > 0;
@@ -199,18 +182,20 @@ export function NilDashboardClient({
             <h1 className="text-xl font-black text-white tracking-tight">NIL VALUE ENGINE</h1>
           </div>
           <p className="text-xs text-white/50 mt-1">
-            Analyze profile engagement, calculate market value score, and get automated contract guidance.
+            Calculate your market score, manage custom rate cards, and generate brand pitch proposals.
           </p>
         </div>
 
-        <button
-          onClick={handleRefresh}
-          disabled={loading}
-          className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-black text-black hover:bg-white/90 transition-all disabled:opacity-50"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-          {loading ? "Calculating..." : "RECALCULATE NIL SCORE"}
-        </button>
+        {isPro && (
+          <button
+            onClick={handleRefresh}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-black text-black hover:bg-white/90 transition-all disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+            {loading ? "Calculating..." : "RECALCULATE NIL SCORE"}
+          </button>
+        )}
       </div>
 
       {error && (
@@ -223,78 +208,75 @@ export function NilDashboardClient({
         </div>
       )}
 
-      {/* Optional prompt banner for users without connected social profiles */}
-      {!hasVerified && (
-        <div className="rounded-2xl border border-accent/20 bg-accent/[0.03] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-accent/15 p-2 text-accent">
-              <TrendingUp className="h-4 w-4" />
+      {/* Free Plan Upgrade Gate vs Pro Plan Full Suite */}
+      {!isPro ? (
+        <NilProPreviewCard themeAccent={themeAccent} />
+      ) : (
+        <div className="space-y-6">
+          {/* Analytics Stats bar */}
+          <NilMetricsStrip
+            cardViews={metrics?.card_views || 0}
+            linkClicks={metrics?.link_clicks || 0}
+            clickThroughRate={metrics?.click_through_rate || 0}
+            tipsAmount={metrics?.tips_amount || 0}
+            followersTotal={followersTotal}
+            themeAccent={themeAccent}
+            followerDelta={metrics?.follower_delta_percent}
+            engagementDelta={metrics?.engagement_delta_percent}
+            isPro={true}
+          />
+
+          {/* Core valuation layout — strict 3 columns */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Column 1: Score Circle */}
+            <div className="space-y-6">
+              <NilScoreCard
+                score={scoreDetails.nilScore}
+                label={scoreDetails.label}
+                themeAccent={themeAccent}
+                onRefresh={handleRefresh}
+                loading={loading}
+                hasRealData={hasRealData}
+              />
             </div>
-            <div>
-              <p className="text-xs font-bold text-white">Boost Your Verified NIL Market Valuation</p>
-              <p className="text-[11px] text-white/50 mt-0.5">
-                Connect your Instagram or TikTok account below to verify your reach and increase your score accuracy.
-              </p>
+
+            {/* Column 2: Editable Rates */}
+            <div className="space-y-6">
+              <RateTableBlock
+                rates={scoreDetails.rates}
+                plan={quotaState.plan}
+                themeAccent={themeAccent}
+                blurred={anyPending}
+                locked={false}
+                hasFollowerData={hasFollowerData}
+              />
+            </div>
+
+            {/* Column 3: AI Market Breakdown */}
+            <div className="space-y-6">
+              <NilAiBreakdown
+                breakdown={knowledgeBreakdown}
+                quotaUsed={quotaState.used}
+                quotaLimit={quotaState.limit}
+                plan={quotaState.plan}
+                themeAccent={themeAccent}
+                loading={breakdownLoading}
+              />
             </div>
           </div>
+
+          {/* Sponsor Pitch Generator — Pro Tool */}
+          <NilPitchGenerator
+            themeAccent={themeAccent}
+            athleteName={profile.full_name || "Athlete"}
+            sport={profile.sport}
+            school={profile.school}
+          />
+
+          {/* NIL Score Trend — Full Width */}
+          <NilScoreHistory profileId={profile.id} themeAccent={themeAccent} />
         </div>
       )}
-
-      <div className="space-y-6">
-        {/* Analytics Stats bar */}
-        <NilMetricsStrip
-          cardViews={metrics?.card_views || 0}
-          linkClicks={metrics?.link_clicks || 0}
-          clickThroughRate={metrics?.click_through_rate || 0}
-          tipsAmount={metrics?.tips_amount || 0}
-          followersTotal={followersTotal}
-          themeAccent={themeAccent}
-          followerDelta={metrics?.follower_delta_percent}
-          engagementDelta={metrics?.engagement_delta_percent}
-        />
-
-        {/* Core valuation layout — strict 3 columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Column 1: Score Circle */}
-          <div className="space-y-6">
-            <NilScoreCard
-              score={scoreDetails.nilScore}
-              label={scoreDetails.label}
-              themeAccent={themeAccent}
-              onRefresh={handleRefresh}
-              loading={loading}
-              hasRealData={hasRealData}
-            />
-          </div>
-
-          {/* Column 2: Rates */}
-          <div className="space-y-6">
-            <RateTableBlock
-              rates={scoreDetails.rates}
-              plan={quotaState.plan}
-              themeAccent={themeAccent}
-              blurred={anyPending}
-              locked={false}
-              hasFollowerData={hasFollowerData}
-            />
-          </div>
-
-          {/* Column 3: AI Market Breakdown */}
-          <div className="space-y-6">
-            <NilAiBreakdown
-              breakdown={knowledgeBreakdown}
-              quotaUsed={quotaState.used}
-              quotaLimit={quotaState.limit}
-              plan={quotaState.plan}
-              themeAccent={themeAccent}
-              loading={breakdownLoading}
-            />
-          </div>
-        </div>
-
-        {/* NIL Score Trend — Full Width */}
-        <NilScoreHistory profileId={profile.id} themeAccent={themeAccent} />
-      </div>
     </div>
   );
 }

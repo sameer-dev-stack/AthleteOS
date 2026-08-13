@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { DollarSign, ShieldAlert, ArrowUpRight } from "lucide-react";
+import { DollarSign, ShieldAlert, ArrowUpRight, Edit2, Check } from "lucide-react";
 import { RateRange } from "@/lib/nil-score";
 
 type Props = {
@@ -18,17 +19,26 @@ type Props = {
 export function NilRateTable({ rates, plan, themeAccent, hasFollowerData = true }: Props) {
   const isFree = plan === "free";
 
+  const [postTarget, setPostTarget] = useState(rates.post.target);
+  const [appearanceTarget, setAppearanceTarget] = useState(rates.appearance.target);
+  const [campaignTarget, setCampaignTarget] = useState(rates.campaign.target);
+  const [editingRow, setEditingRow] = useState<"post" | "appearance" | "campaign" | null>(null);
+
   return (
     <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-6 flex flex-col justify-between">
       <div>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <DollarSign className="h-4.5 w-4.5" style={{ color: themeAccent }} />
-            <h3 className="text-sm font-bold text-white/90">Suggested NIL Rates</h3>
+            <h3 className="text-sm font-bold text-white/90">Editable NIL Rate Card</h3>
           </div>
-          {isFree && hasFollowerData && (
+          {isFree && hasFollowerData ? (
             <span className="text-[10px] font-black uppercase tracking-wider bg-accent/10 text-accent border border-accent/25 px-2 py-0.5 rounded-md" style={{ color: themeAccent, borderColor: `${themeAccent}30`, backgroundColor: `${themeAccent}0a` }}>
               Free Tier
+            </span>
+          ) : (
+            <span className="text-[10px] font-bold text-white/40 italic">
+              Click rates to customize
             </span>
           )}
         </div>
@@ -55,32 +65,101 @@ export function NilRateTable({ rates, plan, themeAccent, hasFollowerData = true 
                 <tr className="border-b border-white/[0.06] bg-white/[0.01]">
                   <th className="p-3 text-[10px] font-bold text-white/40 uppercase tracking-wider">Deliverable</th>
                   <th className="p-3 text-[10px] font-bold text-white/40 uppercase tracking-wider text-right">Floor</th>
-                  <th className="p-3 text-[10px] font-bold text-white/40 uppercase tracking-wider text-right">Target</th>
+                  <th className="p-3 text-[10px] font-bold text-white/40 uppercase tracking-wider text-right">Target Rate</th>
                   <th className="p-3 text-[10px] font-bold text-white/40 uppercase tracking-wider text-right">Ceiling</th>
                 </tr>
               </thead>
               <tbody>
-                {/* Row 1: Posts (Visible to all) */}
+                {/* Row 1: Posts */}
                 <tr className="border-b border-white/[0.04] hover:bg-white/[0.01] transition-colors duration-200">
                   <td className="p-3 text-xs font-semibold text-white/80">Social Media Post</td>
                   <td className="p-3 text-xs font-bold text-white/50 text-right">${rates.post.min}</td>
-                  <td className="p-3 text-xs font-black text-right" style={{ color: themeAccent }}>${rates.post.target}</td>
+                  <td className="p-3 text-xs font-black text-right" style={{ color: themeAccent }}>
+                    {editingRow === "post" ? (
+                      <div className="flex items-center justify-end gap-1">
+                        <span className="text-white">$</span>
+                        <input
+                          type="number"
+                          value={postTarget}
+                          onChange={(e) => setPostTarget(Number(e.target.value))}
+                          className="w-14 rounded bg-white/10 px-1 py-0.5 text-right text-xs font-bold text-white focus:outline-none"
+                        />
+                        <button onClick={() => setEditingRow(null)} className="p-1 text-accent hover:text-white">
+                          <Check className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setEditingRow("post")}
+                        className="inline-flex items-center gap-1 hover:underline"
+                      >
+                        ${postTarget}
+                        <Edit2 className="h-2.5 w-2.5 opacity-50" />
+                      </button>
+                    )}
+                  </td>
                   <td className="p-3 text-xs font-bold text-white/50 text-right">${rates.post.max}</td>
                 </tr>
 
-                {/* Row 2: Appearance (Gated to Pro+) */}
+                {/* Row 2: Appearance */}
                 <tr className={`border-b border-white/[0.04] hover:bg-white/[0.01] transition-all duration-300 ${isFree ? "filter blur-[3px] select-none pointer-events-none opacity-20" : ""}`}>
                   <td className="p-3 text-xs font-semibold text-white/80">In-Person Appearance</td>
                   <td className="p-3 text-xs font-bold text-white/50 text-right">${rates.appearance.min}</td>
-                  <td className="p-3 text-xs font-black text-right" style={{ color: themeAccent }}>${rates.appearance.target}</td>
+                  <td className="p-3 text-xs font-black text-right" style={{ color: themeAccent }}>
+                    {editingRow === "appearance" ? (
+                      <div className="flex items-center justify-end gap-1">
+                        <span className="text-white">$</span>
+                        <input
+                          type="number"
+                          value={appearanceTarget}
+                          onChange={(e) => setAppearanceTarget(Number(e.target.value))}
+                          className="w-14 rounded bg-white/10 px-1 py-0.5 text-right text-xs font-bold text-white focus:outline-none"
+                        />
+                        <button onClick={() => setEditingRow(null)} className="p-1 text-accent hover:text-white">
+                          <Check className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setEditingRow("appearance")}
+                        className="inline-flex items-center gap-1 hover:underline"
+                      >
+                        ${appearanceTarget}
+                        <Edit2 className="h-2.5 w-2.5 opacity-50" />
+                      </button>
+                    )}
+                  </td>
                   <td className="p-3 text-xs font-bold text-white/50 text-right">${rates.appearance.max}</td>
                 </tr>
 
-                {/* Row 3: Campaign (Gated to Pro+) */}
+                {/* Row 3: Campaign */}
                 <tr className={`hover:bg-white/[0.01] transition-all duration-300 ${isFree ? "filter blur-[3px] select-none pointer-events-none opacity-20" : ""}`}>
                   <td className="p-3 text-xs font-semibold text-white/80">Monthly Campaign</td>
                   <td className="p-3 text-xs font-bold text-white/50 text-right">${rates.campaign.min}</td>
-                  <td className="p-3 text-xs font-black text-right" style={{ color: themeAccent }}>${rates.campaign.target}</td>
+                  <td className="p-3 text-xs font-black text-right" style={{ color: themeAccent }}>
+                    {editingRow === "campaign" ? (
+                      <div className="flex items-center justify-end gap-1">
+                        <span className="text-white">$</span>
+                        <input
+                          type="number"
+                          value={campaignTarget}
+                          onChange={(e) => setCampaignTarget(Number(e.target.value))}
+                          className="w-14 rounded bg-white/10 px-1 py-0.5 text-right text-xs font-bold text-white focus:outline-none"
+                        />
+                        <button onClick={() => setEditingRow(null)} className="p-1 text-accent hover:text-white">
+                          <Check className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setEditingRow("campaign")}
+                        className="inline-flex items-center gap-1 hover:underline"
+                      >
+                        ${campaignTarget}
+                        <Edit2 className="h-2.5 w-2.5 opacity-50" />
+                      </button>
+                    )}
+                  </td>
                   <td className="p-3 text-xs font-bold text-white/50 text-right">${rates.campaign.max}</td>
                 </tr>
               </tbody>
@@ -107,7 +186,7 @@ export function NilRateTable({ rates, plan, themeAccent, hasFollowerData = true 
       
       {hasFollowerData && (
         <p className="text-[10px] text-white/30 italic leading-snug mt-4">
-          Estimated using a CPM baseline formula adjusted for your audience size and engagement.
+          Rates calculated from standard CPM advertising benchmarks. Click any target rate to customize.
         </p>
       )}
     </div>
