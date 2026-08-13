@@ -374,80 +374,93 @@ export default function AnalyticsOverview() {
 
       {/* SECTION 2: TRAFFIC TIMELINE & ENGAGEMENT METRICS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Vector Timeline Chart */}
-        <div className="bg-[#0A0A0B]/80 backdrop-blur-xl p-6 rounded-2xl border border-white/[0.08] lg:col-span-2 space-y-5 shadow-2xl">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-            <div>
-              <h3 className="text-sm font-black text-white flex items-center gap-2 uppercase tracking-wider">
-                <TrendingUp className="w-4 h-4 text-[#C6FF3D]" /> Profile Traffic & Link Click Trends
-              </h3>
-              <p className="text-xs text-ink-muted mt-0.5">Aggregated daily engagement across public athlete cards.</p>
+        {/* Left Column: Vector Timeline Chart & Top Athlete Profiles */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Vector Timeline Chart Card */}
+          <div className="bg-[#0A0A0B]/80 backdrop-blur-xl p-6 rounded-2xl border border-white/[0.08] space-y-5 shadow-2xl">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+              <div>
+                <h3 className="text-sm font-black text-white flex items-center gap-2 uppercase tracking-wider">
+                  <TrendingUp className="w-4 h-4 text-[#C6FF3D]" /> Profile Traffic & Link Click Trends
+                </h3>
+                <p className="text-xs text-ink-muted mt-0.5">Aggregated daily engagement across public athlete cards.</p>
+              </div>
+              
+              <div className="flex items-center gap-4 text-xs font-bold uppercase font-mono">
+                <span className="flex items-center gap-2 text-[#C6FF3D]">
+                  <span className="w-2.5 h-2.5 bg-[#C6FF3D] rounded-sm inline-block shadow-[0_0_8px_rgba(198,255,61,0.5)]" /> Views ({totalViews.toLocaleString()})
+                </span>
+                <span className="flex items-center gap-2 text-sky-400">
+                  <span className="w-2.5 h-2.5 bg-sky-400 rounded-sm inline-block shadow-[0_0_8px_rgba(56,189,248,0.5)]" /> Clicks ({totalClicks.toLocaleString()})
+                </span>
+              </div>
             </div>
-            
-            <div className="flex items-center gap-4 text-xs font-bold uppercase font-mono">
-              <span className="flex items-center gap-2 text-[#C6FF3D]">
-                <span className="w-2.5 h-2.5 bg-[#C6FF3D] rounded-sm inline-block shadow-[0_0_8px_rgba(198,255,61,0.5)]" /> Views ({totalViews.toLocaleString()})
-              </span>
-              <span className="flex items-center gap-2 text-sky-400">
-                <span className="w-2.5 h-2.5 bg-sky-400 rounded-sm inline-block shadow-[0_0_8px_rgba(56,189,248,0.5)]" /> Clicks ({totalClicks.toLocaleString()})
-              </span>
-            </div>
+
+            {loading ? (
+              <div className="h-44 flex flex-col items-center justify-center text-ink-muted font-mono text-xs gap-2">
+                <Loader2 className="w-6 h-6 animate-spin text-[#C6FF3D]" />
+                Syncing master platform telemetry...
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="relative w-full h-44 bg-black/30 rounded-xl p-3 border border-white/[0.04]">
+                  <svg
+                    viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                    className="w-full h-full"
+                    preserveAspectRatio="none"
+                  >
+                    <line x1={padding} y1={padding} x2={chartWidth - padding} y2={padding} stroke="#1F1F24" strokeWidth="1" />
+                    <line x1={padding} y1={chartHeight / 2} x2={chartWidth - padding} y2={chartHeight / 2} stroke="#1F1F24" strokeWidth="1" strokeDasharray="4 4" />
+                    <line x1={padding} y1={chartHeight - padding} x2={chartWidth - padding} y2={chartHeight - padding} stroke="#27272A" strokeWidth="1" />
+
+                    <path d={viewPath} fill="none" stroke="#C6FF3D" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d={clickPath} fill="none" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+
+                    {viewPoints && viewPoints.map((pt, idx) => {
+                      const [x, y] = pt.split(',');
+                      return (
+                        <circle key={`v-${idx}`} cx={x} cy={y} r="3" fill="#0A0A0B" stroke="#C6FF3D" strokeWidth="2" />
+                      );
+                    })}
+                  </svg>
+                </div>
+
+                <div className="flex justify-between px-2 text-[10px] text-ink-dim font-mono uppercase tracking-wider font-bold">
+                  <span>{data.viewsOverTime[0]?.date || 'Start'}</span>
+                  <span>CTR: {clickThroughRate}%</span>
+                  <span>{data.viewsOverTime[data.viewsOverTime.length - 1]?.date || 'Today'}</span>
+                </div>
+              </div>
+            )}
           </div>
 
-          {loading ? (
-            <div className="h-44 flex flex-col items-center justify-center text-ink-muted font-mono text-xs gap-2">
-              <Loader2 className="w-6 h-6 animate-spin text-[#C6FF3D]" />
-              Syncing master platform telemetry...
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="relative w-full h-48 bg-black/30 rounded-xl p-3 border border-white/[0.04]">
-                <svg
-                  viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-                  className="w-full h-full"
-                  preserveAspectRatio="none"
-                >
-                  <line x1={padding} y1={padding} x2={chartWidth - padding} y2={padding} stroke="#1F1F24" strokeWidth="1" />
-                  <line x1={padding} y1={chartHeight / 2} x2={chartWidth - padding} y2={chartHeight / 2} stroke="#1F1F24" strokeWidth="1" strokeDasharray="4 4" />
-                  <line x1={padding} y1={chartHeight - padding} x2={chartWidth - padding} y2={chartHeight - padding} stroke="#27272A" strokeWidth="1" />
-
-                  <path d={viewPath} fill="none" stroke="#C6FF3D" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d={clickPath} fill="none" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-
-                  {viewPoints && viewPoints.map((pt, idx) => {
-                    const [x, y] = pt.split(',');
-                    return (
-                      <circle key={`v-${idx}`} cx={x} cy={y} r="3" fill="#0A0A0B" stroke="#C6FF3D" strokeWidth="2" />
-                    );
-                  })}
-                </svg>
-              </div>
-
-              <div className="flex justify-between px-2 text-[10px] text-ink-dim font-mono uppercase tracking-wider font-bold">
-                <span>{data.viewsOverTime[0]?.date || 'Start'}</span>
-                <span>CTR: {clickThroughRate}%</span>
-                <span>{data.viewsOverTime[data.viewsOverTime.length - 1]?.date || 'Today'}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Integrated Geographic Footprint */}
-          <div className="pt-3 border-t border-white/[0.06] space-y-3">
-            <h4 className="text-xs font-mono font-bold text-ink-muted uppercase tracking-wider flex items-center gap-2">
-              <Globe className="w-4 h-4 text-emerald-400" /> Geographic Footprint (Top Visitor Locations)
-            </h4>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-              {data.topCountries.map((c, idx) => (
-                <div key={idx} className="p-2.5 bg-black/40 rounded-xl border border-white/[0.06] text-center">
-                  <span className="text-xs font-bold text-white font-mono block">{c.country}</span>
-                  <span className="text-[10px] text-emerald-400 font-mono font-bold">{c.count.toLocaleString()} visits</span>
+          {/* Top Performing Athlete Profiles Card */}
+          <div className="bg-[#0A0A0B]/80 backdrop-blur-xl p-6 rounded-2xl border border-white/[0.08] space-y-4 shadow-xl">
+            <h3 className="text-sm font-black text-white flex items-center gap-2 uppercase tracking-wider">
+              <Award className="w-4 h-4 text-[#C6FF3D]" /> Top Performing Athlete Profiles
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {data.topAthletes.map((athlete, idx) => (
+                <div key={idx} className="p-3.5 bg-black/40 rounded-xl border border-white/[0.06] flex items-center justify-between hover:border-[#C6FF3D]/30 transition-all overflow-hidden">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <span className="w-7 h-7 rounded-lg bg-[#C6FF3D]/10 text-[#C6FF3D] border border-[#C6FF3D]/20 flex items-center justify-center font-mono font-black text-xs shrink-0">
+                      #{idx + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <h5 className="text-xs font-bold text-white tracking-tight truncate">{athlete.full_name}</h5>
+                      <p className="text-[10px] text-ink-muted font-mono truncate">@{athlete.username} • {athlete.sport || 'Athlete'}</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-mono font-bold text-[#C6FF3D] shrink-0 ml-2">
+                    {athlete.views.toLocaleString()} views
+                  </span>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Sports Distribution & Referral Channels Side Column */}
+        {/* Right Column: Sports, Channels & Geographic Telemetry */}
         <div className="space-y-6">
           {/* Sports Breakdown */}
           <div className="bg-[#0A0A0B]/80 backdrop-blur-xl p-5 rounded-2xl border border-white/[0.08] space-y-4 shadow-xl">
@@ -489,31 +502,22 @@ export default function AnalyticsOverview() {
               ))}
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* SECTION 3: ATHLETE PERFORMANCE LEADERBOARD */}
-      <div className="bg-[#0A0A0B]/80 backdrop-blur-xl p-6 rounded-2xl border border-white/[0.08] space-y-4 shadow-xl">
-        <h3 className="text-sm font-black text-white flex items-center gap-2 uppercase tracking-wider">
-          <Award className="w-4 h-4 text-[#C6FF3D]" /> Top Performing Athlete Profiles
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {data.topAthletes.map((athlete, idx) => (
-            <div key={idx} className="p-4 bg-black/40 rounded-xl border border-white/[0.06] flex items-center justify-between hover:border-[#C6FF3D]/30 transition-all">
-              <div className="flex items-center gap-3">
-                <span className="w-7 h-7 rounded-lg bg-[#C6FF3D]/10 text-[#C6FF3D] border border-[#C6FF3D]/20 flex items-center justify-center font-mono font-black text-xs">
-                  #{idx + 1}
-                </span>
-                <div>
-                  <h5 className="text-xs font-bold text-white tracking-tight">{athlete.full_name}</h5>
-                  <p className="text-[10px] text-ink-muted font-mono">@{athlete.username} • {athlete.sport || 'Athlete'}</p>
+          {/* Geographic Footprint Card */}
+          <div className="bg-[#0A0A0B]/80 backdrop-blur-xl p-5 rounded-2xl border border-white/[0.08] space-y-3 shadow-xl">
+            <h4 className="text-xs font-mono font-bold text-ink-muted uppercase tracking-wider flex items-center gap-2">
+              <Globe className="w-4 h-4 text-emerald-400" /> Geographic Footprint
+            </h4>
+
+            <div className="space-y-2">
+              {data.topCountries.map((c, idx) => (
+                <div key={idx} className="flex items-center justify-between p-2.5 bg-black/40 rounded-xl border border-white/[0.06]">
+                  <span className="text-xs font-bold text-white font-mono">{c.country}</span>
+                  <span className="text-xs text-emerald-400 font-mono font-bold">{c.count.toLocaleString()} visits</span>
                 </div>
-              </div>
-              <span className="text-xs font-mono font-bold text-[#C6FF3D]">
-                {athlete.views.toLocaleString()} views
-              </span>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </div>
