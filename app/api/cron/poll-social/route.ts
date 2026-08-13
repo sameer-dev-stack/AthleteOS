@@ -12,12 +12,15 @@ function getAdmin() {
 }
 
 // Subscription tier resolving helper
-function resolvePlan(plan: string | null, extendedUntil: string | null, proExpiresAt?: string | null): "free" | "pro" | "elite" {
+function resolvePlan(plan: string | null, extendedUntil: string | null, proExpiresAt?: string | null, stripeSubscriptionId?: string | null): "free" | "pro" | "elite" {
   if (extendedUntil && new Date(extendedUntil) > new Date()) {
     return "pro";
   }
   const p = (plan || "").toLowerCase();
   if (p === "pro" || p === "elite") {
+    // Paid subscriber — always Pro
+    if (stripeSubscriptionId) return p as "pro" | "elite";
+    // Promo grant — check if expired
     if (proExpiresAt && new Date(proExpiresAt) < new Date()) return "free";
     return p as "pro" | "elite";
   }
@@ -62,6 +65,7 @@ export async function GET(req: NextRequest) {
           plan,
           extended_pro_until,
           pro_expires_at,
+          stripe_subscription_id,
           onboarding_completed,
           suspended
         )
@@ -83,7 +87,7 @@ export async function GET(req: NextRequest) {
         return false;
       }
 
-      const tier = resolvePlan(profile.plan, profile.extended_pro_until, profile.pro_expires_at);
+      const tier = resolvePlan(profile.plan, profile.extended_pro_until, profile.pro_expires_at, profile.stripe_subscription_id);
       const lastScrapedStr = account.last_scraped_at || account.updated_at;
       const lastScrapedTime = lastScrapedStr ? new Date(lastScrapedStr).getTime() : 0;
       const hoursSinceScrape = (now - lastScrapedTime) / (1000 * 60 * 60);

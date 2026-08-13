@@ -14,11 +14,11 @@ export async function getEffectivePlan(): Promise<EffectivePlan> {
 
     const { data } = await supabase
       .from("profiles")
-      .select("plan, extended_pro_until, pro_expires_at")
+      .select("plan, extended_pro_until, pro_expires_at, stripe_subscription_id")
       .eq("id", user.id)
       .single();
 
-    return resolvePlan(data?.plan, data?.extended_pro_until, data?.pro_expires_at);
+    return resolvePlan(data?.plan, data?.extended_pro_until, data?.pro_expires_at, data?.stripe_subscription_id);
   } catch (err) {
     console.error("[plan] getEffectivePlan error:", err);
     return "free";

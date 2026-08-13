@@ -38,7 +38,7 @@ export async function getSystemNotifications(): Promise<{
     // Fetch user profile
     const { data: profile } = await admin
       .from("profiles")
-      .select("id, username, full_name, profile_published, plan, referral_code, created_at, extended_pro_until, pro_expires_at")
+      .select("id, username, full_name, profile_published, plan, referral_code, created_at, extended_pro_until, pro_expires_at, stripe_subscription_id")
       .eq("id", user.id)
       .single();
 
@@ -140,7 +140,7 @@ export async function getSystemNotifications(): Promise<{
     // 4. Milestone / System Notifications
     if (profile) {
       // Pro Offer / Plan Status
-      if (resolvePlan(profile.plan, profile.extended_pro_until, profile.pro_expires_at) === "pro") {
+      if (resolvePlan(profile.plan, profile.extended_pro_until, profile.pro_expires_at, profile.stripe_subscription_id) === "pro") {
         notifications.push({
           id: "sys-pro-active",
           type: "milestone",

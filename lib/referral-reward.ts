@@ -6,13 +6,19 @@ export type Plan = "free" | "pro";
 // Single decision point for "is this user Pro right now".
 // Honors BOTH the paid plan column AND referral/stripe-granted extended_pro_until.
 // Also checks pro_expires_at for time-limited Pro grants (e.g. first-500 benefit).
+// If proExpiresAt is set AND no stripeSubscriptionId, it's a promo — expires when proExpiresAt passes.
 export function resolvePlan(
   plan: string | null | undefined,
   extendedProUntil: string | null | undefined,
-  proExpiresAt?: string | null | undefined
+  proExpiresAt?: string | null | undefined,
+  stripeSubscriptionId?: string | null | undefined
 ): Plan {
   if (plan === "pro" || plan === "elite") {
+    // Paid subscriber — always Pro until they cancel
+    if (stripeSubscriptionId) return "pro";
+    // Promo grant — check if it expired
     if (proExpiresAt && new Date(proExpiresAt).getTime() < Date.now()) return "free";
+    // Promo grant still active, or legacy plan with no expiry info
     return "pro";
   }
   if (extendedProUntil && new Date(extendedProUntil).getTime() > Date.now()) return "pro";
