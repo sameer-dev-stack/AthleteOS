@@ -1139,7 +1139,7 @@ export default function OnboardingPage() {
                       </div>
                     ))}
                   </div>
-                  {links.length < 10 && (
+                  {links.length < 3 && (
                     <button
                       onClick={() => setLinks((prev) => [...prev, { label: "", url: "" }])}
                       className="mt-2.5 flex items-center gap-1.5 text-sm text-ink-muted hover:text-accent transition-colors"
@@ -1187,7 +1187,7 @@ export default function OnboardingPage() {
                       </div>
                     ))}
                   </div>
-                  {highlights.length < 10 && (
+                  {highlights.length < 3 && (
                     <button
                       onClick={() => setHighlights((prev) => [...prev, { title: "", url: "" }])}
                       className="mt-2.5 flex items-center gap-1.5 text-sm text-ink-muted hover:text-accent transition-colors"
