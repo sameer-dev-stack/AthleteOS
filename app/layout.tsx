@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { PostHogProvider } from "@/components/providers/posthog-provider";
 import { CookieConsent } from "@/components/providers/cookie-consent";
@@ -166,6 +167,7 @@ export default function RootLayout({
         <PostHogProvider>
           <SmoothScroll>{children}</SmoothScroll>
         </PostHogProvider>
+        <Analytics />
         <CookieConsent />
         <ServiceWorkerRegistration />
       </body>
