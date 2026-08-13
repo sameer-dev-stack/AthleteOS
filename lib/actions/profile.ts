@@ -6,6 +6,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { ALL_THEMES } from "@/lib/themes";
+import { resolvePlan } from "@/lib/referral-reward";
 
 export type Profile = {
   id: string;
@@ -312,13 +313,15 @@ export async function getPublicProfile(username: string): Promise<ProfileResult>
 
     const { data, error } = await admin
       .from("profiles")
-      .select("id, full_name, avatar_url, cover_url, username, sport, school, class_year, position, bio, stats, links, social, highlights, is_verified, profile_published, plan, theme_accent, theme_layout, contact_phone, contact_email, created_at, onboarding_completed")
+      .select("id, full_name, avatar_url, cover_url, username, sport, school, class_year, position, bio, stats, links, social, highlights, is_verified, profile_published, plan, extended_pro_until, pro_expires_at, stripe_subscription_id, theme_accent, theme_layout, contact_phone, contact_email, created_at, onboarding_completed")
       .eq("username", username.toLowerCase().trim())
       .eq("profile_published", true)
       .single();
 
     if (error || !data) return { ok: false, error: "Profile not found" };
-    return { ok: true, data: data as Profile };
+
+    const resolvedPlan = resolvePlan(data.plan, data.extended_pro_until, data.pro_expires_at, data.stripe_subscription_id);
+    return { ok: true, data: { ...data, plan: resolvedPlan } as Profile };
   } catch (err) {
     console.error("[profile] getPublicProfile error:", err);
     return { ok: false, error: "Failed to load profile" };
