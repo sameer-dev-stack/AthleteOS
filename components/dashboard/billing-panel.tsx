@@ -48,11 +48,12 @@ const PLANS = [
     price: "$14",
     period: "/mo",
     features: [
+      "NIL Valuation Score & Level",
+      "Editable NIL Rate Card",
+      "3-in-1 Sponsor Pitch Generator",
       "0% Platform Tip Fee (Keep 100%)",
       "Gold Verified Badge",
-      "Premium Metallic & Neon Themes",
-      "Advanced Traffic & Country Analytics",
-      "Priority Placement in Athlete Discover",
+      "Premium Themes & Discover Placement",
     ],
   },
 ];
