@@ -187,14 +187,14 @@ export async function getSubscriptionByUserId(userId: string): Promise<{
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("plan, extended_pro_until, stripe_subscription_id")
+    .select("plan, extended_pro_until, pro_expires_at, stripe_subscription_id")
     .eq("id", userId)
     .single();
 
   if (!profile?.stripe_subscription_id) {
     return {
       status: null,
-      tier: resolvePlan(profile?.plan, (profile as any)?.extended_pro_until) as PlanTier,
+      tier: resolvePlan(profile?.plan, (profile as any)?.extended_pro_until, (profile as any)?.pro_expires_at) as PlanTier,
       currentPeriodEnd: null,
       customerId: null,
       subscriptionId: null,
@@ -210,7 +210,7 @@ export async function getSubscriptionByUserId(userId: string): Promise<{
     const currentPeriodEnd = firstItem?.current_period_end ?? null;
 
     // Derive tier from live Stripe price ID — not from DB which may be stale
-    let tier: PlanTier = resolvePlan(profile?.plan, (profile as any)?.extended_pro_until) as PlanTier;
+    let tier: PlanTier = resolvePlan(profile?.plan, (profile as any)?.extended_pro_until, (profile as any)?.pro_expires_at) as PlanTier;
     if (subscription.status === "active" || subscription.status === "trialing") {
       const priceId = firstItem?.price?.id;
       if (priceId === process.env.STRIPE_PRICE_ID_PRO) {
@@ -231,7 +231,7 @@ export async function getSubscriptionByUserId(userId: string): Promise<{
   } catch {
     return {
       status: null,
-      tier: resolvePlan(profile?.plan, (profile as any)?.extended_pro_until) as PlanTier,
+      tier: resolvePlan(profile?.plan, (profile as any)?.extended_pro_until, (profile as any)?.pro_expires_at) as PlanTier,
       currentPeriodEnd: null,
       customerId: null,
       subscriptionId: profile.stripe_subscription_id,

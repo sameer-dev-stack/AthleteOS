@@ -12,12 +12,15 @@ function getAdmin() {
 }
 
 // Subscription tier resolving helper
-function resolvePlan(plan: string | null, extendedUntil: string | null): "free" | "pro" | "elite" {
+function resolvePlan(plan: string | null, extendedUntil: string | null, proExpiresAt?: string | null): "free" | "pro" | "elite" {
   if (extendedUntil && new Date(extendedUntil) > new Date()) {
     return "pro";
   }
   const p = (plan || "").toLowerCase();
-  if (p === "pro" || p === "elite") return p as "pro" | "elite";
+  if (p === "pro" || p === "elite") {
+    if (proExpiresAt && new Date(proExpiresAt) < new Date()) return "free";
+    return p as "pro" | "elite";
+  }
   return "free";
 }
 
@@ -58,6 +61,7 @@ export async function GET(req: NextRequest) {
           id,
           plan,
           extended_pro_until,
+          pro_expires_at,
           onboarding_completed,
           suspended
         )
@@ -79,7 +83,7 @@ export async function GET(req: NextRequest) {
         return false;
       }
 
-      const tier = resolvePlan(profile.plan, profile.extended_pro_until);
+      const tier = resolvePlan(profile.plan, profile.extended_pro_until, profile.pro_expires_at);
       const lastScrapedStr = account.last_scraped_at || account.updated_at;
       const lastScrapedTime = lastScrapedStr ? new Date(lastScrapedStr).getTime() : 0;
       const hoursSinceScrape = (now - lastScrapedTime) / (1000 * 60 * 60);

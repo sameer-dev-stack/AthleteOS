@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { resolvePlan } from "@/lib/referral-reward";
 
 export type SystemNotification = {
   id: string;
@@ -37,7 +38,7 @@ export async function getSystemNotifications(): Promise<{
     // Fetch user profile
     const { data: profile } = await admin
       .from("profiles")
-      .select("id, username, full_name, profile_published, plan, referral_code, created_at, extended_pro_until")
+      .select("id, username, full_name, profile_published, plan, referral_code, created_at, extended_pro_until, pro_expires_at")
       .eq("id", user.id)
       .single();
 
@@ -139,7 +140,7 @@ export async function getSystemNotifications(): Promise<{
     // 4. Milestone / System Notifications
     if (profile) {
       // Pro Offer / Plan Status
-      if (profile.plan === "pro" || profile.plan === "team" || profile.extended_pro_until) {
+      if (resolvePlan(profile.plan, profile.extended_pro_until, profile.pro_expires_at) === "pro") {
         notifications.push({
           id: "sys-pro-active",
           type: "milestone",

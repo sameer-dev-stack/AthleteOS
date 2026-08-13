@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
 
     const { data: athletes, error: athletesErr } = await admin
       .from("profiles")
-      .select("id, email, full_name, sport, school, position, bio, created_at, plan, extended_pro_until")
+      .select("id, email, full_name, sport, school, position, bio, created_at, plan, extended_pro_until, pro_expires_at")
       .eq("onboarding_completed", true)
       .eq("suspended", false)
       .not("email", "is", null);
@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
 
         const memory = memoryRes.data;
         const aiUsed = quotaRes.data?.used_count || 0;
-        const effectivePlan = resolvePlan(athlete.plan, athlete.extended_pro_until);
+        const effectivePlan = resolvePlan(athlete.plan, athlete.extended_pro_until, athlete.pro_expires_at);
         const aiLimit = effectivePlan === "pro" ? 300 : 5;
         const aiRemaining = Math.max(0, aiLimit - aiUsed);
 

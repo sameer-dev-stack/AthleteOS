@@ -60,7 +60,7 @@ export async function searchPublicAthletes(
   let dbQuery = supabase
     .from("profiles")
     .select(
-      "id, full_name, username, avatar_url, sport, school, position, bio, is_verified, plan, extended_pro_until",
+      "id, full_name, username, avatar_url, sport, school, position, bio, is_verified, plan, extended_pro_until, pro_expires_at",
       { count: "exact" }
     )
     .eq("profile_published", true)
@@ -120,7 +120,7 @@ export async function searchPublicAthletes(
     position: p.position,
     bio: p.bio,
     is_verified: p.is_verified,
-    plan: resolvePlan(p.plan, p.extended_pro_until),
+    plan: resolvePlan(p.plan, p.extended_pro_until, p.pro_expires_at),
     total_followers: followerMap.get(p.id) ?? 0,
   }));
 

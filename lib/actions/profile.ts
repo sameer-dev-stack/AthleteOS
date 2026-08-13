@@ -34,6 +34,7 @@ export type Profile = {
   theme_layout: string;
   moderation_status: string;
   extended_pro_until: string | null;
+  pro_expires_at: string | null;
   created_at: string;
   updated_at: string;
   contact_phone: string | null;

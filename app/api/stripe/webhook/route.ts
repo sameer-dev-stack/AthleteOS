@@ -174,11 +174,11 @@ export async function POST(request: NextRequest) {
           // Check receiving athlete's plan to determine platform fee (20% for Free, 0% for Pro)
           const { data: athleteProfile } = await supabase
             .from("profiles")
-            .select("plan, extended_pro_until")
+            .select("plan, extended_pro_until, pro_expires_at")
             .eq("id", athleteId)
             .single();
 
-          const isPro = resolvePlan(athleteProfile?.plan, athleteProfile?.extended_pro_until) === "pro";
+          const isPro = resolvePlan(athleteProfile?.plan, athleteProfile?.extended_pro_until, athleteProfile?.pro_expires_at) === "pro";
           const feePercent = isPro ? PLATFORM_FEE_PERCENT_PRO : PLATFORM_FEE_PERCENT_FREE;
           const platformFee = Math.round(amount * (feePercent / 100));
           const netAmount = amount - platformFee;

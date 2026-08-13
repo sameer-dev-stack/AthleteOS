@@ -5,11 +5,16 @@ export type Plan = "free" | "pro";
 
 // Single decision point for "is this user Pro right now".
 // Honors BOTH the paid plan column AND referral/stripe-granted extended_pro_until.
+// Also checks pro_expires_at for time-limited Pro grants (e.g. first-500 benefit).
 export function resolvePlan(
   plan: string | null | undefined,
-  extendedProUntil: string | null | undefined
+  extendedProUntil: string | null | undefined,
+  proExpiresAt?: string | null | undefined
 ): Plan {
-  if (plan === "pro" || plan === "elite") return "pro";
+  if (plan === "pro" || plan === "elite") {
+    if (proExpiresAt && new Date(proExpiresAt).getTime() < Date.now()) return "free";
+    return "pro";
+  }
   if (extendedProUntil && new Date(extendedProUntil).getTime() > Date.now()) return "pro";
   return "free";
 }
