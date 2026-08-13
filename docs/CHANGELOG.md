@@ -3,6 +3,22 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-13 — Updated Billing Panel Pro Features for NIL Suite
+
+### What changed
+- **`components/dashboard/billing-panel.tsx`**:
+  - Updated Pro plan feature highlights on the Billing page (`/dashboard/billing`) to list **NIL Valuation Score & Level**, **Editable NIL Rate Card**, and **3-in-1 Sponsor Pitch Generator**.
+
+### Why
+Ensures consistency across landing page pricing and in-app billing panel when athletes view Pro subscription benefits.
+
+### Files touched
+- `components/dashboard/billing-panel.tsx`
+
+### Commit
+`0e78d30`
+
+
 ## 2026-08-13 — Updated Landing Page Pricing Features for NIL Suite
 
 ### What changed
