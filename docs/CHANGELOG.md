@@ -3,6 +3,25 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-13 — Updated Landing Page Pricing Features for NIL Suite
+
+### What changed
+- **`components/pricing.tsx`**:
+  - Updated the Pro Plan feature list to prominently feature **NIL Valuation & Score Card**, **Editable NIL Rate Card**, and **3-in-1 Sponsor Pitch Generator**.
+- **`app/page.tsx`**:
+  - Updated JSON-LD structured data schema for the Pro offer to match the new features.
+
+### Why
+Accurately advertises the new V1 NIL Value Engine & Pitch Generator suite to visitors on the landing page pricing grid.
+
+### Files touched
+- `components/pricing.tsx`
+- `app/page.tsx`
+
+### Commit
+`751890a`
+
+
 ## 2026-08-13 — Handled Optional AI Prompt Failures Gracefully in NIL Score Engine
 
 ### What changed
