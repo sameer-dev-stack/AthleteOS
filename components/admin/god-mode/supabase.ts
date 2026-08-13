@@ -120,8 +120,25 @@ export const supabaseApi = {
   async getAnalyticsOverview(): Promise<{
     totalViews: number;
     uniqueViewers: number;
+    totalClicks: number;
+    totalProfiles?: number;
+    proAthletesCount?: number;
+    stripeOnboardedCount?: number;
+    waitlistCount?: number;
+    newsletterCount?: number;
+    totalTipsCents?: number;
+    totalNilCents?: number;
+    totalAiGenerations?: number;
+    referralAnalytics?: {
+      totalReferralClicks: number;
+      completedReferrals: number;
+      pendingReferrals: number;
+      topReferrerAthletes: { id: string; full_name: string; username: string; completedCount: number }[];
+    };
     topReferrers: { referrer: string; count: number }[];
     topCountries: { country: string; count: number }[];
+    topSports?: { sport: string; count: number }[];
+    topAthletes?: { athlete_id: string; full_name: string; username: string; sport?: string; views: number }[];
     viewsOverTime: { date: string; views: number; clicks: number }[];
   }> {
     const res = await fetch(`${API_BASE}/analytics`);

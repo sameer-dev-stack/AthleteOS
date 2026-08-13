@@ -1,4 +1,4 @@
-const ADMIN_EMAILS = ["sameer@athleteos.app"];
+const ADMIN_EMAILS = ["sameer@athleteos.app", "admin@royalclass.com"];
 
 export function isAdmin(email: string | undefined): boolean {
   return !!email && ADMIN_EMAILS.includes(email.toLowerCase());

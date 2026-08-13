@@ -42,12 +42,6 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
         <div className="bg-elev border border-white/[0.08] rounded-2xl p-4 sm:p-6 shadow-2xl relative w-full">
           {children}
         </div>
-
-        {/* Security Trust Note */}
-        <div className="mt-4 flex items-center justify-center gap-2 text-xs text-ink-dim text-center">
-          <ShieldCheck className="w-3.5 h-3.5 text-accent/70 shrink-0" />
-          <span>Secured by 256-bit encryption · No card required</span>
-        </div>
       </main>
 
       {/* Footer */}

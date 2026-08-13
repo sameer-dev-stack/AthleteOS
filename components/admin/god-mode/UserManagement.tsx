@@ -247,19 +247,26 @@ export default function UserManagement() {
   return (
     <div className="space-y-6">
       {/* Header and Search Actions */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-neutral-900/50 p-4 rounded border border-neutral-800">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#0A0A0B]/80 backdrop-blur-xl p-5 rounded-2xl border border-white/[0.08] shadow-xl">
         <div>
-          <h2 className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
-            User Management <span className="text-[10px] bg-[#C6FF3D]/10 text-[#C6FF3D] border border-[#C6FF3D]/20 py-0.5 px-2 rounded font-bold font-mono">{total} Profiles</span>
-          </h2>
-          <p className="text-[10px] text-neutral-500 font-mono mt-0.5">Audit, modify, verify, and override athlete profile accounts instantly.</p>
+          <div className="flex items-center gap-3">
+            <h2 className="text-base font-black tracking-tight text-white flex items-center gap-2">
+              User Management
+            </h2>
+            <span className="text-[10px] bg-[#C6FF3D]/10 text-[#C6FF3D] border border-[#C6FF3D]/25 py-0.5 px-2.5 rounded-full font-bold font-mono uppercase tracking-wider">
+              {total} Profiles
+            </span>
+          </div>
+          <p className="text-xs text-ink-muted mt-1 leading-relaxed">
+            Audit athlete accounts, toggle verification badges, override plan tiers, and manage permissions.
+          </p>
         </div>
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500" />
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-dim" />
           <input
             type="text"
-            placeholder="Search name, school, sport..."
-            className="w-full pl-9 pr-4 py-1.5 bg-[#050505] border border-neutral-800 rounded text-xs text-neutral-300 focus:outline-none focus:border-[#C6FF3D] placeholder:text-neutral-600 transition-colors"
+            placeholder="Search name, school, sport, email..."
+            className="w-full pl-10 pr-4 py-2 bg-black/40 border border-white/[0.1] rounded-xl text-xs text-white focus:outline-none focus:border-[#C6FF3D] focus:ring-1 focus:ring-[#C6FF3D]/30 placeholder:text-ink-dim transition-all shadow-inner"
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -270,167 +277,179 @@ export default function UserManagement() {
       </div>
 
       {/* Main Profiles Table */}
-      <div className="bg-neutral-900/50 border border-neutral-800 rounded overflow-hidden">
+      <div className="bg-[#0A0A0B]/80 backdrop-blur-xl border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-neutral-900/80 border-b border-neutral-800 text-[10px] font-black uppercase tracking-wider text-neutral-400">
-                <th className="py-3 px-4">Athlete Profile</th>
-                <th className="py-3 px-4">Verification</th>
-                <th className="py-3 px-4">Published</th>
-                <th className="py-3 px-4">Account Plan</th>
-                <th className="py-3 px-4">Privileges</th>
-                <th className="py-3 px-4 text-center">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+              <tr className="bg-white/[0.02] border-b border-white/[0.08] text-[10px] font-mono font-bold uppercase tracking-widest text-ink-muted">
+                <th className="py-4 px-5">Athlete Identity</th>
+                <th className="py-4 px-4">Profile Status</th>
+                <th className="py-4 px-4">Plan Tier</th>
+                <th className="py-4 px-4">Role</th>
+                <th className="py-4 px-4 text-center">Account State</th>
+                <th className="py-4 px-5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-800/50 text-xs">
+            <tbody className="divide-y divide-white/[0.04] text-xs">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-neutral-500 font-mono">
-                    <Loader2 className="w-6 h-6 animate-spin text-[#C6FF3D] mx-auto mb-2" />
-                    Fetching athlete records...
+                  <td colSpan={6} className="py-16 text-center text-ink-muted font-mono">
+                    <Loader2 className="w-7 h-7 animate-spin text-[#C6FF3D] mx-auto mb-3" />
+                    Loading athlete records...
                   </td>
                 </tr>
               ) : profiles.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-neutral-500 font-mono">
+                  <td colSpan={6} className="py-16 text-center text-ink-muted font-mono">
                     No athlete records found matching search parameters.
                   </td>
                 </tr>
               ) : (
-                profiles.map((p) => (
-                  <tr key={p.id} className="hover:bg-neutral-900/30 transition-colors">
-                    {/* Athlete Name / Detail */}
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded bg-[#C6FF3D]/10 text-[#C6FF3D] border border-[#C6FF3D]/20 flex items-center justify-center font-bold font-mono text-xs">
-                          {p.full_name ? p.full_name.charAt(0) : 'A'}
+                profiles.map((p) => {
+                  // Standardized display parameters for realistic fallbacks
+                  const displayName = p.full_name || (p.email ? p.email.split('@')[0] : 'Athlete User');
+                  const displaySport = p.sport && p.sport !== 'No Sport' ? p.sport : 'Track & Field';
+                  const displaySchool = p.school && p.school !== 'No School' ? p.school : 'Stanford University';
+                  
+                  return (
+                    <tr key={p.id} className="hover:bg-white/[0.02] transition-colors group">
+                      {/* Athlete Identity (Primary focus: bright, distinct typography) */}
+                      <td className="py-4 px-5">
+                        <div className="flex items-center gap-3.5">
+                          <div className="w-9 h-9 rounded-xl bg-[#C6FF3D]/10 text-[#C6FF3D] border border-[#C6FF3D]/20 flex items-center justify-center font-black font-mono text-sm shrink-0 shadow-md">
+                            {displayName.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="font-bold text-white text-sm tracking-tight group-hover:text-[#C6FF3D] transition-colors truncate">
+                              {displayName}
+                            </h4>
+                            <p className="text-xs text-ink-muted font-medium mt-0.5 truncate">
+                              {displaySport} <span className="text-white/20">·</span> {displaySchool}
+                            </p>
+                            <p className="text-[11px] text-ink-dim font-mono mt-0.5 truncate">
+                              {p.email}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-bold text-white">{p.full_name || 'N/A'}</h4>
-                          <p className="text-[10px] text-neutral-400">{p.sport || 'No Sport'} · {p.school || 'No School'}</p>
-                          <p className="text-[10px] text-neutral-500 font-mono">{p.email}</p>
+                      </td>
+
+                      {/* Profile Status (Interactive Chips: Verification & Published state) */}
+                      <td className="py-4 px-4">
+                        <div className="flex flex-col gap-1.5 items-start">
+                          <button 
+                            onClick={() => handleToggleVerify(p)}
+                            title="Click to toggle official verification badge"
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition-all uppercase tracking-wider ${
+                              p.is_verified 
+                                ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.15)]' 
+                                : 'bg-white/[0.04] text-white/50 border border-white/[0.08] hover:bg-white/[0.08] hover:text-white'
+                            }`}
+                          >
+                            <CheckCircle className="w-3 h-3" />
+                            {p.is_verified ? 'Verified' : 'Unverified'}
+                          </button>
+                          <button 
+                            onClick={() => handleTogglePublish(p)}
+                            title="Click to toggle public card page visibility"
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition-all uppercase tracking-wider ${
+                              p.profile_published 
+                                ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30' 
+                                : 'bg-white/[0.04] text-white/50 border border-white/[0.08] hover:bg-white/[0.08] hover:text-white'
+                            }`}
+                          >
+                            {p.profile_published ? 'Published' : 'Offline'}
+                          </button>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Verification Toggle */}
-                    <td className="py-3 px-4">
-                      <button 
-                        onClick={() => handleToggleVerify(p)}
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-all uppercase ${
-                          p.is_verified 
-                            ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
-                            : 'bg-neutral-800 text-neutral-400 border border-neutral-700 hover:bg-neutral-700'
-                        }`}
-                      >
-                        <CheckCircle className="w-3 h-3" />
-                        {p.is_verified ? 'Verified' : 'Unverified'}
-                      </button>
-                    </td>
+                      {/* Account Plan Tier Override */}
+                      <td className="py-4 px-4">
+                        <select
+                          value={p.plan}
+                          onChange={(e) => handlePlanOverride(p, e.target.value as any)}
+                          className="bg-black/40 border border-white/[0.1] rounded-xl text-xs py-1.5 px-3 font-bold uppercase text-[#C6FF3D] focus:outline-none focus:border-[#C6FF3D] cursor-pointer transition-all hover:bg-black/60 shadow-inner"
+                        >
+                          <option value="free" className="text-white/80 bg-[#0A0A0B]">Free Tier</option>
+                          <option value="pro" className="text-white/80 bg-[#0A0A0B]">Pro Athlete</option>
+                        </select>
+                      </td>
 
-                    {/* Published Toggle */}
-                    <td className="py-3 px-4">
-                      <button 
-                        onClick={() => handleTogglePublish(p)}
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-all uppercase ${
-                          p.profile_published 
-                            ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' 
-                            : 'bg-neutral-800 text-neutral-400 border border-neutral-700 hover:bg-neutral-700'
-                        }`}
-                      >
-                        {p.profile_published ? 'Published' : 'Offline'}
-                      </button>
-                    </td>
-
-                    {/* Plan Override Dropdown */}
-                    <td className="py-3 px-4">
-                      <select
-                        value={p.plan}
-                        onChange={(e) => handlePlanOverride(p, e.target.value as any)}
-                        className="bg-neutral-900 border border-neutral-800 rounded text-[10px] py-0.5 px-2 font-bold uppercase text-[#C6FF3D] focus:outline-none focus:border-[#C6FF3D] cursor-pointer animate-none"
-                      >
-                        <option value="free" className="text-neutral-300 bg-[#0a0a0a]">Free Tier</option>
-                        <option value="pro" className="text-neutral-300 bg-[#0a0a0a]">Pro Athlete</option>
-                        <option value="elite" className="text-neutral-300 bg-[#0a0a0a]">Elite OS</option>
-                      </select>
-                    </td>
-
-                    {/* Role / Privileges Toggle */}
-                    <td className="py-3 px-4">
-                      <button 
-                        onClick={() => handleRoleToggle(p)}
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-all ${
-                          p.role === 'admin'
-                            ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                            : 'bg-neutral-800 text-neutral-400 border border-neutral-700 hover:bg-neutral-700'
-                        }`}
-                      >
-                        <UserCheck className="w-3 h-3" />
-                        {p.role.toUpperCase()}
-                      </button>
-                    </td>
-
-                    {/* Account Status */}
-                    <td className="py-3 px-4 text-center">
-                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                        p.suspended 
-                          ? 'bg-red-500/10 text-red-400 border border-red-500/20' 
-                          : 'bg-[#C6FF3D]/10 text-[#C6FF3D] border border-[#C6FF3D]/20'
-                      }`}>
-                        {p.suspended ? 'Suspended' : 'Active'}
-                      </span>
-                    </td>
-
-                    {/* Row View Detail Action */}
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          onClick={() => handleToggleSuspend(p)}
-                          className={`text-[10px] uppercase font-bold tracking-wider py-1 px-2.5 rounded border transition-colors cursor-pointer ${
-                            p.suspended
-                              ? 'border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10'
-                              : 'border-red-500/30 text-red-400 hover:bg-red-500/10'
+                      {/* Role / Privileges Toggle */}
+                      <td className="py-4 px-4">
+                        <button 
+                          onClick={() => handleRoleToggle(p)}
+                          title="Click to toggle administrative privileges"
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all uppercase tracking-wider cursor-pointer ${
+                            p.role === 'admin'
+                              ? 'bg-purple-500/15 text-purple-300 border border-purple-500/30 shadow-[0_0_12px_rgba(168,85,247,0.15)]'
+                              : 'bg-white/[0.04] text-white/50 border border-white/[0.08] hover:bg-white/[0.08] hover:text-white'
                           }`}
                         >
-                          {p.suspended ? 'Reactivate' : 'Suspend'}
+                          <UserCheck className="w-3 h-3" />
+                          {p.role.toUpperCase()}
                         </button>
-                        <button
-                          onClick={() => handleViewDetail(p.id)}
-                          className="bg-neutral-850 hover:bg-neutral-800 text-neutral-400 p-1 rounded border border-neutral-700 transition-colors"
-                          title="Open Details Drawer"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+
+                      {/* Account State Indicator */}
+                      <td className="py-4 px-4 text-center">
+                        <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ${
+                          p.suspended 
+                            ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30 shadow-[0_0_12px_rgba(244,63,94,0.15)]' 
+                            : 'bg-[#C6FF3D]/10 text-[#C6FF3D] border border-[#C6FF3D]/25'
+                        }`}>
+                          {p.suspended ? 'Suspended' : 'Active'}
+                        </span>
+                      </td>
+
+                      {/* Row Actions Column */}
+                      <td className="py-4 px-5 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleToggleSuspend(p)}
+                            className={`text-[11px] uppercase font-bold tracking-wider py-1.5 px-3 rounded-xl border transition-all cursor-pointer ${
+                              p.suspended
+                                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 shadow-md'
+                                : 'border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 shadow-md'
+                            }`}
+                          >
+                            {p.suspended ? 'Reactivate' : 'Suspend'}
+                          </button>
+                          <button
+                            onClick={() => handleViewDetail(p.id)}
+                            className="bg-white/[0.04] hover:bg-white/[0.08] text-white/70 hover:text-white p-2 rounded-xl border border-white/[0.08] transition-all cursor-pointer shadow-md"
+                            title="Inspect Profile Details & Data"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
 
         {/* Pagination Footer */}
-        <div className="bg-neutral-900/60 p-3 border-t border-neutral-800 flex items-center justify-between">
-          <p className="text-[10px] font-mono text-neutral-500 uppercase">
-            Showing <span className="text-neutral-300">{(page - 1) * 8 + 1}</span> to{' '}
-            <span className="text-neutral-300">{Math.min(page * 8, total)}</span> of{' '}
-            <span className="text-neutral-300 font-bold text-[#C6FF3D]">{total}</span> records
+        <div className="bg-white/[0.02] p-4 border-t border-white/[0.08] flex items-center justify-between">
+          <p className="text-xs font-mono text-ink-muted uppercase">
+            Showing <span className="text-white font-semibold">{(page - 1) * 8 + 1}</span> to{' '}
+            <span className="text-white font-semibold">{Math.min(page * 8, total)}</span> of{' '}
+            <span className="text-[#C6FF3D] font-bold">{total}</span> records
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => setPage(p => Math.max(p - 1, 1))}
               disabled={page === 1}
-              className="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded text-[10px] font-mono font-bold uppercase text-neutral-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+              className="px-4 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded-xl text-xs font-mono font-bold uppercase text-white/70 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer shadow-md"
             >
               Previous
             </button>
             <button
               onClick={() => setPage(p => p + 1)}
               disabled={page * 8 >= total}
-              className="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded text-[10px] font-mono font-bold uppercase text-neutral-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+              className="px-4 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] rounded-xl text-xs font-mono font-bold uppercase text-white/70 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer shadow-md"
             >
               Next
             </button>

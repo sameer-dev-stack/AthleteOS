@@ -38,23 +38,6 @@ const PLANS = [
       "Full revenue dashboard",
     ],
   },
-  {
-    name: "Elite",
-    price: "$29",
-    cadence: "/ month",
-    blurb: "For top athletes who want the full NIL operating system.",
-    cta: "Go Elite",
-    ctaHref: "/auth/sign-up",
-    highlight: false,
-    features: [
-      "Everything in Pro",
-      "500 AI actions / mo",
-      "Advanced sponsor kit",
-      "Custom domain",
-      "Verified athlete badge",
-      "Early access features",
-    ],
-  },
 ];
 
 export function Pricing() {
@@ -85,7 +68,7 @@ export function Pricing() {
         <RevealStagger
           staggerChildren={0.1}
           delayChildren={0.15}
-          className="mt-14 grid gap-5 lg:grid-cols-3"
+          className="mt-14 grid gap-6 md:grid-cols-2 max-w-4xl mx-auto"
         >
           {PLANS.map((plan) => (
             <RevealItem key={plan.name} y={30}>

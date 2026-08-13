@@ -12,7 +12,7 @@ export const REFERRAL_MILESTONES = [
   { count: 25, months: 6, days: 180, label: "6 Months Pro Free", badge: true },
 ];
 
-export const MAX_REFERRAL_PRO_DAYS = 365; // 12 Months Max Cap
+export const MAX_REFERRAL_PRO_DAYS = 180; // 6 Months Strict Maximum Lifetime Cap
 export const REFERRAL_WINDOW_DAYS = 30;   // Cookie/attribution window
 export const REFERRAL_CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 

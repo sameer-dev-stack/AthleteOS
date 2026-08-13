@@ -27,14 +27,6 @@ const jsonLd = {
       description: "NIL Valuation Engine, Sponsor Pitch Generator, Rate Card & 300 AI actions/mo",
       billingPeriod: "month",
     },
-    {
-      "@type": "Offer",
-      price: "29",
-      priceCurrency: "USD",
-      name: "Elite",
-      description: "Unlimited AI actions, priority support, team features",
-      billingPeriod: "month",
-    },
   ],
   aggregateRating: {
     "@type": "AggregateRating",

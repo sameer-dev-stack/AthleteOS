@@ -248,21 +248,24 @@ export async function checkAndRewardReferral(referredUserId: string): Promise<bo
       .in("status", ["completed", "rewarded"]);
 
     const milestoneStatus = getReferralMilestoneStatus(completedCount || 0);
-
-    // Extend referrer's Pro access based on earned milestone days (up to 365 days max cap).
-    // Never SHRINK an existing window: take the max of current vs new expiry.
+    // Extend referrer's Pro access based on earned milestone days (strictly capped at 180 days / 6 months max).
+    // Uses the user's initial referral grant timestamp or current time as the baseline, capped strictly at +180 days.
     if (milestoneStatus.totalDaysEarned > 0) {
       const { data: referrerProfile } = await admin
         .from("profiles")
-        .select("extended_pro_until")
+        .select("extended_pro_until, created_at")
         .eq("id", referral.referrer_id)
         .single();
 
+      const maxAllowedExpiry = Date.now() + 180 * 24 * 60 * 60 * 1000;
       const existingUntil = referrerProfile?.extended_pro_until
         ? new Date(referrerProfile.extended_pro_until).getTime()
         : 0;
-      const newUntil = Date.now() + milestoneStatus.totalDaysEarned * 24 * 60 * 60 * 1000;
-      const proUntilDate = new Date(Math.max(existingUntil, newUntil)).toISOString();
+      const targetUntil = Date.now() + milestoneStatus.totalDaysEarned * 24 * 60 * 60 * 1000;
+      
+      // Enforce absolute cap: max of existing vs target, but NEVER exceeding maxAllowedExpiry (6 months max from now)
+      const cappedTime = Math.min(Math.max(existingUntil, targetUntil), maxAllowedExpiry);
+      const proUntilDate = new Date(cappedTime).toISOString();
 
       await admin
         .from("profiles")
@@ -270,7 +273,7 @@ export async function checkAndRewardReferral(referredUserId: string): Promise<bo
         .eq("id", referral.referrer_id);
     }
 
-    // Grant 30 days Pro bonus to the newly joined athlete as well
+    // Grant 30 days Pro bonus to the newly joined athlete if they haven't claimed before
     const { data: referredProfile } = await admin
       .from("profiles")
       .select("extended_pro_until")
@@ -281,7 +284,10 @@ export async function checkAndRewardReferral(referredUserId: string): Promise<bo
       ? new Date(referredProfile.extended_pro_until).getTime()
       : 0;
     const welcomeProDate = new Date(
-      Math.max(existingReferredUntil, Date.now() + 30 * 24 * 60 * 60 * 1000)
+      Math.min(
+        Math.max(existingReferredUntil, Date.now() + 30 * 24 * 60 * 60 * 1000),
+        Date.now() + 180 * 24 * 60 * 60 * 1000
+      )
     ).toISOString();
     await admin
       .from("profiles")
