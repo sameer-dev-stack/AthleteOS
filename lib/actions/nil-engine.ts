@@ -249,11 +249,14 @@ Format the output clearly with headings and a bulleted list for action steps. Be
 
     const systemPrompt = "You are a senior NIL valuation consultant and athletic agent. You help collegiate and high school athletes maximize their business potential with data-driven brand strategies.";
 
-    // Call MiMo API
-    const aiExplanation = await callGemini(prompt, systemPrompt, 1200);
-
-    // Record usage
-    await recordAiUsage("nil_engine");
+    // Call MiMo API gracefully (non-blocking for mathematical score calculation)
+    let aiExplanation = "Your NIL Valuation score and suggested rates have been calculated based on your aggregate reach, card performance, and sport context.";
+    try {
+      aiExplanation = await callGemini(prompt, systemPrompt, 1200);
+      await recordAiUsage("nil_engine");
+    } catch (aiErr) {
+      console.warn("[nil-engine] Optional AI explanation failed gracefully:", aiErr);
+    }
 
     const updatedQuota = await getAiQuota();
 
