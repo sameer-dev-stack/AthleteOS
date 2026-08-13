@@ -3,6 +3,23 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-13 — Handled Optional AI Prompt Failures Gracefully in NIL Score Engine
+
+### What changed
+- **`lib/actions/nil-engine.ts`**:
+  - Wrapped `callGemini()` in a try/catch inside `runNilValueEngine()`.
+  - If the external AI API key returns HTTP 402 (payment required/quota limit) or goes offline, the NIL Score recalculation still completes 100% successfully with deterministic metrics, score, and rates.
+
+### Why
+Ensures recalculating the NIL Score never throws a warning popup if the optional AI text generator hits an external API quota error.
+
+### Files touched
+- `lib/actions/nil-engine.ts`
+
+### Commit
+`d2e0b05`
+
+
 ## 2026-08-13 — Added Resilient Schema Fallback for NIL Metrics Upsert
 
 ### What changed
