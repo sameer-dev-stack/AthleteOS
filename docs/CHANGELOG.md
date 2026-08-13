@@ -3,6 +3,23 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-13 — Added Resilient Schema Fallback for NIL Metrics Upsert
+
+### What changed
+- **`lib/nil-engine-internal.ts`**:
+  - Added an automatic schema fallback retry when upserting into `nil_value_metrics`.
+  - If the database schema cache is missing optional delta columns (`engagement_delta_percent` / `follower_delta_percent`), the engine automatically retries the upsert without those fields, guaranteeing recalculation never throws a database error.
+
+### Why
+Prevents `Could not find column in schema cache` errors when recalculating NIL scores on production database environments that haven't run the latest migration.
+
+### Files touched
+- `lib/nil-engine-internal.ts`
+
+### Commit
+`cf49a01`
+
+
 ## 2026-08-13 — Unlocked NIL Value Navigation Sidebar Tab
 
 ### What changed
