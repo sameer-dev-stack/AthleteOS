@@ -24,7 +24,7 @@ const jsonLd = {
       price: "14",
       priceCurrency: "USD",
       name: "Pro",
-      description: "300 AI actions/month, analytics, custom branding",
+      description: "NIL Valuation Engine, Sponsor Pitch Generator, Rate Card & 300 AI actions/mo",
       billingPeriod: "month",
     },
     {

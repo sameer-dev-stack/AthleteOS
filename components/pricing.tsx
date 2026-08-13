@@ -31,11 +31,11 @@ const PLANS = [
     highlight: true,
     features: [
       "Everything in Free",
+      "NIL Valuation & Score Card",
+      "Editable NIL Rate Card",
+      "3-in-1 Sponsor Pitch Generator",
       "300 AI actions / mo",
-      "Tips & won brand deals",
       "Full revenue dashboard",
-      "Brand deal inbox",
-      "Custom themes",
     ],
   },
   {
