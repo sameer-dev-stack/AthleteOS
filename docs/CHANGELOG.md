@@ -3,6 +3,27 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-14 — Session: Mobile Nav Cleanup — Remove Redundant Hamburger, Make BottomNav "More" Work
+
+### What changed
+- **`components/layout/sidebar.tsx`**:
+  - Removed the mobile hamburger button (`fixed top-4 left-4 z-50` "Open menu") and the entire mobile drawer overlay it opened (Mobile header/nav/user section), plus `mobileOpen` state and its two `useEffect`s (pathname close, Escape close).
+  - Desktop sidebar (`md:flex`, collapse toggle, desktop nav) untouched.
+- **`components/layout/bottom-nav.tsx`**:
+  - "More" tab no longer links to the non-existent `/dashboard/more` route. It is now a `<button>` that opens the existing `BottomSheet` (framer-motion, drag-to-dismiss) titled "More", listing the dashboard sections from `config/dashboard-nav.ts` (Overview, Edit Profile, NIL Value, Analytics, Referrals, AI Toolkit, Billing & Payouts, Settings) minus the tabs already on the bar (Home/Analytics/Profile), with "Coming soon" lock rows for AI Toolkit.
+  - Sheet row tap closes the sheet, haptics preserved; More button shows active/lime state while open.
+- **`components/layout/header.tsx`**: not changed — its own working mobile drawer remains.
+
+### Why
+On mobile the BottomNav is the primary navigation, but a second floating hamburger in `sidebar.tsx` duplicated the header's menu and opened a drawer that overlapped the BottomNav's job. And the BottomNav "More" tab pointed at `/dashboard/more`, which has no route — so tapping it broke navigation instead of revealing the remaining dashboard pages.
+
+### Files touched
+- `components/layout/sidebar.tsx`
+- `components/layout/bottom-nav.tsx`
+
+### Commit
+`<pending>`
+
 ## 2026-08-14 — Session: Onboarding Profile Step Fixes — Placeholder Traps, Avatar Preview Sync, Continue State
 
 ### What changed
