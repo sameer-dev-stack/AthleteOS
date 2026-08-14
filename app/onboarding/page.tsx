@@ -477,7 +477,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg px-4 py-8 sm:py-12">
+    <div className="flex min-h-screen items-center justify-center bg-bg px-4 py-8 sm:py-12 pb-[max(2rem,env(safe-area-inset-bottom))]">
       <VerificationBanner />
       {showWelcome && <WelcomeModal onDismiss={() => setShowWelcome(false)} />}
       <div className="w-full max-w-lg">
@@ -487,15 +487,15 @@ export default function OnboardingPage() {
             <span className="text-lg font-semibold tracking-tight">AthleteOS</span>
           </div>
 
-          <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-3 px-2 overflow-x-auto">
+          <div className="flex items-center justify-center gap-1 sm:gap-2 mb-3">
             {STEP_META.map((s, i) => {
               const isComplete = i < currentIdx;
               const isCurrent = i === currentIdx;
               return (
-                <div key={s.key} className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                <div key={s.key} className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                   <div className="flex flex-col items-center gap-1">
                     <div
-                      className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300 ${
+                      className={`flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full text-[11px] sm:text-xs font-semibold transition-all duration-300 ${
                         isCurrent
                           ? "bg-accent text-bg scale-110"
                           : isComplete
@@ -504,7 +504,7 @@ export default function OnboardingPage() {
                       }`}
                     >
                       {isComplete ? (
-                        <Check className="h-3.5 w-3.5" />
+                        <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                       ) : (
                         i + 1
                       )}
@@ -519,7 +519,7 @@ export default function OnboardingPage() {
                   </div>
                   {i < STEP_META.length - 1 && (
                     <div
-                      className={`h-px w-5 sm:w-8 mb-0 sm:mb-4 transition-colors duration-300 ${
+                      className={`h-px w-3 sm:w-8 mb-0 sm:mb-4 transition-colors duration-300 ${
                         i < currentIdx ? "bg-accent/40" : "bg-white/[0.06]"
                       }`}
                     />
@@ -538,6 +538,9 @@ export default function OnboardingPage() {
                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
               />
             </div>
+            <p className="mt-2 text-center text-[11px] font-medium text-ink-muted sm:hidden">
+              Step {currentIdx + 1} of {STEP_META.length} &middot; {STEP_META[currentIdx].label}
+            </p>
           </div>
         </div>
 
@@ -558,7 +561,7 @@ export default function OnboardingPage() {
                 <span className="text-accent">{username || "yourname"}</span>
               </p>
 
-              <div className="mt-8 space-y-4">
+              <div className="mt-5 sm:mt-8 space-y-4">
                 <div>
                   <label htmlFor="username" className="mb-1.5 block text-sm font-medium text-ink-muted">
                     Username
@@ -578,7 +581,7 @@ export default function OnboardingPage() {
                           : usernameStatus === "taken" || usernameStatus === "invalid"
                           ? "border-red-400/40"
                           : "border-white/[0.08]"
-                      } w-full rounded-xl border bg-white/[0.03] py-3 pl-4 pr-10 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none transition-colors`}
+                      } w-full rounded-xl border bg-white/[0.03] py-3 pl-4 pr-10 text-sm text-white placeholder:text-ink-muted/70 focus:border-accent/40 focus:outline-none transition-colors`}
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
                       {usernameStatus === "checking" && (
@@ -609,7 +612,7 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
-              <div className="mt-8 flex flex-col gap-3">
+              <div className="mt-5 sm:mt-8 flex flex-col gap-3">
                 <button
                   onClick={goNext}
                   disabled={!canProceedUsername}
