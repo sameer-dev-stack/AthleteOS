@@ -98,7 +98,7 @@ export function LaunchOfferBanner({
             </span>
             <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[11px] font-bold text-white/90 bg-white/[0.08] border border-white/[0.14] backdrop-blur-md flex-shrink-0">
               <Zap className="h-3.5 w-3.5 text-accent fill-accent" />
-              {remainingSlots} / {totalSlots} Spots Remaining
+              {remainingSlots} Spots Remaining
             </span>
           </div>
 
