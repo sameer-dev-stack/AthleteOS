@@ -15,7 +15,6 @@ import {
   Instagram,
   Music2,
   Sparkles,
-  Eye,
   Plus,
   X,
   Mail,
@@ -812,10 +811,6 @@ export default function OnboardingPage() {
               </div>
 
               <div className="mt-6">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Eye className="h-3 w-3 text-ink-dim" />
-                  <span className="text-[10px] font-medium text-ink-dim uppercase tracking-wider">Live preview</span>
-                </div>
                 <PreviewCard
                   avatarUrl={avatarLocalUrl ?? avatarUrl}
                   fullName={fullName}
@@ -912,10 +907,6 @@ export default function OnboardingPage() {
               </div>
 
               <div className="mt-6">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Eye className="h-3 w-3 text-ink-dim" />
-                  <span className="text-[10px] font-medium text-ink-dim uppercase tracking-wider">Live preview</span>
-                </div>
                 <PreviewCard
                   avatarUrl={avatarLocalUrl ?? avatarUrl}
                   fullName={fullName}
@@ -1041,10 +1032,6 @@ export default function OnboardingPage() {
               )}
 
               <div className="mt-6">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Eye className="h-3 w-3 text-ink-dim" />
-                  <span className="text-[10px] font-medium text-ink-dim uppercase tracking-wider">Live preview</span>
-                </div>
                 <PreviewCard
                   avatarUrl={avatarLocalUrl ?? avatarUrl}
                   fullName={fullName}
