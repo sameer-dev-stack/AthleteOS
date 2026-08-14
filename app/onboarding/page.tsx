@@ -723,7 +723,7 @@ export default function OnboardingPage() {
                 <button
                   onClick={goNext}
                   disabled={!canProceedUsername}
-                  className="w-full rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-bg transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-bg transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] disabled:bg-white/[0.06] disabled:text-ink-muted disabled:opacity-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   Continue
                   <ArrowRight className="h-4 w-4" />
@@ -1046,7 +1046,7 @@ export default function OnboardingPage() {
                   <button
                     onClick={goNext}
                     disabled={!canProceedSocials}
-                    className="flex-1 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-bg transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-1 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-bg transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] disabled:bg-white/[0.06] disabled:text-ink-muted disabled:opacity-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     Continue
                     <ArrowRight className="h-4 w-4" />
@@ -1074,6 +1074,11 @@ export default function OnboardingPage() {
               </div>
 
               <div className="mt-8 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-1/2 text-[10px] font-medium uppercase tracking-wider text-ink-dim">Label</span>
+                  <span className="flex-1 text-[10px] font-medium uppercase tracking-wider text-ink-dim">Value</span>
+                  <span className="w-9" />
+                </div>
                 {stats.map((stat, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <input
@@ -1134,7 +1139,11 @@ export default function OnboardingPage() {
               )}
 
               {stats.length > 0 && !canProceedStats && (
-                <p className="mt-3 text-xs text-red-400">Fill in the label and value for at least one stat.</p>
+                <p className="mt-3 text-xs text-red-400">
+                  {stats.some((s) => PLACEHOLDER_STATS.test(s.label.trim()) || PLACEHOLDER_STATS.test(s.value.trim()))
+                    ? "That looks like placeholder text. Enter a real stat label and value (e.g. PPG \u00b7 18.4)."
+                    : "Fill in the label and value for at least one stat."}
+                </p>
               )}
 
               <div className="mt-6">
@@ -1171,7 +1180,7 @@ export default function OnboardingPage() {
                   <button
                     onClick={goNext}
                     disabled={!canProceedStats}
-                    className="flex-1 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-bg transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-1 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-bg transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] disabled:bg-white/[0.06] disabled:text-ink-muted disabled:opacity-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     Continue
                     <ArrowRight className="h-4 w-4" />
@@ -1361,7 +1370,7 @@ export default function OnboardingPage() {
                   <button
                     onClick={handleComplete}
                     disabled={saving || !canProceedDetails}
-                    className="flex-1 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-bg transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-1 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-bg transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] disabled:bg-white/[0.06] disabled:text-ink-muted disabled:opacity-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {saving ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
