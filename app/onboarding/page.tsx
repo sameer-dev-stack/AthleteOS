@@ -128,7 +128,9 @@ function PreviewCard({
   tiktok: string;
   stats: { label: string; value: string }[];
 }) {
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
   const displayName = fullName || "Your Name";
+
   const subtitle = [position, sport].filter(Boolean).join(" ");
   const schoolLine = [school, classYear].filter(Boolean).join(" \u00b7 ");
   const hasSocials = instagram.trim() || tiktok.trim();
@@ -143,13 +145,14 @@ function PreviewCard({
 
       <div className="relative px-4 pb-4 -mt-8">
         <div className="flex items-end gap-3">
-          {avatarUrl ? (
+          {avatarUrl && avatarUrl !== failedUrl ? (
             <Image
               src={avatarUrl}
               alt="Avatar"
               unoptimized
               width={64}
               height={64}
+              onError={() => setFailedUrl(avatarUrl)}
               className="h-16 w-16 rounded-2xl object-cover ring-4 ring-bg-elev"
             />
           ) : (
@@ -477,7 +480,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg px-4 py-8 sm:py-12 pb-[max(2rem,env(safe-area-inset-bottom))]">
+    <div className="flex min-h-screen items-center justify-center bg-bg px-4 pt-8 pb-[max(2rem,env(safe-area-inset-bottom))] sm:pt-12 sm:pb-12">
       <VerificationBanner />
       {showWelcome && <WelcomeModal onDismiss={() => setShowWelcome(false)} />}
       <div className="w-full max-w-lg">
@@ -689,7 +692,7 @@ export default function OnboardingPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="sport" className="mb-1.5 block text-sm font-medium text-ink-muted">
                       Sport <span className="text-accent">*</span>
@@ -730,7 +733,7 @@ export default function OnboardingPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="school" className="mb-1.5 block text-sm font-medium text-ink-muted">
                       School <span className="text-accent">*</span>
@@ -786,7 +789,7 @@ export default function OnboardingPage() {
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
                     onBlur={() => markTouched("bio")}
-                    placeholder="D1 guard at Stanford. Game-changer on and off the court."
+                    placeholder="e.g. D1 guard at Stanford. Game-changer on and off the court."
                     rows={3}
                     maxLength={280}
                     className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none resize-none transition-colors"
@@ -801,7 +804,7 @@ export default function OnboardingPage() {
                     ) : (
                       <p className="text-[11px] text-accent/60">Looks good.</p>
                     )}
-                    <p className="text-[11px] text-ink-dim">{bio.length}/280</p>
+                    <p className="text-[11px] text-ink-muted">{bio.length}/280</p>
                   </div>
                 </div>
               </div>
