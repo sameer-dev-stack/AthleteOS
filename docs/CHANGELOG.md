@@ -22,7 +22,7 @@ Onboarding Profile step (step 2) misled mobile users: placeholder text looked li
 - `components/avatar-upload.tsx`
 
 ### Commit
-pending
+`89b493a`
 
 ### What changed
 - **`components/dashboard/billing-panel.tsx`**:
