@@ -3,7 +3,26 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
-## 2026-08-13 — Updated Billing Panel Pro Features for NIL Suite
+## 2026-08-14 — Session: Onboarding Profile Step Fixes — Placeholder Traps, Avatar Preview Sync, Continue State
+
+### What changed
+- **`app/onboarding/page.tsx`**:
+  - Position placeholder `"Guard"` → `e.g. Guard`, School placeholder `"Stanford"` → `e.g. Stanford`, Full name placeholder `"Maya Reyes"` → `e.g. Maya Reyes` (bio already prefixed `e.g. ` in a prior session). Removes false "required" validation errors caused by placeholders that read like entered values.
+  - Added `avatarLocalUrl` state; AvatarUpload now receives `currentUrl={avatarLocalUrl ?? avatarUrl}` and `onUpload={(url, localUrl) => { setAvatarUrl(url); setAvatarLocalUrl(localUrl ?? null); }}` so the freshly picked photo (blob object URL) survives the step remount inside `AnimatePresence mode="wait"`.
+  - All three `PreviewCard` instances now render `avatarLocalUrl ?? avatarUrl` so Live Preview matches the upload circle.
+  - Continue button disabled styling → `disabled:bg-white/[0.06] disabled:text-ink-muted disabled:opacity-100 disabled:cursor-not-allowed` (neutral grey instead of faded lime) so it reads as disabled without looking broken.
+- **`components/avatar-upload.tsx`**:
+  - `onUpload` type extended to `(url: string, localUrl?: string) => void`; success path now passes both the persisted public URL and the in-memory object URL. Backward compatible — dashboard-avatar, profile-editor, and overview pass single-arg handlers.
+
+### Why
+Onboarding Profile step (step 2) misled mobile users: placeholder text looked like filled values while touch-based blur validation flagged required fields empty; the uploaded photo vanished from the avatar circle and Live Preview on step remount because the internal blob preview resets; and the disabled Continue button's faded-lime opacity made it look broken rather than disabled.
+
+### Files touched
+- `app/onboarding/page.tsx`
+- `components/avatar-upload.tsx`
+
+### Commit
+pending
 
 ### What changed
 - **`components/dashboard/billing-panel.tsx`**:

@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 type Props = {
   currentUrl: string | null;
   userId: string;
-  onUpload: (url: string) => void;
+  onUpload: (url: string, localUrl?: string) => void;
   size?: "sm" | "md" | "lg";
   triggerOnly?: boolean;
 };
@@ -69,7 +69,7 @@ export function AvatarUpload({ currentUrl, userId, onUpload, size = "md", trigge
         const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
         const publicUrl = `${data.publicUrl}?t=${Date.now()}`;
 
-        onUpload(publicUrl);
+        onUpload(publicUrl, objectUrl);
       } catch (err) {
         setError("Upload failed. Please try again.");
         if (preview) URL.revokeObjectURL(preview);

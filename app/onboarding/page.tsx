@@ -234,6 +234,7 @@ export default function OnboardingPage() {
   const [position, setPosition] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarLocalUrl, setAvatarLocalUrl] = useState<string | null>(null);
   const [userId, setUserId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -649,9 +650,12 @@ export default function OnboardingPage() {
                 <div>
                   <div className="flex justify-center">
                     <AvatarUpload
-                      currentUrl={avatarUrl}
+                      currentUrl={avatarLocalUrl ?? avatarUrl}
                       userId={userId}
-                      onUpload={setAvatarUrl}
+                      onUpload={(url, localUrl) => {
+                        setAvatarUrl(url);
+                        setAvatarLocalUrl(localUrl ?? null);
+                      }}
                       size="lg"
                     />
                   </div>
@@ -679,7 +683,7 @@ export default function OnboardingPage() {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value.replace(/[^a-zA-ZÀ-ÿ\s'\-]/g, ""))}
                       onBlur={() => markTouched("fullName")}
-                      placeholder="Maya Reyes"
+                      placeholder="e.g. Maya Reyes"
                       maxLength={100}
                       className={fieldClassesPl(fieldState("fullName", fullName.trim().length > 0))}
                     />
@@ -723,8 +727,8 @@ export default function OnboardingPage() {
       value={position}
       onChange={(e) => setPosition(e.target.value)}
       onBlur={() => markTouched("position")}
-      placeholder="Guard"
-      maxLength={50}
+                      placeholder="e.g. Guard"
+                      maxLength={50}
       className={fieldClasses(fieldState("position", position.trim().length > 0))}
     />
                     {touched["position"] && position.trim().length === 0 && (
@@ -746,7 +750,7 @@ export default function OnboardingPage() {
                         value={school}
                         onChange={(e) => setSchool(e.target.value)}
                         onBlur={() => markTouched("school")}
-                        placeholder="Stanford"
+                        placeholder="e.g. Stanford"
                         maxLength={100}
                         className={fieldClassesPl(fieldState("school", school.trim().length > 0))}
                       />
@@ -815,7 +819,7 @@ export default function OnboardingPage() {
                   <span className="text-[10px] font-medium text-ink-dim uppercase tracking-wider">Live preview</span>
                 </div>
                 <PreviewCard
-                  avatarUrl={avatarUrl}
+                  avatarUrl={avatarLocalUrl ?? avatarUrl}
                   fullName={fullName}
                   sport={sport}
                   school={school}
@@ -847,7 +851,7 @@ export default function OnboardingPage() {
                   <button
                     onClick={goNext}
                     disabled={!canProceedProfile}
-                    className="flex-1 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-bg transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-1 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-bg transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] disabled:bg-white/[0.06] disabled:text-ink-muted disabled:opacity-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     Continue
                     <ArrowRight className="h-4 w-4" />
@@ -915,7 +919,7 @@ export default function OnboardingPage() {
                   <span className="text-[10px] font-medium text-ink-dim uppercase tracking-wider">Live preview</span>
                 </div>
                 <PreviewCard
-                  avatarUrl={avatarUrl}
+                  avatarUrl={avatarLocalUrl ?? avatarUrl}
                   fullName={fullName}
                   sport={sport}
                   school={school}
@@ -1044,7 +1048,7 @@ export default function OnboardingPage() {
                   <span className="text-[10px] font-medium text-ink-dim uppercase tracking-wider">Live preview</span>
                 </div>
                 <PreviewCard
-                  avatarUrl={avatarUrl}
+                  avatarUrl={avatarLocalUrl ?? avatarUrl}
                   fullName={fullName}
                   sport={sport}
                   school={school}
