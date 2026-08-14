@@ -9,7 +9,6 @@ import {
   ArrowLeft,
   Check,
   Loader2,
-  AtSign,
   User,
   GraduationCap,
   Copy,
@@ -478,22 +477,22 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-bg px-4 py-8 sm:py-12">
       <VerificationBanner />
       {showWelcome && <WelcomeModal onDismiss={() => setShowWelcome(false)} />}
       <div className="w-full max-w-lg">
-        <div className="mb-8 text-center">
-          <div className="inline-flex items-center gap-2.5 mb-6">
+        <div className="mb-4 sm:mb-8 text-center">
+          <div className="inline-flex items-center gap-2.5 mb-4 sm:mb-6">
             <Logo />
             <span className="text-lg font-semibold tracking-tight">AthleteOS</span>
           </div>
 
-          <div className="flex items-center justify-center gap-2 mb-3">
+          <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-3 px-2 overflow-x-auto">
             {STEP_META.map((s, i) => {
               const isComplete = i < currentIdx;
               const isCurrent = i === currentIdx;
               return (
-                <div key={s.key} className="flex items-center gap-2">
+                <div key={s.key} className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                   <div className="flex flex-col items-center gap-1">
                     <div
                       className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300 ${
@@ -511,7 +510,7 @@ export default function OnboardingPage() {
                       )}
                     </div>
                     <span
-                      className={`text-[10px] font-medium transition-colors duration-300 ${
+                      className={`hidden sm:block text-[10px] font-medium whitespace-nowrap transition-colors duration-300 ${
                         isCurrent ? "text-ink" : isComplete ? "text-accent" : "text-ink-dim"
                       }`}
                     >
@@ -520,7 +519,7 @@ export default function OnboardingPage() {
                   </div>
                   {i < STEP_META.length - 1 && (
                     <div
-                      className={`h-px w-8 mb-4 transition-colors duration-300 ${
+                      className={`h-px w-5 sm:w-8 mb-0 sm:mb-4 transition-colors duration-300 ${
                         i < currentIdx ? "bg-accent/40" : "bg-white/[0.06]"
                       }`}
                     />
@@ -530,7 +529,7 @@ export default function OnboardingPage() {
             })}
           </div>
 
-          <div className="mx-auto max-w-xs mb-8">
+          <div className="mx-auto max-w-xs mb-6 sm:mb-8">
             <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
               <motion.div
                 className="h-full rounded-full bg-accent"
@@ -565,7 +564,6 @@ export default function OnboardingPage() {
                     Username
                   </label>
                   <div className="relative">
-                    <AtSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-dim" />
                     <input
                       id="username"
                       type="text"
@@ -580,7 +578,7 @@ export default function OnboardingPage() {
                           : usernameStatus === "taken" || usernameStatus === "invalid"
                           ? "border-red-400/40"
                           : "border-white/[0.08]"
-                      } w-full rounded-xl border bg-white/[0.03] py-3 pl-10 pr-10 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none transition-colors`}
+                      } w-full rounded-xl border bg-white/[0.03] py-3 pl-4 pr-10 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none transition-colors`}
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
                       {usernameStatus === "checking" && (
