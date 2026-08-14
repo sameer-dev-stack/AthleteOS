@@ -46,6 +46,27 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const PLACEHOLDER_STATS = /^(test|asdf|foo|bar|baz|aaa|123|000|xxx|yyy|zzz|na|n\/a|none|sample|demo|example|temp|placeholder)$/i;
 
+const DRAFT_PREFIX = "athleteos:onboarding:draft:v1:";
+
+type OnboardingDraft = {
+  step: StepKey;
+  username: string;
+  fullName: string;
+  sport: string;
+  school: string;
+  classYear: string;
+  position: string;
+  bio: string;
+  avatarUrl: string | null;
+  instagram: string;
+  tiktok: string;
+  stats: { label: string; value: string }[];
+  links: { label: string; url: string }[];
+  highlights: { title: string; url: string }[];
+  contactEmail: string;
+  contactPhone: string;
+};
+
 function isValidEmail(value: string): boolean {
   return EMAIL_REGEX.test(value.trim());
 }
@@ -245,6 +266,60 @@ export default function OnboardingPage() {
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
 
+  function restoreDraft(userId: string) {
+    let draft: OnboardingDraft | null = null;
+    try {
+      const raw = localStorage.getItem(`${DRAFT_PREFIX}${userId}`);
+      if (raw) draft = JSON.parse(raw);
+    } catch {
+      draft = null;
+    }
+    if (!draft || !STEP_META.some((s) => s.key === draft!.step)) return;
+
+    setStep(draft.step);
+    setUsername(draft.username);
+    setFullName(draft.fullName);
+    setSport(draft.sport);
+    setSchool(draft.school);
+    setClassYear(draft.classYear);
+    setPosition(draft.position);
+    setBio(draft.bio);
+    setAvatarUrl(draft.avatarUrl);
+    setInstagram(draft.instagram);
+    setTiktok(draft.tiktok);
+    setStats(draft.stats);
+    setLinks(draft.links);
+    setHighlights(draft.highlights);
+    setContactEmail(draft.contactEmail);
+    setContactPhone(draft.contactPhone);
+  }
+
+  function saveDraft(userId: string) {
+    const draft: OnboardingDraft = {
+      step,
+      username,
+      fullName,
+      sport,
+      school,
+      classYear,
+      position,
+      bio,
+      avatarUrl,
+      instagram,
+      tiktok,
+      stats,
+      links,
+      highlights,
+      contactEmail,
+      contactPhone,
+    };
+    try {
+      localStorage.setItem(`${DRAFT_PREFIX}${userId}`, JSON.stringify(draft));
+    } catch {
+      // storage full/unavailable; ignore
+    }
+  }
+
   useEffect(() => {
     let cancelled = false;
     const supabase = createClient();
@@ -270,6 +345,7 @@ export default function OnboardingPage() {
             router.push("/dashboard");
             return;
           }
+          restoreDraft(user.id);
           setLoading(false);
           setShowWelcome(true);
           trackFunnel("onboarding_start");
@@ -281,6 +357,31 @@ export default function OnboardingPage() {
     });
     return () => { cancelled = true; };
   }, [router]);
+
+  useEffect(() => {
+    if (!userId || loading) return;
+    const t = setTimeout(() => saveDraft(userId), 400);
+    return () => clearTimeout(t);
+  }, [
+    userId,
+    loading,
+    step,
+    username,
+    fullName,
+    sport,
+    school,
+    classYear,
+    position,
+    bio,
+    avatarUrl,
+    instagram,
+    tiktok,
+    stats,
+    links,
+    highlights,
+    contactEmail,
+    contactPhone,
+  ]);
 
   useEffect(() => {
     if (username.length < 3) {
@@ -430,6 +531,11 @@ export default function OnboardingPage() {
         referred_by: referredBy,
       });
       if (result.ok) {
+        try {
+          localStorage.removeItem(`${DRAFT_PREFIX}${userId}`);
+        } catch {
+          // ignore
+        }
         trackFunnel("onboarding_complete");
         if (referredBy) {
           recordReferral(referredBy).then((r) => {
