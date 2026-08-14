@@ -644,7 +644,7 @@ function AthleteStats({ cells, accent }: AthleteStatsProps) {
           return (
             <div
               key={cell.key}
-              className="flex-1 flex flex-col items-center justify-center py-3.5 px-2 relative"
+              className="flex-1 flex flex-col items-center justify-center py-3.5 px-2 relative min-w-0"
               style={
                 i > 0
                   ? { borderLeft: "1px solid rgba(255,255,255,0.055)" }
@@ -659,9 +659,9 @@ function AthleteStats({ cells, accent }: AthleteStatsProps) {
                   opacity: cell.isAccent ? 0.95 : 0.65,
                 }}
               />
-              {/* Value */}
+              {/* Value — smaller on mobile, truncated so long numbers never overflow */}
               <span
-                className="text-[20px] font-black leading-none tracking-tight"
+                className="text-base sm:text-[20px] font-black leading-none tracking-tight max-w-full truncate"
                 style={{
                   color: cell.isAccent ? accent : "rgba(255,255,255,0.95)",
                   letterSpacing: "-0.03em",
@@ -669,9 +669,9 @@ function AthleteStats({ cells, accent }: AthleteStatsProps) {
               >
                 {cell.value}
               </span>
-              {/* Label */}
+              {/* Label — smaller on mobile, truncated */}
               <span
-                className="text-[8.5px] font-bold uppercase tracking-widest mt-1.5 text-center leading-none"
+                className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-widest mt-1.5 text-center leading-none max-w-full truncate"
                 style={{
                   color: cell.isAccent ? `${accent}cc` : "rgba(255,255,255,0.45)",
                 }}

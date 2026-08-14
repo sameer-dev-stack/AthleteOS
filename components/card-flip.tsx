@@ -12,9 +12,9 @@ export function CardFlip() {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Floating overlays */}
+      {/* Floating overlays — hidden on mobile */}
       <div
-        className="absolute -top-4 -left-10 z-20 w-[200px] rounded-xl border border-white/[0.08] bg-zinc-900/95 p-3 shadow-xl backdrop-blur-md transition-all duration-500"
+        className="absolute -top-4 -left-10 z-20 hidden w-[200px] rounded-xl border border-white/[0.08] bg-zinc-900/95 p-3 shadow-xl backdrop-blur-md transition-all duration-500 sm:block"
         style={{
           opacity: hovered ? 1 : 0,
           transform: hovered ? "translateY(0)" : "translateY(8px)",
@@ -34,7 +34,7 @@ export function CardFlip() {
       </div>
 
       <div
-        className="absolute -top-2 -right-8 z-20 flex items-center gap-2 rounded-xl border border-accent/20 bg-zinc-900/95 px-3 py-2 shadow-xl backdrop-blur-md transition-all duration-500"
+        className="absolute -top-2 -right-8 z-20 hidden items-center gap-2 rounded-xl border border-accent/20 bg-zinc-900/95 px-3 py-2 shadow-xl backdrop-blur-md transition-all duration-500 sm:flex"
         style={{
           opacity: hovered ? 1 : 0,
           transform: hovered ? "translateY(0)" : "translateY(8px)",
@@ -49,7 +49,7 @@ export function CardFlip() {
       </div>
 
       <div
-        className="absolute bottom-16 -left-12 z-20 w-[210px] rounded-xl border border-white/[0.08] bg-zinc-900/95 p-3 shadow-xl backdrop-blur-md transition-all duration-500"
+        className="absolute bottom-16 -left-12 z-20 hidden w-[210px] rounded-xl border border-white/[0.08] bg-zinc-900/95 p-3 shadow-xl backdrop-blur-md transition-all duration-500 sm:block"
         style={{
           opacity: hovered ? 1 : 0,
           transform: hovered ? "translateY(0)" : "translateY(8px)",
