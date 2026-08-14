@@ -31,7 +31,6 @@ import confetti from "canvas-confetti";
 import { Logo } from "@/components/logo";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { WelcomeModal } from "@/components/onboarding/welcome-modal";
-import { VerificationBanner } from "@/components/verification-banner";
 import { trackFunnel } from "@/lib/hooks/use-funnel-tracking";
 import { getStatTemplatesForSport } from "@/lib/sport-stat-templates";
 
@@ -482,7 +481,6 @@ export default function OnboardingPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg px-4 pt-8 pb-[max(2rem,env(safe-area-inset-bottom))] sm:pt-12 sm:pb-12">
-      <VerificationBanner />
       {showWelcome && <WelcomeModal onDismiss={() => setShowWelcome(false)} />}
       <div className="w-full max-w-lg">
         <div className="mb-4 sm:mb-8 text-center">
