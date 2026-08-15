@@ -196,44 +196,6 @@ export function AnalyticsPanel({ athleteId, initialData, themeAccent = "#C6FF3D"
 
   return (
     <div className="space-y-6">
-      {/* Pro Lock Top Banner for Free Plan Users */}
-      {!isPro && (
-        <div
-          className="relative overflow-hidden rounded-2xl border border-accent/40 p-5 shadow-2xl"
-          style={{
-            background: "radial-gradient(ellipse 130% 120% at 0% 0%, rgba(198, 255, 61, 0.12) 0%, rgba(18, 20, 28, 0.96) 50%, rgba(8, 9, 13, 0.99) 100%)",
-            boxShadow: "0 20px 50px -10px rgba(0, 0, 0, 0.8)",
-          }}
-        >
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-3.5">
-              <div className="h-10 w-10 rounded-xl bg-accent/20 border border-accent/40 flex items-center justify-center flex-shrink-0 text-accent shadow-[0_0_20px_rgba(198,255,61,0.3)]">
-                <Crown className="h-5 w-5" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h4 className="text-sm font-black text-white tracking-wide uppercase">Detailed Analytics — Pro Exclusive</h4>
-                  <span className="px-2 py-0.5 rounded text-[9.5px] font-black uppercase tracking-wider bg-accent text-black">
-                    PRO ONLY
-                  </span>
-                </div>
-                <p className="text-xs text-white/70 mt-1 leading-relaxed max-w-xl">
-                  Free accounts only see basic view counts. Upgrade to AthleteOS Pro to unlock 30 & 90-day historical trends, link click tracking, referrer sources, device breakdowns, conversion rates, and CSV exports.
-                </p>
-              </div>
-            </div>
-
-            <Link
-              href="/dashboard/billing"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-accent text-black font-black text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(198,255,61,0.4)] hover:bg-[#b8f52b] hover:scale-[1.02] active:scale-[0.98] transition-all flex-shrink-0"
-            >
-              <span>Unlock Full Analytics</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-        </div>
-      )}
-
       <div className="rounded-xl border border-white/[0.06] bg-[#111113]">
         {/* Header Controls */}
         <div className="border-b border-white/[0.06] px-6 py-4">
@@ -374,34 +336,89 @@ export function AnalyticsPanel({ athleteId, initialData, themeAccent = "#C6FF3D"
                     </div>
                   </div>
 
-                  {/* Dummy Blurred Preview of Detailed Analytics */}
-                  <div className="filter blur-md pointer-events-none select-none opacity-20 space-y-6">
-                    <div className="grid gap-4 sm:grid-cols-4">
-                      <div className="rounded-lg bg-white/[0.03] p-4">
-                        <div className="text-xs text-ink-muted">Click rate</div>
-                        <div className="text-2xl font-bold text-white mt-1">4.2%</div>
+                    {/* Dummy Blurred Preview of Detailed Analytics */}
+                    <div className="filter blur-md pointer-events-none select-none opacity-20 space-y-6">
+                      <div className="grid gap-4 sm:grid-cols-4">
+                        <div className="rounded-lg bg-white/[0.03] p-4">
+                          <div className="text-xs text-ink-muted">Click rate</div>
+                          <div className="text-2xl font-bold text-white mt-1">4.2%</div>
+                        </div>
+                        <div className="rounded-lg bg-white/[0.03] p-4">
+                          <div className="text-xs text-ink-muted">Inquiry rate</div>
+                          <div className="text-2xl font-bold text-white mt-1">1.8%</div>
+                        </div>
+                        <div className="rounded-lg bg-white/[0.03] p-4">
+                          <div className="text-xs text-ink-muted">Tip rate</div>
+                          <div className="text-2xl font-bold text-emerald-400 mt-1">$2.40</div>
+                        </div>
+                        <div className="rounded-lg bg-white/[0.03] p-4">
+                          <div className="text-xs text-ink-muted">Avg views/day</div>
+                          <div className="text-2xl font-bold text-white mt-1">24</div>
+                        </div>
                       </div>
-                      <div className="rounded-lg bg-white/[0.03] p-4">
-                        <div className="text-xs text-ink-muted">Inquiry rate</div>
-                        <div className="text-2xl font-bold text-white mt-1">1.8%</div>
+
+                      {/* Bar chart preview */}
+                      <div className="h-32 bg-accent/20 rounded-xl w-full flex items-end gap-1 px-3 pb-2">
+                        {[35, 55, 40, 70, 50, 65, 45, 80, 55, 70, 40, 75].map((h, i) => (
+                          <div key={i} className="flex-1 bg-accent/40 rounded-t" style={{ height: `${h}%` }} />
+                        ))}
                       </div>
-                      <div className="rounded-lg bg-white/[0.03] p-4">
-                        <div className="text-xs text-ink-muted">Tip rate</div>
-                        <div className="text-2xl font-bold text-emerald-400 mt-1">$2.40</div>
-                      </div>
-                      <div className="rounded-lg bg-white/[0.03] p-4">
-                        <div className="text-xs text-ink-muted">Avg views/day</div>
-                        <div className="text-2xl font-bold text-white mt-1">24</div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        {/* Referrer sources preview */}
+                        <div className="h-24 bg-white/[0.05] rounded-xl p-3 space-y-2">
+                          <div className="text-[10px] text-ink-muted">Top referrers</div>
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <div className="h-1 flex-1 bg-white/10 rounded-full overflow-hidden">
+                                <div className="h-full w-3/4 bg-accent/30 rounded-full" />
+                              </div>
+                              <span className="text-[9px] text-ink-dim">instagram.com</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="h-1 flex-1 bg-white/10 rounded-full overflow-hidden">
+                                <div className="h-full w-1/2 bg-accent/30 rounded-full" />
+                              </div>
+                              <span className="text-[9px] text-ink-dim">tiktok.com</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="h-1 flex-1 bg-white/10 rounded-full overflow-hidden">
+                                <div className="h-full w-1/4 bg-accent/30 rounded-full" />
+                              </div>
+                              <span className="text-[9px] text-ink-dim">direct</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Device breakdown preview */}
+                        <div className="h-24 bg-white/[0.05] rounded-xl p-3 space-y-2">
+                          <div className="text-[10px] text-ink-muted">Audience devices</div>
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[9px] text-ink-dim">Mobile</span>
+                              <div className="flex-1 mx-2 h-1 bg-white/10 rounded-full overflow-hidden">
+                                <div className="h-full w-2/3 bg-accent/30 rounded-full" />
+                              </div>
+                              <span className="text-[9px] text-ink-dim">68%</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-[9px] text-ink-dim">Desktop</span>
+                              <div className="flex-1 mx-2 h-1 bg-white/10 rounded-full overflow-hidden">
+                                <div className="h-full w-1/4 bg-accent/30 rounded-full" />
+                              </div>
+                              <span className="text-[9px] text-ink-dim">24%</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-[9px] text-ink-dim">Tablet</span>
+                              <div className="flex-1 mx-2 h-1 bg-white/10 rounded-full overflow-hidden">
+                                <div className="h-full w-1/12 bg-accent/30 rounded-full" />
+                              </div>
+                              <span className="text-[9px] text-ink-dim">8%</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-
-                    <div className="h-32 bg-accent/20 rounded-xl w-full" />
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="h-24 bg-white/[0.05] rounded-xl" />
-                      <div className="h-24 bg-white/[0.05] rounded-xl" />
-                    </div>
-                  </div>
                 </div>
               ) : (
                 /* PRO USERS: Full Detailed Analytics Charts & Data */
