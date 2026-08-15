@@ -36,6 +36,7 @@ export function TipEarnings({
   const [localEarnings, setLocalEarnings] = useState<TipEarnings | null>(null);
   const [localBalance, setLocalBalance] = useState<BalanceSummary | null>(null);
   const [localLoading, setLocalLoading] = useState(true);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   useEffect(() => {
     if (propLoading === undefined) {
@@ -43,10 +44,14 @@ export function TipEarnings({
       Promise.all([getTipEarnings(), getBalanceSummary()]).then(([earningsResult, balanceResult]) => {
         if (cancelled) return;
         if (earningsResult.ok && earningsResult.data) setLocalEarnings(earningsResult.data);
+        if (!earningsResult.ok) setLocalError(earningsResult.error || "Failed to load tip earnings");
         if (balanceResult.ok && balanceResult.data) setLocalBalance(balanceResult.data);
         setLocalLoading(false);
-      }).catch(() => {
-        if (!cancelled) setLocalLoading(false);
+      }).catch((err) => {
+        if (!cancelled) {
+          setLocalError(err instanceof Error ? err.message : "Failed to load earnings");
+          setLocalLoading(false);
+        }
       });
       return () => { cancelled = true; };
     }
@@ -55,6 +60,7 @@ export function TipEarnings({
   const activeLoading = propLoading !== undefined ? propLoading : localLoading;
   const activeEarnings = propEarnings !== undefined ? propEarnings : localEarnings;
   const activeBalance = propBalance !== undefined ? propBalance : localBalance;
+  const activeError = localError;
 
   if (activeLoading) {
     return (
@@ -120,7 +126,32 @@ export function TipEarnings({
       </div>
 
       <div className="p-6 space-y-6">
-        {/* ── Payment Method Setup Banner ──────── */}
+        {activeError && (
+          <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-center">
+            <p className="text-xs text-red-400">{activeError}</p>
+            <button
+              onClick={() => {
+                setLocalError(null);
+                setLocalLoading(true);
+                Promise.all([getTipEarnings(), getBalanceSummary()]).then(([earningsResult, balanceResult]) => {
+                  if (earningsResult.ok && earningsResult.data) setLocalEarnings(earningsResult.data);
+                  if (!earningsResult.ok) setLocalError(earningsResult.error || "Failed to load tip earnings");
+                  if (balanceResult.ok && balanceResult.data) setLocalBalance(balanceResult.data);
+                  setLocalLoading(false);
+                }).catch((err) => {
+                  setLocalError(err instanceof Error ? err.message : "Failed to load earnings");
+                  setLocalLoading(false);
+                });
+              }}
+              className="mt-2 text-xs font-semibold text-red-300 hover:text-red-200 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {!activeError && (
+          <>
         {!b.onboardingComplete && (
           <PaymentMethodSetup onSuccess={() => window.location.reload()} />
         )}
@@ -218,6 +249,8 @@ export function TipEarnings({
               Share your card
             </button>
           </div>
+        )}
+          </>
         )}
       </div>
     </div>

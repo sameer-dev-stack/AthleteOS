@@ -120,7 +120,7 @@ export async function getReferralStats(): Promise<ReferralStats> {
       .from("referrals")
       .select("id", { count: "exact", head: true })
       .eq("referrer_id", user.id)
-      .eq("status", "completed");
+      .in("status", ["completed", "rewarded"]);
 
     const { count: pending } = await admin
       .from("referrals")

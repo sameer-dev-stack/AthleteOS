@@ -44,6 +44,7 @@ import {
   Heart, Sparkles, ExternalLink, ChevronRight,
   X, Phone, QrCode,
   ShieldCheck, Briefcase, ChevronDown,
+  Loader2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Profile } from "@/lib/actions/profile";
@@ -51,6 +52,7 @@ import { TipButton } from "@/components/tip-button";
 import { InquiryForm } from "@/components/inquiry-form";
 import { trackView, trackLinkClick } from "@/lib/actions/analytics";
 import { trackFunnel } from "@/lib/hooks/use-funnel-tracking";
+import { verifyRecentTip } from "@/lib/actions/tip-verification";
 import { Logo } from "@/components/logo";
 import { resolvePlan } from "@/lib/referral-reward";
 import { QrShareModal } from "@/components/dashboard/qr-share-modal";
@@ -1527,6 +1529,8 @@ export function ProfileCard({
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [linksExpanded, setLinksExpanded] = useState(false);
   const [showTipSuccess, setShowTipSuccess] = useState(false);
+  const [showTipConfirming, setShowTipConfirming] = useState(false);
+  const [tipVerified, setTipVerified] = useState(false);
   const searchParams = useSearchParams();
   const autoReturnRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const trackedRef = useRef(false);
@@ -1543,12 +1547,31 @@ export function ProfileCard({
 
   useEffect(() => {
     if (searchParams?.get("tip") === "success") {
-      setShowTipSuccess(true);
-      import("canvas-confetti").then((mod) => {
-        mod.default({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-      }).catch(() => {});
+      setShowTipConfirming(true);
+      setTipVerified(false);
+
+      let attempts = 0;
+      const maxAttempts = 10;
+      const interval = setInterval(async () => {
+        attempts++;
+        const result = await verifyRecentTip(profile.id);
+        if (result.verified) {
+          clearInterval(interval);
+          setTipVerified(true);
+          setShowTipSuccess(true);
+          setShowTipConfirming(false);
+          import("canvas-confetti").then((mod) => {
+            mod.default({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+          }).catch(() => {});
+        } else if (attempts >= maxAttempts) {
+          clearInterval(interval);
+          setShowTipConfirming(false);
+        }
+      }, 3000);
+
+      return () => clearInterval(interval);
     }
-  }, [searchParams]);
+  }, [searchParams, profile.id]);
 
   /* ── Derived data ───────────────────────────────── */
   const themeObj = resolveTheme(profile.theme_accent);
@@ -2031,6 +2054,54 @@ export function ProfileCard({
         open={showInquiry}
         onClose={() => setShowInquiry(false)}
       />
+
+      {/* Tip confirming modal */}
+      <AnimatePresence>
+        {showTipConfirming && !showTipSuccess && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[150] flex items-center justify-center p-4"
+            style={{
+              background: "rgba(0,0,0,0.88)",
+              backdropFilter: "blur(14px)",
+              WebkitBackdropFilter: "blur(14px)",
+            }}
+            onClick={() => setShowTipConfirming(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl relative"
+              style={{
+                background: "#0d0d12",
+                border: "1px solid rgba(255,255,255,0.07)",
+              }}
+            >
+              <button
+                onClick={() => setShowTipConfirming(false)}
+                aria-label="Close"
+                className="absolute top-4 right-4 text-white/30 hover:text-white/70 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl"
+                style={{ background: `${accent}14`, border: `1px solid ${accent}28` }}
+              >
+                <Loader2 className="h-7 w-7 animate-spin" style={{ color: accent }} />
+              </div>
+              <h3 className="text-xl font-black text-white">Confirming Your Tip</h3>
+              <p className="mt-2 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+                Payment received! Your tip for{" "}
+                <span className="font-semibold text-white">{firstName}</span> is being confirmed and will appear in their dashboard shortly.
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Tip success modal */}
       <AnimatePresence>

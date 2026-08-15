@@ -3,6 +3,55 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session 2: Fix Optimistic Tip Success Bug
+
+### What changed
+- `lib/actions/tip-verification.ts` [NEW]: `verifyRecentTip(athleteId)` server action that checks whether a tip was recorded in the `tips` table within the last 5 minutes.
+- `components/profile-card.tsx`:
+  - Replaced immediate optimistic success modal on `?tip=success` with a two-state flow.
+  - When `?tip=success` is detected, shows a "Confirming Your Tip" modal with spinner while polling `verifyRecentTip` every 3 seconds for up to 30 seconds.
+  - Only shows the definitive "Thank You! Your tip has been processed" modal after the backend confirms the tip record exists.
+  - If verification times out, the confirming modal simply closes without claiming success.
+- `components/dashboard/tip-earnings.tsx`:
+  - Added `localError` state so query failures are surfaced to the user instead of silently showing the empty "No tips yet" state.
+  - Added retry button for failed earnings loads.
+
+### Why
+- The fan-facing success modal was triggered purely by the Stripe Checkout `success_url` parameter (`?tip=success`) with zero backend verification. If the Stripe webhook (`checkout.session.completed`) was delayed or failed, the tip record was never created in the database, leaving the athlete's dashboard showing "No tips yet" while the fan already saw "Your tip has been processed." This is a P0 money-integrity bug.
+- The earnings dashboard also silently swallowed errors from `getTipEarnings()`, making it impossible to distinguish "no tips" from "query failed."
+
+### Files touched
+- `lib/actions/tip-verification.ts`
+- `components/profile-card.tsx`
+- `components/dashboard/tip-earnings.tsx`
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings.
+- `npm run build` — green.
+- `npm test` — 10 pre-existing failures unrelated to tip flow (referral-reward, auth-copy).
+
+### Commit
+`<pending>`
+
+## 2026-08-15 — Session 3: Fix Referral Stats Inconsistency
+
+### What changed
+- `lib/actions/referrals.ts`: `getReferralStats()` now counts both `completed` and `rewarded` referrals for the `completedReferrals` stat, matching the leaderboard and funnel logic.
+
+### Why
+- The referral dashboard top stats showed `Completed = 0` while the `Top Referrers` leaderboard below showed `1 referral` for the same user. `getReferralStats()` only queried `status = "completed"`, but `getReferralLeaderboard()` and `getReferralFunnel()` both included `status IN ("completed", "rewarded")`. When a referral transitioned to `rewarded` after anti-cheat qualification, it disappeared from the personal stats but remained in the leaderboard — a data consistency bug identical in pattern to the tip earnings issue.
+
+### Files touched
+- `lib/actions/referrals.ts`
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings.
+- `npm run build` — green.
+- `npm test` — 10 pre-existing failures unrelated to referrals.
+
+### Commit
+`<pending>`
+
 ## 2026-08-15 — Session: Implement Tip Payout Fee Calculation
 
 ### What changed
