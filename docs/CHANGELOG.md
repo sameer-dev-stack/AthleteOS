@@ -31,7 +31,7 @@
 - `npm test` — 10 pre-existing failures unrelated to tip flow (referral-reward, auth-copy).
 
 ### Commit
-`<pending>`
+`3c76ced`
 
 ## 2026-08-15 — Session 3: Fix Referral Stats Inconsistency
 
@@ -50,7 +50,7 @@
 - `npm test` — 10 pre-existing failures unrelated to referrals.
 
 ### Commit
-`<pending>`
+`3c76ced`
 
 ## 2026-08-15 — Session: Implement Tip Payout Fee Calculation
 
@@ -516,7 +516,7 @@ QA review flagged the placement as a High trust issue: a persistent, non-dismiss
 - `app/dashboard/billing/page.tsx`
 
 ### Commit
-`<pending>`
+`3c76ced`
 
 ## 2026-08-14 — Session: Launch Offer Banner Restraint Pass — Kill Neon/Gamified Language, One Focal Point
 
@@ -537,7 +537,7 @@ QA acceptance criteria demanded the launch offer match the onboarding's restrain
 - `components/promo/launch-offer-banner.tsx`
 
 ### Commit
-`<pending>`
+`3c76ced`
 
 ## 2026-08-14 — Session: Launch Offer Banner Trust Fix — Hide Pre-Launch Counter, Concrete AI Chip, Em-Dash Out
 
@@ -555,7 +555,7 @@ External review flagged that the scarcity frame collapsed: the "500 Spots Remain
 - `components/promo/launch-offer-banner.tsx`
 
 ### Commit
-`<pending>`
+`3c76ced`
 
 ## 2026-08-14 — Session: Mobile Nav Cleanup — Remove Redundant Hamburger, Make BottomNav "More" Work
 
@@ -576,7 +576,7 @@ On mobile the BottomNav is the primary navigation, but a second floating hamburg
 - `components/layout/bottom-nav.tsx`
 
 ### Commit
-`<pending>`
+`3c76ced`
 
 ## 2026-08-14 — Session: Onboarding Profile Step Fixes — Placeholder Traps, Avatar Preview Sync, Continue State
 
