@@ -18,11 +18,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 
 function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
   return new Promise((resolve) => {
-    canvas.toBlob(
-      (blob) => resolve(blob),
-      "image/webp",
-      0.9
-    );
+    canvas.toBlob((blob) => resolve(blob), "image/webp", 0.9);
   });
 }
 
@@ -58,22 +54,28 @@ export async function cropImageToBlob(
   return canvasToBlob(canvas);
 }
 
-export async function boundImageToBlob(
+export async function fitSquareImageToBlob(
   src: string,
   maxSize = MAX_OUTPUT
 ): Promise<Blob | null> {
   const image = await loadImage(src);
-  const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
-  const width = Math.max(1, Math.round(image.width * scale));
-  const height = Math.max(1, Math.round(image.height * scale));
+  const size = Math.min(image.width, image.height);
+  const sx = (image.width - size) / 2;
+  const sy = (image.height - size) / 2;
+  const outputSize = Math.min(maxSize, size);
 
   const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
+  canvas.width = outputSize;
+  canvas.height = outputSize;
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
 
-  ctx.drawImage(image, 0, 0, width, height);
+  ctx.drawImage(image, sx, sy, size, size, 0, 0, outputSize, outputSize);
 
   return canvasToBlob(canvas);
+}
+
+export async function getImageSize(src: string): Promise<{ width: number; height: number }> {
+  const image = await loadImage(src);
+  return { width: image.width, height: image.height };
 }

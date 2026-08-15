@@ -6,7 +6,7 @@
 
 ## Edit log
 
-- **2026-08-15** — `components/avatar-crop-modal.tsx` [NEW]: crop UI copy. Title "Crop your photo"; buttons "Use as is", "Crop", "Zoom in", "Zoom out"; hint "Drag to position. Pinch or scroll to zoom."; close aria-label "Close"; processing label "Processing...". Also `components/avatar-upload.tsx`: upload error strings unchanged ("Image must be under 2 MB.", "Please upload an image file.", "Upload failed. Please try again.").
+- **2026-08-15** — `components/avatar-crop-modal.tsx`: crop UI copy. Title "Crop your photo"; buttons "Use as is", "Crop", "Reset"; zoom aria-labels "Zoom in" / "Zoom out"; hint "Drag to position. Pinch or use the slider to zoom."; close aria-label "Close"; processing label "Processing..."; min-size guard message "This image is too small. Use the crop to zoom in."; result thumbnail alt "Cropped preview". Also `components/avatar-upload.tsx`: upload error strings unchanged ("Image must be under 2 MB.", "Please upload an image file.", "Upload failed. Please try again.").
 - **2026-08-05** — `components/monetization.tsx` (#1 monetization card): replaced obsolete "Memberships / Recurring" with `{ icon: Handshake, label: "Brand deals", note: "Won & logged" }`.
 - **2026-08-05** — `components/pricing.tsx`: "Memberships & paid shoutouts" → "Tips & won brand deals".
 - **2026-08-05** — `components/how-it-works.tsx` (step 3 body): "Turn on tips, paid shoutouts, merch, and brand inquiries — all in one card." → "Turn on tips and brand inquiries, and run deals from first message to signed — all in one card." Removes non-existent "paid shoutouts" and "merch" claims; adds the Deal Room story.

@@ -6,7 +6,7 @@
 
 ## `<AvatarCropModal>` — `components/avatar-crop-modal.tsx` [NEW 2026-08-15]
 
-Full-screen square (1:1) avatar crop modal built on `react-easy-crop`. Drag to position, pinch/scroll to zoom, plus keyboard-focusable Zoom in / Zoom out buttons for a11y. No face detection — the user positions the crop. Emits the cropped blob (bounded to 512x512 WebP) or a bounded "use as is" blob.
+Full-screen square (1:1) avatar crop modal built on `react-easy-crop`. Crops to the card's circular shape via `cropShape="round"`; drag to position, pinch or slider to zoom, Reset returns to fit. No face detection — the user positions the crop. Live result thumbnail (desktop) shows the exact circular output. Emits a cropped blob bounded to 512x512 WebP; "Use as is" center-crops to 1:1 and bounds the same, disabled when the source is under 200px.
 
 - **Used by:** `components/avatar-upload.tsx`
 - **Requires:** `react-easy-crop` (^6.2.3), `lib/crop-image.ts`

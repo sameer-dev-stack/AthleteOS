@@ -3,6 +3,29 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Avatar Cropper QA Pass — Circular Mask, Live Result Thumb, Zoom Slider + Reset, Use-as-Is Guard
+
+### What changed
+- **`components/avatar-crop-modal.tsx`**:
+  - Switched the cropper to a **circular mask** (`cropShape="round"`) matching the card's circular avatar, so what you crop is the shape the card displays. No more square-frame blind crop.
+  - Added a **live result thumbnail** (desktop) — a small circle on the right showing the exact crop output as you adjust, updated via `refreshThumb` on every `onCropComplete`.
+  - Replaced button-only zoom with a **zoom slider** (1–3, step 0.05) plus keep the +/− buttons; added a **Reset** button that returns crop to center and zoom to 1.
+  - Added a checkerboard backdrop behind the crop stage so the silver/logo subject doesn't muddy into the dark frame.
+  - Added Escape-to-close.
+- **`lib/crop-image.ts`**: added `fitSquareImageToBlob` (center-crop to 1:1 then bound to 512) replacing `boundImageToBlob`, so **"Use as is" always ships a square, bounded image** — never a rectangle that breaks the card slot. Added `getImageSize` used for the minimum-size guard.
+- **Use-as-is guard**: if the source image's smallest dimension is under 200px, the "Use as is" button is disabled with an inline "This image is too small. Use the crop to zoom in." message. No tiny/blurry image can reach the card via the skip path.
+
+### Why
+QA verdict on the first cropper iteration: it was a functional prototype, not a profile-photo tool. Concrete defects fixed here: no live preview of the masked (circular) shape; "Use as is" could ship a rectangle or blurry tiny image (layout-breaker); zoom buttons only with no slider/reset; image muddiness against the dark frame. On the upload-to-card sync (QA item 5): traced and confirmed the flow is already correct — onboarding routes the cropped blob object URL through `onUpload(url, localUrl)` into `avatarLocalUrl`, and all three `PreviewCard`s plus the upload circle read it, so the card updates the moment a crop confirms. The "red placeholder" behind the modal is the pre-confirm state (nothing has been committed yet), which is expected while the crop dialog is open.
+
+### Files touched
+- `components/avatar-crop-modal.tsx`
+- `lib/crop-image.ts`
+- `docs/COMPONENTS.md`, `docs/COPY.md`
+
+### Commit
+`<pending>`
+
 ## 2026-08-15 — Session: Avatar Upload Cropper — react-easy-crop 1:1 Crop, Bounded WebP Output
 
 ### What changed
