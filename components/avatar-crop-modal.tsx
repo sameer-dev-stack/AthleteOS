@@ -154,10 +154,10 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
                 className="absolute inset-0"
                 style={{
                   background:
-                    "radial-gradient(circle closest-side at center, transparent 0, transparent 98.4%, rgba(0,0,0,0.65) 99.4%)",
+                    "radial-gradient(circle closest-side at center, transparent 0, transparent 98.4%, rgba(0,0,0,0.35) 99.4%)",
                 }}
               />
-              <div className="absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/70 shadow-[0_0_0_1px_rgba(0,0,0,0.4)]" />
+              <div className="absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/40 shadow-[0_0_0_1px_rgba(0,0,0,0.25)]" />
             </div>
           </div>
 
@@ -240,7 +240,7 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
             disabled={processing || tooSmall}
             className="flex-1 rounded-lg border border-white/10 bg-white/[0.02] px-4 py-2.5 text-sm font-medium text-ink-muted transition-colors hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Skip crop
+            Use as is
           </button>
           <button
             type="button"

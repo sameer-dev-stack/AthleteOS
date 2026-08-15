@@ -3,6 +3,27 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Avatar Crop Modal — Soften Circle Guide, Relabel "Skip Crop"
+
+### What changed
+- `components/avatar-crop-modal.tsx`:
+  - Circular preview mask lightened `rgba(0,0,0,0.65)` → `rgba(0,0,0,0.35)`; guide ring `border-white/70 shadow-[0_0_0_1px_rgba(0,0,0,0.4)]` → `border-white/40 shadow-[0_0_0_1px_rgba(0,0,0,0.25)]`. The circle is (and always was) a preview overlay only — output is a square crop (`cropShape="rect"`, `aspect={1}`, square canvas in `lib/crop-image.ts`). The heavy mask read as a destructive circular crop on mobile; now the full square is visible and the circle reads as a guide for circular avatar contexts.
+  - Button "Skip crop" → "Use as is": the action calls `fitSquareImageToBlob` which center-crops to a square — it never uploaded the full rectangle, so "Skip crop" was misleading.
+
+### Why
+- Mobile QA review of a scenic landscape photo: the strong circular mask made the square crop look like a hard circular crop that strips context; and "Skip crop" implied no cropping would happen when the button actually center-crops to square. Corrected perception and label. Face-detection default and zoom-out below 100% were evaluated and NOT implemented: (a) face detection needs an ML dependency (product decision, deferred); (b) a square output geometrically cannot fit a full landscape image without empty corners, so a zoom floor below 1 is pointless.
+
+### Files touched
+- `components/avatar-crop-modal.tsx`
+- `docs/COPY.md`
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings (unchanged).
+- `npm run build` — green.
+
+### Commit
+(see below)
+
 ## 2026-08-15 — Session: Replace Route Loader With InfinityLoop Animation
 
 ### What changed
