@@ -3,6 +3,32 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Improve Launch Offer Banner UX
+
+### What changed
+- `components/promo/launch-offer-banner.tsx`:
+  - Added explicit trial end date display: "90-day Pro trial · ends MM/DD" in the offer body.
+  - Split fine print into two lines: "Requires card verification via Stripe. No charges today." + "After MM/DD, your Pro subscription renews at $14/month unless you cancel beforehand. Cancel anytime."
+  - Increased dismiss button contrast from `text-white/40` to `text-white/60`, hover from `text-white/70` to `text-white/90`, and enlarged tap target from `h-8 w-8` to `h-9 w-9`.
+  - Increased body text contrast from `text-white/75` to `text-white/85` for better accessibility.
+  - Updated claimed-state banner to include "· $14/mo after trial · cancel anytime" on desktop.
+- `components/avatar-crop-modal.tsx`: removed unsupported `cropAreaStyle` prop from `Cropper` component (react-easy-crop v6 compatibility fix).
+
+### Why
+- QA review flagged the trial terms as insufficiently transparent for regulatory scrutiny (FTC/CMA), the dismiss button as intentionally muted, and body text contrast as borderline for accessibility.
+
+### Files touched
+- `components/promo/launch-offer-banner.tsx`
+- `components/avatar-crop-modal.tsx`
+
+### Verification
+- `npm run lint` — 0 errors.
+- `npm run build` — green.
+- `npx playwright test e2e/full-audit.spec.ts --config=playwright.prod.ts` — 98 passed (46.1s).
+
+### Commit
+`3b7114b`
+
 ## 2026-08-15 — Session: Improve Payout Dashboard UX
 
 ### What changed
