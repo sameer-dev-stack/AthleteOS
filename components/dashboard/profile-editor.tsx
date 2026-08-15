@@ -496,6 +496,7 @@ function BioEditor({
             userId={profile.id}
             onUpload={handleAvatarUpload}
             size="lg"
+            previewProfile={profile}
           />
           <div className="space-y-1">
             <p className="text-sm text-white/60">

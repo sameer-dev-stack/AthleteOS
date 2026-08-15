@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Camera, Loader2, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { AvatarCropModal } from "@/components/avatar-crop-modal";
+import type { Profile } from "@/lib/actions/profile";
 
 type Props = {
   currentUrl: string | null;
@@ -12,6 +13,7 @@ type Props = {
   onUpload: (url: string, localUrl?: string) => void;
   size?: "sm" | "md" | "lg";
   triggerOnly?: boolean;
+  previewProfile?: Profile | null;
 };
 
 const SIZE_MAP = {
@@ -26,7 +28,7 @@ const TEXT_SIZE_MAP = {
   lg: "text-3xl",
 };
 
-export function AvatarUpload({ currentUrl, userId, onUpload, size = "md", triggerOnly = false }: Props) {
+export function AvatarUpload({ currentUrl, userId, onUpload, size = "md", triggerOnly = false, previewProfile }: Props) {
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -114,6 +116,7 @@ export function AvatarUpload({ currentUrl, userId, onUpload, size = "md", trigge
           imageUrl={cropUrl}
           onCancel={handleCropCancel}
           onConfirm={handleCropConfirm}
+          previewProfile={previewProfile}
         />
       </>
     );
@@ -175,6 +178,7 @@ export function AvatarUpload({ currentUrl, userId, onUpload, size = "md", trigge
         imageUrl={cropUrl}
         onCancel={handleCropCancel}
         onConfirm={handleCropConfirm}
+        previewProfile={previewProfile}
       />
     </div>
   );

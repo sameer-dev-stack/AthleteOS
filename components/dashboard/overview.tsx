@@ -482,6 +482,7 @@ export function DashboardOverview({ profile: initialProfile, promo }: Props) {
                           onUpload={handleAvatarUpload}
                           size="sm"
                           triggerOnly
+                          previewProfile={profile}
                         />
                       </label>
                     )}

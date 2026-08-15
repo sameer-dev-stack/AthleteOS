@@ -3,6 +3,55 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Avatar Crop Modal — Live Card Preview
+
+### What changed
+- `components/avatar-crop-modal.tsx`:
+  - Added `CardFrontPreview`, a scaled (0.5x) static replica of the card front face: full-bleed photo hero (`object-cover object-top` + vignette + bottom gradient), overlapping circular avatar, name, sport·position, school, and accent hairlines — matching `components/profile-card.tsx` markup (AthletePhoto / ProfileAvatar / AthleteIdentity / hairlines).
+  - New optional `previewProfile?: Profile | null` prop. When provided, the right-side "Live card preview" panel renders the card replica fed by the live 256px crop (`refreshThumb` bumped from 96 → 256px), so the user sees the actual card output while dragging. Falls back to the small circular "Result" thumb when no profile is given.
+  - Layout now stacks on mobile (`flex-col sm:flex-row`) so the preview is visible on small screens; modal widens to `sm:max-w-xl` on desktop to fit crop + preview side by side.
+- `components/avatar-upload.tsx`: added optional `previewProfile?: Profile | null` prop, forwarded to `AvatarCropModal`.
+- `app/onboarding/page.tsx`, `components/dashboard/overview.tsx`, `components/dashboard/profile-editor.tsx`: pass profile data as `previewProfile`.
+
+### Why
+- User: "make it Show The LIVE PREVIEW Properly the Actual Card How it is going to preview." The old "Result" thumb was an 80px circle that didn't reflect how the photo appears on the card (full-bleed rectangular hero + circular avatar). Rendering the full interactive `ProfileCard` (webcam, analytics, flip, confetti) inside the modal was rejected as too heavy/risky; a faithful static replica mirrors the card's exact photo rendering instead.
+
+### Files touched
+- `components/avatar-crop-modal.tsx`
+- `components/avatar-upload.tsx`
+- `app/onboarding/page.tsx`
+- `components/dashboard/overview.tsx`
+- `components/dashboard/profile-editor.tsx`
+- `docs/COMPONENTS.md`, `docs/COPY.md`
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings (unchanged).
+- `npm run build` — green.
+
+### Commit
+(see below)
+
+## 2026-08-15 — Session: Fix Profile Card Flip-Back Button
+
+### What changed
+- `components/profile-card.tsx`:
+  - Added `onFlipBack` prop to `BackHeaderProps` and wired it to the "Flip Back" button's `onClick` handler. The button previously had `role="button"` but no click handler, so clicking it did nothing.
+  - Passed `handleFlip` as `onFlipBack` when rendering `BackHeader` inside the back face.
+
+### Why
+- QA reported: card flip turn off/on doesn't work. The front-face click handler (`handleFlip`) was correctly attached to the main card container, but the explicit "Flip Back" affordance on the back face was a dead button.
+
+### Files touched
+- `components/profile-card.tsx`
+
+### Verification
+- `npm run lint` — 0 errors.
+- `npm run build` — green.
+- `npx playwright test e2e/full-audit.spec.ts --config=playwright.prod.ts` — 98 passed (45.2s).
+
+### Commit
+`63e5071`
+
 ## 2026-08-15 — Session: Avatar Crop Modal — Soften Circle Guide, Relabel "Skip Crop"
 
 ### What changed

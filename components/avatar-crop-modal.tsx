@@ -6,16 +6,165 @@ import Image from "next/image";
 import Cropper, { type Area } from "react-easy-crop";
 import { X, Check, Loader2, RotateCcw, ZoomIn } from "lucide-react";
 import { cropImageToBlob, fitSquareImageToBlob, getImageSize } from "@/lib/crop-image";
+import type { Profile } from "@/lib/actions/profile";
+import { resolveTheme } from "@/lib/themes";
+import { cleanName } from "@/lib/display-name";
+import { getFallbackGradient } from "@/lib/sport-config";
 
 type Props = {
   imageUrl: string | null;
   onCancel: () => void;
   onConfirm: (blob: Blob) => void;
+  previewProfile?: Profile | null;
 };
 
 const MIN_SOURCE_DIM = 200;
+const CARD_W = 360;
+const CARD_H = 600;
 
-export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
+function CardFrontPreview({ profile, imageUrl }: { profile: Profile; imageUrl: string | null }) {
+  const themeObj = resolveTheme(profile.theme_accent);
+  const accent = themeObj.primaryColor;
+  const displayName = cleanName(profile.full_name, profile.username);
+  const initials = displayName
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  const metaLine = [profile.position, profile.sport].filter(Boolean).join(" · ");
+  const scale = 180 / CARD_W;
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <span className="text-[10px] font-medium uppercase tracking-wider text-ink-dim">
+        Live card preview
+      </span>
+      <div
+        style={{ width: CARD_W * scale, height: CARD_H * scale, overflow: "hidden" }}
+        className="pointer-events-none"
+      >
+        <div
+          style={{
+            width: CARD_W,
+            height: CARD_H,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+        >
+          <div
+            className="relative flex h-[600px] w-[360px] flex-col overflow-hidden rounded-[20px]"
+            style={{ background: "#0d0d12" }}
+          >
+            {/* Top accent hairline */}
+            <div
+              className="absolute inset-x-0 top-0 z-20 h-px"
+              style={{ background: `linear-gradient(90deg, transparent 5%, ${accent}40 50%, transparent 95%)` }}
+            />
+
+            {/* Photo hero — mirrors AthletePhoto */}
+            <div className="relative min-h-0 w-full flex-1">
+              {imageUrl ? (
+                <Image
+                  src={imageUrl}
+                  alt={displayName}
+                  fill
+                  sizes="360px"
+                  unoptimized
+                  className="object-cover object-top"
+                  draggable={false}
+                />
+              ) : (
+                <div
+                  className="absolute inset-0 flex items-center justify-center"
+                  style={{ background: getFallbackGradient(profile.sport) }}
+                >
+                  <span className="text-[72px] font-black select-none" style={{ color: `${accent}18` }}>
+                    {initials}
+                  </span>
+                </div>
+              )}
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background:
+                    "radial-gradient(ellipse 85% 65% at 50% 30%, transparent 35%, rgba(0,0,0,0.30) 100%)",
+                }}
+              />
+              <div
+                className="absolute inset-x-0 bottom-0 pointer-events-none"
+                style={{
+                  height: "55%",
+                  background:
+                    "linear-gradient(to top, #0d0d12 0%, #0d0d12e8 18%, #0d0d1290 45%, transparent 100%)",
+                }}
+              />
+            </div>
+
+            {/* Circular avatar — mirrors ProfileAvatar */}
+            <div className="absolute left-5 z-20" style={{ bottom: "calc(48% - 36px)" }}>
+              <div
+                className="relative h-[72px] w-[72px] overflow-hidden rounded-full"
+                style={{
+                  border: "3px solid #0d0d12",
+                  boxShadow: `0 4px 20px rgba(0,0,0,0.5), 0 0 0 1px ${accent}30`,
+                }}
+              >
+                {imageUrl ? (
+                  <Image
+                    src={imageUrl}
+                    alt={displayName}
+                    fill
+                    sizes="72px"
+                    unoptimized
+                    draggable={false}
+                  />
+                ) : (
+                  <div
+                    className="absolute inset-0 flex items-center justify-center"
+                    style={{ background: getFallbackGradient(profile.sport) }}
+                  >
+                    <span className="text-[28px] font-black select-none" style={{ color: `${accent}40` }}>
+                      {initials}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Identity block — mirrors AthleteIdentity */}
+            <div className="relative z-10 flex-shrink-0 px-5 pt-6">
+              <h1
+                className="font-black text-white"
+                style={{ fontSize: 24, lineHeight: 1.2, letterSpacing: "-0.02em" }}
+              >
+                {displayName}
+              </h1>
+              {metaLine && (
+                <p className="mt-1 text-[12px] font-semibold leading-none" style={{ color: "rgba(255,255,255,0.50)", letterSpacing: "0.02em" }}>
+                  {metaLine}
+                </p>
+              )}
+              {profile.school && (
+                <p className="mt-0.5 truncate text-[10.5px] font-medium leading-none" style={{ color: "rgba(255,255,255,0.28)" }}>
+                  {profile.school}
+                </p>
+              )}
+            </div>
+
+            {/* Bottom accent hairline */}
+            <div
+              className="absolute inset-x-0 bottom-0 z-20 h-px"
+              style={{ background: `linear-gradient(90deg, transparent 10%, ${accent}22 50%, transparent 90%)` }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function AvatarCropModal({ imageUrl, onCancel, onConfirm, previewProfile }: Props) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [pixelCrop, setPixelCrop] = useState<Area | null>(null);
@@ -45,7 +194,7 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
     async (px: Area) => {
       if (!imageUrl) return;
       try {
-        const blob = await cropImageToBlob(imageUrl, px, 96);
+        const blob = await cropImageToBlob(imageUrl, px, 256);
         if (!blob) return;
         const url = URL.createObjectURL(blob);
         setThumbUrl((prev) => {
@@ -113,7 +262,7 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#111113] p-5 shadow-2xl"
+        className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#111113] p-5 shadow-2xl sm:max-w-xl"
       >
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-base font-semibold text-white">Crop your photo</h3>
@@ -128,9 +277,9 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
           </button>
         </div>
 
-        <div className="flex items-start gap-4">
+        <div className="flex flex-col items-start gap-4 sm:flex-row">
           <div
-            className="relative aspect-square max-w-full min-w-0 flex-1 overflow-hidden rounded-xl border border-white/[0.06]"
+            className="relative aspect-square w-full max-w-full min-w-0 overflow-hidden rounded-xl border border-white/[0.06] sm:flex-1"
             style={{
               backgroundImage:
                 "linear-gradient(45deg, #1c1c1f 25%, transparent 25%, transparent 75%, #1c1c1f 75%), linear-gradient(45deg, #1c1c1f 25%, #19191c 25%, #19191c 75%, #1c1c1f 75%)",
@@ -161,23 +310,29 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
             </div>
           </div>
 
-          <div className="hidden w-24 flex-col items-center gap-2 sm:flex">
-            <span className="text-[10px] font-medium uppercase tracking-wider text-ink-dim">
-              Result
-            </span>
-            {thumbUrl ? (
-              <Image
-                src={thumbUrl}
-                alt="Cropped preview"
-                width={80}
-                height={80}
-                unoptimized
-                className="h-20 w-20 rounded-full object-cover ring-2 ring-accent/30"
-              />
+          <div className="flex w-full flex-shrink-0 flex-col items-center gap-2 sm:w-[180px]">
+            {previewProfile ? (
+              <CardFrontPreview profile={previewProfile} imageUrl={thumbUrl} />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-accent/10 text-xs text-ink-dim ring-2 ring-accent/20">
-                Crop
-              </div>
+              <>
+                <span className="text-[10px] font-medium uppercase tracking-wider text-ink-dim">
+                  Result
+                </span>
+                {thumbUrl ? (
+                  <Image
+                    src={thumbUrl}
+                    alt="Cropped preview"
+                    width={80}
+                    height={80}
+                    unoptimized
+                    className="h-20 w-20 rounded-full object-cover ring-2 ring-accent/30"
+                  />
+                ) : (
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-accent/10 text-xs text-ink-dim ring-2 ring-accent/20">
+                    Crop
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
