@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Cropper, { type Area } from "react-easy-crop";
-import { X, Check, Loader2, RotateCcw } from "lucide-react";
+import { X, Check, Loader2, RotateCcw, ZoomIn } from "lucide-react";
 import { cropImageToBlob, fitSquareImageToBlob, getImageSize } from "@/lib/crop-image";
 
 type Props = {
@@ -143,7 +143,7 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
               crop={crop}
               zoom={zoom}
               aspect={1}
-              cropShape="round"
+              cropShape="rect"
               showGrid
               onCropChange={setCrop}
               onZoomChange={setZoom}
@@ -183,11 +183,12 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
         </div>
 
         <div className="mt-4 flex items-center gap-3">
+          <span className="text-[10px] font-medium text-ink-dim w-8 text-center">{Math.round(zoom * 100)}%</span>
           <button
             type="button"
             onClick={() => setZoom((z) => Math.max(1, +(z - 0.1).toFixed(2)))}
             disabled={processing}
-            className="rounded-lg bg-white/[0.04] px-2.5 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:bg-white/[0.08]"
+            className="rounded-lg bg-white/[0.06] px-2.5 py-1.5 text-sm font-bold text-white hover:bg-white/[0.12] disabled:opacity-40"
             aria-label="Zoom out"
           >
             -
@@ -201,13 +202,13 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
             onChange={(e) => setZoom(parseFloat(e.target.value))}
             disabled={processing}
             aria-label="Zoom"
-            className="flex-1 accent-[#C6FF3D]"
+            className="flex-1 accent-[#C6FF3D] h-2"
           />
           <button
             type="button"
             onClick={() => setZoom((z) => Math.min(3, +(z + 0.1).toFixed(2)))}
             disabled={processing}
-            className="rounded-lg bg-white/[0.04] px-2.5 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:bg-white/[0.08]"
+            className="rounded-lg bg-white/[0.06] px-2.5 py-1.5 text-sm font-bold text-white hover:bg-white/[0.12] disabled:opacity-40"
             aria-label="Zoom in"
           >
             +
@@ -216,7 +217,7 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
             type="button"
             onClick={handleReset}
             disabled={processing}
-            className="flex items-center gap-1.5 rounded-lg bg-white/[0.04] px-2.5 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:bg-white/[0.08]"
+            className="flex items-center gap-1.5 rounded-lg bg-white/[0.06] px-2.5 py-1.5 text-xs font-medium text-white hover:bg-white/[0.12] disabled:opacity-40"
           >
             <RotateCcw className="h-3 w-3" />
             Reset
@@ -239,7 +240,7 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
             disabled={processing || tooSmall}
             className="flex-1 rounded-lg border border-white/10 bg-white/[0.02] px-4 py-2.5 text-sm font-medium text-ink-muted transition-colors hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Use as is
+            Skip crop
           </button>
           <button
             type="button"

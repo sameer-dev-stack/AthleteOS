@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Sparkles, X, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
-const BANNER_KEY = "athleteos_whatsnew_jul7";
+const BANNER_KEY = "athleteos_whatsnew_aug13";
 
 export function WhatsNewBanner() {
   const mounted = useMounted();
@@ -34,9 +34,9 @@ export function WhatsNewBanner() {
           <Sparkles className="h-4 w-4 text-accent" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-white">New: Referral system is live</p>
+          <p className="text-sm font-semibold text-white">New: NIL Value Engine is live</p>
           <p className="mt-1 text-xs text-ink-muted leading-relaxed">
-            Invite other athletes with your unique link and track who joins. Plus: launch checklist, system status, and feature request board.
+            Get an AI-powered estimate of your NIL value with editable rate cards, generate brand, sponsor, and media pitches in one place, and explore deal packages.
           </p>
           <div className="mt-3 flex items-center gap-3">
             <Link
