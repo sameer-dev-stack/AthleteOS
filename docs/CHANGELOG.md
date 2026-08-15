@@ -3,6 +3,24 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-14 — Session: Launch Offer Banner Trust Fix — Hide Pre-Launch Counter, Concrete AI Chip, Em-Dash Out
+
+### What changed
+- **`components/promo/launch-offer-banner.tsx`**:
+  - Live claim progress bar (Claimed / % Claimed / fill bar) now renders only when `claimedCount > 0`. Before the first real redemption it is hidden entirely.
+  - AI feature chip: `"300 AI Actions / Mo"` → `"AI Bio, Pitches & Captions"` (names the real shipped tools instead of the vague quota jargon).
+  - Body copy: `Verify your card securely via Stripe — $0.00 charged today` → `Verify your card securely via Stripe. $0.00 charged today` (em dash removed).
+  - Removed the `🎉` emoji from the hasClaimed success state (repo no-emoji rule).
+
+### Why
+External review flagged that the scarcity frame collapsed: the "500 Spots Remaining" / LAUNCH OFFER urgency conflicted with a "CLAIMED: 0 ATHLETES / 0% CLAIMED" bar, reading as "not launched yet." The counter was NOT a wiring bug — `getLaunchPromoStats` reads real data and the launch is simply fresh. Seeding fake claimed numbers would violate the repo's "honest gaps — not invented" standard, so the counter is hidden until real claims exist. Also the "300 AI Actions / Mo" claim, while backed (`lib/actions/ai-usage.ts` `pro: { total: 300 }`, 4 real AI tools), was vague to an athlete, and the copy used an em dash.
+
+### Files touched
+- `components/promo/launch-offer-banner.tsx`
+
+### Commit
+`<pending>`
+
 ## 2026-08-14 — Session: Mobile Nav Cleanup — Remove Redundant Hamburger, Make BottomNav "More" Work
 
 ### What changed

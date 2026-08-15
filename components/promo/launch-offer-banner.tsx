@@ -52,7 +52,7 @@ export function LaunchOfferBanner({
           <CheckCircle2 className="h-6 w-6 text-accent" />
         </div>
         <div>
-          <p className="text-sm font-black text-white tracking-wider uppercase">3-Month Pro VIP Trial Unlocked 🎉</p>
+          <p className="text-sm font-black text-white tracking-wider uppercase">3-Month Pro VIP Trial Unlocked</p>
           <p className="text-xs text-white/60 mt-0.5">Your 90-day Pro Trial is active. Enjoy custom card themes & AI actions!</p>
         </div>
       </div>
@@ -111,7 +111,7 @@ export function LaunchOfferBanner({
               </span>
             </h2>
             <p className="text-xs sm:text-sm text-white/75 mt-2 leading-relaxed max-w-2xl font-medium">
-              Join today and claim your 90-day Pro Plan Access Pass. Verify your card securely via Stripe —{" "}
+              Join today and claim your 90-day Pro Plan Access Pass. Verify your card securely via Stripe.{" "}
               <span className="text-white font-bold underline decoration-accent/60 underline-offset-4">$0.00 charged today</span>.
             </p>
           </div>
@@ -124,7 +124,7 @@ export function LaunchOfferBanner({
             </div>
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-xs font-semibold text-white/90">
               <Check className="h-4 w-4 text-accent flex-shrink-0" />
-              <span>300 AI Actions / Mo</span>
+              <span>AI Bio, Pitches &amp; Captions</span>
             </div>
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-xs font-semibold text-white/90">
               <Check className="h-4 w-4 text-accent flex-shrink-0" />
@@ -132,22 +132,24 @@ export function LaunchOfferBanner({
             </div>
           </div>
 
-          {/* Live Claim Progress Bar */}
-          <div className="w-full max-w-xl pt-2">
-            <div className="flex justify-between items-center text-[11px] font-extrabold tracking-wider text-white/60 mb-2 uppercase">
-              <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-accent animate-ping" />
-                Claimed: {claimedCount} Athletes
-              </span>
-              <span className="text-accent">{percentClaimed}% Claimed</span>
+          {/* Live Claim Progress Bar — hidden until first real claim so "0% Claimed" can't undercut the offer */}
+          {claimedCount > 0 && (
+            <div className="w-full max-w-xl pt-2">
+              <div className="flex justify-between items-center text-[11px] font-extrabold tracking-wider text-white/60 mb-2 uppercase">
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-accent animate-ping" />
+                  Claimed: {claimedCount} Athletes
+                </span>
+                <span className="text-accent">{percentClaimed}% Claimed</span>
+              </div>
+              <div className="h-3 w-full rounded-full bg-white/10 p-0.5 border border-white/10 overflow-hidden shadow-inner">
+                <div
+                  className="h-full bg-gradient-to-r from-accent via-[#e4ff80] to-accent transition-all duration-500 rounded-full shadow-[0_0_16px_rgba(198,255,61,0.7)]"
+                  style={{ width: `${Math.max(5, percentClaimed)}%` }}
+                />
+              </div>
             </div>
-            <div className="h-3 w-full rounded-full bg-white/10 p-0.5 border border-white/10 overflow-hidden shadow-inner">
-              <div
-                className="h-full bg-gradient-to-r from-accent via-[#e4ff80] to-accent transition-all duration-500 rounded-full shadow-[0_0_16px_rgba(198,255,61,0.7)]"
-                style={{ width: `${Math.max(5, percentClaimed)}%` }}
-              />
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Right Section: Digital VIP Ticket Card Mockup */}
