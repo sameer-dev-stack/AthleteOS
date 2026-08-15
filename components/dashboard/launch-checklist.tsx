@@ -139,44 +139,47 @@ export function LaunchChecklist({ profile }: { profile: Profile }) {
 
       {/* Items */}
       <div className="space-y-2">
-        {items.map((item) => (
-          <div
-            key={item.id}
-            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${
-              item.done
-                ? "bg-accent/5"
-                : "bg-white/[0.02] hover:bg-white/[0.04]"
-            }`}
-          >
-            <div className={`flex h-5 w-5 items-center justify-center rounded-full flex-shrink-0 ${
-              item.done
-                ? "bg-accent/20"
-                : "border border-white/[0.12]"
-            }`}>
-              {item.done ? (
-                <Check className="h-3 w-3 text-accent" strokeWidth={3} />
-              ) : (
-                <Circle className="h-2.5 w-2.5 text-ink-dim" />
+        {items.map((item) => {
+          const isIncomplete = !item.done;
+          return (
+            <div
+              key={item.id}
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${
+                item.done
+                  ? "bg-accent/5"
+                  : "bg-accent/[0.03] border border-accent/10"
+              }`}
+            >
+              <div className={`flex h-5 w-5 items-center justify-center rounded-full flex-shrink-0 ${
+                item.done
+                  ? "bg-accent/20"
+                  : "border border-accent/30"
+              }`}>
+                {item.done ? (
+                  <Check className="h-3 w-3 text-accent" strokeWidth={3} />
+                ) : (
+                  <Circle className="h-2.5 w-2.5 text-accent/70" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className={`text-xs font-semibold ${item.done ? "text-white/60 line-through" : "text-white"}`}>
+                  {item.label}
+                </p>
+                {!item.done && (
+                  <p className="text-[10px] text-ink-dim mt-0.5">{item.description}</p>
+                )}
+              </div>
+              {item.href && (
+                <Link
+                  href={item.href}
+                  className="flex-shrink-0 text-[10px] font-semibold text-accent hover:text-accent-soft transition-colors"
+                >
+                  {item.done ? "Edit" : "Connect"}
+                </Link>
               )}
             </div>
-            <div className="flex-1 min-w-0">
-              <p className={`text-xs font-semibold ${item.done ? "text-white/50 line-through" : "text-white"}`}>
-                {item.label}
-              </p>
-              {!item.done && (
-                <p className="text-[10px] text-ink-dim mt-0.5">{item.description}</p>
-              )}
-            </div>
-            {!item.done && item.href && (
-              <Link
-                href={item.href}
-                className="flex-shrink-0 text-[10px] font-semibold text-accent hover:text-accent-soft transition-colors"
-              >
-                Fix
-              </Link>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </motion.div>
   );

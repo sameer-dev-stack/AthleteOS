@@ -3,6 +3,34 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Profile Photo Cropper UX Fix (QA Spec 1-15)
+
+### What changed
+- `components/avatar-crop-modal.tsx`:
+  - **Modal z-index raised from `z-50` to `z-[70]`.** Root cause found via Playwright: the cookie consent bar (`fixed bottom-0 inset-x-0 z-50`, rendered after page content in `app/layout.tsx`) painted over the modal's bottom action buttons on first visit, intercepting clicks on Crop/Use as is. Verified with `document.elementFromPoint` + a click-through test.
+  - **Crop viewport is now square** (`aspect-square max-w-full min-w-0 flex-1` instead of `h-80 w-80 max-w-full flex-1`). Previously the flex row with the `w-24` result column produced a non-square stage (measured 292x319), so the round crop area was not centered square-on-square. Now the inscribed circle is perfectly centered with no drift.
+  - **Explicit deterministic mask + boundary ring** replace reliance on react-easy-crop's `box-shadow: 0 0 0 9999em` crop-area hack. Added a `pointer-events-none absolute inset-0` overlay: a radial-gradient mask (`circle closest-side at center`, transparent through 98.4%, dark to 99.4%) plus a centered `border-2 border-white/70` ring. `style={{ cropAreaStyle: { boxShadow: "none", border: "none" } }}` disables the lib's own mask/border so the overlay is the single source of the mask (root-cause hardening, not a blind CSS override).
+- Verified in a real Chromium browser via a temporary Playwright harness (9 tests, then 7 tests after cleanup — harness files were removed before commit so no test route/image ships to prod):
+  - BUG 1 (mask gaps): pixel-sampled the rendered stage — zero bright pixels outside the inscribed circle on desktop (292x293) and mobile (314x315) viewports; corners dark, center bright.
+  - BUG 2 (crop UI hidden on hover): did not reproduce — controls stay visible at all cursor positions, opacity > 0.9.
+  - BUG 3 (image click opens file picker): did not reproduce — clicking/dragging the image produced zero `filechooser` events; the real `AvatarUpload` flow (setInputFiles on its hidden input) opens the modal but image interactions never reopen the picker.
+  - Controls work (zoom +/- / slider / reset / use-as-is), preview matches final output (both derive from the same `pixelCrop`), backdrop-click closes / card-click does not.
+- No second upload flow added (spec #10): upload trigger stays in `components/avatar-upload.tsx` (label + hidden input); modal only crops. All controls already carry meaningful labels (Zoom out/in, Zoom, Reset, Use as is, Crop, Close).
+
+### Why
+- User QA spec (15 sections) requested: gap-free, perfectly centered circular mask; crop UI never pointer-dependent; image click never opens the file picker; separate upload vs crop; preview matches output; root-cause fixes with no visual redesign. Browser verification showed the current code already satisfied 2 of 3 reported bugs; the genuine defects were the cookie-consent z-index overlap and the non-square crop stage.
+
+### Files touched
+- `components/avatar-crop-modal.tsx`
+
+### Verification
+- Temporary Playwright harness: 7/7 passed (BUG1 pixel coverage, BUG2 controls visibility, BUG3 filechooser, controls work, preview-vs-output, backdrop/card click, z-index regression).
+- `npm run lint` — 0 errors, 11 pre-existing warnings (baseline unchanged).
+- `npm run build` — green.
+
+### Commit
+(see below)
+
 ## 2026-08-15 — Session: Improve Launch Offer Banner UX
 
 ### What changed

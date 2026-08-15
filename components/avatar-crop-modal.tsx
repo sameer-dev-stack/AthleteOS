@@ -144,6 +144,7 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
               aspect={1}
               cropShape="round"
               showGrid
+              style={{ cropAreaStyle: { boxShadow: "none", border: "none" } }}
               onCropChange={setCrop}
               onZoomChange={setZoom}
               onCropComplete={handleCropComplete}
