@@ -3,6 +3,26 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Update Dashboard "What's New" Banner
+
+### What changed
+- `components/dashboard/whats-new-banner.tsx` (shown at `components/dashboard/overview.tsx:231`): updated stale July content ("Referral system is live") to the latest release ("NIL Value Engine is live" — AI NIL valuation w/ editable rate cards, 3-in-1 pitch generator, deal packages). Dismiss key bumped `athleteos_whatsnew_jul7` → `athleteos_whatsnew_aug13` so returning users who already dismissed the July banner see the new announcement.
+- Copy verified against actual engine features in `lib/actions/nil-engine.ts` (valuation, deal-check, rate context).
+
+### Why
+- Same staleness fix as the changelog page: banner still advertised July's referral system a month later. LocalStorage key per announcement ensures each release is shown once until dismissed.
+
+### Files touched
+- `components/dashboard/whats-new-banner.tsx`
+- `docs/COPY.md` (edit log entry for banner copy)
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings (unchanged).
+- `npm run build` — green (waited out a concurrent build from another worktree session).
+
+### Commit
+(see below)
+
 ## 2026-08-15 — Session: Update Public Changelog Page (Content Staleness Fix)
 
 ### What changed
