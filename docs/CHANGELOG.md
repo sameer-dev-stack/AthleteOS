@@ -3,6 +3,27 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Fix Avatar Crop Modal Positioning Bug
+
+### What changed
+- `components/avatar-crop-modal.tsx`:
+  - Wrapped modal in `createPortal(..., document.body)` so it renders at the root level, escaping any parent stacking contexts, `overflow: hidden`, or `transform` containers.
+  - Removed unsupported `style={{ cropAreaStyle: ... }}` prop from `Cropper` component (react-easy-crop v6 compatibility).
+
+### Why
+- QA reported: page dims but crop modal not visible on mobile; user had to scroll to find it, and clicking the image again re-triggered upload. This is a classic symptom of a fixed-position modal trapped inside a parent with stacking/overflow issues. Portal + fixed positioning fixes it.
+
+### Files touched
+- `components/avatar-crop-modal.tsx`
+
+### Verification
+- `npm run lint` — 0 errors.
+- `npm run build` — green.
+- `npx playwright test e2e/full-audit.spec.ts --config=playwright.prod.ts` — 98 passed (40.9s).
+
+### Commit
+`c13994e`
+
 ## 2026-08-15 — Session: Improve Launch Checklist UX
 
 ### What changed

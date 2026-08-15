@@ -9,6 +9,74 @@ export const metadata: Metadata = {
 
 const entries = [
   {
+    date: "August 13, 2026",
+    tag: "Features",
+    title: "NIL Value Engine goes live",
+    items: [
+      "AI-powered NIL valuation with editable rate cards",
+      "3-in-1 pitch generator — brand, sponsor, and media pitches",
+      "NIL value dashboard with a sidebar tab and Pro gating",
+      "Interactive deal package calculator",
+      "Resilient NIL metrics with graceful schema fallback",
+    ],
+  },
+  {
+    date: "August 11, 2026",
+    tag: "Growth",
+    title: "Launch offer for the first 500 athletes",
+    items: [
+      "First 500 athletes get a 3-month Pro trial",
+      "Dismissible launch offer banner with clear trial terms",
+    ],
+  },
+  {
+    date: "August 10, 2026",
+    tag: "Polish",
+    title: "Profile card redesign",
+    items: [
+      "New premium profile card with a dynamic border glow",
+      "ReflectiveCard material with webcam integration",
+      "Gold verified badge across card, discovery, and billing",
+      "Sport-aware card styling and refinements",
+      "Discover page Pro spotlight strip",
+      "Smoother card flip animation",
+    ],
+  },
+  {
+    date: "August 6, 2026",
+    tag: "Platform",
+    title: "Launch gate hardening and OG previews",
+    items: [
+      "Per-profile social share (OG) previews",
+      "Business Facts store with AI grounding",
+      "Funnel audit and URL/env hardening",
+      "Unbuilt features now show \"Coming soon\" and redirect to the dashboard",
+      "Null-safe database client and reduced dev service workers",
+    ],
+  },
+  {
+    date: "July 13, 2026",
+    tag: "Platform",
+    title: "Faster builds and stronger billing",
+    items: [
+      "Upgraded to Next.js 16.2 with Turbopack",
+      "Stripe SDK updated and pinned with apiVersion sync",
+      "Supabase SSR upgraded",
+      "Sentry error tracking",
+    ],
+  },
+  {
+    date: "July 12, 2026",
+    tag: "Growth",
+    title: "Referral system, round two",
+    items: [
+      "Referral landing pages at /r/yourname",
+      "Referral dashboard with funnel and leaderboard",
+      "Two-sided rewards — both the referrer and the referred athlete earn Pro",
+      "\"Invited by {Name}\" banner on the sign-up page",
+    ],
+  },
+  {
     date: "July 7, 2026",
     tag: "Growth",
     title: "Referral system, launch checklist, and more",
