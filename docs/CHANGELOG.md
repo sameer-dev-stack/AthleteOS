@@ -3,6 +3,27 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-14 — Session: Launch Offer Banner Restraint Pass — Kill Neon/Gamified Language, One Focal Point
+
+### What changed
+- **`components/promo/launch-offer-banner.tsx`**:
+  - Removed crown icon + "Pro VIP Pass" header, flame + lightning badges, and the "500 Spots Remaining" pill. Header is now a single quiet "Launch offer" eyebrow.
+  - Right panel redesigned from a gamified "VIP Ticket Card" into a restrained price block: "90 Days of Pro", big "$0.00" price, "Valued at $42.00", fine print "Requires card verification via Stripe. No charges today. Cancel anytime."
+  - Replaced the three loud feature pills with one quiet line: "Includes AI bio writer, sponsor pitches, captions, and custom card themes."
+  - Raised fine-print contrast (`text-white/40` → `text-white/50`, `text-white/60` → `text-white/70`, security line `text-white/50` → `text-white/70`).
+  - Removed the `Crown`, `Flame`, `Zap`, `Check` lucide imports (unused after redesign).
+  - Claimed-state copy: "3-Month Pro VIP Trial Unlocked" → "3-Month Pro Trial Unlocked"; "AI actions" → "AI tools".
+  - Dropped the second ambient cyan spotlight; one lime glow remains.
+
+### Why
+QA acceptance criteria demanded the launch offer match the onboarding's restrained dark-lime design language: one accent, one focal point (the $0.00 price), one CTA, no competing pills, no crown/VIP/flame/lightning gamification, no manufactured-scarcity theater, and legible fine print. The AI feature claim was verified before keeping: `lib/actions/ai-usage.ts` sets `pro: { total: 300 }` and all four named tools (bio, pitches, captions, profile) are shipped.
+
+### Files touched
+- `components/promo/launch-offer-banner.tsx`
+
+### Commit
+`<pending>`
+
 ## 2026-08-14 — Session: Launch Offer Banner Trust Fix — Hide Pre-Launch Counter, Concrete AI Chip, Em-Dash Out
 
 ### What changed
