@@ -3,6 +3,27 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Improve Payout Dashboard UX
+
+### What changed
+- `components/dashboard/payment-method-setup.tsx`: converted the PayPal setup from an always-expanded giant form into a **collapsible banner**. Default state shows a compact "Payout Account" row with a "Connect PayPal" button; clicking expands the email + confirm email fields. Changed "Verified for instant payouts" to "Secure PayPal payouts". Increased input placeholder contrast from `placeholder-white/20` to `placeholder-white/50`. Neutralized the card background from green-tinted `bg-[#161B12]` to `bg-white/[0.02]`. Shortened CTA from "Connect PayPal Account" to "Connect PayPal".
+- `components/dashboard/balance-overview.tsx`: reordered page hierarchy so the **earnings cards (Earned, Pending, Available, Withdrawn) render first** as the hero, with the PaymentMethodSetup banner pushed below them.
+
+### Why
+- QA verdict: the PayPal form dominated the page, creating a setup-wizard experience instead of a financial dashboard. The compact collapsed state preserves the connection flow without sacrificing the earnings-first hierarchy.
+
+### Files touched
+- `components/dashboard/payment-method-setup.tsx`
+- `components/dashboard/balance-overview.tsx`
+
+### Verification
+- `npm run lint` — 0 errors.
+- `npm run build` — green.
+- `npx playwright test e2e/full-audit.spec.ts --config=playwright.prod.ts` — 98 passed (41.9s).
+
+### Commit
+`079b9c4`
+
 ## 2026-08-15 — Session: Block Auth Pages for Signed-In Users
 
 ### What changed
@@ -23,7 +44,7 @@
 - `npm run build` — green.
 
 ### Commit
-(pending)
+`217a2ef`
 
 ## 2026-08-15 — Session: Prod Audit — Align Pricing Test With 2-Tier Landing Page
 
