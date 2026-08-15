@@ -722,10 +722,14 @@ Business Operations summary card for the right sidebar. Displays 7-day revenue (
   - `username?: string | null` — athlete handle for card sharing link
 
 ### `<BillingPanel>` — `components/dashboard/billing-panel.tsx`
-Subscription billing panel showing current plan badge, AI usage bar, pricing cards, and upgrade/manage buttons. Integrates with Stripe Checkout for upgrades and Customer Portal for management. Includes loading states for checkout, portal, and cancel operations. Error display for failed operations. Graceful downgrade via `cancel_at_period_end`.
-- **Used by:** `app/dashboard/page.tsx`
+Subscription billing panel showing current plan badge, AI usage ring + meter, payment method card, Pro billing-cycle selector (1 Month / 6 Months / 1 Year), pricing card with feature list, and upgrade/manage/cancel buttons. Integrates with Stripe Checkout for upgrades and Customer Portal for management. Includes loading states for checkout, portal, and cancel operations. Error display for failed operations. Graceful downgrade via `cancel_at_period_end`. Billing-cycle selection is distinct from recommendation: the selected card gets an accent border/ring + top-left check indicator; the recommended (annual) card keeps a persistent faint accent border via the `highlight` field even when not selected. "Gold Verified Badge" feature row uses a gold `BadgeCheck` icon (matches the card/discover verified glyph).
+- **Used by:** `app/dashboard/billing/page.tsx` (via `BillingPanel subscription={subscription}` in a `Suspense` boundary)
 - **Props:**
   - `subscription: SubscriptionStatus` — current subscription status from `getSubscriptionStatus()` (plan, status, currentPeriodEnd, aiUsed, aiLimit, aiRemaining)
+
+### `<BalanceOverview>` — `components/dashboard/balance-overview.tsx`
+PayPal tip balance card: 4-stat grid (Earned/Pending/Available/Withdrawn), PayPal onboarding banner (`PaymentMethodSetup`) when not connected, withdraw-to-PayPal section with progress bar to the $25 minimum, payout history list, and dashed empty state. Header badge "PayPal payouts only" is styled neutral/informational (`Info` icon + tooltip) — it states a support limitation plainly rather than reading as a positive feature pill.
+- **Used by:** `app/dashboard/billing/page.tsx`
 
 ### `<AnalyticsPanel>` — `components/dashboard/analytics-panel.tsx`
 Analytics display for athlete card performance. Shows 3 summary cards (total views, unique visitors, link clicks), bar chart of views by day, top referrers, top links, and top countries. Range selector (7d/30d/90d). Only rendered when profile is published.

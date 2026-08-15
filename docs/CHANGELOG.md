@@ -3,6 +3,29 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Billing Page Polish (payments badge, gold badge, plan selection)
+
+### What changed
+- `components/dashboard/balance-overview.tsx`:
+  - "PayPal Payouts Only" header badge restyled from an accent-green positive pill (`bg-accent/15 text-accent`) to a neutral informational badge (`bg-white/[0.06] text-white/40`) with an `Info` icon and a `title` tooltip ("Bank transfers and other payout methods are not available yet"). It now reads as a plainly stated limitation rather than an achievement.
+- `components/dashboard/billing-panel.tsx`:
+  - "Gold Verified Badge" feature list item: replaced the filled gold circle + dark check (which read as a caution/warning dot) with a gold `BadgeCheck` icon (`text-[#FACC15]`) — the same verified-badge glyph used on the card and discover page, so it reads as premium status.
+  - Pro billing-cycle selector: selection state is now explicit and distinct from the recommendation. The selected card gets a top-left accent check indicator plus the existing accent border/ring/glow; the recommended (annual) card keeps a persistent faint accent border (`border-accent/25 bg-accent/[0.04]`) via the previously-dead `highlight` field even when another interval is selected. Previously the border alone did double duty for "selected" and "recommended".
+
+### Why
+- Fresh QA review of the billing page: (1) the PayPal badge's green styling made a support limitation read like a positive feature pill; (2) the gold checkmark's color + filled-circle shape looked like an error/warning icon rather than a premium status; (3) the billing-cycle card border conflated "best value/recommended" with "selected", ambiguous in a static screenshot. User chose to keep the page stacked (no tab split) after being asked about vertical length.
+
+### Files touched
+- `components/dashboard/balance-overview.tsx`
+- `components/dashboard/billing-panel.tsx`
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings.
+- `npm run build` — green.
+
+### Commit
+(pending — after docs updated)
+
 ## 2026-08-15 — Session: Fix Analytics Upsell Duplication and Blank Preview Boxes
 
 ### What changed

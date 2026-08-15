@@ -14,6 +14,7 @@ import {
   ChevronRight,
   AlertTriangle,
   ArrowDownToLine,
+  BadgeCheck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -436,9 +437,16 @@ export function BillingPanel({ subscription: initial }: Props) {
                       className={`relative flex flex-col justify-between rounded-xl p-3.5 text-left border transition-all ${
                         isSelected
                           ? "border-accent bg-accent/15 ring-1 ring-accent/40 shadow-[0_0_20px_rgba(198,255,61,0.2)]"
-                          : "border-white/[0.08] bg-white/[0.02] hover:border-white/20"
+                          : opt.highlight
+                            ? "border-accent/25 bg-accent/[0.04] hover:border-accent/50"
+                            : "border-white/[0.08] bg-white/[0.02] hover:border-white/20"
                       }`}
                     >
+                      {isSelected && (
+                        <span className="absolute -top-2.5 left-2 flex h-4 w-4 items-center justify-center rounded-full bg-accent">
+                          <Check className="h-2.5 w-2.5 text-bg" strokeWidth={4} />
+                        </span>
+                      )}
                       {opt.badge && (
                         <span className="absolute -top-2.5 right-2 rounded-full bg-accent px-2 py-0.5 text-[9px] font-black text-black uppercase shadow-sm">
                           {opt.badge}
@@ -511,9 +519,7 @@ export function BillingPanel({ subscription: initial }: Props) {
                         className="flex items-start gap-1.5 text-xs text-white/80"
                       >
                         {f === "Gold Verified Badge" ? (
-                          <span className="mt-0.5 flex h-3 w-3 flex-shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: "#FACC15" }}>
-                            <Check className="h-2 w-2 text-[#111115]" strokeWidth={3} />
-                          </span>
+                          <BadgeCheck className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#FACC15]" strokeWidth={2.25} />
                         ) : (
                           <Check className="mt-0.5 h-3 w-3 flex-shrink-0 text-accent" />
                         )}

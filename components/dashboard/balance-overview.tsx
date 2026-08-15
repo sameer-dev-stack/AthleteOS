@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { DollarSign, Clock, ArrowDownToLine, TrendingUp, Loader2, AlertCircle, ArrowRight, CheckCircle, XCircle } from "lucide-react";
+import { DollarSign, Clock, ArrowDownToLine, TrendingUp, Loader2, AlertCircle, ArrowRight, CheckCircle, XCircle, Info } from "lucide-react";
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton";
 import { getBalanceSummary, getPayoutHistory, createPayout, type BalanceSummary, type PayoutRecord } from "@/lib/actions/balance";
 import { PaymentMethodSetup } from "./payment-method-setup";
@@ -135,8 +135,12 @@ export function BalanceOverview() {
           <DollarSign className="h-5 w-5 text-accent" />
           <h2 className="text-lg font-bold text-white">PayPal Tip Balance</h2>
         </div>
-        <span className="rounded-md bg-accent/15 px-2.5 py-1 text-[11px] font-bold text-accent">
-          PayPal Payouts Only
+        <span
+          className="inline-flex items-center gap-1 rounded-md bg-white/[0.06] px-2.5 py-1 text-[11px] font-medium text-white/40"
+          title="Bank transfers and other payout methods are not available yet"
+        >
+          <Info className="h-3 w-3" />
+          PayPal payouts only
         </span>
       </div>
 
