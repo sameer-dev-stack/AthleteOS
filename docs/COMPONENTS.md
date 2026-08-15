@@ -4,6 +4,10 @@
 
 ---
 
+## `<InfinityLoop>` — `components/loading-ui/infinity.tsx` [NEW 2026-08-15]
+
+An SVG infinity-path loader that animates a continuous dash for long-running/continuous loading states (route transitions, sync, background jobs — no percent-complete value). Source: loading-ui registry (MIT). Inherits `currentColor`; tune `--duration` for speed (default 2s), `className` for size (wider than tall reads best, e.g. `h-12 w-16`). Used in `app/loading.tsx` (route-level loader) with `text-accent`.
+
 ## `<AvatarCropModal>` — `components/avatar-crop-modal.tsx` [NEW 2026-08-15]
 
 Full-screen square (1:1) avatar crop modal built on `react-easy-crop`. Crops to the card's circular shape via `cropShape="round"`; drag to position, pinch or slider to zoom, Reset returns to fit. No face detection — the user positions the crop. Live result thumbnail (desktop) shows the exact circular output. Emits a cropped blob bounded to 512x512 WebP; "Use as is" center-crops to 1:1 and bounds the same, disabled when the source is under 200px.

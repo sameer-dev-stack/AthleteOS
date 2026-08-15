@@ -3,6 +3,27 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Replace Route Loader With InfinityLoop Animation
+
+### What changed
+- Added `components/loading-ui/infinity.tsx` — new `InfinityLoop` SVG component (loading-ui registry, MIT) that animates a continuous dash along an infinity path. Inherits `currentColor`, `--duration` CSS var for speed, `className` for size.
+- Updated `app/loading.tsx` (route-level loader) to use `<InfinityLoop className="h-12 w-16 text-accent" />` replacing the old CSS border spinner, keeping the "Loading..." label.
+
+### Why
+- Requested by user; the infinity loop suits the app's long-running/continuous states (route transitions, sync, background jobs) better than a bare spinner. Matches design system: single accent color `#C6FF3D` via `text-accent`, dark bg.
+
+### Files touched
+- `components/loading-ui/infinity.tsx` [NEW]
+- `app/loading.tsx`
+- `docs/COMPONENTS.md`
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings (unchanged).
+- `npm run build` — green.
+
+### Commit
+(see below)
+
 ## 2026-08-15 — Session: Update Dashboard "What's New" Banner
 
 ### What changed
@@ -47,7 +68,7 @@
 - `npm run build` — green; `/changelog` prerendered as static (○).
 
 ### Commit
-(see below)
+`28f2c4f`
 
 ## 2026-08-15 — Session: Fix Avatar Crop Modal Positioning Bug
 
