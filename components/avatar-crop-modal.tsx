@@ -293,12 +293,29 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm, previewProfile 
               zoom={zoom}
               aspect={1}
               cropShape="rect"
-              showGrid
               onCropChange={setCrop}
               onZoomChange={setZoom}
               onCropComplete={handleCropComplete}
             />
             <div aria-hidden className="pointer-events-none absolute inset-0">
+              {/* Circle-scoped rule-of-thirds grid (square grid clipped by the circle reads as broken) */}
+              <svg
+                className="absolute inset-0 h-full w-full"
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+              >
+                <defs>
+                  <clipPath id="crop-circle-grid">
+                    <circle cx="50" cy="50" r="50" />
+                  </clipPath>
+                </defs>
+                <g clipPath="url(#crop-circle-grid)" stroke="rgba(255,255,255,0.28)" strokeWidth="0.35" vectorEffect="non-scaling-stroke">
+                  <line x1="33.33" y1="0" x2="33.33" y2="100" />
+                  <line x1="66.66" y1="0" x2="66.66" y2="100" />
+                  <line x1="0" y1="33.33" x2="100" y2="33.33" />
+                  <line x1="0" y1="66.66" x2="100" y2="66.66" />
+                </g>
+              </svg>
               <div
                 className="absolute inset-0"
                 style={{
@@ -359,6 +376,10 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm, previewProfile 
             aria-label="Zoom"
             className="flex-1 accent-[#C6FF3D] h-2"
           />
+          <div className="flex w-9 flex-col items-center leading-none">
+            <span className="text-[8px] text-ink-dim">100%</span>
+            <span className="mt-0.5 text-[8px] text-ink-muted">300%</span>
+          </div>
           <button
             type="button"
             onClick={() => setZoom((z) => Math.min(3, +(z + 0.1).toFixed(2)))}
@@ -379,7 +400,10 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm, previewProfile 
           </button>
         </div>
         <p className="mt-2 text-center text-[11px] text-ink-dim">
-          Drag to position. Pinch or use the slider to zoom.
+          This circle sets your small badge photo only &mdash; your main card image keeps the full photo.
+        </p>
+        <p className="mt-1 text-center text-[11px] text-ink-muted">
+          Drag to position. Pinch or use the slider to zoom. For best results, use a solo photo with a clear background.
         </p>
 
         {tooSmall && (

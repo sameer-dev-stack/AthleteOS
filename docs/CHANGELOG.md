@@ -3,6 +3,28 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Avatar Crop Modal — Communicate Crop Scope
+
+### What changed
+- `components/avatar-crop-modal.tsx`:
+  - Replaced react-easy-crop's `showGrid` (a square rule-of-thirds grid whose corners are clipped by the circular overlay, reading as broken) with a custom SVG grid drawn inside a circle `clipPath` — the grid now scopes to the circle guide.
+  - Added two helper lines under the zoom controls: "This circle sets your small badge photo only — your main card image keeps the full photo." (communicates that the circular crop is scoped to the card's small circular avatar badge, while the card hero keeps the full rectangular photo) and "Drag to position. Pinch or use the slider to zoom. For best results, use a solo photo with a clear background." (content-suitability nudge).
+  - Added zoom bound labels "100%" / "300%" beside the slider so the zoom floor (a hard floor for square output) and ceiling are visible.
+
+### Why
+- User QA review (fresh take after seeing the live card preview): the circle-vs-square critique was partially retracted — the circle genuinely is scoped to the small circular badge, with the rectangular hero keeping the full photo. The remaining issues were communication: nothing explained the relationship between the two previews (badge crop vs full card photo), no nudge for unsuitable source photos (e.g. a crowded classroom shot), grid lines clipped by the circle, and no visible zoom bounds. Fixed 1, 2, 3, 5. Point 4 (de-emphasize the crop step / unify with the rectangular crop) deliberately deferred — that's a redesign, not a copy fix.
+
+### Files touched
+- `components/avatar-crop-modal.tsx`
+- `docs/COMPONENTS.md`, `docs/COPY.md`
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings (unchanged).
+- `npm run build` — green.
+
+### Commit
+(see below)
+
 ## 2026-08-15 — Session: Avatar Crop Modal — Live Card Preview
 
 ### What changed
