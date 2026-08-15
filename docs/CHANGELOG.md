@@ -21,7 +21,7 @@ QA/PM review approved building an avatar cropper on the condition that the base 
 - `docs/COMPONENTS.md`, `docs/COPY.md`
 
 ### Commit
-`<pending>`
+`e17529c`
 
 ## 2026-08-14 — Session: Launch Offer Placement & Trust — Offer Below User Data, Dismissible, Claimed-State Thin Line
 
