@@ -3,6 +3,30 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Improve Launch Checklist UX
+
+### What changed
+- `components/dashboard/launch-checklist.tsx`:
+  - Increased completed item contrast from `text-white/50` to `text-white/60` for better legibility.
+  - Added accent border + subtle background (`border-accent/10 bg-accent/[0.03]`) to incomplete items so the single remaining task visually stands out.
+  - Changed incomplete item CTA from "Fix" to "Connect" to match neutral, encouraging tone.
+  - Made completed rows also show an "Edit" link (previously only incomplete items had a link).
+  - Changed incomplete radio circle border from `border-white/[0.12]` to `border-accent/30` for stronger visual priority.
+
+### Why
+- QA review: incomplete item didn't stand out enough as "the one thing left"; "Fix" framing was slightly alarming for an onboarding step; completed row contrast was borderline for quick re-scanning.
+
+### Files touched
+- `components/dashboard/launch-checklist.tsx`
+
+### Verification
+- `npm run lint` — 0 errors.
+- `npm run build` — green.
+- `npx playwright test e2e/full-audit.spec.ts --config=playwright.prod.ts` — 98 passed (45.3s).
+
+### Commit
+`f4c2b2f`
+
 ## 2026-08-15 — Session: Profile Photo Cropper UX Fix (QA Spec 1-15)
 
 ### What changed
