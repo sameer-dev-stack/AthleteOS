@@ -3,6 +3,44 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Implement Tip Payout Fee Calculation
+
+### What changed
+- `lib/tip-payout.ts` [NEW]: `calculateTipPayout()` utility implementing the full fee breakdown:
+  - FREE plan: `stripe_fee = (tip * 0.029) + 0.30`, `platform_fee = tip * 0.20`, `net = tip - stripe_fee - platform_fee`
+  - PRO plan: `stripe_fee = (tip * 0.029) + 0.30`, `platform_fee = 0`, `net = tip - stripe_fee`
+  - International card surcharge: +1.5% to stripe_fee
+  - Currency conversion surcharge: +1% to stripe_fee
+  - Fees rounded to cents BEFORE subtracting, net clamped to 0
+  - `isBelowMinimumTip()` helper for $5.00 floor
+- `app/api/stripe/webhook/route.ts`: replaced inline platform-fee math with `calculateTipPayout()`; now also persists `stripe_fee` in the `tips` table.
+- `supabase/migrations/20260815_tip_fees.sql` [NEW]: adds `stripe_fee INTEGER NOT NULL DEFAULT 0` to `tips`.
+- `__tests__/tip-payout.test.ts` [NEW]: 11 tests covering free/pro plans, international/currency surcharges, sub-minimum tips, rounding reconciliation, and negative-input clamping.
+- UI disclosures:
+  - `components/dashboard/billing-panel.tsx`: updated plan feature copy to include "standard Stripe processing fees still apply"
+  - `lib/actions/emails.ts`: Pro upgrade email now says "0% platform fee — standard payment processing fees still apply" instead of "No platform fee on fan tips."
+
+### Why
+- Business requested a single source of truth for tip payout math, with Stripe fees included in the ledger. Existing webhook only computed platform fee; the new shared function ensures webhook, emails, and any future UI all use identical math. Disclosure lines prevent the "Keep 100%" claim from reading as literally fee-free.
+
+### Files touched
+- `lib/tip-payout.ts`
+- `lib/constants.ts`
+- `app/api/stripe/webhook/route.ts`
+- `supabase/migrations/20260815_tip_fees.sql`
+- `__tests__/tip-payout.test.ts`
+- `components/dashboard/billing-panel.tsx`
+- `lib/actions/emails.ts`
+
+### Verification
+- `npx jest __tests__/tip-payout.test.ts` — 11 passed.
+- `npm run lint` — 0 errors, 11 pre-existing warnings.
+- `npm run build` — green.
+- `npx playwright test e2e/full-audit.spec.ts --config=playwright.prod.ts` — 98 passed (42.1s).
+
+### Commit
+`d85856f`
+
 ## 2026-08-15 — Session: Billing Page Polish (payments badge, gold badge, plan selection)
 
 ### What changed
