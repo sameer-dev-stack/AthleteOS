@@ -24,7 +24,7 @@ QA verdict on the first cropper iteration: it was a functional prototype, not a 
 - `docs/COMPONENTS.md`, `docs/COPY.md`
 
 ### Commit
-`<pending>`
+`0bce792`
 
 ## 2026-08-15 — Session: Avatar Upload Cropper — react-easy-crop 1:1 Crop, Bounded WebP Output
 
