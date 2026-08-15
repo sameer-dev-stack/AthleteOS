@@ -3,6 +3,28 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Fix Analytics Upsell Duplication and Blank Preview Boxes
+
+### What changed
+- `components/dashboard/analytics-panel.tsx`:
+  - Removed the top "Pro Lock Top Banner" card (`Detailed Analytics — Pro Exclusive / Unlock Full Analytics`) for free users. This was the first of three duplicate upsell prompts on the page.
+  - Fixed blank gray placeholder boxes in the blurred Pro preview section. The bar-chart area and the two lower placeholders now render actual chart silhouettes (bar chart, referrer bars, device breakdown) instead of empty divs, so the teaser reads as intentional rather than broken.
+  - Kept the contextual "Full Analytics Locked" overlay card and the inline lock icons on 30d/90d range buttons as the single upsell path.
+
+### Why
+- QA review: four instances of the same upgrade message on one screen (top banner, bottom locked card, two inline lock icons, plus modal) was repetitive and nagging. The blank gray boxes read as a render bug and undercut the upsell's credibility right before asking users to pay. Teaser charts should communicate value, not empty space.
+
+### Files touched
+- `components/dashboard/analytics-panel.tsx`
+
+### Verification
+- `npm run lint` — 0 errors.
+- `npm run build` — green.
+- `npx playwright test e2e/full-audit.spec.ts --config=playwright.prod.ts` — 98 passed (43.1s).
+
+### Commit
+`dd2657b`
+
 ## 2026-08-15 — Session: Avatar Crop Modal — Communicate Crop Scope
 
 ### What changed
