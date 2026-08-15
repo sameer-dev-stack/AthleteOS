@@ -181,6 +181,13 @@ CREATE TABLE IF NOT EXISTS public.tips (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Tip fee breakdown: persist Stripe's processing fee for ledger reconciliation.
+ALTER TABLE public.tips
+  ADD COLUMN IF NOT EXISTS stripe_fee INTEGER NOT NULL DEFAULT 0;
+
+CREATE INDEX IF NOT EXISTS idx_tips_stripe_payment_intent
+  ON public.tips(stripe_payment_intent_id);
+
 -- Brand accounts
 CREATE TABLE IF NOT EXISTS public.brand_accounts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,

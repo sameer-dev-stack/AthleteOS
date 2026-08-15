@@ -40,7 +40,7 @@ const PLANS = [
       "Public Athlete Card & Link",
       "Standard Card Styling & Colors",
       "Basic View Analytics",
-      "Fan Tips Enabled (20% platform fee)",
+      "Fan Tips Enabled (20% platform fee — standard Stripe processing fees also apply)",
     ],
   },
   {
@@ -52,7 +52,7 @@ const PLANS = [
       "NIL Valuation Score & Level",
       "Editable NIL Rate Card",
       "3-in-1 Sponsor Pitch Generator",
-      "0% Platform Tip Fee (Keep 100%)",
+      "0% Platform Tip Fee (Keep 100%) — standard payment processing fees still apply",
       "Gold Verified Badge",
       "Premium Themes & Discover Placement",
     ],

@@ -486,7 +486,7 @@ export async function sendProUpgradeEmail(
           <tr>
             <td style="padding:12px 16px;background-color:#16161A;border-radius:10px;border:1px solid rgba(198,255,61,0.1);">
               <p style="color:#C6FF3D;font-size:13px;font-weight:700;margin:0 0 4px;">Keep 100% of every tip</p>
-              <p style="color:#88888A;font-size:13px;margin:0;">No platform fee on fan tips.</p>
+              <p style="color:#88888A;font-size:13px;margin:0;">0% platform fee — standard payment processing fees still apply.</p>
             </td>
           </tr>
           <tr><td style="height:8px;"></td></tr>

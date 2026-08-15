@@ -1,5 +1,9 @@
 export const PLATFORM_FEE_PERCENT_FREE = 20;
 export const PLATFORM_FEE_PERCENT_PRO = 0;
+export const STRIPE_FEE_RATE = 0.029; // Stripe's standard US card rate
+export const STRIPE_FEE_FLAT_CENTS = 30; // $0.30 per charge
+export const STRIPE_FEE_INTERNATIONAL_RATE = 0.015; // +1.5% for non-US cards
+export const STRIPE_FEE_CURRENCY_CONVERSION_RATE = 0.01; // +1% when payout currency != charge currency
 export const MINIMUM_PAYOUT_CENTS = 2500;
 export const MINIMUM_TIP_CENTS = 500;
 export const CARD_W = 360;

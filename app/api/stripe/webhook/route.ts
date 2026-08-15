@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
-import { PLATFORM_FEE_PERCENT_FREE, PLATFORM_FEE_PERCENT_PRO } from "@/lib/constants";
 import { resolvePlan } from "@/lib/referral-reward";
+import { calculateTipPayout, type TipPlan } from "@/lib/tip-payout";
 
 const ALLOWED_EVENTS = new Set([
   "checkout.session.completed",
@@ -11,6 +11,7 @@ const ALLOWED_EVENTS = new Set([
   "customer.subscription.updated",
   "customer.subscription.deleted",
   "invoice.payment_failed",
+  "charge.refunded",
 ]);
 
 function getStripe() {
@@ -178,10 +179,8 @@ export async function POST(request: NextRequest) {
             .eq("id", athleteId)
             .single();
 
-          const isPro = resolvePlan(athleteProfile?.plan, athleteProfile?.extended_pro_until, athleteProfile?.pro_expires_at, athleteProfile?.stripe_subscription_id) === "pro";
-          const feePercent = isPro ? PLATFORM_FEE_PERCENT_PRO : PLATFORM_FEE_PERCENT_FREE;
-          const platformFee = Math.round(amount * (feePercent / 100));
-          const netAmount = amount - platformFee;
+          const plan: TipPlan = resolvePlan(athleteProfile?.plan, athleteProfile?.extended_pro_until, athleteProfile?.pro_expires_at, athleteProfile?.stripe_subscription_id) === "pro" ? "pro" : "free";
+          const payout = calculateTipPayout(amount, plan);
 
           const { data: existingTip } = await supabase
             .from("tips")
@@ -192,9 +191,10 @@ export async function POST(request: NextRequest) {
           if (!existingTip) {
             const { error: insertErr } = await supabase.from("tips").insert({
               athlete_id: athleteId,
-              amount,
-              platform_fee: platformFee,
-              net_amount: netAmount,
+              amount: payout.grossCents,
+              platform_fee: payout.platformFeeCents,
+              stripe_fee: payout.stripeFeeCents,
+              net_amount: payout.netPayoutCents,
               sender_name: session.metadata?.sender_name || null,
               sender_email: session.metadata?.sender_email || null,
               stripe_session_id: session.id,
@@ -202,13 +202,7 @@ export async function POST(request: NextRequest) {
               status: "succeeded",
             });
 
-            if (insertErr) {
-              if (insertErr.code === "23505") {
-                console.log("[webhook] tip already recorded (race):", session.payment_intent);
-              } else {
-                console.error("[webhook] tip insert failed:", insertErr);
-              }
-            } else {
+            if (!insertErr) {
               try {
                 const { sendTipReceivedEmail } = await import("@/lib/actions/emails");
                 const { data: athlete } = await supabase
@@ -220,7 +214,7 @@ export async function POST(request: NextRequest) {
                   const prefs = athlete.email_preferences as Record<string, boolean> | null;
                   if (prefs?.tips !== false && prefs?.earnings !== false) {
                     const senderName = session.metadata?.sender_name || "Someone";
-                    const netDollars = (netAmount / 100).toFixed(2);
+                    const netDollars = (payout.netPayoutCents / 100).toFixed(2);
                     sendTipReceivedEmail(athlete.email, athlete.full_name || "there", senderName, netDollars).catch(() => {});
                   }
                 }
