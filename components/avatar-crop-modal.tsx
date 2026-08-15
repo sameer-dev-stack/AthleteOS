@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import Cropper, { type Area } from "react-easy-crop";
 import { X, Check, Loader2, RotateCcw } from "lucide-react";
@@ -103,7 +104,7 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
 
   if (!imageUrl) return null;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md"
       onClick={() => {
@@ -144,7 +145,6 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
               aspect={1}
               cropShape="round"
               showGrid
-              style={{ cropAreaStyle: { boxShadow: "none", border: "none" } }}
               onCropChange={setCrop}
               onZoomChange={setZoom}
               onCropComplete={handleCropComplete}
@@ -256,6 +256,7 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
