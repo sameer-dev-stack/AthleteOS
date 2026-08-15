@@ -792,6 +792,7 @@ interface BackHeaderProps {
   isPro: boolean;
   initials: string;
   accent: string;
+  onFlipBack: () => void;
 }
 
 function BackHeader({
@@ -804,6 +805,7 @@ function BackHeader({
   isPro,
   initials,
   accent,
+  onFlipBack,
 }: BackHeaderProps) {
   const metaParts = [position, sport, school].filter(Boolean);
 
@@ -878,6 +880,7 @@ function BackHeader({
         }}
         role="button"
         aria-label="Flip card back"
+        onClick={onFlipBack}
       >
         <RotateCcw className="h-3 w-3" style={{ color: accent }} />
         <span className="text-[8.5px] font-black tracking-wider text-white/60 uppercase">
@@ -1920,6 +1923,7 @@ export function ProfileCard({
               isPro={isPro}
               initials={initials}
               accent={accent}
+              onFlipBack={handleFlip}
             />
 
             {/* Divider */}
