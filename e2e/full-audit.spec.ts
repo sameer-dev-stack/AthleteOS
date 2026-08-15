@@ -116,7 +116,6 @@ test.describe('Landing Page', () => {
     // Use exact matching to avoid false positives with "pro" appearing in other headings
     await expect(page.getByRole('heading', { name: 'Free', exact: true, level: 3 })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Pro', exact: true, level: 3 })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Elite', exact: true, level: 3 })).toBeVisible();
   });
 });
 

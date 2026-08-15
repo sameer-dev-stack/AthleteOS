@@ -3,6 +3,25 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Prod Audit — Align Pricing Test With 2-Tier Landing Page
+
+### What changed
+- `e2e/full-audit.spec.ts`: removed the `Elite` pricing heading assertion (line 119). The landing pricing intentionally ships Free + Pro only since `caef910` (Elite card was cut in the 3-col → 2-col grid refactor); Elite remains a real product tier in the app (billing, usage monitor) but no longer appears as a landing pricing card.
+
+### Why
+- `npx playwright test e2e/full-audit.spec.ts --config=playwright.prod.ts` against live Vercel failed 1/98: the `Elite` h3 assertion could not match the deployed page. Restoring the Elite card was the alternative, but Elite was dropped from the landing page deliberately, so the test now asserts what the product actually shows (Free + Pro).
+
+### Files touched
+- `e2e/full-audit.spec.ts`
+
+### Verification
+- `npm run lint` — 11 pre-existing warnings, 0 errors.
+- `npm run build` — green.
+- `npx playwright test e2e/full-audit.spec.ts --config=playwright.prod.ts` — 98 passed (38.6s).
+
+### Commit
+`<pending>`
+
 ## 2026-08-15 — Session: Avatar Cropper QA Pass — Circular Mask, Live Result Thumb, Zoom Slider + Reset, Use-as-Is Guard
 
 ### What changed
