@@ -20,7 +20,7 @@
 - `npx playwright test e2e/full-audit.spec.ts --config=playwright.prod.ts` — 98 passed (38.6s).
 
 ### Commit
-`<pending>`
+`6e25e4e`
 
 ## 2026-08-15 — Session: Avatar Cropper QA Pass — Circular Mask, Live Result Thumb, Zoom Slider + Reset, Use-as-Is Guard
 
