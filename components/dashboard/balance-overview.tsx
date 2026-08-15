@@ -141,11 +141,7 @@ export function BalanceOverview() {
       </div>
 
       <div className="p-6 space-y-6">
-        {/* ── Payment Method Setup Banner ──────── */}
-        {!s.onboardingComplete && (
-          <PaymentMethodSetup onSuccess={() => window.location.reload()} />
-        )}
-
+        {/* ── Stats Row ──────────────────────── */}
         <div className="grid grid-cols-2 gap-3">
           {cards.map((card) => (
             <div key={card.label} className="rounded-xl bg-white/[0.03] border border-white/[0.04] p-4">
@@ -160,6 +156,11 @@ export function BalanceOverview() {
             </div>
           ))}
         </div>
+
+        {/* ── Payment Method Setup Banner ──────── */}
+        {!s.onboardingComplete && (
+          <PaymentMethodSetup onSuccess={() => window.location.reload()} />
+        )}
 
         {s.connected && s.onboardingComplete && (
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
