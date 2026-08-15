@@ -43,6 +43,13 @@ export function LaunchOfferBanner({
   const claimedCount = Math.max(0, totalSlots - remainingSlots);
   const percentClaimed = Math.min(100, Math.round((claimedCount / totalSlots) * 100));
 
+  const trialEndLabel = mounted ? formatMonthDay(trialEndsAt) : null;
+  const trialEndDisplay = trialEndLabel || (() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 90);
+    return formatMonthDay(d.toISOString());
+  })();
+
   function handleDismiss() {
     setDismissed(true);
     localStorage.setItem(DISMISS_KEY, "dismissed");
@@ -71,10 +78,11 @@ export function LaunchOfferBanner({
   if (hasClaimed) {
     const endLabel = mounted ? formatMonthDay(trialEndsAt) : null;
     return (
-      <div className={`flex items-center justify-between gap-3 rounded-xl border border-accent/20 bg-accent/10 px-4 py-2.5 ${className}`}>
+      <div className={`flex items-center justify-between gap-3 rounded-xl border border-accent/20 bg-accent/10 px-4 py-3 ${className}`}>
         <p className="text-xs font-semibold text-accent flex items-center gap-2">
           <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0" />
           Pro trial active{endLabel ? ` · ends ${endLabel}` : ""}
+          <span className="text-white/50 font-normal hidden sm:inline">· $14/mo after trial · cancel anytime</span>
         </p>
       </div>
     );
@@ -103,7 +111,7 @@ export function LaunchOfferBanner({
       <button
         onClick={handleDismiss}
         aria-label="Dismiss launch offer"
-        className="absolute top-4 right-4 z-20 flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-white/40 transition-colors hover:bg-white/[0.08] hover:text-white/70"
+        className="absolute top-4 right-4 z-20 flex h-9 w-9 items-center justify-center rounded-lg border border-white/15 bg-white/[0.04] text-white/60 transition-colors hover:bg-white/[0.1] hover:text-white/90"
       >
         <X className="h-4 w-4" />
       </button>
@@ -124,8 +132,8 @@ export function LaunchOfferBanner({
                 3 Months Pro Free
               </span>
             </h2>
-            <p className="text-xs sm:text-sm text-white/75 mt-2 leading-relaxed max-w-2xl font-medium">
-              90-day Pro trial. Verify your card via Stripe.{" "}
+            <p className="text-sm text-white/85 mt-2 leading-relaxed max-w-2xl font-medium">
+              90-day Pro trial · ends {trialEndDisplay}. Verify your card via Stripe.{" "}
               <span className="text-white font-bold underline decoration-accent/60 underline-offset-4">$0.00 charged today</span>.
             </p>
           </div>
@@ -175,9 +183,14 @@ export function LaunchOfferBanner({
             </div>
 
             {/* Fine print */}
-            <p className="text-[12px] text-white/70 leading-relaxed">
-              Requires card verification via Stripe. No charges today. Cancel anytime.
-            </p>
+            <div className="space-y-1.5">
+              <p className="text-[12px] text-white/70 leading-relaxed">
+                Requires card verification via Stripe. No charges today.
+              </p>
+              <p className="text-[11px] text-white/50 leading-relaxed">
+                After {trialEndDisplay}, your Pro subscription renews at $14/month unless you cancel beforehand. Cancel anytime.
+              </p>
+            </div>
 
             {/* Action CTA Button */}
             <div className="space-y-2 pt-1">

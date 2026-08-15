@@ -105,7 +105,7 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md"
       onClick={() => {
         if (!processing) onCancel();
       }}
@@ -129,7 +129,7 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
 
         <div className="flex items-start gap-4">
           <div
-            className="relative h-80 w-80 max-w-full flex-1 overflow-hidden rounded-xl border border-white/[0.06]"
+            className="relative aspect-square max-w-full min-w-0 flex-1 overflow-hidden rounded-xl border border-white/[0.06]"
             style={{
               backgroundImage:
                 "linear-gradient(45deg, #1c1c1f 25%, transparent 25%, transparent 75%, #1c1c1f 75%), linear-gradient(45deg, #1c1c1f 25%, #19191c 25%, #19191c 75%, #1c1c1f 75%)",
@@ -148,6 +148,16 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
               onZoomChange={setZoom}
               onCropComplete={handleCropComplete}
             />
+            <div aria-hidden className="pointer-events-none absolute inset-0">
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "radial-gradient(circle closest-side at center, transparent 0, transparent 98.4%, rgba(0,0,0,0.65) 99.4%)",
+                }}
+              />
+              <div className="absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/70 shadow-[0_0_0_1px_rgba(0,0,0,0.4)]" />
+            </div>
           </div>
 
           <div className="hidden w-24 flex-col items-center gap-2 sm:flex">

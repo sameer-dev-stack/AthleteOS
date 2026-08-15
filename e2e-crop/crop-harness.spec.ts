@@ -42,11 +42,14 @@ test.describe('AvatarCropModal harness', () => {
       return { r: pixels[i], g: pixels[i + 1], b: pixels[i + 2], a: pixels[i + 3] };
     };
 
-    // Corners (should be masked/darkened by the overlay)
+    // True corners only (the 4 corner quadrants are outside the circle and must be masked).
+    // Edge midpoints are inside the inscribed circle on a square viewport, so they are bright.
     const corners = [
       sample(2, 2), sample(w - 3, 2), sample(2, h - 3), sample(w - 3, h - 3),
-      sample(Math.floor(w / 2), 2), sample(Math.floor(w / 2), h - 3),
-      sample(2, Math.floor(h / 2)), sample(w - 3, Math.floor(h / 2)),
+      sample(2, Math.floor(h * 0.15)), sample(w - 3, Math.floor(h * 0.15)),
+      sample(2, h - Math.floor(h * 0.15) - 3), sample(w - 3, h - Math.floor(h * 0.15) - 3),
+      sample(Math.floor(w * 0.15), 2), sample(w - Math.floor(w * 0.15) - 3, 2),
+      sample(Math.floor(w * 0.15), h - 3), sample(w - Math.floor(w * 0.15) - 3, h - 3),
     ].filter((p) => p !== undefined);
     // Center should show the bright test image (not fully dark)
     const center = sample(Math.floor(w / 2), Math.floor(h / 2));
@@ -56,25 +59,27 @@ test.describe('AvatarCropModal harness', () => {
     const avgCorner = corners.reduce((s, p) => s + (p.r + p.g + p.b), 0) / corners.length;
     console.log('corner pixels:', JSON.stringify(corners.map((p) => Math.round((p.r + p.g + p.b) / 3))));
 
-    // Dense scan of the full border (3px inset) for any unmasked bright pixels
+    // Dense scan: every pixel OUTSIDE the inscribed circle (dist from center > radius + margin)
+    // must be masked/dark. Pixels inside the circle are the bright image and are excluded.
     const lum = (x: number, y: number) => {
       const p = sample(x, y);
       return p ? (p.r + p.g + p.b) / 3 : -1;
     };
+    const cx = Math.floor(w / 2);
+    const cy = Math.floor(h / 2);
+    const radius = Math.min(w, h) / 2;
+    const MASK_MARGIN = 8; // skip the antialiased gradient edge
     const brightGaps: Array<[number, number, number]> = [];
-    for (let x = 0; x < w; x += 2) {
-      for (const y of [2, h - 3]) {
-        const l = lum(x, y);
-        if (l > 60) brightGaps.push([x, y, Math.round(l)]);
-      }
-    }
     for (let y = 0; y < h; y += 2) {
-      for (const x of [2, w - 3]) {
+      for (let x = 0; x < w; x += 2) {
+        if (x < 4 || y < 4 || x > w - 5 || y > h - 5) continue;
+        const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+        if (dist < radius + MASK_MARGIN) continue;
         const l = lum(x, y);
         if (l > 60) brightGaps.push([x, y, Math.round(l)]);
       }
     }
-    console.log('bright gaps along border:', JSON.stringify(brightGaps));
+    console.log('bright gaps outside mask:', JSON.stringify(brightGaps));
     expect(brightGaps.length).toBe(0);
     const centerLum = (center.r + center.g + center.b) / 3;
     const nearCenterLum = (nearCenter.r + nearCenter.g + nearCenter.b) / 3;
@@ -196,5 +201,32 @@ test.describe('AvatarCropModal harness', () => {
     await page.mouse.click(8, 8);
     await page.waitForTimeout(300);
     await expect(page.getByText('Crop your photo')).not.toBeVisible();
+  });
+
+  test('REGRESSION: modal sits above cookie consent bar (z-50) so buttons stay clickable', async ({ page }) => {
+    // Fresh page where cookie consent is still visible
+    await page.goto('/crop-harness');
+    await expect(page.getByText('We value your privacy')).toBeVisible();
+
+    // Open the modal WITHOUT dismissing cookie consent
+    await page.getByRole('button', { name: 'Open with test image' }).click();
+    await expect(page.getByText('Crop your photo')).toBeVisible();
+    await page.waitForTimeout(600);
+
+    // Verify modal z-index beats cookie consent (z-50)
+    const cropBtn = page.getByRole('button', { name: 'Crop' });
+    const box = (await cropBtn.boundingBox())!;
+    const hit = await page.evaluate(({ x, y }) => {
+      const el = document.elementFromPoint(x, y);
+      return el ? el.textContent?.trim() : null;
+    }, { x: box.x + box.width / 2, y: box.y + box.height / 2 });
+    console.log('top element at Crop button:', JSON.stringify(hit));
+    // The hit element must be inside the modal card, not the consent bar
+    expect(hit).not.toBe('Accept');
+
+    // Crop must actually work (consent bar can't intercept)
+    await cropBtn.click();
+    await page.waitForTimeout(1200);
+    await expect(page.getByAltText('Final output')).toBeVisible();
   });
 });
