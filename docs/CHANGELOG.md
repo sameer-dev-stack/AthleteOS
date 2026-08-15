@@ -3,6 +3,26 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Avatar Upload Cropper — react-easy-crop 1:1 Crop, Bounded WebP Output
+
+### What changed
+- **`lib/crop-image.ts`** [NEW]: client-side helpers that produce bounded output. `cropImageToBlob(src, pixelCrop)` renders the 1:1 crop region to a canvas clamped to 512x512 and exports WebP (`image/webp`, 0.9); `boundImageToBlob(src)` downscales the whole image to at most 512 on the longest edge for the "Use as is" path. Both resolve to a `Blob`.
+- **`components/avatar-crop-modal.tsx`** [NEW]: full-screen crop modal wrapping `react-easy-crop`. Fixed square `aspect={1}` rect crop with grid; touch drag + pinch/scroll zoom (react-easy-crop native); explicit Zoom in / Zoom out buttons (keyboard-focusable, a11y zoom); "Use as is" button that skips manual cropping and just bounds the image; "Crop" button emits the cropped blob. No face detection — the user positions the crop. Modal backdrop closes on tap when idle; processing state disables all actions.
+- **`components/avatar-upload.tsx`**: reworked pick flow. `handleFileSelect` now only validates size (2 MB) and type, creates an object URL, and opens the crop modal — the old `handleUpload` upload path was removed. On confirm, `handleCropConfirm(blob)` creates the cropped blob's object URL, revokes the raw pick URL, sets it as the live preview, uploads the *cropped* blob to Supabase, and calls `onUpload(publicUrl, localUrl)` so both the upload circle and the onboarding `PreviewCard`s show the cropped result. Upload extension derived from `blob.type` (`webp` or `jpg`). `triggerOnly` mode (dashboard card hover) also routes through the modal.
+
+### Why
+QA/PM review approved building an avatar cropper on the condition that the base upload-to-preview sync was already fixed (it is, via session 2026-08-14 commit `89b493a`: onboarding passes the blob object URL as `currentUrl` and to all three `PreviewCard`s). The cropper adds square 1:1 framing, touch-first interaction, bounded ~512x512 JPEG/WebP output, and a "use as is" skip — and because the cropped blob's object URL flows through the same `onUpload(url, localUrl)` path, the preview card and upload circle both show the cropped result with no new sync surface.
+
+### Files touched
+- `lib/crop-image.ts` [NEW]
+- `components/avatar-crop-modal.tsx` [NEW]
+- `components/avatar-upload.tsx`
+- `package.json` / `package-lock.json` (added `react-easy-crop` ^6.2.3)
+- `docs/COMPONENTS.md`, `docs/COPY.md`
+
+### Commit
+`<pending>`
+
 ## 2026-08-14 — Session: Launch Offer Placement & Trust — Offer Below User Data, Dismissible, Claimed-State Thin Line
 
 ### What changed

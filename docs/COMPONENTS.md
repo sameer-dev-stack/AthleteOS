@@ -4,6 +4,21 @@
 
 ---
 
+## `<AvatarCropModal>` — `components/avatar-crop-modal.tsx` [NEW 2026-08-15]
+
+Full-screen square (1:1) avatar crop modal built on `react-easy-crop`. Drag to position, pinch/scroll to zoom, plus keyboard-focusable Zoom in / Zoom out buttons for a11y. No face detection — the user positions the crop. Emits the cropped blob (bounded to 512x512 WebP) or a bounded "use as is" blob.
+
+- **Used by:** `components/avatar-upload.tsx`
+- **Requires:** `react-easy-crop` (^6.2.3), `lib/crop-image.ts`
+- **Props:**
+  | Prop | Type | Default | Description |
+  |---|---|---|---|
+  | `imageUrl` | `string \| null` | — | Object URL of the picked image to crop; `null` hides the modal |
+  | `onCancel` | `() => void` | — | Close without uploading |
+  | `onConfirm` | `(blob: Blob) => void` | — | Called with the cropped or bounded WebP blob |
+
+---
+
 ## `<NilPackageCalculator>` — `components/dashboard/nil-package-calculator.tsx` [NEW 2026-08-11]
 
 Interactive NIL deal scenario builder for custom brand sponsorship packages. Combines sponsored feed posts, short video reels, hourly in-person appearances, content licensing rights (1–12 months), and category exclusivity terms. Computes real-time target payouts, market valuation ranges ($Min - $Max), and provides 1-click copy proposal pitch text to send directly to brand sponsors.
@@ -532,13 +547,14 @@ Client wrapper for the authenticated dashboard. Lifts profile state so profile e
 ## Avatar & Profile Components
 
 ### `<AvatarUpload>` — `components/avatar-upload.tsx`
-Reusable avatar upload with camera overlay, file preview, and Supabase Storage integration.
-- **Used by:** `app/onboarding/page.tsx`
+Reusable avatar upload with camera overlay, file preview, and Supabase Storage integration. Picking a file opens `<AvatarCropModal>`; the cropped blob (bounded 512x512 WebP) is what uploads and flows through `onUpload`.
+- **Used by:** `app/onboarding/page.tsx`, `components/dashboard/overview.tsx`, `components/dashboard/profile-editor.tsx`, `components/dashboard-avatar.tsx`
 - **Props:**
   - `currentUrl: string | null` — current avatar URL
   - `userId: string` — user ID for storage path
-  - `onUpload: (url: string) => void` — callback with new URL
+  - `onUpload: (url: string, localUrl?: string) => void` — callback with persisted public URL plus the live blob object URL
   - `size?: "sm" | "md" | "lg"` — avatar size (default "md")
+  - `triggerOnly?: boolean` — render just the hidden file input (no circle) for dashboard hover upload
 
 ### `<DashboardAvatar>` — `components/dashboard-avatar.tsx`
 Dashboard wrapper for AvatarUpload. Saves directly to profile.

@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { Camera, Loader2, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { AvatarCropModal } from "@/components/avatar-crop-modal";
 
 type Props = {
   currentUrl: string | null;
@@ -29,69 +30,92 @@ export function AvatarUpload({ currentUrl, userId, onUpload, size = "md", trigge
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cropUrl, setCropUrl] = useState<string | null>(null);
 
   const initials = "A";
 
-  const handleUpload = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
 
-      if (file.size > 2 * 1024 * 1024) {
-        setError("Image must be under 2 MB.");
-        return;
-      }
+    if (file.size > 2 * 1024 * 1024) {
+      setError("Image must be under 2 MB.");
+      return;
+    }
 
-      if (!file.type.startsWith("image/")) {
-        setError("Please upload an image file.");
-        return;
-      }
+    if (!file.type.startsWith("image/")) {
+      setError("Please upload an image file.");
+      return;
+    }
 
-      setError(null);
-      setUploading(true);
+    setError(null);
+    if (cropUrl) URL.revokeObjectURL(cropUrl);
+    setCropUrl(URL.createObjectURL(file));
+  }
 
-      if (preview) URL.revokeObjectURL(preview);
-      const objectUrl = URL.createObjectURL(file);
-      setPreview(objectUrl);
+  async function uploadBlob(blob: Blob) {
+    setUploading(true);
+    try {
+      const supabase = createClient();
+      if (!supabase) throw new Error("Supabase client unavailable");
+      const ext = blob.type === "image/webp" ? "webp" : "jpg";
+      const filePath = `${userId}/avatar.${ext}`;
 
-      try {
-        const supabase = createClient();
-        if (!supabase) throw new Error("Supabase client unavailable");
-        const ext = file.name.split(".").pop() || "jpg";
-        const filePath = `${userId}/avatar.${ext}`;
+      const { error: uploadErr } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, blob, { upsert: true, contentType: blob.type });
 
-        const { error: uploadErr } = await supabase.storage
-          .from("avatars")
-          .upload(filePath, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
 
-        if (uploadErr) throw uploadErr;
+      const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      return `${data.publicUrl}?t=${Date.now()}`;
+    } catch {
+      setError("Upload failed. Please try again.");
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  }
 
-        const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
-        const publicUrl = `${data.publicUrl}?t=${Date.now()}`;
+  async function handleCropConfirm(blob: Blob) {
+    const localUrl = URL.createObjectURL(blob);
+    if (cropUrl) URL.revokeObjectURL(cropUrl);
+    setCropUrl(null);
+    setPreview(localUrl);
 
-        onUpload(publicUrl, objectUrl);
-      } catch (err) {
-        setError("Upload failed. Please try again.");
-        if (preview) URL.revokeObjectURL(preview);
-        setPreview(null);
-      } finally {
-        setUploading(false);
-      }
-    },
-    [userId, onUpload, preview]
-  );
+    const publicUrl = await uploadBlob(blob);
+    if (publicUrl) {
+      onUpload(publicUrl, localUrl);
+    } else {
+      URL.revokeObjectURL(localUrl);
+      setPreview(null);
+    }
+  }
+
+  function handleCropCancel() {
+    if (cropUrl) URL.revokeObjectURL(cropUrl);
+    setCropUrl(null);
+  }
 
   const displayUrl = preview || currentUrl;
 
   if (triggerOnly) {
     return (
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handleUpload}
-        className="hidden"
-        disabled={uploading}
-      />
+      <>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          className="hidden"
+          disabled={uploading}
+        />
+        <AvatarCropModal
+          imageUrl={cropUrl}
+          onCancel={handleCropCancel}
+          onConfirm={handleCropConfirm}
+        />
+      </>
     );
   }
 
@@ -124,7 +148,7 @@ export function AvatarUpload({ currentUrl, userId, onUpload, size = "md", trigge
           <input
             type="file"
             accept="image/*"
-            onChange={handleUpload}
+            onChange={handleFileSelect}
             className="hidden"
             disabled={uploading}
           />
@@ -146,6 +170,12 @@ export function AvatarUpload({ currentUrl, userId, onUpload, size = "md", trigge
       )}
 
       {error && <p className="text-xs text-red-400">{error}</p>}
+
+      <AvatarCropModal
+        imageUrl={cropUrl}
+        onCancel={handleCropCancel}
+        onConfirm={handleCropConfirm}
+      />
     </div>
   );
 }
