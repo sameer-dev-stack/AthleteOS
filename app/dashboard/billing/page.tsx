@@ -24,6 +24,7 @@ export default async function BillingPage() {
 
   const promoStats = await getLaunchPromoStats();
   const isPro = subscription.plan === "pro" || subscription.plan === "team";
+  const trialEndsAt = subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd * 1000).toISOString() : null;
 
   return (
     <div className="space-y-8">
@@ -41,6 +42,7 @@ export default async function BillingPage() {
             totalSlots={promoStats.totalSlots}
             isAuthenticated={true}
             hasClaimed={profile?.has_claimed_promo_trial}
+            trialEndsAt={trialEndsAt}
           />
         )}
         <BalanceOverview />

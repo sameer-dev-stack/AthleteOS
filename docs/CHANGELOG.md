@@ -3,6 +3,26 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-14 — Session: Launch Offer Placement & Trust — Offer Below User Data, Dismissible, Claimed-State Thin Line
+
+### What changed
+- **`app/dashboard/page.tsx`**: removed the top-of-page launch offer hero. The offer no longer renders above the user's dashboard content.
+- **`components/dashboard/overview.tsx`**: `DashboardOverview` now accepts an optional `promo` prop and renders the launch offer at the **bottom** of the dashboard, below "Your card is live" + the stats strip (lead with the user's reality, then the offer). While the offer is showing, the redundant mid-page "Unlock Pro" CTA is suppressed (one promo surface at a time).
+- **`components/promo/launch-offer-banner.tsx`**: added a dismiss (X) button persisting to `localStorage` (`athleteos_launch_offer_dismissed`), so the offer can be permanently dismissed. Claimed-state is now a thin "Pro trial active · ends MM/DD" line with **no CTA hero**; it reads the trial end date from the Stripe subscription period end.
+- **`app/dashboard/billing/page.tsx`**: passes the subscription period end as `trialEndsAt` so the claimed-state line shows the correct date there too.
+
+### Why
+QA review flagged the placement as a High trust issue: a persistent, non-dismissible sales hero above the user's own dashboard inverts hierarchy, eats 30-40% of the mobile first screen, and stacks with the "Unlock Pro" CTA and Refer & Unlock section into an ad wall. Fix = move the offer below the user's data, make it dismissible, and collapse the claimed state to a thin status line.
+
+### Files touched
+- `app/dashboard/page.tsx`
+- `components/dashboard/overview.tsx`
+- `components/promo/launch-offer-banner.tsx`
+- `app/dashboard/billing/page.tsx`
+
+### Commit
+`<pending>`
+
 ## 2026-08-14 — Session: Launch Offer Banner Restraint Pass — Kill Neon/Gamified Language, One Focal Point
 
 ### What changed

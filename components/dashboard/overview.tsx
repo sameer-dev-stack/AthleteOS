@@ -29,14 +29,24 @@ import { PullToRefresh } from "@/components/mobile/pull-to-refresh";
 import { useHaptic } from "@/components/mobile/use-haptic";
 import { SwipeCards } from "@/components/mobile/swipe-cards";
 import { getMissingCardFieldLabels } from "@/lib/card-completeness";
+import { LaunchOfferBanner } from "@/components/promo/launch-offer-banner";
 
 const QrShareModal = lazy(() => import("@/components/dashboard/qr-share-modal").then((m) => ({ default: m.QrShareModal })));
 
-type Props = {
-  profile: Profile;
+type PromoProps = {
+  available: boolean;
+  remainingSlots: number;
+  totalSlots: number;
+  claimed: boolean;
+  trialEndsAt: string | null;
 };
 
-export function DashboardOverview({ profile: initialProfile }: Props) {
+type Props = {
+  profile: Profile;
+  promo?: PromoProps;
+};
+
+export function DashboardOverview({ profile: initialProfile, promo }: Props) {
   const [profile, setProfile] = useState(initialProfile);
   const [avatarUrl, setAvatarUrl] = useState(initialProfile.avatar_url);
 
@@ -179,6 +189,8 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
   }
 
   const accentColor = profile.theme_accent || "#C6FF3D";
+  const isProUser = resolvePlan(profile.plan, profile.extended_pro_until) !== "free";
+  const showPromoOffer = !!promo && promo.available && !promo.claimed && !isProUser;
   const initials = cardName
     .split(" ")
     .map((w) => w[0])
@@ -275,7 +287,7 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
       )}
 
       {/* Upgrade CTA for free users */}
-      {resolvePlan(profile.plan, profile.extended_pro_until) === "free" && (
+      {!showPromoOffer && resolvePlan(profile.plan, profile.extended_pro_until) === "free" && (
         <Link
           href="/dashboard/billing"
           className="flex items-center justify-between rounded-2xl border border-accent/20 bg-accent/5 p-4 transition-all hover:bg-accent/10"
@@ -523,6 +535,20 @@ export function DashboardOverview({ profile: initialProfile }: Props) {
           </div>
         </div>
       </div>
+      {promo && promo.claimed && (
+        <LaunchOfferBanner
+          hasClaimed={true}
+          trialEndsAt={promo.trialEndsAt}
+          isAuthenticated={true}
+        />
+      )}
+      {showPromoOffer && (
+        <LaunchOfferBanner
+          remainingSlots={promo!.remainingSlots}
+          totalSlots={promo!.totalSlots}
+          isAuthenticated={true}
+        />
+      )}
       {profile.username && (
         <QrShareModal
           url={`${process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app"}/${profile.username}`}

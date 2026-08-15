@@ -1,29 +1,52 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ArrowRight, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { ArrowRight, ShieldCheck, CheckCircle2, X } from "lucide-react";
+import { useMounted } from "@/lib/hooks/use-mounted";
 import { claimLaunchPromoTrialAction } from "@/lib/actions/billing";
+
+const DISMISS_KEY = "athleteos_launch_offer_dismissed";
 
 type Props = {
   remainingSlots?: number;
   totalSlots?: number;
   isAuthenticated?: boolean;
   hasClaimed?: boolean;
+  trialEndsAt?: string | null;
   className?: string;
 };
+
+function formatMonthDay(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${mm}/${dd}`;
+}
 
 export function LaunchOfferBanner({
   remainingSlots = 500,
   totalSlots = 500,
   isAuthenticated = false,
   hasClaimed = false,
+  trialEndsAt = null,
   className = "",
 }: Props) {
+  const mounted = useMounted();
+  const [dismissed, setDismissed] = useState(
+    () => typeof window !== "undefined" && localStorage.getItem(DISMISS_KEY) === "dismissed",
+  );
   const [isPending, startTransition] = useTransition();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const claimedCount = Math.max(0, totalSlots - remainingSlots);
   const percentClaimed = Math.min(100, Math.round((claimedCount / totalSlots) * 100));
+
+  function handleDismiss() {
+    setDismissed(true);
+    localStorage.setItem(DISMISS_KEY, "dismissed");
+  }
 
   async function handleClaim() {
     setErrorMsg(null);
@@ -46,18 +69,18 @@ export function LaunchOfferBanner({
   }
 
   if (hasClaimed) {
+    const endLabel = mounted ? formatMonthDay(trialEndsAt) : null;
     return (
-      <div className={`rounded-2xl bg-accent/10 border border-accent/30 p-5 flex items-center gap-4 backdrop-blur-xl shadow-xl ${className}`}>
-        <div className="h-11 w-11 rounded-xl bg-accent/20 border border-accent/40 flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(198,255,61,0.3)]">
-          <CheckCircle2 className="h-6 w-6 text-accent" />
-        </div>
-        <div>
-          <p className="text-sm font-black text-white tracking-wider uppercase">3-Month Pro Trial Unlocked</p>
-          <p className="text-xs text-white/75 mt-0.5">Your 90-day Pro trial is active. Enjoy custom card themes and AI tools.</p>
-        </div>
+      <div className={`flex items-center justify-between gap-3 rounded-xl border border-accent/20 bg-accent/10 px-4 py-2.5 ${className}`}>
+        <p className="text-xs font-semibold text-accent flex items-center gap-2">
+          <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0" />
+          Pro trial active{endLabel ? ` · ends ${endLabel}` : ""}
+        </p>
       </div>
     );
   }
+
+  if (mounted && dismissed) return null;
 
   return (
     <div
@@ -75,6 +98,15 @@ export function LaunchOfferBanner({
         className="absolute -top-24 -left-24 h-72 w-72 rounded-full pointer-events-none blur-3xl opacity-20"
         style={{ background: "#C6FF3D" }}
       />
+
+      {/* Dismiss */}
+      <button
+        onClick={handleDismiss}
+        aria-label="Dismiss launch offer"
+        className="absolute top-4 right-4 z-20 flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-white/40 transition-colors hover:bg-white/[0.08] hover:text-white/70"
+      >
+        <X className="h-4 w-4" />
+      </button>
 
       <div className="relative z-10 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-8 w-full">
         {/* Left Section: Offer Details */}
