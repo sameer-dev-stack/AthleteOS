@@ -3,6 +3,32 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Update Public Changelog Page (Content Staleness Fix)
+
+### What changed
+- `app/changelog/page.tsx`: added 6 new hardcoded entries (the array is the page's only data source) so the page reflects what actually shipped since July 7, 2026. Reverse-chronological, above the existing July 7 entry:
+  - Aug 13 — "NIL Value Engine goes live" (Features): AI NIL valuation w/ editable rate cards, 3-in-1 pitch generator, NIL value dashboard w/ Pro gating, deal package calculator, resilient metrics.
+  - Aug 11 — "Launch offer for the first 500 athletes" (Growth): 3-month Pro trial, dismissible offer banner.
+  - Aug 10 — "Profile card redesign" (Polish): dynamic border glow, ReflectiveCard webcam material, gold verified badge, sport-aware refinements, discover Pro spotlight, smoother flip.
+  - Aug 6 — "Launch gate hardening and OG previews" (Platform): per-profile OG previews, Business Facts store + AI grounding, funnel/env hardening, "Coming soon" gating, null-safe client.
+  - Jul 13 — "Faster builds and stronger billing" (Platform): Next.js 16.2 Turbopack upgrade, Stripe SDK v22 pin, Supabase SSR 0.12, Sentry.
+  - Jul 12 — "Referral system, round two" (Growth): /r/ landing pages, referral dashboard, two-sided Pro rewards, invited-by banner.
+- Entries map to existing `tagColors` keys (Growth/Polish/Platform/Features); no tag map change needed.
+
+### Why
+- QA review flagged the page as stale: it stopped at July 7, 2026 while the product kept shipping (70+ sessions in `docs/CHANGELOG.md` since). Because the entries are a hardcoded static array (`app/changelog/page.tsx:10-82`), this was a content bug, not a caching/render issue. "We ship fast" copy with a 5-week gap reads as abandonment. Visual/layout concerns (density, contrast, visual anchors) were intentionally deferred — content currency first.
+
+### Files touched
+- `app/changelog/page.tsx`
+- `docs/COPY.md` (edit log entry for the new user-facing copy)
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings (unchanged).
+- `npm run build` — green; `/changelog` prerendered as static (○).
+
+### Commit
+(see below)
+
 ## 2026-08-15 — Session: Fix Avatar Crop Modal Positioning Bug
 
 ### What changed
