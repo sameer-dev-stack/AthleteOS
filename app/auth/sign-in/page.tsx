@@ -52,9 +52,6 @@ export default function SignInPage() {
   useEffect(() => {
     if (state.ok) {
       let cancelled = false;
-      // ponytail: honor a deep-link redirect set by middleware (e.g. a guarded
-      // route visited while logged out), but only for internal same-origin
-      // paths — blocks open-redirect via ?redirect=//evil.com or other schemes.
       const redirectParam = new URLSearchParams(window.location.search).get("redirect");
       const safeRedirect =
         redirectParam && redirectParam.startsWith("/") && !redirectParam.startsWith("//")
@@ -86,6 +83,30 @@ export default function SignInPage() {
       setProcessing(false);
     }
   }, [state, router]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/auth/profile-status");
+        const data = await res.json();
+        if (cancelled) return;
+        if (data.isAdmin) {
+          router.push("/admin");
+        } else if (!data.onboardingCompleted) {
+          router.push("/onboarding");
+        } else {
+          router.push("/dashboard");
+        }
+      } catch {
+        if (cancelled) return;
+      }
+    };
+    checkAuth();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   return (
     <AuthLayout

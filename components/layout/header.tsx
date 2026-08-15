@@ -202,14 +202,6 @@ export function Header({ profile, email }: HeaderProps) {
         <div className="flex h-full items-center w-full max-w-7xl mx-auto px-4 md:px-8">
           {/* Left: Breadcrumb */}
           <nav className="flex items-center gap-1.5 min-w-0 flex-1">
-            {/* Mobile hamburger */}
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden p-2 -ml-2 mr-1 text-white/50 hover:text-white rounded-lg transition-colors"
-              aria-label="Open menu"
-            >
-              <Menu className="h-4 w-4" />
-            </button>
 
             {/* Breadcrumbs — hidden on very small screens */}
             <ol className="hidden sm:flex items-center gap-1.5 text-xs min-w-0">

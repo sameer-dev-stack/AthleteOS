@@ -56,6 +56,30 @@ export default function SignUpPage() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/auth/profile-status");
+        const data = await res.json();
+        if (cancelled) return;
+        if (data.isAdmin) {
+          router.push("/admin");
+        } else if (!data.onboardingCompleted) {
+          router.push("/onboarding");
+        } else {
+          router.push("/dashboard");
+        }
+      } catch {
+        if (cancelled) return;
+      }
+    };
+    checkAuth();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
+
+  useEffect(() => {
     if (state.ok) {
       trackFunnel("sign_up_complete");
       const email = state.email || "";

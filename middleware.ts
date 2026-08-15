@@ -126,14 +126,26 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(suspendedUrl);
     }
 
-    if (pathname === "/onboarding" && profile?.onboarding_completed) {
+    if (
+      pathname === "/onboarding" &&
+      profile?.onboarding_completed
+    ) {
       const dashUrl = request.nextUrl.clone();
       dashUrl.pathname = "/dashboard";
       return NextResponse.redirect(dashUrl);
     }
 
-    // Block incomplete profiles from accessing anything except /onboarding, auth,
-    // and public profile pages (/:username single-segment paths).
+    const isAuthPage =
+      pathname === "/auth/sign-in" ||
+      pathname.startsWith("/auth/sign-up") ||
+      pathname === "/auth/sign-up";
+
+    if (isAuthPage) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/dashboard";
+      return NextResponse.redirect(redirectUrl);
+    }
+
     const isPublicProfile = /^\/[a-zA-Z0-9_-]+$/.test(pathname) && !pathname.startsWith("/_next");
     if (
       !profile?.onboarding_completed &&

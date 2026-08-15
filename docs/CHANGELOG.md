@@ -3,6 +3,28 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-15 — Session: Block Auth Pages for Signed-In Users
+
+### What changed
+- `middleware.ts`: added redirect for authenticated users visiting auth pages (`/auth/sign-in`, `/auth/sign-up`) — sends them to `/dashboard` instead of rendering the forms.
+- `app/auth/sign-in/page.tsx`: added client-side `useEffect` that checks `/api/auth/profile-status` on mount and redirects authenticated users to their appropriate destination (dashboard, onboarding, or admin).
+- `app/auth/sign-up/page.tsx`: added the same client-side auth guard to prevent signed-in users from viewing the sign-up form.
+
+### Why
+- A signed-in user could manually navigate to `/auth/sign-in` or `/auth/sign-up` and see the auth forms. The middleware now catches this server-side; the client-side guards provide defense-in-depth for any edge case where middleware might not intercept (e.g. cached navigations or direct page loads).
+
+### Files touched
+- `middleware.ts`
+- `app/auth/sign-in/page.tsx`
+- `app/auth/sign-up/page.tsx`
+
+### Verification
+- `npm run lint` — 11 pre-existing warnings, 0 errors.
+- `npm run build` — green.
+
+### Commit
+(pending)
+
 ## 2026-08-15 — Session: Prod Audit — Align Pricing Test With 2-Tier Landing Page
 
 ### What changed

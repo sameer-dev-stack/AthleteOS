@@ -78,7 +78,7 @@ export function BottomNav() {
                     />
                   </span>
                   <span className="text-[9px] font-medium leading-none text-white/20">
-                    Coming soon
+                    Soon
                   </span>
                 </div>
               );
