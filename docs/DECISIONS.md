@@ -5,6 +5,27 @@
 
 ---
 
+## ADR-054 — Mobile Card: Restore Premium Border Glow as a Static Mesh
+
+**Status:** Accepted · 2026-08-16
+
+**Context:**
+ADR-053 stripped the BorderGlow gradient mesh from touch devices, replacing it with a flat 1px accent border + `box-shadow`. User feedback: the card now performs well but lost the colored gradient border glow that "gives the platform its premium feel." The gap was that the coarse-pointer block hid the entire mesh rather than distinguishing the expensive parts (cursor-driven masks, sweep-driven CSS vars, blend-mode compositing) from the cheap parts (a static gradient ring).
+
+**Decision:**
+Keep all per-frame cost drivers off on touch (no `animated` sweep, no cursor masks, no blend modes), but restore the mesh as a **static** layer:
+- `.border-glow-card::before` (gradient border ring) — mask removed, `opacity: 1`, `transition: none`. This is the colored accent ring that reads as the premium border.
+- `.border-glow-card > .edge-light` (outer glow) — mask removed, `mix-blend-mode: normal` (was `plus-lighter`), `opacity: 0.6`.
+- `.border-glow-card::after` (interior soft-light fill) stays `display: none` — unmasked it would wash the whole card face.
+- The card's own border becomes transparent (mesh owns the edge) and the drop shadow stays.
+
+**Consequences:**
+- Mobile now shows a full colored gradient ring + soft outer halo, statically composited once and cached, so the 3D flip stays cheap.
+- The interior fill and animated sweep remain off on touch; desktop hover behavior is unchanged.
+- If a mobile device still shows jank, the next lever is the flip spring (`mass: 0.85`), not another glow removal.
+
+---
+
 ## ADR-053 — Mobile Card: Fix Flip-Back Double-Toggle + Strip Blend/Blur Layers from Flip Faces
 
 **Status:** Accepted · 2026-08-16

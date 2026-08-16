@@ -3,6 +3,28 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-16 — Session: Restore Premium Border Glow on Mobile (Static Mesh, No Sweep)
+
+### What changed
+- `components/border-glow.css` — reworked the `@media (pointer: coarse)` block:
+  - The gradient mesh is no longer `display: none`. The `::before` gradient border renders as a **full static ring** around the card (mask removed, `opacity: 1`), restoring the signature colored-accent border.
+  - The `.edge-light` outer glow ring renders statically too (`mix-blend-mode` switched from `plus-lighter` to `normal`, `opacity: 0.6`, mask removed).
+  - The `::after` interior soft-light fill stays hidden — a full-size mesh wash would cover the card content.
+  - The per-frame cost drivers are still gone: no cursor sweep (`animated={!IS_COARSE_POINTER}` stays), no blend-mode compositing, no cursor-driven masks.
+
+### Why
+- User confirmed the digital card is now fully optimized and asked to bring back the border glow, which was the premium-feel signature of the platform. The previous coarse-pointer block had replaced the mesh with a flat 1px border + plain box-shadow, losing the colored gradient glow on mobile. The fix keeps the glow visible and premium while leaving all the jank sources disabled.
+
+### Files touched
+- `components/border-glow.css`
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings (baseline).
+- `npm run build` — green.
+
+### Commit
+- *(pending — fill after push)*
+
 ## 2026-08-16 — Session: Fix Flip-Back Button + Strip Heavy Layers on Mobile Card
 
 ### What changed

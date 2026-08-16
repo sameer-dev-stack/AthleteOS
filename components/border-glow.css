@@ -162,20 +162,37 @@
 }
 
 /* Coarse pointers (touch devices): the cursor-tracked glow never fires
-   on touch, so swap the masked gradient mesh — which re-composites on
-   every 3D flip frame — for a cheap static glow. */
+   on touch, so render the gradient mesh statically — no cursor mask, no
+   blend modes, no sweep — restoring the premium colored border without
+   the per-frame compositing cost during the 3D flip. */
 @media (pointer: coarse) {
-  .border-glow-card::before,
-  .border-glow-card::after,
-  .border-glow-card > .edge-light {
+  /* gradient border: full ring around the card */
+  .border-glow-card::before {
+    -webkit-mask-image: none;
+    mask-image: none;
+    opacity: 1;
+    transition: none;
+  }
+
+  /* interior soft-light fill: hidden — a full-size mesh wash would
+     cover the card content; the border + outer glow carry the look */
+  .border-glow-card::after {
     display: none;
   }
 
+  /* outer glow ring → plain overlay instead of plus-lighter */
+  .border-glow-card > .edge-light {
+    -webkit-mask-image: none;
+    mask-image: none;
+    mix-blend-mode: normal;
+    opacity: 0.6;
+    transition: none;
+  }
+
   .border-glow-card {
-    border: 1px solid var(--glow-color-60, rgba(255, 255, 255, 0.18));
+    border-color: transparent;
     box-shadow:
       0 0 0 1px rgba(255, 255, 255, 0.05) inset,
-      0 0 22px -6px var(--glow-color, hsla(78, 100%, 62%, 0.5)),
       0 14px 44px -14px rgba(0, 0, 0, 0.75);
   }
 }

@@ -86,6 +86,7 @@ Root public athlete identity card. Now a composition of named sub-components rat
 
 - **Flip-back bug fix [2026-08-16]:** the `BackHeader` flip-back affordance now calls `e.stopPropagation()` before `onFlipBack()`. Without it the click bubbled to the parent `motion.div`'s `onClick={handleFlip}` and toggled `flipped` twice (net no-op), so the button appeared dead.
 - **Coarse-pointer overrides [2026-08-16]:** on touch devices a `@media (pointer: coarse)` block in `globals.css` forces inline `backdrop-filter` off inside `.flip-card-face` and shrinks the `.card-ambient-glow` blur from `60px` to `20px`. See `components/border-glow.css` + `components/reflective-card.css` for their matching coarse-pointer blocks.
+- **Border glow restored on touch [2026-08-16]:** the coarse-pointer block in `border-glow.css` now renders the gradient mesh **statically** instead of hiding it — `::before` shows the full colored border ring (`opacity: 1`, mask removed) and `.edge-light` shows a plain-blend outer glow (`mix-blend-mode: normal`, `opacity: 0.6`). Only `::after` (interior soft-light fill) stays hidden so the mesh doesn't wash over card content. All per-frame cost drivers remain off: no cursor sweep, no blend-mode compositing, no cursor masks.
 
 **Sub-components (all local, not exported):**
 
