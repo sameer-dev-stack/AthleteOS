@@ -85,7 +85,7 @@ export function TipButton({ athleteId, athleteName, accentColor = "#C6FF3D" }: P
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
                   className="fixed inset-0 z-[100] flex items-end justify-center pb-6 px-4"
-                  style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
+                  style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (e.target === e.currentTarget) setOpen(false);

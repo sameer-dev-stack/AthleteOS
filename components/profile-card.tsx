@@ -605,7 +605,7 @@ function AthleteIDBlock({ username, athleteId, accent, urlCopied, onCopy }: Athl
     <div className="flex-shrink-0 mx-4 mt-2">
       <button
         onClick={onCopy}
-        className="w-full flex items-center justify-between rounded-lg px-3.5 py-2.5 group transition-all duration-200"
+        className="w-full flex items-center justify-between rounded-lg px-3.5 py-2.5 group transition-colors duration-200"
         style={{
           background: "rgba(255,255,255,0.02)",
           border: "1px solid rgba(255,255,255,0.055)",
@@ -1015,7 +1015,7 @@ function LinksSection({
                 onInteract();
                 onLinkClick(link.label, link.url);
               }}
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200 group"
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors duration-200 group"
               style={{
                 background: "rgba(255,255,255,0.025)",
                 border: "1px solid rgba(255,255,255,0.065)",
@@ -1118,7 +1118,7 @@ function HighlightsSection({ highlights, accent, profileId, onInteract }: Highli
               onInteract();
               trackLinkClick(profileId, h.title || `Highlight ${i + 1}`, h.url);
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-200 hover:scale-105 flex-shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-transform duration-200 hover:scale-105 flex-shrink-0"
             style={{
               background: `${accent}0e`,
               border: `1px solid ${accent}1e`,
@@ -1384,7 +1384,7 @@ function BusinessBlock({
               onInteract();
               onContactOpen();
             }}
-            className="flex-1 flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[11.5px] font-black tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            className="flex-1 flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[11.5px] font-black tracking-wide transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
             style={{
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(255,255,255,0.08)",
@@ -1401,7 +1401,7 @@ function BusinessBlock({
             onInteract();
             onInquiryOpen();
           }}
-          className={`${hasContact ? "flex-1" : "w-full"} flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[11.5px] font-black tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]`}
+          className={`${hasContact ? "flex-1" : "w-full"} flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[11.5px] font-black tracking-wide transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]`}
           style={{
             background: `${accent}15`,
             border: `1px solid ${accent}30`,
