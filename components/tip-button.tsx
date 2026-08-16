@@ -85,22 +85,25 @@ export function TipButton({ athleteId, athleteName, accentColor = "#C6FF3D" }: P
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
                   className="fixed inset-0 z-[100] flex items-end justify-center pb-6 px-4"
-                  style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+                  style={{ background: "rgba(0,0,0,0.88)", willChange: "transform" }}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (e.target === e.currentTarget) setOpen(false);
                   }}
                 >
                   <motion.div
-                    initial={{ opacity: 0, y: 60, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 60, scale: 0.95 }}
-                    transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    onClick={(e) => e.stopPropagation()}
                     className="w-full max-w-sm rounded-3xl overflow-hidden"
                     style={{
                       background: "#111115",
                       border: "1px solid rgba(255,255,255,0.08)",
                       boxShadow: `0 -20px 60px rgba(0,0,0,0.6), 0 0 40px -10px ${accentColor}12`,
+                      transform: "translateZ(0)",
+                      willChange: "transform",
                     }}
                   >
                     {/* Header with accent gradient */}

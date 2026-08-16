@@ -1218,15 +1218,15 @@ function ContactModal({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       onClick={(e) => e.stopPropagation()}
       className="absolute inset-0 z-30 flex flex-col justify-center gap-5 p-5 rounded-[18.5px]"
       style={{
         background: "rgba(10,10,14,0.96)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
+        transform: "translateZ(0)",
+        willChange: "transform",
       }}
     >
       <div>
