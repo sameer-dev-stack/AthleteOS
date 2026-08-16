@@ -30,7 +30,7 @@
 - `npm run build` — green.
 
 ### Commit
-- *(pending — fill after push)*
+- `60f3f64`
 
 ## 2026-08-16 — Session: Mobile Profile Card Performance Fix (Webcam + Filter Off on Touch)
 
