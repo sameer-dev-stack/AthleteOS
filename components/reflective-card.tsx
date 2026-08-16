@@ -198,7 +198,7 @@ export function ReflectiveCard({
             <feTurbulence
               type="turbulence"
               baseFrequency={baseFrequency}
-              numOctaves="2"
+              numOctaves="1"
               result="noise"
             />
 
@@ -244,36 +244,6 @@ export function ReflectiveCard({
               in="light-effect"
               in2="rippled"
               mode="screen"
-              result="metallic-result"
-            />
-
-            {/* Steps 7–10: Optional glass edge distortion */}
-            <feColorMatrix
-              in="SourceAlpha"
-              type="matrix"
-              values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"
-              result="solidAlpha"
-            />
-            <feMorphology
-              in="solidAlpha"
-              operator="erode"
-              radius="45"
-              result="erodedAlpha"
-            />
-            <feGaussianBlur
-              in="erodedAlpha"
-              stdDeviation="10"
-              result="blurredMap"
-            />
-            <feComponentTransfer in="blurredMap" result="glassMap">
-              <feFuncA type="linear" slope="0.5" intercept="0" />
-            </feComponentTransfer>
-            <feDisplacementMap
-              in="metallic-result"
-              in2="glassMap"
-              scale={glassDistortion}
-              xChannelSelector="A"
-              yChannelSelector="A"
               result="final"
             />
           </filter>

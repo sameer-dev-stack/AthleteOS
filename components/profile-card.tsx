@@ -1556,6 +1556,7 @@ export function ProfileCard({
 }) {
   /* ── State ──────────────────────────────────────── */
   const [flipped, setFlipped] = useState(false);
+  const [isFlipping, setIsFlipping] = useState(false);
   const [copied, setCopied] = useState(false);
   const [urlCopied, setUrlCopied] = useState(false);
   const [photoIdx, setPhotoIdx] = useState(0);
@@ -1717,8 +1718,10 @@ export function ProfileCard({
 
   /* ── Handlers ───────────────────────────────────── */
   function handleFlip() {
+    setIsFlipping(true);
     setFlipped((f) => !f);
     if (hintVisible) setHintVisible(false);
+    setTimeout(() => setIsFlipping(false), 380);
   }
 
   async function handleShare(e: React.MouseEvent) {
@@ -1801,10 +1804,8 @@ export function ProfileCard({
           <div
             className="flip-card-face flex flex-col"
             style={{
-              opacity: flipped ? 0 : 1,
               pointerEvents: flipped ? "none" : "auto",
               zIndex: flipped ? 0 : 1,
-              transition: "opacity 0.32s ease",
             }}
           >
             <BorderGlow
@@ -1816,7 +1817,7 @@ export function ProfileCard({
               glowIntensity={1.2}
               coneSpread={25}
               loop
-              active={!flipped}
+              active={!flipped && !isFlipping}
               colors={[accent, `${accent}cc`, `${accent}88`]}
               className="w-full h-full"
               style={{
@@ -1897,10 +1898,8 @@ export function ProfileCard({
           <div
             className="flip-card-face flip-card-back flex flex-col"
             style={{
-              opacity: flipped ? 1 : 0,
               pointerEvents: flipped ? "auto" : "none",
               zIndex: flipped ? 1 : 0,
-              transition: "opacity 0.32s ease",
             }}
             onMouseMove={resetAutoReturn}
             onTouchStart={resetAutoReturn}
@@ -1915,7 +1914,7 @@ export function ProfileCard({
               glowIntensity={1.2}
               coneSpread={25}
               loop
-              active={flipped}
+              active={flipped && !isFlipping}
               colors={[accent, `${accent}cc`, `${accent}88`]}
               className="w-full h-full"
               style={{

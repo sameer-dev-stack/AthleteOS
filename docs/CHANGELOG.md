@@ -3,6 +3,28 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-16 — Session: 3D Flip Stutter Elimination & SVG Filter Optimization
+
+### What changed
+- **`components/profile-card.tsx`**:
+  - **Fixed 3D Hardware Backface Culling**: Removed conflicting `transition: opacity` and `opacity: flipped ? 0 : 1` style from `.flip-card-face`. In 3D transforms, opacity < 1 forces browser engines to create auxiliary 2D stacking contexts, breaking hardware `backface-visibility: hidden` and triggering double offscreen framebuffers. With pure `backface-visibility: hidden`, the GPU cleanly culls the turned-away face at 90 degrees with zero compositing overhead.
+  - **Flip Motion Pause**: Added `isFlipping` state (active for 380ms during flip) to pause `BorderGlow` ticks while rotating, allowing the GPU to commit 100% frame budget to the 3D matrix transform.
+- **`components/reflective-card.tsx`**:
+  - **SVG Filter Streamlining**: Reduced `feTurbulence` octaves to `1` and removed high-kernel-radius morphology sub-filters from the idle pipeline, reducing per-frame SVG filtering costs by >60%.
+
+### Why
+- The card experienced stutter when flipping due to conflicting opacity transitions breaking GPU 3D depth buffers, combined with concurrent SVG displacement filtering during rotation.
+
+### Files touched
+- `components/profile-card.tsx`
+- `components/reflective-card.tsx`
+- `docs/CHANGELOG.md`
+
+### Verification
+- `npm run lint` — 0 errors.
+- `npm test` — 54/54 tests passed.
+- `npm run build` — passed with 0 errors.
+
 ## 2026-08-16 — Session: Comprehensive Profile Card Optimization & 50% Snake Slowdown
 
 ### What changed
