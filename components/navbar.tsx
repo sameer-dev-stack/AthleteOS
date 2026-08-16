@@ -33,11 +33,16 @@ export function Navbar() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
 
-    createClient()?.auth.getUser().then(({ data: { user } }) => {
-      setLoggedIn(!!user);
-    }).catch(() => {});
+    const timer = setTimeout(() => {
+      createClient()?.auth.getUser().then(({ data: { user } }) => {
+        setLoggedIn(!!user);
+      }).catch(() => {});
+    }, 1500);
 
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(timer);
+    };
   }, []);
 
   useEffect(() => {

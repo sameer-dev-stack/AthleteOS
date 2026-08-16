@@ -5,12 +5,11 @@ import { type ReactNode } from "react";
 import { useMounted } from "@/lib/hooks/use-mounted";
 
 const VARIANTS: Variants = {
-  hidden: { opacity: 0, y: 24, filter: "blur(8px)" },
+  hidden: { opacity: 0, y: 24 },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
   },
 };
 
@@ -44,12 +43,11 @@ export function Reveal({
       whileInView="visible"
       viewport={{ once: true, amount, margin: "0px 0px -10% 0px" }}
       variants={{
-        hidden: { opacity: 0, y, filter: "blur(8px)" },
+        hidden: { opacity: 0, y },
         visible: {
           opacity: 1,
           y: 0,
-          filter: "blur(0px)",
-          transition: { duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] },
+          transition: { duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] },
         },
       }}
       className={className}
@@ -112,12 +110,11 @@ export function RevealItem({
   return (
     <motion.div
       variants={{
-        hidden: { opacity: 0, y, filter: "blur(6px)" },
+        hidden: { opacity: 0, y },
         visible: {
           opacity: 1,
           y: 0,
-          filter: "blur(0px)",
-          transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
+          transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
         },
       }}
       className={className}

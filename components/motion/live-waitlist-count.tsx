@@ -10,18 +10,22 @@ export function LiveWaitlistCount({ className }: { className?: string }) {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/waitlist", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data: { waitlist?: number } | null) => {
-        if (!cancelled && data && typeof data.waitlist === "number") {
-          setCount(data.waitlist);
-        }
-      })
-      .catch(() => {
-        // Network error — keep fallback
-      });
+    const timer = setTimeout(() => {
+      fetch("/api/waitlist", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data: { waitlist?: number } | null) => {
+          if (!cancelled && data && typeof data.waitlist === "number") {
+            setCount(data.waitlist);
+          }
+        })
+        .catch(() => {
+          // Network error — keep fallback
+        });
+    }, 2000);
+
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
   }, []);
 
