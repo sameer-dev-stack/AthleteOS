@@ -42,7 +42,7 @@ import {
   GraduationCap, Timer, Trophy, Target,
   TrendingUp, Percent, Zap, Medal,
   Heart, Sparkles, ExternalLink, ChevronRight,
-  X, Phone, QrCode,
+  X, Phone, QrCode, Globe,
   ShieldCheck, Briefcase, ChevronDown,
   Loader2,
 } from "lucide-react";
@@ -852,6 +852,135 @@ function SectionLabel({
   );
 }
 
+/* ── LinkFavicon & Domain Utilities ───────────────────── */
+function getCleanDomain(rawUrl: string): string {
+  if (!rawUrl) return "";
+  let url = rawUrl.trim();
+  if (!/^https?:\/\//i.test(url)) {
+    url = `https://${url}`;
+  }
+  try {
+    return new URL(url).hostname.replace(/^www\./i, "");
+  } catch {
+    return "";
+  }
+}
+
+interface LinkFaviconProps {
+  url: string;
+  label: string;
+  accent: string;
+}
+
+function LinkFavicon({ url, label, accent }: LinkFaviconProps) {
+  const domain = getCleanDomain(url);
+  const [sourceIdx, setSourceIdx] = useState(0);
+  const [imgError, setImgError] = useState(false);
+
+  const d = domain.toLowerCase();
+  const l = (label || "").toLowerCase().trim();
+
+  // 1. YouTube
+  if (d.includes("youtube.com") || d.includes("youtu.be") || l.includes("youtube")) {
+    return (
+      <div className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-[#FF0000]/15 border border-[#FF0000]/25">
+        <Youtube className="h-3.5 w-3.5 text-[#FF0000]" />
+      </div>
+    );
+  }
+
+  // 2. Instagram
+  if (d.includes("instagram.com") || l.includes("instagram") || l.includes("insta")) {
+    return (
+      <div className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-[#E4405F]/15 border border-[#E4405F]/25">
+        <Instagram className="h-3.5 w-3.5 text-[#E4405F]" />
+      </div>
+    );
+  }
+
+  // 3. Twitter / X
+  if (d.includes("twitter.com") || d.includes("x.com") || l === "twitter" || l === "x") {
+    return (
+      <div className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-white/10 border border-white/15">
+        <Twitter className="h-3.5 w-3.5 text-white/90" />
+      </div>
+    );
+  }
+
+  // 4. TikTok
+  if (d.includes("tiktok.com") || l.includes("tiktok")) {
+    return (
+      <div className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-[#00F2EA]/15 border border-[#00F2EA]/25">
+        <Music2 className="h-3.5 w-3.5 text-[#00F2EA]" />
+      </div>
+    );
+  }
+
+  // 5. Twitch
+  if (d.includes("twitch.tv") || l.includes("twitch")) {
+    return (
+      <div className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-[#9146FF]/15 border border-[#9146FF]/25">
+        <svg className="h-3.5 w-3.5 fill-[#9146FF]" viewBox="0 0 24 24">
+          <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z" />
+        </svg>
+      </div>
+    );
+  }
+
+  // 6. Spotify
+  if (d.includes("spotify.com") || l.includes("spotify")) {
+    return (
+      <div className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-[#1DB954]/15 border border-[#1DB954]/25">
+        <svg className="h-3.5 w-3.5 fill-[#1DB954]" viewBox="0 0 24 24">
+          <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
+        </svg>
+      </div>
+    );
+  }
+
+  // Favicon providers with fallback chain (Google S2 -> DuckDuckGo -> Lucide Globe)
+  const sources = domain
+    ? [
+        `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`,
+        `https://icons.duckduckgo.com/ip3/${encodeURIComponent(domain)}.ico`,
+      ]
+    : [];
+
+  const currentSrc = sources[sourceIdx];
+
+  const handleImgError = () => {
+    if (sourceIdx + 1 < sources.length) {
+      setSourceIdx((i) => i + 1);
+    } else {
+      setImgError(true);
+    }
+  };
+
+  return (
+    <div
+      className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden transition-transform duration-200 group-hover:scale-105"
+      style={{
+        background: "rgba(255,255,255,0.04)",
+        border: "1px solid rgba(255,255,255,0.08)",
+      }}
+    >
+      {currentSrc && !imgError ? (
+        <Image
+          src={currentSrc}
+          alt=""
+          width={16}
+          height={16}
+          className="h-4 w-4 object-contain rounded-[2px]"
+          unoptimized
+          onError={handleImgError}
+        />
+      ) : (
+        <Globe className="h-3.5 w-3.5 text-white/40" />
+      )}
+    </div>
+  );
+}
+
 /* ── LinksSection ─────────────────────────────────────── */
 interface LinksSectionProps {
   links: { label: string; url: string }[];
@@ -883,14 +1012,13 @@ function LinksSection({
       />
       <div className="space-y-1.5">
         {displayed.map((link) => {
-          let domain = "";
-          try {
-            domain = new URL(link.url).hostname.replace("www.", "");
-          } catch { /* */ }
+          const domain = getCleanDomain(link.url);
+          const safeHref = /^https?:\/\//i.test(link.url) ? link.url : `https://${link.url}`;
+
           return (
             <a
               key={link.url}
-              href={link.url}
+              href={safeHref}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => {
@@ -919,17 +1047,10 @@ function LinksSection({
                   background: `linear-gradient(to bottom, ${accent}70, ${accent}18)`,
                 }}
               />
-              {domain && (
-                <Image
-                  src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=32`}
-                  alt=""
-                  width={16}
-                  height={16}
-                  className="h-4 w-4 rounded-sm flex-shrink-0 opacity-80"
-                  unoptimized
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-              )}
+
+              {/* Favicon / platform icon */}
+              <LinkFavicon url={link.url} label={link.label} accent={accent} />
+
               <div className="flex-1 min-w-0">
                 <div
                   className="text-[11px] font-semibold truncate leading-tight"

@@ -3,6 +3,29 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-16 — Session: Link Favicon Icons and Platform Brand Badges for Public Profile Card
+
+### What changed
+- **`components/profile-card.tsx`**:
+  - Implemented `LinkFavicon` component for public athlete card's back face links section:
+    - **Platform Brand Badges**: Built-in crisp vector icons with signature platform colors for YouTube (`#FF0000`), Instagram (`#E4405F`), Twitter/X (`#FFFFFF`), TikTok (`#00F2EA`), Twitch (`#9146FF`), and Spotify (`#1DB954`).
+    - **Multi-Tier Favicon Resolver**: For custom websites / merchandise stores / external platforms, queries high-resolution Google S2 favicon service (`sz=64`) with fallback to DuckDuckGo ICO provider and fallback to Lucide `Globe` icon badge.
+    - **Robust URL & Domain Normalizer**: Added `getCleanDomain()` to handle protocol-less URLs (`twitch.tv`, `youtube.com/channel`), subdomains, and trailing parameters.
+    - Wrapped link icons in a sleek 28x28px rounded glass container with hover micro-animations.
+
+### Why
+- User requested that website favicons display as icons next to custom links on the card back so visitors can immediately recognize platforms (Twitch, YouTube, Instagram, merch, etc.).
+
+### Files touched
+- `components/profile-card.tsx`
+- `docs/COMPONENTS.md`
+- `docs/CHANGELOG.md`
+
+### Verification
+- `npm run lint` — 0 errors.
+- `npm test` — all 9 test suites / 54 tests passed.
+- `npm run build` — compiled successfully with zero errors.
+
 ## 2026-08-16 — Session: Fix NIL Card Front Face Component Alignment and Positioning
 
 ### What changed
