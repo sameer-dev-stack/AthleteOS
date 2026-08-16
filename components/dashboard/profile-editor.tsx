@@ -467,23 +467,6 @@ export function DashboardEditor({ profile, onSaved }: Props) {
           />
         )}
       </div>
-
-      {hasChanges && (
-        <div className="fixed bottom-4 inset-x-4 z-50 lg:hidden">
-          <button
-            onClick={handleSave}
-            disabled={saving || !hasChanges || contactEmailInvalid || usernameInvalid}
-            className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-bg shadow-lg shadow-accent/20 transition-all hover:shadow-[0_0_24px_-4px_rgba(198,255,61,0.5)] disabled:opacity-50"
-          >
-            {saving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            {saving ? "Saving..." : "Save changes"}
-          </button>
-        </div>
-      )}
     </div>
   );
 }

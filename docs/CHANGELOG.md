@@ -3,6 +3,25 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-16 — Session: Fix Home Page First-Load Jank by Server-Rendering Landing Sections
+
+### What changed
+- `components/landing-sections.tsx` — converted from a `"use client"` wrapper that lazy-loaded all 13 landing sections via `dynamic(..., { ssr: false })` into a plain server component with static imports of each section (`TrustStrip`, `Problem`, `Solution`, `Testimonials`, `Features`, `HowItWorks`, `AIFeatures`, `Monetization`, `Pricing`, `FAQ`, `FinalCTA`, `Footer`, `InstallBanner`).
+- The 9 server-component sections are now SSR'd into the initial HTML instead of being shipped as client chunks that must be downloaded and hydrated after first paint. The 4 client sections (`FAQ`, `FinalCTA`, `Footer`, `InstallBanner`) remain `"use client"` islands and still hydrate normally.
+
+### Why
+- User reported the home page (root `/`) stutters/janks on first load after a refresh. Root cause: `ssr: false` on every section meant the server HTML contained none of the below-fold content; on every hard refresh the browser re-downloaded and re-hydrated all 13 chunks at once, causing the burst of work after first paint. Most sections are pure server components, so `ssr: false` was forcing them into the client bundle for no benefit.
+
+### Files touched
+- `components/landing-sections.tsx`
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings (baseline).
+- `npm run build` — green.
+
+### Commit
+- `6eb1f04` (landing-sections change landed inside the parallel session's stats commit; this CHANGELOG entry documents it)
+
 ## 2026-08-16 — Session: Re-enable Animated Border Glow Sweep on All Devices
 
 ### What changed

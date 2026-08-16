@@ -229,6 +229,10 @@ Main top section. Animated gradient background, floating decorative elements, ty
 - Server component (wraps client motion primitives).
 - Contains `<Reveal>`, `<CardFlip>`, `<AnimatedGradientBg>`, `<FloatingElements>`, `<TypingText>`, `<SocialProofAvatars>`, `<TrustBadge>`, `<HeroCta>`, `<LiveWaitlistCount>`.
 
+### `<LandingSections />` — `components/landing-sections.tsx` [REFACTORED 2026-08-16]
+Composes all below-fold landing sections in order: `<TrustStrip>`, `<Problem>`, `<Solution>`, `<Testimonials>`, `<Features>`, `<HowItWorks>`, `<AIFeatures>`, `<Monetization>`, `<Pricing>`, `<FAQ>`, `<FinalCTA>`, `<Footer>`, `<InstallBanner>`.
+- **Server component** (removed `"use client"` + `next/dynamic` `{ ssr: false }`). Previously each section lazy-loaded client-side, forcing all 13 chunks to download/hydrate after first paint on every refresh — root cause of home page first-load jank. Now the 9 server sections ship in the initial HTML; `FAQ`, `FinalCTA`, `Footer`, `InstallBanner` stay `"use client"` islands.
+
 ### `<AthleteCard />` — `components/athlete-card.tsx`
 The product hero mockup. Phone-frame style with verified badge, stats, action tiles, latest highlight. Three floating receipts (brand deal, AI bio, tip notification) translate forward on Z-axis so they pop in 3D when the parent `<Tilt>` rotates.
 - Server component. No props.

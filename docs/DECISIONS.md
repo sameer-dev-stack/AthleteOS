@@ -5,6 +5,23 @@
 
 ---
 
+## ADR-056 — Server-Render Landing Sections Instead of Client-Side Lazy Loading
+
+**Status:** Accepted · 2026-08-16
+
+**Context:**
+The home page (`app/page.tsx`) rendered a `LandingSections` client component that lazy-loaded all 13 landing sections through `next/dynamic` with `{ ssr: false }`. This predated the Next.js 15.5 upgrade. On a hard refresh the server sent only the above-the-fold hero; the browser then downloaded and hydrated all 13 section chunks in one burst after first paint, causing visible stutter/jank on first load. Investigation confirmed 9 of the 13 sections are pure server components (no `"use client"`, no module-scope browser APIs), so `ssr: false` gained nothing and forced them into the client bundle.
+
+**Decision:**
+Convert `components/landing-sections.tsx` into a server component that statically imports and renders all sections in order. The 9 server sections are SSR'd into the initial HTML; the 4 client sections (`FAQ`, `FinalCTA`, `Footer`, `InstallBanner`) stay `"use client"` and hydrate as islands.
+
+**Consequences:**
+- First refresh no longer triggers a 13-chunk client burst; below-fold content ships in the initial server HTML, so first-load jank is removed.
+- Trade-off: the landing page's below-fold content is no longer code-split into separate chunks, slightly increasing initial payload; acceptable for a marketing page.
+- Remaining suspects for any residual mobile jank (not addressed here): PostHog `autocapture: true`, and `Reveal`'s `filter: blur(8px)` scroll-in animation.
+
+---
+
 ## ADR-055 — Re-enable Animated Border Glow Sweep on All Devices
 
 **Status:** Accepted · 2026-08-16
