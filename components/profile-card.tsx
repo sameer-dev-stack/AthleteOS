@@ -200,7 +200,7 @@ function CardHeader({
       : "clamp(11px, 3.2vw, 13px)";
 
   return (
-    <div className={`flex items-center justify-between w-full z-20 ${isPro ? "mb-1" : "mb-3.5"}`}>
+    <div className={`flex items-center justify-end w-full z-20 ${isPro ? "mb-1" : "mb-3.5"}`}>
       {/* Right actions */}
       <div className="flex flex-col items-end gap-2 flex-shrink-0">
         <div className="flex items-center gap-1.5 pointer-events-auto">
