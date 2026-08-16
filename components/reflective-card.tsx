@@ -36,6 +36,16 @@
 import { useEffect, useRef, useState } from "react";
 import "./reflective-card.css";
 
+/** Phones/tablets: skip the live webcam + SVG displacement filter entirely —
+ *  it recomposites two filtered video layers every frame on a mobile GPU. */
+function isCoarsePointer(): boolean {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia?.("(pointer: coarse)").matches === true ||
+    (window.navigator.maxTouchPoints ?? 0) > 1
+  );
+}
+
 /* ── Props ─────────────────────────────────────────── */
 export interface ReflectiveCardProps {
   /* Material */
@@ -89,6 +99,13 @@ export function ReflectiveCard({
 
   /* ── Webcam lifecycle ─────────────────────────────── */
   useEffect(() => {
+    // Mobile GPUs can't recomposite a filtered live video each frame.
+    // Fall back to the static metallic gradient instead.
+    if (isCoarsePointer()) {
+      const raf = requestAnimationFrame(() => setWebcamDenied(true));
+      return () => cancelAnimationFrame(raf);
+    }
+
     // If a shared stream ref is provided and already has a stream, reuse it
     const shared = streamRef?.current;
     if (shared && videoRef.current) {

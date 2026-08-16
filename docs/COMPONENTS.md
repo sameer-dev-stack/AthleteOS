@@ -58,6 +58,7 @@ Webcam-based metallic card material shell from React Bits. Renders a live blurre
 - **Used by:** `components/profile-card.tsx` — both front and back card faces
 - **Requires:** `components/reflective-card.css` (imported inside the component)
 - **Fallback:** When webcam is unavailable/denied, renders a static dark metallic gradient. No UI blocking, no error thrown.
+- **Mobile performance [UPDATED 2026-08-16]:** On touch / coarse-pointer devices the webcam + SVG displacement filter is skipped entirely — the static metallic gradient fallback is rendered instead. The live filtered `<video>` recomposites on every frame on a mobile GPU, and two faces mounted two of them simultaneously. Desktop (hover) keeps the full webcam material.
 - **Props:**
   | Prop | Type | Default | Description |
   |---|---|---|---|

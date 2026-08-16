@@ -3,6 +3,34 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-16 — Session: Mobile Profile Card Performance Fix (Webcam + Filter Off on Touch)
+
+### What changed
+- `components/reflective-card.tsx`:
+  - Added `isCoarsePointer()` detection (pointer: coarse media query / `maxTouchPoints > 1`).
+  - On touch/coarse-pointer devices the live webcam + SVG displacement filter chain is **skipped entirely** — the component renders the existing static metallic gradient fallback (`.rc-video-fallback`) instead of mounting a `<video>` element. Previously **both** card faces mounted a live 640×480 webcam video filtered through an `feTurbulence → feDisplacementMap → feSpecularLighting → feComposite → feBlend → feGaussianBlur` chain, which a mobile GPU had to recomposite every frame.
+  - The coarse-pointer check runs in the existing webcam lifecycle effect; the `setWebcamDenied(true)` is deferred one frame via `requestAnimationFrame` to avoid a synchronous setState-in-effect lint warning and a server/client hydration mismatch.
+- `components/profile-card.tsx`:
+  - Added module-level `IS_COARSE_POINTER` detection.
+  - Both `BorderGlow` faces now pass `animated={!IS_COARSE_POINTER}`. The animated cursor sweep runs a per-frame rAF that writes `--cursor-angle`/`--cursor-x`/`--cursor-y`/`--edge-proximity` CSS vars (~5.7s on mount), forcing main-thread style recalc + masked-gradient re-evaluation — disabled on mobile.
+- `app/globals.css`:
+  - `.flip-card-face` now has `backface-visibility: hidden` (both `-webkit-` and standard) + `will-change: transform`. During the 3D `rotateY` flip the browser now culls the turned-away face instead of compositing **both** heavy faces (each containing a webcam feed + SVG filter) every frame.
+
+### Why
+- User reported severe, page-wide lag on mobile when visiting any athlete profile ("everything is lagging"). Root cause: the public profile card mounted two simultaneous live webcam feeds filtered through heavy SVG displacement filters, plus two BorderGlow rAF cursor sweeps, all composited under `preserve-3d` without backface culling. Lenis smooth scroll was already disabled on touch devices, so it was not a contributor.
+
+### Files touched
+- `components/reflective-card.tsx`
+- `components/profile-card.tsx`
+- `app/globals.css`
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings (baseline restored; the new setState-in-effect warning was resolved with the rAF deferral).
+- `npm run build` — green.
+
+### Commit
+- (pending — to be filled after commit)
+
 ## 2026-08-16 — Session: Fix OAuth Callback Race (Session Is Source of Truth)
 
 ### What changed

@@ -5,6 +5,25 @@
 
 ---
 
+## ADR-052 — Mobile Card: Skip Webcam Material + 3D Backface Culling on Touch
+
+**Status:** Accepted · 2026-08-16
+
+**Context:**
+The public athlete profile card (`components/profile-card.tsx`) mounted **two** `ReflectiveCard` instances (front + back face) simultaneously, each running a live 640×480 webcam `<video>` through an SVG displacement/specular filter chain, plus two `BorderGlow` `animated` cursor sweeps mutating CSS vars per frame, all composited under a Framer Motion `rotateY` spring with `preserve-3d`. On mobile GPUs the browser recomposited two big filtered video layers every frame, producing page-wide lag on every profile visit.
+
+**Decision:**
+- Detect coarse pointers (`pointer: coarse` media query or `maxTouchPoints > 1`) and, on touch devices, skip the webcam + SVG filter entirely — `ReflectiveCard` renders its existing static metallic-gradient fallback instead of a `<video>`.
+- Disable the `BorderGlow` animated cursor sweep (`animated={!IS_COARSE_POINTER}`) on touch devices.
+- Add `backface-visibility: hidden` + `will-change: transform` to `.flip-card-face` so the browser culls the turned-away face during the 3D flip instead of compositing both heavy faces each frame.
+
+**Consequences:**
+- Profile card is dramatically cheaper on mobile; desktop (hover) keeps the full webcam metallic material.
+- Static fallback looks slightly less "live" than the webcam reflection on phones — an acceptable tradeoff for usability.
+- The `backface-visibility` fix also reduces flip cost on desktop, since the hidden face is no longer composited mid-rotation.
+
+---
+
 ## ADR-051 — OAuth Callback: Session Is the Source of Truth, Not the Code Exchange
 
 **Status:** Accepted · 2026-08-16
