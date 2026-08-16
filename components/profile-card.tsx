@@ -201,97 +201,8 @@ function CardHeader({
 
   return (
     <div className={`flex items-center justify-between w-full z-20 ${isPro ? "mb-1" : "mb-3.5"}`}>
-      {/* Name */}
-      <div className="flex-1 min-w-0 pr-2">
-        {!isPro ? (
-          <h1
-            className="font-black text-white line-clamp-2"
-            style={{
-              fontSize,
-              lineHeight: 1.2,
-              letterSpacing: "-0.02em",
-              wordBreak: "keep-all",
-              overflowWrap: "anywhere",
-              maxWidth: "100%",
-              minWidth: 0,
-            } as React.CSSProperties}
-          >
-            <span>{displayName}</span>
-            {(isVerified || isPro || classLabel) && (
-              <span className="inline-flex items-center gap-1 align-middle ml-1 flex-shrink-0 relative -top-[1px]">
-                {isVerified && (
-                  <Image
-                    src="/verified.gif"
-                    alt="Verified Athlete"
-                    width={48}
-                    height={48}
-                    className="inline-block h-[32px] w-[32px] flex-shrink-0 align-middle"
-                    unoptimized
-                  />
-                )}
-                {classLabel && (
-                  <span
-                    className="flex-shrink-0 inline-flex items-center rounded px-1.5 py-0.5 text-[7.5px] font-black tracking-widest uppercase"
-                    style={{
-                      color: "rgba(255,255,255,0.35)",
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                    }}
-                  >
-                    {classLabel}
-                  </span>
-                )}
-              </span>
-            )}
-          </h1>
-        ) : (
-          <div className="flex items-center gap-1.5">
-            <h1
-              className="font-black text-white line-clamp-2"
-              style={{
-                fontSize,
-                lineHeight: 1.2,
-                letterSpacing: "-0.02em",
-                wordBreak: "keep-all",
-                overflowWrap: "anywhere",
-                maxWidth: "100%",
-                minWidth: 0,
-              } as React.CSSProperties}
-            >
-              <span>{displayName}</span>
-              {(isVerified || isPro || classLabel) && (
-                <span className="inline-flex items-center gap-1 align-middle ml-1 flex-shrink-0 relative -top-[1px]">
-                  {(isVerified || isPro) && (
-                    <Image
-                      src="/verified.gif"
-                      alt="Verified Athlete"
-                      width={48}
-                      height={48}
-                      className="inline-block h-[32px] w-[32px] flex-shrink-0 align-middle"
-                      unoptimized
-                    />
-                  )}
-                  {classLabel && (
-                    <span
-                      className="flex-shrink-0 inline-flex items-center rounded px-1.5 py-0.5 text-[7.5px] font-black tracking-widest uppercase"
-                      style={{
-                        color: "rgba(255,255,255,0.35)",
-                        background: "rgba(255,255,255,0.05)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                      }}
-                    >
-                      {classLabel}
-                    </span>
-                  )}
-                </span>
-              )}
-            </h1>
-          </div>
-        )}
-      </div>
-
       {/* Right actions */}
-      <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+      <div className="flex flex-col items-end gap-2 flex-shrink-0">
         <div className="flex items-center gap-1.5 pointer-events-auto">
           {/* QR */}
           <button
@@ -329,7 +240,7 @@ function CardHeader({
         {/* Brand mark under QR/Share for free users */}
         {!isPro && (
           <div
-            className="flex items-center gap-1 rounded-full px-2 py-0.5 pointer-events-auto"
+            className="flex items-center gap-1.5 rounded-full px-3 py-1 pointer-events-auto"
             style={{
               background: "rgba(0,0,0,0.5)",
               border: "1px solid rgba(255,255,255,0.10)",
@@ -337,10 +248,10 @@ function CardHeader({
             }}
           >
             <Logo
-              className="h-3 w-3 rounded-[3px] flex-shrink-0"
+              className="h-4 w-4 rounded-[3px] flex-shrink-0"
               style={{ backgroundColor: accent }}
             />
-            <span className="text-[7px] font-black tracking-[0.18em] uppercase text-white/70">
+            <span className="text-[8px] font-black tracking-[0.18em] uppercase text-white/70">
               NIL CARD
             </span>
           </div>
@@ -1055,6 +966,17 @@ function LinksSection({
                   background: `linear-gradient(to bottom, ${accent}70, ${accent}18)`,
                 }}
               />
+              {domain && (
+                <Image
+                  src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=32`}
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="h-4 w-4 rounded-sm flex-shrink-0 opacity-80"
+                  unoptimized
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+              )}
               <div className="flex-1 min-w-0">
                 <div
                   className="text-[11px] font-semibold truncate leading-tight"
@@ -1803,7 +1725,6 @@ export function ProfileCard({
           animate={{ rotateY: flipped ? 180 : 0 }}
           transition={{ type: "spring", stiffness: 270, damping: 30, mass: 0.85 }}
           onClick={handleFlip}
-          onTouchStart={handleFlip}
           className="relative w-full h-full cursor-pointer group"
           style={{ transformStyle: "preserve-3d", borderRadius: "20px" }}
           role="button"
@@ -1831,7 +1752,7 @@ export function ProfileCard({
               glowRadius={40}
               glowIntensity={1.2}
               coneSpread={25}
-              animated
+              loop
               colors={[accent, `${accent}cc`, `${accent}88`]}
               className="w-full h-full"
               style={{
@@ -1929,6 +1850,7 @@ export function ProfileCard({
             }}
             onMouseMove={resetAutoReturn}
             onTouchStart={resetAutoReturn}
+            onClick={handleFlip}
           >
             <BorderGlow
               edgeSensitivity={30}
@@ -1938,7 +1860,7 @@ export function ProfileCard({
               glowRadius={40}
               glowIntensity={1.2}
               coneSpread={25}
-              animated
+              loop
               colors={[accent, `${accent}cc`, `${accent}88`]}
               className="w-full h-full"
               style={{

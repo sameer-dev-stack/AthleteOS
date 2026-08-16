@@ -14,6 +14,7 @@ interface BorderGlowProps {
   glowIntensity?: number;
   coneSpread?: number;
   animated?: boolean;
+  loop?: boolean;
   colors?: string[];
   fillOpacity?: number;
   style?: React.CSSProperties;
@@ -97,11 +98,14 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
   glowIntensity = 1.0,
   coneSpread = 25,
   animated = false,
+  loop = false,
   colors = ['#c084fc', '#f472b6', '#38bdf8'],
   fillOpacity = 0.5,
   style,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
+  const loopStartRef = useRef<number | null>(null);
 
   const getCenterOfElement = useCallback((el: HTMLElement): [number, number] => {
     const { width, height } = el.getBoundingClientRect();
@@ -148,35 +152,56 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
   }, [getEdgeProximity, getCursorAngle]);
 
   useEffect(() => {
-    if (!animated || !cardRef.current) return;
     const card = cardRef.current;
-    const rect = card.getBoundingClientRect();
-    const w = rect.width || 300;
-    const h = rect.height || 400;
-    const angleStart = 110;
-    const angleEnd = 465;
-    card.classList.add('sweep-active');
-    card.style.setProperty('--cursor-angle', `${angleStart}deg`);
-    card.style.setProperty('--cursor-x', `${(w * 0.5).toFixed(1)}px`);
-    card.style.setProperty('--cursor-y', `0px`);
+    if (!card) return;
 
-    const updatePos = (deg: number) => {
-      card.style.setProperty('--cursor-angle', `${deg.toFixed(3)}deg`);
-      const rad = (deg - 90) * (Math.PI / 180);
-      const cx = w / 2 + (w / 2) * Math.cos(rad);
-      const cy = h / 2 + (h / 2) * Math.sin(rad);
-      card.style.setProperty('--cursor-x', `${cx.toFixed(1)}px`);
-      card.style.setProperty('--cursor-y', `${cy.toFixed(1)}px`);
-    };
+    if (loop) {
+      const rect = card.getBoundingClientRect();
+      const w = rect.width || 300;
+      const h = rect.height || 400;
+      const perimeter = 2 * (w + h);
+      const speed = 0.0004;
+      const proximity = 90;
 
-    animateValue({ duration: 500, onUpdate: v => card.style.setProperty('--edge-proximity', `${v.toFixed(3)}`) });
-    animateValue({ ease: easeInCubic, duration: 1500, end: 50, onUpdate: v => updatePos((angleEnd - angleStart) * (v / 100) + angleStart) });
-    animateValue({ ease: easeOutCubic, delay: 1500, duration: 2250, start: 50, end: 100, onUpdate: v => updatePos((angleEnd - angleStart) * (v / 100) + angleStart) });
-    animateValue({ ease: easeInCubic, delay: 2500, duration: 1500, start: 100, end: 0,
-      onUpdate: v => card.style.setProperty('--edge-proximity', `${v.toFixed(3)}`),
-      onEnd: () => card.classList.remove('sweep-active'),
-    });
-  }, [animated]);
+      card.classList.add('glow-looping');
+
+      const tick = (now: number) => {
+        if (!loopStartRef.current) loopStartRef.current = now;
+        const elapsed = now - loopStartRef.current;
+        const t = (elapsed * speed) % 1;
+        const dist = t * perimeter;
+
+        let x: number, y: number;
+        if (dist < w) {
+          x = dist;
+          y = 0;
+        } else if (dist < w + h) {
+          x = w;
+          y = dist - w;
+        } else if (dist < 2 * w + h) {
+          x = w - (dist - (w + h));
+          y = h;
+        } else {
+          x = 0;
+          y = h - (dist - (2 * w + h));
+        }
+
+        card.style.setProperty('--edge-proximity', `${proximity}`);
+        card.style.setProperty('--cursor-x', `${x.toFixed(1)}px`);
+        card.style.setProperty('--cursor-y', `${y.toFixed(1)}px`);
+
+        rafRef.current = requestAnimationFrame(tick);
+      };
+
+      rafRef.current = requestAnimationFrame(tick);
+
+      return () => {
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        card.classList.remove('glow-looping');
+        loopStartRef.current = null;
+      };
+    }
+  }, [loop]);
 
   const glowVars = buildGlowVars(glowColor, glowIntensity);
 
@@ -195,7 +220,7 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
   return (
     <div
       ref={cardRef}
-      onPointerMove={handlePointerMove}
+      onPointerMove={loop ? undefined : handlePointerMove}
       className={`border-glow-card ${className}`}
       style={mergedStyles}
     >
