@@ -201,100 +201,150 @@ function CardHeader({
 
   return (
     <div className={`flex items-center justify-between w-full z-20 ${isPro ? "mb-1" : "mb-3.5"}`}>
-      {/* Brand mark / Athlete Name */}
-      {!isPro ? (
-        <div
-          className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 h-6 pointer-events-auto"
-          style={{
-            background: "rgba(0,0,0,0.5)",
-            border: "1px solid rgba(255,255,255,0.12)",
-            backdropFilter: "blur(12px)",
-          }}
-        >
-          <Logo
-            className="h-3.5 w-3.5 rounded-[3px] flex-shrink-0"
-            style={{ backgroundColor: accent }}
-          />
-          <span className="text-[8.5px] font-black tracking-[0.18em] uppercase text-white/90">
-            ATHLETE<span style={{ color: accent }}>OS</span>
-          </span>
-        </div>
-      ) : (
-        <h1
-          className="font-black text-white line-clamp-2"
-          style={{
-            fontSize,
-            lineHeight: 1.2,
-            letterSpacing: "-0.02em",
-            wordBreak: "keep-all",
-            overflowWrap: "anywhere",
-            maxWidth: "75%",
-            minWidth: 0,
-          } as React.CSSProperties}
-        >
-          <span>{displayName}</span>
-          {(isVerified || isPro || classLabel) && (
-            <span className="inline-flex items-center gap-1 align-middle ml-1 flex-shrink-0 relative -top-[1px]">
-              {(isVerified || isPro) && (
-                <Image
-                  src="/verified.gif"
-                  alt="Verified Athlete"
-                  width={48}
-                  height={48}
-                  className="inline-block h-[32px] w-[32px] flex-shrink-0 align-middle"
-                  unoptimized
-                />
-              )}
-              {classLabel && (
-                <span
-                  className="flex-shrink-0 inline-flex items-center rounded px-1.5 py-0.5 text-[7.5px] font-black tracking-widest uppercase"
-                  style={{
-                    color: "rgba(255,255,255,0.35)",
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                  }}
-                >
-                  {classLabel}
+      {/* Name */}
+      <div className="flex-1 min-w-0 pr-2">
+        {!isPro ? (
+          <h1
+            className="font-black text-white line-clamp-2"
+            style={{
+              fontSize,
+              lineHeight: 1.2,
+              letterSpacing: "-0.02em",
+              wordBreak: "keep-all",
+              overflowWrap: "anywhere",
+              maxWidth: "100%",
+              minWidth: 0,
+            } as React.CSSProperties}
+          >
+            <span>{displayName}</span>
+            {(isVerified || isPro || classLabel) && (
+              <span className="inline-flex items-center gap-1 align-middle ml-1 flex-shrink-0 relative -top-[1px]">
+                {isVerified && (
+                  <Image
+                    src="/verified.gif"
+                    alt="Verified Athlete"
+                    width={48}
+                    height={48}
+                    className="inline-block h-[32px] w-[32px] flex-shrink-0 align-middle"
+                    unoptimized
+                  />
+                )}
+                {classLabel && (
+                  <span
+                    className="flex-shrink-0 inline-flex items-center rounded px-1.5 py-0.5 text-[7.5px] font-black tracking-widest uppercase"
+                    style={{
+                      color: "rgba(255,255,255,0.35)",
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    {classLabel}
+                  </span>
+                )}
+              </span>
+            )}
+          </h1>
+        ) : (
+          <div className="flex items-center gap-1.5">
+            <h1
+              className="font-black text-white line-clamp-2"
+              style={{
+                fontSize,
+                lineHeight: 1.2,
+                letterSpacing: "-0.02em",
+                wordBreak: "keep-all",
+                overflowWrap: "anywhere",
+                maxWidth: "100%",
+                minWidth: 0,
+              } as React.CSSProperties}
+            >
+              <span>{displayName}</span>
+              {(isVerified || isPro || classLabel) && (
+                <span className="inline-flex items-center gap-1 align-middle ml-1 flex-shrink-0 relative -top-[1px]">
+                  {(isVerified || isPro) && (
+                    <Image
+                      src="/verified.gif"
+                      alt="Verified Athlete"
+                      width={48}
+                      height={48}
+                      className="inline-block h-[32px] w-[32px] flex-shrink-0 align-middle"
+                      unoptimized
+                    />
+                  )}
+                  {classLabel && (
+                    <span
+                      className="flex-shrink-0 inline-flex items-center rounded px-1.5 py-0.5 text-[7.5px] font-black tracking-widest uppercase"
+                      style={{
+                        color: "rgba(255,255,255,0.35)",
+                        background: "rgba(255,255,255,0.05)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                      }}
+                    >
+                      {classLabel}
+                    </span>
+                  )}
                 </span>
               )}
-            </span>
-          )}
-        </h1>
-      )}
+            </h1>
+          </div>
+        )}
+      </div>
 
       {/* Right actions */}
-      <div className="flex items-center gap-1.5 pointer-events-auto">
-        {/* QR */}
-        <button
-          onClick={onQr}
-          aria-label="Show QR code"
-          className="h-10 w-10 rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
-          style={{
-            background: "rgba(0,0,0,0.5)",
-            border: "1px solid rgba(255,255,255,0.10)",
-            backdropFilter: "blur(12px)",
-          }}
-        >
-          <QrCode className="h-4 w-4" style={{ color: "rgba(255,255,255,0.55)" }} />
-        </button>
+      <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+        <div className="flex items-center gap-1.5 pointer-events-auto">
+          {/* QR */}
+          <button
+            onClick={onQr}
+            aria-label="Show QR code"
+            className="h-10 w-10 rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
+            style={{
+              background: "rgba(0,0,0,0.5)",
+              border: "1px solid rgba(255,255,255,0.10)",
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            <QrCode className="h-4 w-4" style={{ color: "rgba(255,255,255,0.55)" }} />
+          </button>
 
-        {/* Share */}
-        <button
-          onClick={onShare}
-          aria-label="Share profile"
-          className="h-10 w-10 rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
-          style={{
-            background: "rgba(0,0,0,0.5)",
-            border: "1px solid rgba(255,255,255,0.10)",
-            backdropFilter: "blur(12px)",
-          }}
-        >
-          {copied ? (
-            <CheckIcon className="h-4 w-4" style={{ color: accent }} />
-          ) : (
-            <Share2 className="h-4 w-4" style={{ color: "rgba(255,255,255,0.55)" }} />
-          )}
-        </button>
+          {/* Share */}
+          <button
+            onClick={onShare}
+            aria-label="Share profile"
+            className="h-10 w-10 rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
+            style={{
+              background: "rgba(0,0,0,0.5)",
+              border: "1px solid rgba(255,255,255,0.10)",
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            {copied ? (
+              <CheckIcon className="h-4 w-4" style={{ color: accent }} />
+            ) : (
+              <Share2 className="h-4 w-4" style={{ color: "rgba(255,255,255,0.55)" }} />
+            )}
+          </button>
+        </div>
+
+        {/* Brand mark under QR/Share for free users */}
+        {!isPro && (
+          <div
+            className="flex items-center gap-1 rounded-full px-2 py-0.5 pointer-events-auto"
+            style={{
+              background: "rgba(0,0,0,0.5)",
+              border: "1px solid rgba(255,255,255,0.10)",
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            <Logo
+              className="h-3 w-3 rounded-[3px] flex-shrink-0"
+              style={{ backgroundColor: accent }}
+            />
+            <span className="text-[7px] font-black tracking-[0.18em] uppercase text-white/70">
+              NIL CARD
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1599,6 +1649,12 @@ export function ProfileCard({
   const isVerified = profile.is_verified || isPro;
 
   const classLabel =
+    profile.class_year?.toLowerCase() === "fr"        ? "FR" :
+    profile.class_year?.toLowerCase() === "so"        ? "SO" :
+    profile.class_year?.toLowerCase() === "jr"        ? "JR" :
+    profile.class_year?.toLowerCase() === "sr"        ? "SR" :
+    profile.class_year?.toLowerCase() === "gs"        ? "GS" :
+    profile.class_year?.toLowerCase() === "pro"       ? "PRO" :
     profile.class_year?.toLowerCase() === "freshman"  ? "FR" :
     profile.class_year?.toLowerCase() === "sophomore" ? "SO" :
     profile.class_year?.toLowerCase() === "junior"    ? "JR" :
@@ -1747,6 +1803,7 @@ export function ProfileCard({
           animate={{ rotateY: flipped ? 180 : 0 }}
           transition={{ type: "spring", stiffness: 270, damping: 30, mass: 0.85 }}
           onClick={handleFlip}
+          onTouchStart={handleFlip}
           className="relative w-full h-full cursor-pointer group"
           style={{ transformStyle: "preserve-3d", borderRadius: "20px" }}
           role="button"

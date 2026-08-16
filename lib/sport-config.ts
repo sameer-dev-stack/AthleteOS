@@ -232,6 +232,17 @@ export const SPORT_CONFIG: Record<string, SportConfig> = {
     ],
     fallbackGradient: "linear-gradient(160deg, #1a1a1a 0%, #121212 40%, #0a0a0a 100%)",
   },
+  ESP: {
+    code: "ESP",
+    label: "Esports",
+    positions: ["FPS", "MOBA", "BR", "RTS", "Sports Games", "Fighting Games"],
+    statsSchema: [
+      { key: "kda", label: "K/D/A", unit: "" },
+      { key: "win-rate", label: "Win Rate", unit: "%" },
+      { key: "rank", label: "Rank", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #0a0a2a 0%, #050520 40%, #020210 100%)",
+  },
 };
 
 const LABEL_TO_CODE: Record<string, string> = {};
