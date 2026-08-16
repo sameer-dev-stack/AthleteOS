@@ -5,6 +5,24 @@
 
 ---
 
+## ADR-055 — Re-enable Animated Border Glow Sweep on All Devices
+
+**Status:** Accepted · 2026-08-16
+
+**Context:**
+ADR-052 disabled the BorderGlow `animated` cursor sweep on touch devices (`animated={!IS_COARSE_POINTER}`) and ADR-053/054 flattened the gradient mesh into a static ring under `@media (pointer: coarse)`. User feedback after those perf fixes: the card is fast, but the border glow no longer *moves* — the premium signature is the colored gradient that sweeps/loops around the card, not a static border. The flattened version reads as a downgrade.
+
+**Decision:**
+- Set `animated` (true) on both `BorderGlow` instances regardless of pointer type; remove the `IS_COARSE_POINTER` const.
+- Delete the `@media (pointer: coarse)` block from `border-glow.css` so the masked gradient mesh + sweep-driven vars render normally again.
+- Keep the other mobile-perf fixes that don't conflict with the sweep: webcam + SVG filter skipped on touch (`ReflectiveCard` fallback), `backdrop-filter: none` inside `.flip-card-face`, `.card-ambient-glow` blur `60px → 20px`, backface culling, and ReflectiveCard's blend-layer stripping.
+
+**Consequences:**
+- The animated sweep (one-shot ~5.7s arc around the card on mount) is back on mobile and desktop; the mesh blend modes re-enter the flip-frame compositing path on touch.
+- If the sweep re-introduces mobile jank, the next lever is a cheaper sweep (e.g. CSS-only conic-gradient rotation, or gating only the sweep while keeping the static mesh during the 3D flip) — not another full removal.
+
+---
+
 ## ADR-054 — Mobile Card: Restore Premium Border Glow as a Static Mesh
 
 **Status:** Accepted · 2026-08-16

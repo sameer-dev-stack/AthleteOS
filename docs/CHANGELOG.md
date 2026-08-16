@@ -3,6 +3,26 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-16 — Session: Re-enable Animated Border Glow Sweep on All Devices
+
+### What changed
+- `components/profile-card.tsx` — both `BorderGlow` instances (front + back face) now use `animated` (true) on every device. Removed the `IS_COARSE_POINTER` const and its gating (`animated={!IS_COARSE_POINTER}`), which the ADR-052 mobile-perf fix had introduced.
+- `components/border-glow.css` — removed the `@media (pointer: coarse)` block entirely. The gradient mesh (cursor-mask + sweep-driven `--edge-proximity`/`--cursor-angle` vars + blend modes) is back in full on touch, so the colored glow visibly sweeps around the card again.
+
+### Why
+- User feedback after the perf fixes: the card is fast but the border glow is a flat ring instead of the signature animated sweep that loops around the card. The premium look is the moving glow, so it is restored on all devices.
+
+### Files touched
+- `components/profile-card.tsx`
+- `components/border-glow.css`
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings (baseline).
+- `npm run build` — green.
+
+### Commit
+- *(pending — fill after push)*
+
 ## 2026-08-16 — Session: Restore Premium Border Glow on Mobile (Static Mesh, No Sweep)
 
 ### What changed

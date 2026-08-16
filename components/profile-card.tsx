@@ -72,13 +72,6 @@ import { isValidPosition, getFallbackGradient } from "@/lib/sport-config";
 const AUTO_RETURN_MS = 12_000;
 const PHOTO_INTERVAL_MS = 4_000;
 
-/** The BorderGlow cursor sweep runs a per-frame rAF that mutates CSS vars —
- *  it janks the main thread on mobile. Skip it on touch/coarse pointers. */
-const IS_COARSE_POINTER =
-  typeof window !== "undefined" &&
-  (window.matchMedia?.("(pointer: coarse)").matches === true ||
-    (window.navigator.maxTouchPoints ?? 0) > 1);
-
 /** Maps well-known stat keys to lucide icons */
 const STAT_ICON_MAP: Record<string, React.ElementType> = {
   gpa: GraduationCap,
@@ -1781,7 +1774,7 @@ export function ProfileCard({
               glowRadius={40}
               glowIntensity={1.2}
               coneSpread={25}
-              animated={!IS_COARSE_POINTER}
+              animated
               colors={[accent, `${accent}cc`, `${accent}88`]}
               className="w-full h-full"
               style={{
@@ -1888,7 +1881,7 @@ export function ProfileCard({
               glowRadius={40}
               glowIntensity={1.2}
               coneSpread={25}
-              animated={!IS_COARSE_POINTER}
+              animated
               colors={[accent, `${accent}cc`, `${accent}88`]}
               className="w-full h-full"
               style={{
