@@ -1819,14 +1819,10 @@ export function ProfileCard({
             }}
           >
             <BorderGlow
-              edgeSensitivity={30}
-              glowColor="78 100 62"
               backgroundColor="#0d0d12"
               borderRadius={20}
-              glowRadius={40}
-              glowIntensity={1.2}
-              coneSpread={25}
               loop
+              active={!flipped}
               colors={[accent, `${accent}cc`, `${accent}88`]}
               className="w-full h-full"
               style={{
@@ -1917,14 +1913,10 @@ export function ProfileCard({
             onClick={handleFlip}
           >
             <BorderGlow
-              edgeSensitivity={30}
-              glowColor="78 100 62"
               backgroundColor="#0d0d12"
               borderRadius={20}
-              glowRadius={40}
-              glowIntensity={1.2}
-              coneSpread={25}
               loop
+              active={flipped}
               colors={[accent, `${accent}cc`, `${accent}88`]}
               className="w-full h-full"
               style={{
