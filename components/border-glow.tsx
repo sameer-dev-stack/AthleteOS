@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useCallback, useEffect } from 'react';
+import React, { useRef, useCallback, useEffect, useMemo } from 'react';
 import './border-glow.css';
 
 export interface BorderGlowProps {
@@ -82,33 +82,9 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
   const cardRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
   const loopStartRef = useRef<number | null>(null);
-
-  const getCenterOfElement = useCallback((el: HTMLElement): [number, number] => {
-    const { width, height } = el.getBoundingClientRect();
-    return [width / 2, height / 2];
-  }, []);
-
-  const getEdgeProximity = useCallback((el: HTMLElement, x: number, y: number): number => {
-    const [cx, cy] = getCenterOfElement(el);
-    const dx = x - cx;
-    const dy = y - cy;
-    let kx = Infinity;
-    let ky = Infinity;
-    if (dx !== 0) kx = cx / Math.abs(dx);
-    if (dy !== 0) ky = cy / Math.abs(dy);
-    return Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
-  }, [getCenterOfElement]);
-
-  const getCursorAngle = useCallback((el: HTMLElement, x: number, y: number): number => {
-    const [cx, cy] = getCenterOfElement(el);
-    const dx = x - cx;
-    const dy = y - cy;
-    if (dx === 0 && dy === 0) return 0;
-    const radians = Math.atan2(dy, dx);
-    let degrees = radians * (180 / Math.PI) + 90;
-    if (degrees < 0) degrees += 360;
-    return degrees;
-  }, [getCenterOfElement]);
+  // Cache last written pixel position — skip setProperty when unchanged
+  const lastXRef = useRef<number>(-1);
+  const lastYRef = useRef<number>(-1);
 
   const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     const card = cardRef.current;
@@ -117,54 +93,70 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    const dx = x - cx;
+    const dy = y - cy;
 
-    const edge = getEdgeProximity(card, x, y);
-    const angle = getCursorAngle(card, x, y);
+    // Edge proximity: how close cursor is to the card border (0 = center, 1 = edge)
+    let kx = dx !== 0 ? cx / Math.abs(dx) : Infinity;
+    let ky = dy !== 0 ? cy / Math.abs(dy) : Infinity;
+    const edge = Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
 
-    card.style.setProperty('--edge-proximity', `${(edge * 100).toFixed(3)}`);
-    card.style.setProperty('--cursor-angle', `${angle.toFixed(3)}deg`);
-    card.style.setProperty('--cursor-x', `${x.toFixed(1)}px`);
-    card.style.setProperty('--cursor-y', `${y.toFixed(1)}px`);
-  }, [getEdgeProximity, getCursorAngle]);
+    // Cursor angle around center, 0 = top, clockwise
+    let degrees = 0;
+    if (dx !== 0 || dy !== 0) {
+      degrees = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
+      if (degrees < 0) degrees += 360;
+    }
+
+    card.style.setProperty('--edge-proximity', `${(edge * 100) | 0}`);
+    card.style.setProperty('--cursor-angle', `${degrees | 0}deg`);
+    card.style.setProperty('--cursor-x', `${x | 0}px`);
+    card.style.setProperty('--cursor-y', `${y | 0}px`);
+  }, []);
 
   useEffect(() => {
     const card = cardRef.current;
     if (!card) return;
 
     if (loop && active) {
+      // Read dimensions once outside tick to avoid forced layout on every frame
       const rect = card.getBoundingClientRect();
       const w = rect.width || 300;
       const h = rect.height || 400;
       const perimeter = 2 * (w + h);
       const speed = 0.0004;
-      const proximity = 90;
 
       card.classList.add('glow-looping');
-      card.style.setProperty('--edge-proximity', `${proximity}`);
+      card.style.setProperty('--edge-proximity', '90');
+      lastXRef.current = -1;
+      lastYRef.current = -1;
 
       const tick = (now: number) => {
         if (!loopStartRef.current) loopStartRef.current = now;
-        const elapsed = now - loopStartRef.current;
-        const t = (elapsed * speed) % 1;
-        const dist = t * perimeter;
+        const dist = ((now - loopStartRef.current) * speed % 1) * perimeter;
 
         let x: number, y: number;
         if (dist < w) {
-          x = dist;
-          y = 0;
+          x = dist;          y = 0;
         } else if (dist < w + h) {
-          x = w;
-          y = dist - w;
+          x = w;             y = dist - w;
         } else if (dist < 2 * w + h) {
-          x = w - (dist - (w + h));
-          y = h;
+          x = w - (dist - (w + h)); y = h;
         } else {
-          x = 0;
-          y = h - (dist - (2 * w + h));
+          x = 0;             y = h - (dist - (2 * w + h));
         }
 
-        card.style.setProperty('--cursor-x', `${x.toFixed(1)}px`);
-        card.style.setProperty('--cursor-y', `${y.toFixed(1)}px`);
+        // Integer pixels — skip write if we haven't moved a full pixel
+        const xi = x | 0;
+        const yi = y | 0;
+        if (xi !== lastXRef.current || yi !== lastYRef.current) {
+          card.style.setProperty('--cursor-x', `${xi}px`);
+          card.style.setProperty('--cursor-y', `${yi}px`);
+          lastXRef.current = xi;
+          lastYRef.current = yi;
+        }
 
         rafRef.current = requestAnimationFrame(tick);
       };
@@ -183,9 +175,11 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
     }
   }, [loop, active]);
 
-  const glowVars = buildGlowVars(glowColor, glowIntensity);
+  // Memoize static CSS vars — only recompute when props actually change
+  const glowVars = useMemo(() => buildGlowVars(glowColor, glowIntensity), [glowColor, glowIntensity]);
+  const gradientVars = useMemo(() => buildGradientVars(colors), [colors]);
 
-  const mergedStyles: CustomCSSProperties = {
+  const mergedStyles: CustomCSSProperties = useMemo(() => ({
     '--card-bg': backgroundColor,
     '--edge-sensitivity': edgeSensitivity,
     '--border-radius': `${borderRadius}px`,
@@ -193,9 +187,9 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
     '--cone-spread': coneSpread,
     '--fill-opacity': fillOpacity,
     ...glowVars,
-    ...buildGradientVars(colors),
+    ...gradientVars,
     ...style,
-  };
+  }), [backgroundColor, edgeSensitivity, borderRadius, glowRadius, coneSpread, fillOpacity, glowVars, gradientVars, style]);
 
   return (
     <div

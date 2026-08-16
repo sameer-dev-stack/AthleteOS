@@ -22,6 +22,10 @@
     rgba(0, 0, 0, 0.1) 0px 8px 16px,
     rgba(0, 0, 0, 0.1) 0px 16px 32px,
     rgba(0, 0, 0, 0.1) 0px 32px 64px;
+  /* Limit style-recalc to this subtree only.
+     When --cursor-x/y change each rAF tick, the browser only
+     re-evaluates styles within .border-glow-card, not the whole page. */
+  contain: layout style;
 }
 
 .border-glow-card::before,
@@ -33,6 +37,8 @@
   border-radius: inherit;
   transition: opacity 0.25s ease-out;
   z-index: -1;
+  /* Hint the compositor that opacity will animate, avoiding repaint on fade in/out */
+  will-change: opacity;
 }
 
 .border-glow-card:not(:hover):not(.sweep-active):not(.glow-looping)::before,
@@ -111,6 +117,9 @@
   pointer-events: none;
   z-index: 1;
   border-radius: calc(var(--border-radius) + var(--glow-padding));
+  /* Promote to own compositor layer so plus-lighter blend doesn't
+     block the main thread compositing pass */
+  transform: translateZ(0);
 
   -webkit-mask-image:
     radial-gradient(
