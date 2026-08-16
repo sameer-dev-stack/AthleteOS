@@ -34,6 +34,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import {
   Share2, Check as CheckIcon, Copy, Mail, Send,
@@ -52,6 +53,7 @@ import { TipButton } from "@/components/tip-button";
 import { InquiryForm } from "@/components/inquiry-form";
 import { trackView, trackLinkClick } from "@/lib/actions/analytics";
 import { trackFunnel } from "@/lib/hooks/use-funnel-tracking";
+import { useMounted } from "@/lib/hooks/use-mounted";
 import { verifyRecentTip } from "@/lib/actions/tip-verification";
 import { Logo } from "@/components/logo";
 import { resolvePlan } from "@/lib/referral-reward";
@@ -1575,6 +1577,7 @@ export function ProfileCard({
   const trackedRef = useRef(false);
   /** Shared webcam stream between front and back ReflectiveCard instances */
   const webcamStreamRef = useRef<MediaStream | null>(null);
+  const mounted = useMounted();
 
   /* ── Analytics ──────────────────────────────────── */
   useEffect(() => {
@@ -1943,33 +1946,40 @@ export function ProfileCard({
               } as React.CSSProperties}
             >
             {/* Contact modal overlay */}
-            <AnimatePresence>
-              {showContactModal && (
-                <ContactModal
-                  profile={profile}
-                  accent={accent}
-                  onClose={() => setShowContactModal(false)}
-                  copiedEmail={copiedEmail}
-                  copiedPhone={copiedPhone}
-                  onCopyEmail={async () => {
-                    try {
-                      await navigator.clipboard.writeText(
-                        profile.contact_email || profile.email
-                      );
-                      setCopiedEmail(true);
-                      setTimeout(() => setCopiedEmail(false), 2000);
-                    } catch { /* */ }
-                  }}
-                  onCopyPhone={async () => {
-                    try {
-                      await navigator.clipboard.writeText(profile.contact_phone || "");
-                      setCopiedPhone(true);
-                      setTimeout(() => setCopiedPhone(false), 2000);
-                    } catch { /* */ }
-                  }}
-                />
-              )}
-            </AnimatePresence>
+            {mounted && typeof document !== "undefined"
+              ? createPortal(
+                  <AnimatePresence>
+                    {showContactModal && (
+                      <ContactModal
+                        profile={profile}
+                        accent={accent}
+                        onClose={() => setShowContactModal(false)}
+                        copiedEmail={copiedEmail}
+                        copiedPhone={copiedPhone}
+                        onCopyEmail={async () => {
+                          try {
+                            await navigator.clipboard.writeText(
+                              profile.contact_email || profile.email
+                            );
+                            setCopiedEmail(true);
+                            setTimeout(() => setCopiedEmail(false), 2000);
+                          } catch { /* */ }
+                        }}
+                        onCopyPhone={async () => {
+                          try {
+                            await navigator.clipboard.writeText(
+                              profile.contact_phone || ""
+                            );
+                            setCopiedPhone(true);
+                            setTimeout(() => setCopiedPhone(false), 2000);
+                          } catch { /* */ }
+                        }}
+                      />
+                    )}
+                  </AnimatePresence>,
+                  document.body
+                )
+              : null}
 
             {/* Back header */}
             <BackHeader
