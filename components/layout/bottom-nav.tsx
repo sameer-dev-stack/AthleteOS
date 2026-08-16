@@ -6,7 +6,7 @@ import { useCallback, useState } from "react";
 import {
   LayoutDashboard,
   BarChart3,
-  Sparkles,
+  LineChart,
   User,
   MoreHorizontal,
   Lock,
@@ -16,8 +16,8 @@ import { dashboardNavSections } from "@/config/dashboard-nav";
 
 const tabs = [
   { label: "Home", href: "/dashboard", icon: LayoutDashboard },
+  { label: "NIL Value", href: "/dashboard/nil", icon: LineChart },
   { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
-  { label: "AI", href: "/dashboard/ai", icon: Sparkles, comingSoon: true },
   { label: "Profile", href: "/dashboard/profile", icon: User },
   { label: "More", href: "/dashboard/more", icon: MoreHorizontal, isMore: true },
 ];
@@ -62,27 +62,6 @@ export function BottomNav() {
               pathname === tab.href ||
               (tab.href !== "/dashboard" && pathname.startsWith(tab.href));
             const Icon = tab.icon;
-
-            if (tab.comingSoon) {
-              return (
-                <div
-                  key={tab.href}
-                  aria-label={`${tab.label} — coming soon`}
-                  className="relative flex flex-col items-center justify-center gap-1 w-14 h-[52px] rounded-xl cursor-not-allowed select-none"
-                  style={{ WebkitTapHighlightColor: "transparent" }}
-                >
-                  <span className="relative flex items-center justify-center">
-                    <Icon
-                      className="h-[22px] w-[22px] text-white/25"
-                      strokeWidth={1.8}
-                    />
-                  </span>
-                  <span className="text-[9px] font-medium leading-none text-white/20">
-                    Soon
-                  </span>
-                </div>
-              );
-            }
 
             if (tab.isMore) {
               return (
