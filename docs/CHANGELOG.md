@@ -22,6 +22,9 @@
 - `npm run lint` — 0 errors, 11 pre-existing warnings.
 - `npm run build` — green.
 
+### Commit
+- `3ca69c2`
+
 ## 2026-08-16 — Session: Free-Tier Analytics Paywall & Overview UX Redesign
 
 ### What changed
