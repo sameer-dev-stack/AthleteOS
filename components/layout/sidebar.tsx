@@ -38,7 +38,7 @@ export function Sidebar({ profile, email }: SidebarProps) {
           <Link href="/dashboard" className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-[8px] bg-accent flex items-center justify-center flex-shrink-0">
               <span className="text-bg font-black text-[10px] tracking-widest select-none">
-                AOS
+                NC
               </span>
             </div>
             {!collapsed && (
