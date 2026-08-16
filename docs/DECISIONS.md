@@ -5,6 +5,42 @@
 
 ---
 
+## ADR-057 — Lock `nilcard.app` as the Canonical SEO Domain
+
+**Status:** Accepted · 2026-08-16
+
+**Context:**
+An SEO audit found critical domain chaos. The code's `NEXT_PUBLIC_SITE_URL` fallback is `https://nilcard.app`, but the live HTML canonicals/og:url/JSON-LD pointed at `https://athlete-os-vert.vercel.app` (the env var is set to the vercel URL in prod). `nilcard.app` serves the same content (a second live domain), and `docs/CREDENTIALS.md` + `.env.example` incorrectly listed `https://athleteos.app` — which is a completely different product (an AI lifting-coaching app). Search engines were seeing duplicate sites, split link signals, and mismatched canonicals between robots.txt, sitemap.xml, and page canonicals.
+
+**Decision:**
+`nilcard.app` is the ONE canonical production domain. All SEO output (canonical, og:url, sitemap, robots.txt sitemap line, JSON-LD URLs) must resolve to `nilcard.app`. The Vercel deployment URL stays but is non-canonical (optionally 301-redirected). `athleteos.app` is explicitly documented as a different product and never used.
+
+**Consequences:**
+- Code now derives URLs from `NEXT_PUBLIC_SITE_URL || "https://nilcard.app"` everywhere (robots.ts, sitemap.ts, page.tsx, [username]/page.tsx already did).
+- Deployment action required (not code): set `NEXT_PUBLIC_SITE_URL=https://nilcard.app` in Vercel env and redeploy, so live canonicals flip to nilcard.app. Optionally add a 301 from `athlete-os-vert.vercel.app` in Vercel Project Settings → Redirects.
+- Duplicate-content risk between nilcard.app and the vercel URL remains until the redirect is added.
+
+---
+
+## ADR-058 — Harden Indexing: Thin Sitemap, Noindex on Private Areas, FAQ Structured Data
+
+**Status:** Accepted · 2026-08-16
+
+**Context:**
+The sitemap only listed `/`, `/discover`, and published athlete URLs — missing static pages (about, changelog, docs, legal, brands) — and included junk/test athlete usernames derived from spam emails (e.g. `lasihad311adspritecom`). Auth, dashboard, admin, onboarding, and stripe-status pages inherited the root layout's `index, follow` and the generic site title, wasting crawl budget and risking junk pages in the index. The homepage has a visible FAQ section but no FAQPage structured data, missing a free rich-results opportunity.
+
+**Decision:**
+- Rebuild `app/sitemap.ts`: a `STATIC_PAGES` list covers 10 public pages with priorities and change frequencies; athlete URLs are filtered by a `JUNK_USERNAME_RE` (email-derived usernames); the CI fallback returns the full static set.
+- Noindex private areas via `robots: { index: false, follow: false }`: server route layouts for auth, onboarding, offline, brands/setup, brands/dashboard, teams/setup (client pages can't export metadata, so metadata lives in layouts); direct exports on dashboard layout, admin, stripe/status, suspended.
+- Add FAQPage JSON-LD to the homepage mirroring the 5 most relevant on-page FAQs.
+
+**Consequences:**
+- Crawl budget focuses on indexable public pages; auth/dashboard/admin emit `noindex, nofollow`.
+- FAQ content can surface as Google FAQ rich results.
+- Public static pages now appear in the sitemap with sensible priorities.
+
+---
+
 ## ADR-056 — Server-Render Landing Sections Instead of Client-Side Lazy Loading
 
 **Status:** Accepted · 2026-08-16

@@ -20,7 +20,7 @@ const STATIC_PAGES: Array<{
   { path: "/brands/discover", priority: 0.7, changeFrequency: "weekly" },
 ];
 
-const JUNK_USERNAME_RE = /^[a-z0-9]+(\d{2,}[a-z]+)+?(com|net|org|app|io|co)$/i;
+const JUNK_USERNAME_RE = /^[a-z]+\d{2,}[a-z0-9]+(com|net|org|app|io|co)$/i;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Return basic sitemap if env vars not available (CI builds)

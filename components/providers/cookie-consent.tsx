@@ -1,16 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Shield } from "lucide-react";
+import { Shield, X } from "lucide-react";
 
 const CONSENT_KEY = "nilcard_cookie_consent";
 
 export function CookieConsent() {
   const [visible, setVisible] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     const consent = localStorage.getItem(CONSENT_KEY);
-    if (!consent) queueMicrotask(() => setVisible(true));
+    if (!consent) {
+      const timer = setTimeout(() => {
+        setVisible(true);
+      }, 1200);
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   function accept() {
@@ -26,37 +32,48 @@ export function CookieConsent() {
     } catch { /* posthog not loaded */ }
   }
 
-  if (!visible) return null;
+  if (!visible || dismissed) return null;
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 p-4 md:p-6">
-      <div className="mx-auto max-w-2xl rounded-2xl bg-[#111113] border border-white/[0.08] p-5 shadow-2xl backdrop-blur-md">
-        <div className="flex items-start gap-4">
-          <div className="mt-0.5 flex-shrink-0 h-9 w-9 rounded-lg bg-accent/10 flex items-center justify-center">
-            <Shield className="h-4.5 w-4.5 text-accent" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-white mb-1">We value your privacy</p>
-            <p className="text-xs text-white/40 leading-relaxed mb-4">
-              We use cookies and analytics (PostHog) to improve your experience and understand how our platform is used. Your data is never sold to third parties.
-            </p>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={accept}
-                className="h-8 px-4 rounded-lg bg-accent text-[#0A0A0B] text-xs font-bold transition-all hover:brightness-110"
-              >
-                Accept
-              </button>
-              <button
-                onClick={decline}
-                className="h-8 px-4 rounded-lg border border-white/[0.08] text-white/50 text-xs font-bold transition-all hover:text-white hover:bg-white/[0.04]"
-              >
-                Decline
-              </button>
-            </div>
-          </div>
+    <div className="fixed bottom-4 inset-x-0 z-50 px-4 md:px-6">
+      <div
+        className="mx-auto max-w-xl rounded-xl bg-[#111113]/95 border border-white/[0.08] p-4 shadow-2xl backdrop-blur-md flex items-center gap-3"
+        style={{ animation: "cookieSlideUp 0.4s ease-out" }}
+      >
+        <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-accent/10 flex items-center justify-center">
+          <Shield className="h-4 w-4 text-accent" />
+        </div>
+        <p className="flex-1 text-xs text-white/50 leading-relaxed">
+          We use cookies and analytics to improve your experience. Your data is never sold to third parties.
+        </p>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={decline}
+            className="h-7 px-3 rounded-lg border border-white/[0.08] text-white/40 text-[11px] font-semibold transition-all hover:text-white hover:bg-white/[0.04]"
+          >
+            Decline
+          </button>
+          <button
+            onClick={accept}
+            className="h-7 px-3 rounded-lg bg-accent text-[#0A0A0B] text-[11px] font-bold transition-all hover:brightness-110"
+          >
+            Accept
+          </button>
+          <button
+            onClick={() => setDismissed(true)}
+            aria-label="Dismiss"
+            className="h-7 w-7 flex items-center justify-center rounded-lg text-white/20 hover:text-white/60 transition-colors"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
         </div>
       </div>
+      <style>{`
+        @keyframes cookieSlideUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }

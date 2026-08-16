@@ -102,8 +102,8 @@ NIL/
 │   ├── icon.svg                  # Favicon (file-based metadata convention)
 │   ├── layout.tsx                # Root layout · Inter font · SmoothScroll wrapper · full metadata + JSON-LD
 │   ├── page.tsx                  # Single landing page · composes all section components
-│   ├── robots.ts                 # Generates /robots.txt at build time
-│   ├── sitemap.ts                # Generates /sitemap.xml at build time
+│   ├── robots.ts                 # Generates /robots.txt at build time · sitemap URL from NEXT_PUBLIC_SITE_URL · blocks /api/ + /admin/
+│   ├── sitemap.ts                # Generates /sitemap.xml at build time · 10 static pages + filtered published athlete URLs
 │   └── vercel.json               # Vercel settings and weekly-briefing cron configuration
 │
 │── components/                   # All React components (server by default)

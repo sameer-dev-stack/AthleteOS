@@ -3,6 +3,38 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-16 — Session: SEO/SEM Foundation — Canonical Domain, Robots, Sitemap, Noindex, Structured Data
+
+### What changed
+- **Canonical domain locked to `nilcard.app`** (user decision). Fixed every source that claimed otherwise:
+  - `.env.example` — `NEXT_PUBLIC_SITE_URL`/`NEXT_PUBLIC_APP_URL` corrected from the wrong `https://athleteos.app` to `https://nilcard.app`. (`athleteos.app` is a DIFFERENT product — an AI lifting-coaching app, not this project.)
+  - `docs/CREDENTIALS.md` — env table + Important URLs updated; `athleteos.app` now flagged as a different product, `nilcard.app` marked canonical, `athlete-os-vert.vercel.app` marked as the (non-canonical) deployment URL.
+  - `docs/DEPLOYMENT.md` — both `NEXT_PUBLIC_SITE_URL` tables now `https://nilcard.app`; Domain setup section rewritten (register → point DNS at Vercel, set env var, optional 301 from the vercel URL).
+  - `docs/CONTEXT.md`, `docs/PRODUCT_SPECIFICATION.md`, `docs/VISION.md`, `docs/ROADMAP.md`, `docs/DESIGN_SYSTEM.md`, `docs/COPY.md`, `docs/AGENTS.project.md`, `docs/brain/master-memory.md` — domain references corrected to `nilcard.app`.
+  - `app/page.tsx` — `SoftwareApplication` JSON-LD `url` no longer hardcoded; now `process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app"`.
+  - `scripts/gen-og.js` — baked `athleteos.app` watermark in the OG image generator corrected to `nilcard.app`.
+- **`app/robots.ts`** — sitemap URL now derived from env (`NEXT_PUBLIC_SITE_URL || "https://nilcard.app"`) instead of hardcoded.
+- **`app/sitemap.ts`** — rebuilt: 10 static public pages (home, discover, about, changelog, docs/help, docs/nil-guide, legal/terms, legal/privacy, brands, brands/discover) now included with proper priorities/change-frequencies; junk/test athlete usernames (email-derived, e.g. `lasihad311adspritecom`, `yakoxem175aratrincom`, `pidab24605buloancom`, `ririce8037bora4dcom`) filtered via `JUNK_USERNAME_RE`; CI fallback now returns the full static set.
+- **Noindex on private areas** (auth, dashboard, onboarding, admin, stripe status, suspended, offline, brands setup/dashboard, teams setup) — new server route layouts `app/{auth,onboarding,offline,brands/setup,brands/dashboard,teams/setup}/layout.tsx` export `robots: { index: false, follow: false }`; `app/dashboard/layout.tsx`, `app/admin/page.tsx`, `app/stripe/status/page.tsx`, `app/suspended/page.tsx` got the same metadata directly. Auth/dashboard pages are client components so the noindex had to live in layouts (metadata can't be exported from client components).
+- **FAQPage JSON-LD** added to the homepage (`app/page.tsx`) — 5 Q&As mirroring the on-page FAQ section, eligible for Google FAQ rich results.
+
+### Why
+- SEO audit found critical domain chaos: code default `nilcard.app` vs live HTML canonicals pointing at `athlete-os-vert.vercel.app` vs wrong `athleteos.app` in docs/env. Search engines were seeing duplicate sites, split signals, and mismatched canonicals. Also: thin sitemap (only `/`, `/discover`, athlete URLs), junk test URLs in the sitemap, indexable auth/dashboard/admin pages (crawl-budget leak), hardcoded robots sitemap, and no FAQ structured data despite an on-page FAQ.
+
+### Files touched
+- `app/robots.ts`, `app/sitemap.ts`, `app/page.tsx`, `scripts/gen-og.js`, `.env.example`
+- New: `app/auth/layout.tsx`, `app/onboarding/layout.tsx`, `app/offline/layout.tsx`, `app/brands/setup/layout.tsx`, `app/brands/dashboard/layout.tsx`, `app/teams/setup/layout.tsx`
+- `app/dashboard/layout.tsx`, `app/admin/page.tsx`, `app/stripe/status/page.tsx`, `app/suspended/page.tsx`
+- Docs: `docs/CREDENTIALS.md`, `docs/DEPLOYMENT.md`, `docs/CONTEXT.md`, `docs/PRODUCT_SPECIFICATION.md`, `docs/VISION.md`, `docs/ROADMAP.md`, `docs/DESIGN_SYSTEM.md`, `docs/COPY.md`, `docs/AGENTS.project.md`, `docs/brain/master-memory.md`, `docs/CHANGELOG.md`, `docs/DECISIONS.md`
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings (baseline).
+- `npm run build` — green.
+- Built sitemap verified: all 10 static pages present; all four junk/test usernames filtered out.
+
+### Commit
+- TBD (pending push)
+
 ## 2026-08-16 — Session: Fix Home Page First-Load Jank by Server-Rendering Landing Sections
 
 ### What changed

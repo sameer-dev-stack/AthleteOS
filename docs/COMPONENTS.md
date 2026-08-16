@@ -4,6 +4,23 @@
 
 ---
 
+## Route layouts (noindex wrappers) [NEW 2026-08-16]
+
+Six new server route layouts that export `robots: { index: false, follow: false }` so private client-component pages don't get indexed:
+
+| Layout | Path | Purpose |
+|---|---|---|
+| `app/auth/layout.tsx` | `/auth/*` | All auth pages (sign-in, sign-up, forgot/reset password, welcome, account-created, error) |
+| `app/onboarding/layout.tsx` | `/onboarding` | Onboarding flow |
+| `app/offline/layout.tsx` | `/offline` | PWA offline page |
+| `app/brands/setup/layout.tsx` | `/brands/setup` | Brand onboarding |
+| `app/brands/dashboard/layout.tsx` | `/brands/dashboard` | Brand dashboard |
+| `app/teams/setup/layout.tsx` | `/teams/setup` | Team onboarding |
+
+Each renders `{children}` unchanged. Metadata lives in the layout (not the client page) because `metadata` can't be exported from `"use client"` components. `app/dashboard/layout.tsx`, `app/admin/page.tsx`, `app/stripe/status/page.tsx`, `app/suspended/page.tsx` carry the same noindex metadata as direct exports.
+
+---
+
 ## `<InfinityLoop>` — `components/loading-ui/infinity.tsx` [NEW 2026-08-15]
 
 An SVG infinity-path loader that animates a continuous dash for long-running/continuous loading states (route transitions, sync, background jobs — no percent-complete value). Source: loading-ui registry (MIT). Inherits `currentColor`; tune `--duration` for speed (default 2s), `className` for size (wider than tall reads best, e.g. `h-12 w-16`). Used in `app/loading.tsx` (route-level loader) with `text-accent`.
