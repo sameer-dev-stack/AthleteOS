@@ -127,11 +127,11 @@ function getStatIcon(label: string, customIconName?: string | null): React.Eleme
 }
 
 function formatAthleteId(username: string | null): string {
-  if (!username) return "AOS-00000";
+  if (!username) return "NC-00000";
   const hash = username
     .split("")
     .reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) & 0xffff, 0);
-  return `AOS-${String(hash).padStart(5, "0")}`;
+  return `NC-${String(hash).padStart(5, "0")}`;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -2027,18 +2027,18 @@ export function ProfileCard({
             {/* Powered by footer */}
             {!isPro && (
               <div
-                className="flex items-center justify-center gap-1.5 py-1.5 flex-shrink-0"
+                className="flex items-center justify-end gap-1.5 py-1.5 flex-shrink-0"
                 style={{
                   borderTop: "1px solid rgba(255,255,255,0.03)",
                   background: "rgba(0,0,0,0.10)",
                 }}
               >
                 <span className="text-[7px] font-bold tracking-[0.28em] uppercase" style={{ color: "rgba(255,255,255,0.18)" }}>
-                  Powered by
+                  NIL CARD
                 </span>
                 <Logo className="h-2 w-2 rounded-[2px]" style={{ backgroundColor: `${accent}35` }} />
                 <span className="text-[7px] font-bold tracking-[0.28em] uppercase" style={{ color: "rgba(255,255,255,0.18)" }}>
-                  NIL CARD
+                  Powered by
                 </span>
               </div>
             )}
