@@ -1789,7 +1789,7 @@ export function ProfileCard({
       >
         <motion.div
           animate={{ rotateY: flipped ? 180 : 0 }}
-          transition={{ type: "spring", stiffness: 380, damping: 38, mass: 1 }}
+          transition={{ type: "spring", stiffness: 220, damping: 32, mass: 1.3 }}
           onClick={handleFlip}
           className="relative w-full h-full cursor-pointer group"
           style={{ transformStyle: "preserve-3d", borderRadius: "20px", willChange: "transform" }}
