@@ -1718,10 +1718,10 @@ export function ProfileCard({
 
   /* ── Handlers ───────────────────────────────────── */
   function handleFlip() {
+    if (isFlipping) return;
     setIsFlipping(true);
     setFlipped((f) => !f);
     if (hintVisible) setHintVisible(false);
-    setTimeout(() => setIsFlipping(false), 380);
   }
 
   async function handleShare(e: React.MouseEvent) {
@@ -1796,6 +1796,7 @@ export function ProfileCard({
           role="button"
           aria-label={flipped ? "Flip card to front" : "Flip card to see more"}
           aria-pressed={flipped}
+          onAnimationComplete={() => setIsFlipping(false)}
         >
 
           {/* ═══════════════════════════════════════════
@@ -1901,7 +1902,6 @@ export function ProfileCard({
               pointerEvents: flipped ? "auto" : "none",
               zIndex: flipped ? 1 : 0,
             }}
-            onMouseMove={resetAutoReturn}
             onTouchStart={resetAutoReturn}
             onClick={handleFlip}
           >
