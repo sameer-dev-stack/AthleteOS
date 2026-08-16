@@ -80,11 +80,6 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
   style,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number | null>(null);
-  const loopStartRef = useRef<number | null>(null);
-  // Cache last written pixel position — skip setProperty when unchanged
-  const lastXRef = useRef<number>(-1);
-  const lastYRef = useRef<number>(-1);
 
   const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     const card = cardRef.current;
@@ -121,57 +116,17 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
     if (!card) return;
 
     if (loop && active) {
-      // Read dimensions once outside tick to avoid forced layout on every frame
-      const rect = card.getBoundingClientRect();
-      const w = rect.width || 300;
-      const h = rect.height || 400;
-      const perimeter = 2 * (w + h);
-      const speed = 0.0002; // 50% slower, elegant smooth perimeter travel
-
+      // CSS @keyframes on .glow-looping drives --cursor-x/--cursor-y
+      // entirely on the GPU compositor via registered @property <length>.
+      // No rAF loop needed — zero main-thread style recalculation per frame.
       card.classList.add('glow-looping');
       card.style.setProperty('--edge-proximity', '90');
-      lastXRef.current = -1;
-      lastYRef.current = -1;
-
-      const tick = (now: number) => {
-        if (!loopStartRef.current) loopStartRef.current = now;
-        const dist = ((now - loopStartRef.current) * speed % 1) * perimeter;
-
-        let x: number, y: number;
-        if (dist < w) {
-          x = dist;          y = 0;
-        } else if (dist < w + h) {
-          x = w;             y = dist - w;
-        } else if (dist < 2 * w + h) {
-          x = w - (dist - (w + h)); y = h;
-        } else {
-          x = 0;             y = h - (dist - (2 * w + h));
-        }
-
-        // Integer pixels — skip write if we haven't moved a full pixel
-        const xi = x | 0;
-        const yi = y | 0;
-        if (xi !== lastXRef.current || yi !== lastYRef.current) {
-          card.style.setProperty('--cursor-x', `${xi}px`);
-          card.style.setProperty('--cursor-y', `${yi}px`);
-          lastXRef.current = xi;
-          lastYRef.current = yi;
-        }
-
-        rafRef.current = requestAnimationFrame(tick);
-      };
-
-      rafRef.current = requestAnimationFrame(tick);
 
       return () => {
-        if (rafRef.current) cancelAnimationFrame(rafRef.current);
         card.classList.remove('glow-looping');
-        loopStartRef.current = null;
       };
     } else {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
       card.classList.remove('glow-looping');
-      loopStartRef.current = null;
     }
   }, [loop, active]);
 

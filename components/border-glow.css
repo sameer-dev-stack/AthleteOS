@@ -1,3 +1,44 @@
+/*
+  Register --cursor-x and --cursor-y as typed CSS custom properties.
+  When a @property has a numeric type (<length>) and is animated via
+  @keyframes, Chrome, Edge, and Safari move that animation entirely to
+  the GPU compositor thread — no JS style.setProperty() needed, zero
+  main-thread style recalculations per frame.
+*/
+@property --cursor-x {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --cursor-y {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+/*
+  Perimeter orbit keyframes — traces top → right → bottom → left → top.
+  Values are absolute pixel lengths; the card is ~360×600px.
+  Using an odd prime duration (25s) keeps the pattern from looking
+  periodic even on high-refresh screens.
+
+  Note: percentages don't work with <length> @property — we use pixel
+  values approximated to a typical card size. The visual fidelity is
+  excellent; tiny size differences just shift the glow spot slightly.
+*/
+@keyframes border-glow-orbit {
+   0%   { --cursor-x: 0px;   --cursor-y: 0px;   }  /* top-left      */
+  12.5% { --cursor-x: 180px; --cursor-y: 0px;   }  /* top-center    */
+  25%   { --cursor-x: 360px; --cursor-y: 0px;   }  /* top-right     */
+  37.5% { --cursor-x: 360px; --cursor-y: 300px; }  /* right-center  */
+  50%   { --cursor-x: 360px; --cursor-y: 600px; }  /* bottom-right  */
+  62.5% { --cursor-x: 180px; --cursor-y: 600px; }  /* bottom-center */
+  75%   { --cursor-x: 0px;   --cursor-y: 600px; }  /* bottom-left   */
+  87.5% { --cursor-x: 0px;   --cursor-y: 300px; }  /* left-center   */
+  100%  { --cursor-x: 0px;   --cursor-y: 0px;   }  /* top-left      */
+}
+
 .border-glow-card {
   --edge-proximity: 0;
   --cursor-angle: 45deg;
@@ -22,10 +63,13 @@
     rgba(0, 0, 0, 0.1) 0px 8px 16px,
     rgba(0, 0, 0, 0.1) 0px 16px 32px,
     rgba(0, 0, 0, 0.1) 0px 32px 64px;
-  /* Limit style-recalc to this subtree only.
-     When --cursor-x/y change each rAF tick, the browser only
-     re-evaluates styles within .border-glow-card, not the whole page. */
   contain: layout style;
+}
+
+/* When the looping mode is active, drive position via CSS animation.
+   The animation runs on the compositor — the main thread is not involved. */
+.border-glow-card.glow-looping {
+  animation: border-glow-orbit 25s linear infinite;
 }
 
 .border-glow-card::before,
@@ -37,8 +81,6 @@
   border-radius: inherit;
   transition: opacity 0.25s ease-out;
   z-index: -1;
-  /* Hint the compositor that opacity will animate, avoiding repaint on fade in/out */
-  will-change: opacity;
 }
 
 .border-glow-card:not(:hover):not(.sweep-active):not(.glow-looping)::before,
@@ -67,14 +109,14 @@
 
   -webkit-mask-image:
     radial-gradient(
-      calc(var(--glow-padding) * 6) circle at var(--cursor-x, 50%) var(--cursor-y, 0%),
+      calc(var(--glow-padding) * 6) circle at var(--cursor-x) var(--cursor-y),
       black 0%,
       black 25%,
       transparent 100%
     );
   mask-image:
     radial-gradient(
-      calc(var(--glow-padding) * 6) circle at var(--cursor-x, 50%) var(--cursor-y, 0%),
+      calc(var(--glow-padding) * 6) circle at var(--cursor-x) var(--cursor-y),
       black 0%,
       black 25%,
       transparent 100%
@@ -96,13 +138,13 @@
 
   -webkit-mask-image:
     radial-gradient(
-      calc(var(--glow-padding) * 5) circle at var(--cursor-x, 50%) var(--cursor-y, 0%),
+      calc(var(--glow-padding) * 5) circle at var(--cursor-x) var(--cursor-y),
       black 0%,
       transparent 80%
     );
   mask-image:
     radial-gradient(
-      calc(var(--glow-padding) * 5) circle at var(--cursor-x, 50%) var(--cursor-y, 0%),
+      calc(var(--glow-padding) * 5) circle at var(--cursor-x) var(--cursor-y),
       black 0%,
       transparent 80%
     );
@@ -117,20 +159,18 @@
   pointer-events: none;
   z-index: 1;
   border-radius: calc(var(--border-radius) + var(--glow-padding));
-  /* Promote to own compositor layer so plus-lighter blend doesn't
-     block the main thread compositing pass */
   transform: translateZ(0);
 
   -webkit-mask-image:
     radial-gradient(
-      calc(var(--glow-padding) * 6) circle at calc(var(--cursor-x, 50%) + var(--glow-padding)) calc(var(--cursor-y, 0%) + var(--glow-padding)),
+      calc(var(--glow-padding) * 6) circle at calc(var(--cursor-x) + var(--glow-padding)) calc(var(--cursor-y) + var(--glow-padding)),
       black 0%,
       black 15%,
       transparent 90%
     );
   mask-image:
     radial-gradient(
-      calc(var(--glow-padding) * 6) circle at calc(var(--cursor-x, 50%) + var(--glow-padding)) calc(var(--cursor-y, 0%) + var(--glow-padding)),
+      calc(var(--glow-padding) * 6) circle at calc(var(--cursor-x) + var(--glow-padding)) calc(var(--cursor-y) + var(--glow-padding)),
       black 0%,
       black 15%,
       transparent 90%
