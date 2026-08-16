@@ -23,7 +23,7 @@
 - `npm run build` — green.
 
 ### Commit
-- *(pending — fill after push)*
+- `06a3041`
 
 ## 2026-08-16 — Session: Fix Flip-Back Button + Strip Heavy Layers on Mobile Card
 
