@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getMyProfile } from "@/lib/actions/profile";
 import { getAnalyticsData } from "@/lib/actions/analytics";
 import { AnalyticsPanel } from "@/components/dashboard/analytics-panel";
+import { resolvePlan } from "@/lib/referral-reward";
 import { BarChart3, AlertCircle } from "lucide-react";
 
 export default async function AnalyticsPage() {
@@ -13,7 +14,7 @@ export default async function AnalyticsPage() {
   }
 
   const profile = profileResult.data;
-  const isPro = profile.plan === "pro" || profile.plan === "team";
+  const isPro = resolvePlan(profile.plan, profile.extended_pro_until) !== "free";
   const accentColor = profile.theme_accent || "#C6FF3D";
   const defaultRange = isPro ? "30d" : "7d";
   const initialAnalytics = await getAnalyticsData(profile.id, defaultRange);

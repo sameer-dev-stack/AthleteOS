@@ -5,6 +5,7 @@ import { randomBytes } from "crypto";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
+import { getEffectivePlan } from "@/lib/actions/plan";
 
 const IP_HASH_SECRET = process.env.ANALYTICS_IP_HASH_SECRET;
 if (!IP_HASH_SECRET) {
@@ -796,7 +797,23 @@ export async function getAnalytics(
     }
 
     const targetId = athleteId || user.id;
-    const data = await getAnalyticsData(targetId, range, customStart, customEnd, compare);
+    let data = await getAnalyticsData(targetId, range, customStart, customEnd, compare);
+
+    const planResult = await getEffectivePlan();
+    const isPro = planResult !== "free";
+
+    if (!isPro) {
+      data = {
+        ...data,
+        totalClicks: 0,
+        topLinks: [],
+        topReferrers: [],
+        geoBreakdown: [],
+        demographics: { devices: [], browsers: [] },
+        engagement: { clickRate: 0, inquiryRate: 0, tipRate: 0, avgViewsPerDay: 0 },
+      };
+    }
+
     return { ok: true, data };
   } catch (err) {
     console.error("[analytics] getAnalytics error:", err);

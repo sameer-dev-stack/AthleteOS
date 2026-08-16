@@ -238,6 +238,7 @@ export function DashboardOverview({ profile: initialProfile, promo }: Props) {
         inquiriesCount={inquiriesCount}
         themeAccent={accentColor}
         isPublished={profile.profile_published}
+        isPro={isProUser}
         username={profile.username}
         onShare={handleShareCard}
       />

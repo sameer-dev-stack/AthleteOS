@@ -12,6 +12,7 @@ type Props = {
   inquiriesCount?: number;
   themeAccent: string;
   isPublished?: boolean;
+  isPro?: boolean;
   username?: string | null;
   onShare?: () => void;
 };
@@ -42,6 +43,7 @@ export function TodaysDigest({
   inquiriesCount = 0,
   themeAccent,
   isPublished = false,
+  isPro = false,
   username,
   onShare,
 }: Props) {
@@ -76,7 +78,7 @@ export function TodaysDigest({
       });
     }
 
-    if (analytics.totalClicks > 0) {
+    if (isPro && analytics.totalClicks > 0) {
       newItems.push({
         label: "Link Clicks",
         value: formatCompact(analytics.totalClicks),
@@ -113,7 +115,7 @@ export function TodaysDigest({
     }
 
     queueMicrotask(() => setItems(newItems));
-  }, [analytics, nilScore, tipsCount, inquiriesCount]);
+  }, [analytics, nilScore, tipsCount, inquiriesCount, isPro]);
 
   if (items.length === 0) {
     return (
