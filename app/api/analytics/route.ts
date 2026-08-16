@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getAnalyticsData, type AnalyticsRange } from "@/lib/actions/analytics";
+import { getEffectivePlan } from "@/lib/actions/plan";
 
 export async function GET(request: Request) {
   try {
@@ -18,6 +19,17 @@ export async function GET(request: Request) {
     const compare = searchParams.get("compare") === "true";
 
     const data = await getAnalyticsData(user.id, range, customStart, customEnd, compare);
+
+    const planResult = await getEffectivePlan();
+    if (planResult === "free") {
+      data.totalClicks = 0;
+      data.topLinks = [];
+      data.topReferrers = [];
+      data.geoBreakdown = [];
+      data.demographics = { devices: [], browsers: [] };
+      data.engagement = { clickRate: 0, inquiryRate: 0, tipRate: 0, avgViewsPerDay: 0 };
+    }
+
     return NextResponse.json({ ok: true, data });
   } catch (err) {
     console.error("[api/analytics] GET error:", err);
