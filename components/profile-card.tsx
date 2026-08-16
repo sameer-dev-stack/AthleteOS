@@ -2060,7 +2060,7 @@ export function ProfileCard({
             {/* Powered by footer */}
             {!isPro && (
               <div
-                className="flex items-center justify-end gap-1.5 py-1.5 flex-shrink-0"
+                className="flex items-center justify-center gap-1.5 py-1.5 flex-shrink-0"
                 style={{
                   borderTop: "1px solid rgba(255,255,255,0.03)",
                   background: "rgba(0,0,0,0.10)",
