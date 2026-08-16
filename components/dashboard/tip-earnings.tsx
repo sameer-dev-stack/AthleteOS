@@ -28,10 +28,12 @@ export function TipEarnings({
   earnings: propEarnings,
   balance: propBalance,
   loading: propLoading,
+  username,
 }: {
   earnings?: TipEarnings | null;
   balance?: BalanceSummary | null;
   loading?: boolean;
+  username?: string | null;
 }) {
   const [localEarnings, setLocalEarnings] = useState<TipEarnings | null>(null);
   const [localBalance, setLocalBalance] = useState<BalanceSummary | null>(null);
@@ -94,7 +96,8 @@ export function TipEarnings({
   const b = activeBalance || { available: 0, pending: 0, connected: false, onboardingComplete: false };
 
   async function handleShareTipJar() {
-    const url = `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}`;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+    const url = username ? `${siteUrl}/${username}` : siteUrl;
     if (navigator.share) {
       try {
         await navigator.share({ title: "Tip me on AthleteOS", text: "Support me through my AthleteOS tip jar!", url });
@@ -237,7 +240,8 @@ export function TipEarnings({
             </p>
             <button
               onClick={() => {
-                const url = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+                const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+                const url = username ? `${siteUrl}/${username}` : siteUrl;
                 if (navigator.share) {
                   navigator.share({ title: "Check out my athlete card", url });
                 } else {

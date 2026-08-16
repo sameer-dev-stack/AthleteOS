@@ -113,6 +113,45 @@ export function DashboardEditor({ profile, onSaved }: Props) {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Tab rail scroll state: fades + auto-scroll active tab into view
+  const tabRailRef = useRef<HTMLDivElement>(null);
+  const tabButtonRefs = useRef<Partial<Record<Tab, HTMLButtonElement | null>>>({});
+  const [tabCanScrollLeft, setTabCanScrollLeft] = useState(false);
+  const [tabCanScrollRight, setTabCanScrollRight] = useState(false);
+
+  const updateTabScrollState = useCallback(() => {
+    const el = tabRailRef.current;
+    if (!el) return;
+    setTabCanScrollLeft(el.scrollLeft > 2);
+    setTabCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 2);
+  }, []);
+
+  useEffect(() => {
+    const el = tabRailRef.current;
+    if (!el) return;
+    updateTabScrollState();
+    el.addEventListener("scroll", updateTabScrollState, { passive: true });
+    const ro = new ResizeObserver(updateTabScrollState);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", updateTabScrollState);
+      ro.disconnect();
+    };
+  }, [updateTabScrollState]);
+
+  // When a tab is selected, center it in the rail if it's off-screen
+  useEffect(() => {
+    const container = tabRailRef.current;
+    const activeBtn = tabButtonRefs.current[tab];
+    if (!container || !activeBtn) return;
+    const containerRect = container.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
+    if (btnRect.left < containerRect.left || btnRect.right > containerRect.right) {
+      const delta = btnRect.left - containerRect.left - (containerRect.width - btnRect.width) / 2;
+      container.scrollBy({ left: delta, behavior: "smooth" });
+    }
+  }, [tab]);
+
   // Content state
   const [bio, setBio] = useState(profile.bio || "");
   const [stats, setStats] = useState(profile.stats || []);
@@ -311,36 +350,54 @@ export function DashboardEditor({ profile, onSaved }: Props) {
           </button>
         </div>
 
-        <div className="mt-4 flex gap-1 overflow-x-auto">
-          {TABS.map((t) => {
-            let isComplete = false;
-            if (t.id === "bio") isComplete = !!bio && bio.length >= 15;
-            else if (t.id === "stats") isComplete = stats.length >= 1;
-            else if (t.id === "links") isComplete = links.length >= 1;
-            else if (t.id === "social") isComplete = !!(social.instagram || social.twitter || social.tiktok || social.youtube);
-            else if (t.id === "highlights") isComplete = highlights.length >= 1;
-            else if (t.id === "contact") isComplete = !!(contactEmail || contactPhone);
-            else if (t.id === "theme") isComplete = accent !== "#C6FF3D";
+        <div className="relative mt-4">
+          <div
+            ref={tabRailRef}
+            className="flex gap-1 overflow-x-auto scrollbar-none overscroll-x-contain"
+          >
+            {TABS.map((t) => {
+              let isComplete = false;
+              if (t.id === "bio") isComplete = !!bio && bio.length >= 15;
+              else if (t.id === "stats") isComplete = stats.length >= 1;
+              else if (t.id === "links") isComplete = links.length >= 1;
+              else if (t.id === "social") isComplete = !!(social.instagram || social.twitter || social.tiktok || social.youtube);
+              else if (t.id === "highlights") isComplete = highlights.length >= 1;
+              else if (t.id === "contact") isComplete = !!(contactEmail || contactPhone);
+              else if (t.id === "theme") isComplete = accent !== "#C6FF3D";
 
-            return (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${tab === t.id
-                    ? "bg-accent/15 text-accent"
-                    : "text-ink-muted hover:bg-white/[0.04] hover:text-white"
-                  }`}
-              >
-                {t.label}
-                {isComplete && (
-                  <Check className="ml-1.5 inline-block h-3 w-3 text-accent" />
-                )}
-                {t.id === "theme" && themeChanged && !isComplete && (
-                  <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-accent align-middle" />
-                )}
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={t.id}
+                  ref={(el) => {
+                    tabButtonRefs.current[t.id] = el;
+                  }}
+                  onClick={() => setTab(t.id)}
+                  className={`flex-shrink-0 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${tab === t.id
+                      ? "bg-accent/15 text-accent"
+                      : "text-ink-muted hover:bg-white/[0.04] hover:text-white"
+                    }`}
+                >
+                  {t.label}
+                  {isComplete && (
+                    <Check className="ml-1.5 inline-block h-3 w-3 text-accent" />
+                  )}
+                  {t.id === "theme" && themeChanged && !isComplete && (
+                    <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-accent align-middle" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Edge fades indicating the rail continues horizontally */}
+          <div
+            aria-hidden
+            className={`pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-[#111113] to-transparent transition-opacity duration-200 ${tabCanScrollLeft ? "opacity-100" : "opacity-0"}`}
+          />
+          <div
+            aria-hidden
+            className={`pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#111113] to-transparent transition-opacity duration-200 ${tabCanScrollRight ? "opacity-100" : "opacity-0"}`}
+          />
         </div>
       </div>
 

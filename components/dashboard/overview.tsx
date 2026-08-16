@@ -308,6 +308,7 @@ export function DashboardOverview({ profile: initialProfile, promo }: Props) {
             earnings={earnings}
             balance={balance}
             loading={loadingTips}
+            username={profile.username}
           />
 
           {/* Referral Card (Full width - spacious & unclipped) */}
