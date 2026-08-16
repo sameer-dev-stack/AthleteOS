@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   metadataBase: new URL(SITE_URL),
   alternates: {
-    canonical: "/",
+    canonical: `${SITE_URL}/`,
   },
   openGraph: {
     type: "website",
