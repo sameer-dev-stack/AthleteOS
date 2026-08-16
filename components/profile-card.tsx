@@ -164,102 +164,7 @@ function buildTokens(accent: string): CardTokens {
    SUB-COMPONENTS — FRONT FACE
 ══════════════════════════════════════════════════════════ */
 
-/* ── CardHeader ─────────────────────────────────────────── */
-interface CardHeaderProps {
-  accent: string;
-  plan: string;
-  isVerified: boolean;
-  profile: Profile;
-  onQr: (e: React.MouseEvent) => void;
-  onShare: (e: React.MouseEvent) => void;
-  copied: boolean;
-  displayName: string;
-  classLabel: string | null;
-}
 
-function CardHeader({
-  accent,
-  plan,
-  isVerified,
-  onQr,
-  onShare,
-  copied,
-  displayName,
-  classLabel,
-}: CardHeaderProps) {
-  const isPro = plan === "pro" || plan === "team";
-
-  const nameLen = displayName.length;
-  const fontSize =
-    nameLen <= 8
-      ? "clamp(18px, 5.2vw, 22px)"
-      : nameLen <= 14
-      ? "clamp(15px, 4.4vw, 19px)"
-      : nameLen <= 20
-      ? "clamp(13px, 3.8vw, 15px)"
-      : "clamp(11px, 3.2vw, 13px)";
-
-  return (
-    <div className={`flex items-center justify-end w-full z-20 ${isPro ? "mb-1" : "mb-3.5"}`}>
-      {/* Right actions */}
-      <div className="flex flex-col items-end gap-2 flex-shrink-0">
-        <div className="flex items-center gap-1.5 pointer-events-auto">
-          {/* QR */}
-          <button
-            onClick={onQr}
-            aria-label="Show QR code"
-            className="h-10 w-10 rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
-            style={{
-              background: "rgba(0,0,0,0.5)",
-              border: "1px solid rgba(255,255,255,0.10)",
-              backdropFilter: "blur(12px)",
-            }}
-          >
-            <QrCode className="h-4 w-4" style={{ color: "rgba(255,255,255,0.55)" }} />
-          </button>
-
-          {/* Share */}
-          <button
-            onClick={onShare}
-            aria-label="Share profile"
-            className="h-10 w-10 rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
-            style={{
-              background: "rgba(0,0,0,0.5)",
-              border: "1px solid rgba(255,255,255,0.10)",
-              backdropFilter: "blur(12px)",
-            }}
-          >
-            {copied ? (
-              <CheckIcon className="h-4 w-4" style={{ color: accent }} />
-            ) : (
-              <Share2 className="h-4 w-4" style={{ color: "rgba(255,255,255,0.55)" }} />
-            )}
-          </button>
-        </div>
-
-        {/* Brand mark under QR/Share for free users */}
-        {!isPro && (
-          <div
-            className="flex items-center gap-1.5 rounded-full px-3 py-1 pointer-events-auto"
-            style={{
-              background: "rgba(0,0,0,0.5)",
-              border: "1px solid rgba(255,255,255,0.10)",
-              backdropFilter: "blur(12px)",
-            }}
-          >
-            <Logo
-              className="h-4 w-4 rounded-[3px] flex-shrink-0"
-              style={{ backgroundColor: accent }}
-            />
-            <span className="text-[8px] font-black tracking-[0.18em] uppercase text-white/70">
-              NIL CARD
-            </span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 /* ── AthletePhoto ─────────────────────────────────────── */
 interface AthletePhotoProps {
@@ -472,15 +377,15 @@ function AthleteIdentity({
   const nameLen = displayName.length;
   const fontSize =
     nameLen <= 8
-      ? "clamp(20px, 5.5vw, 24px)"
+      ? "clamp(18px, 5vw, 22px)"
       : nameLen <= 14
-      ? "clamp(17px, 4.8vw, 21px)"
+      ? "clamp(15px, 4.2vw, 19px)"
       : nameLen <= 20
-      ? "clamp(14px, 4vw, 17px)"
-      : "clamp(11px, 3.2vw, 14px)";
+      ? "clamp(13px, 3.6vw, 16px)"
+      : "clamp(11px, 3vw, 13px)";
 
   return (
-    <div className="flex-shrink-0 px-5 pt-6 relative z-10">
+    <div className="flex-shrink-0 px-5 pt-3.5 pb-1 relative z-10">
       {/* Divider between hero and content */}
       <div
         className="absolute top-0 left-5 right-5 h-px"
@@ -488,82 +393,130 @@ function AthleteIdentity({
           background: `linear-gradient(90deg, transparent, ${accent}30, transparent)`,
         }}
       />
-      {/* Card Header (Logo, QR, Share) relocated here */}
-      <CardHeader
-        accent={accent}
-        plan={plan}
-        isVerified={isVerified}
-        profile={{} as any} // Profile is not used inside CardHeader, passed empty mock to satisfy TS
-        onQr={onQr}
-        onShare={onShare}
-        copied={copied}
-        displayName={displayName}
-        classLabel={classLabel}
-      />
-      {/* Name row */}
-      {!isPro && (
-        <h1
-          className="font-black text-white line-clamp-2"
-          style={{
-            fontSize,
-            lineHeight: 1.2,
-            letterSpacing: "-0.02em",
-            wordBreak: "keep-all",
-            overflowWrap: "anywhere",
-            maxWidth: "100%",
-            minWidth: 0,
-          } as React.CSSProperties}
-        >
-          <span>{displayName}</span>
-          {(isVerified || isPro || classLabel) && (
-            <span className="inline-flex items-center gap-1 align-middle ml-1 flex-shrink-0 relative -top-[1px]">
-              {(isVerified || isPro) && (
-                <Image
-                  src="/verified.gif"
-                  alt="Verified Athlete"
-                  width={48}
-                  height={48}
-                  className="inline-block h-[32px] w-[32px] flex-shrink-0 align-middle"
-                  unoptimized
-                />
-              )}
-              {classLabel && (
-                <span
-                  className="flex-shrink-0 inline-flex items-center rounded px-1.5 py-0.5 text-[7.5px] font-black tracking-widest uppercase"
-                  style={{
-                    color: "rgba(255,255,255,0.35)",
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                  }}
-                >
-                  {classLabel}
-                </span>
-              )}
-            </span>
+
+      <div className="flex items-start justify-between gap-3 w-full">
+        {/* Left column: Name, Badges, Sport/Position, School */}
+        <div className="flex-1 min-w-0">
+          <h1
+            className="font-black text-white line-clamp-2"
+            style={{
+              fontSize,
+              lineHeight: 1.2,
+              letterSpacing: "-0.02em",
+              wordBreak: "keep-all",
+              overflowWrap: "anywhere",
+              maxWidth: "100%",
+              minWidth: 0,
+            } as React.CSSProperties}
+          >
+            <span>{displayName}</span>
+            {(isVerified || isPro || classLabel) && (
+              <span className="inline-flex items-center gap-1 align-middle ml-1 flex-shrink-0 relative -top-[1px]">
+                {(isVerified || isPro) && (
+                  <Image
+                    src="/verified.gif"
+                    alt="Verified Athlete"
+                    width={48}
+                    height={48}
+                    className="inline-block h-[28px] w-[28px] flex-shrink-0 align-middle"
+                    unoptimized
+                  />
+                )}
+                {classLabel && (
+                  <span
+                    className="flex-shrink-0 inline-flex items-center rounded px-1.5 py-0.5 text-[7.5px] font-black tracking-widest uppercase"
+                    style={{
+                      color: "rgba(255,255,255,0.35)",
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    {classLabel}
+                  </span>
+                )}
+              </span>
+            )}
+          </h1>
+
+          {/* Sport · Position */}
+          {metaLine && (
+            <p
+              className="text-[12px] font-semibold mt-1 leading-none"
+              style={{ color: "rgba(255,255,255,0.50)", letterSpacing: "0.02em" }}
+            >
+              {metaLine}
+            </p>
           )}
-        </h1>
-      )}
 
-      {/* Sport · Position */}
-      {metaLine && (
-        <p
-          className="text-[12px] font-semibold mt-1 leading-none"
-          style={{ color: "rgba(255,255,255,0.50)", letterSpacing: "0.02em" }}
-        >
-          {metaLine}
-        </p>
-      )}
+          {/* School */}
+          {schoolLine && (
+            <p
+              className="text-[10.5px] mt-1 leading-none font-medium truncate"
+              style={{ color: "rgba(255,255,255,0.28)" }}
+              title={schoolLine}
+            >
+              {schoolLine}
+            </p>
+          )}
+        </div>
 
-      {/* School */}
-      {schoolLine && (
-        <p
-          className="text-[10.5px] mt-0.5 leading-none font-medium truncate"
-          style={{ color: "rgba(255,255,255,0.28)" }}
-          title={schoolLine}
-        >
-          {schoolLine}
-        </p>
-      )}
+        {/* Right column: Actions & Watermark badge */}
+        <div className="flex flex-col items-end gap-2 flex-shrink-0 pt-0.5">
+          <div className="flex items-center gap-1.5 pointer-events-auto">
+            {/* QR */}
+            <button
+              onClick={onQr}
+              aria-label="Show QR code"
+              className="h-9 w-9 rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
+              style={{
+                background: "rgba(0,0,0,0.5)",
+                border: "1px solid rgba(255,255,255,0.10)",
+                backdropFilter: "blur(12px)",
+              }}
+            >
+              <QrCode className="h-4 w-4" style={{ color: "rgba(255,255,255,0.55)" }} />
+            </button>
+
+            {/* Share */}
+            <button
+              onClick={onShare}
+              aria-label="Share profile"
+              className="h-9 w-9 rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
+              style={{
+                background: "rgba(0,0,0,0.5)",
+                border: "1px solid rgba(255,255,255,0.10)",
+                backdropFilter: "blur(12px)",
+              }}
+            >
+              {copied ? (
+                <CheckIcon className="h-4 w-4" style={{ color: accent }} />
+              ) : (
+                <Share2 className="h-4 w-4" style={{ color: "rgba(255,255,255,0.55)" }} />
+              )}
+            </button>
+          </div>
+
+          {/* Brand mark under QR/Share for free users */}
+          {!isPro && (
+            <div
+              className="flex items-center gap-1.5 rounded-full px-2.5 py-1 pointer-events-auto"
+              style={{
+                background: "rgba(0,0,0,0.5)",
+                border: "1px solid rgba(255,255,255,0.10)",
+                backdropFilter: "blur(12px)",
+              }}
+            >
+              <Logo
+                className="h-3.5 w-3.5 rounded-[3px] flex-shrink-0"
+                style={{ backgroundColor: accent }}
+              />
+              <span className="text-[8px] font-black tracking-[0.18em] uppercase text-white/70">
+                NIL CARD
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -1796,11 +1749,7 @@ export function ProfileCard({
                 sport={profile.sport}
               />
 
-
-
-
-
-              {/* Identity */}
+              {/* Identity & Actions */}
               <AthleteIdentity
                 displayName={displayName}
                 sport={profile.sport}
@@ -1816,17 +1765,11 @@ export function ProfileCard({
                 copied={copied}
               />
 
-
-
               {/* Stats strip */}
               <AthleteStats cells={statCells} accent={accent} />
 
               {/* Bottom spacing to keep stats block off the card border */}
-              <div className="h-6" />
-
-
-
-
+              <div className="h-5" />
 
               {/* Bottom accent hairline */}
               <div

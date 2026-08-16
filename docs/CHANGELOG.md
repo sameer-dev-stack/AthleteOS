@@ -3,6 +3,36 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-16 — Session: Fix NIL Card Front Face Component Alignment and Positioning
+
+### What changed
+- **`components/profile-card.tsx`**:
+  - Restructured `AthleteIdentity` into a clean horizontal two-column flex container:
+    - **Left column**: Athlete name with responsive fluid clamp sizing, verified badge gif, and class year badge (`SO`, `FR`, `JR`, `SR`, `PRO`), followed by sport · position (`FPS · Esports`) and school / organization (`Riot Games`).
+    - **Right column**: QR code and Share action buttons in a row, with the branded `NIL CARD` watermark badge directly underneath (for free tier cards).
+  - Removed the deprecated and standalone `CardHeader` subcomponent that previously sat on a separate top row, which caused vertical displacement, empty gaps, and staggered alignment.
+  - Adjusted spacing between the hero photo, identity info, stats strip, and bottom card border to fit the 360x600 card aspect ratio comfortably without clipping.
+- **Unit test fixes**:
+  - `jest.config.js`: added `/.kilo/` to `testPathIgnorePatterns` to ignore old worktree test runs.
+  - `__tests__/auth-copy.test.ts`: updated visibility expectation for `nextPasswordInputType`.
+  - `__tests__/referral-reward.test.ts`: removed obsolete `usersToReward` tests.
+
+### Why
+- The previous card layout rendered action buttons and the NIL CARD badge in an isolated row above the athlete's name, leaving a large empty gap on the left of the buttons and pushing the athlete identity down into a staggered layout. The new structure aligns athlete info and card actions side-by-side cleanly.
+
+### Files touched
+- `components/profile-card.tsx`
+- `docs/COMPONENTS.md`
+- `docs/CHANGELOG.md`
+- `jest.config.js`
+- `__tests__/auth-copy.test.ts`
+- `__tests__/referral-reward.test.ts`
+
+### Verification
+- `npm run lint` — 0 errors.
+- `npm test` — all 9 test suites / 54 tests passed.
+- `npm run build` — compiled successfully with zero errors.
+
 ## 2026-08-16 — Session: SEO/SEM Foundation — Canonical Domain, Robots, Sitemap, Noindex, Structured Data
 
 ### What changed

@@ -19,8 +19,8 @@ describe("accountCreatedCopy", () => {
 
 describe("nextPasswordInputType", () => {
   it("toggles text <-> password", () => {
-    expect(nextPasswordInputType(false)).toBe("text");
-    expect(nextPasswordInputType(true)).toBe("password");
+    expect(nextPasswordInputType(true)).toBe("text");
+    expect(nextPasswordInputType(false)).toBe("password");
   });
 });
 

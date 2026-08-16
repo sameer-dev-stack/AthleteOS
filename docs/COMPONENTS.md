@@ -109,9 +109,8 @@ Root public athlete identity card. Now a composition of named sub-components rat
 
 | Component | Responsibility |
 |---|---|
-| `CardHeader` | AthleteOS logo, plan/verified badge, QR button, share button (40x40 tap targets) |
-| `AthletePhoto` | Hero photo (52% card height) + vignette + grain + sport-aware fallback gradient |
-| `AthleteIdentity` | Name, sport·position, school, class label, gold verified badge |
+| `AthletePhoto` | Hero photo + vignette + grain + sport-aware fallback gradient |
+| `AthleteIdentity` | Balanced row containing name, badges, sport · position, school on the left, and QR/Share actions + NIL CARD watermark on the right |
 | `AthleteStats` | 3-cell stat strip with lucide icon per stat key |
 | `AthleteIDBlock` | Athlete ID chip + URL copy row |
 | `FlipCTA` | "Tap card to flip" animated pill |
