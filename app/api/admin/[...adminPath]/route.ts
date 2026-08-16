@@ -260,14 +260,13 @@ export async function GET(
 
         const quota = {
           free: { used: 0, total: 0, count: 0 },
-          pro: { used: 0, total: 0, count: 0 },
-          elite: { used: 0, total: 0, count: 0 }
+          pro: { used: 0, total: 0, count: 0 }
         };
 
         (profiles || []).forEach((p: any) => {
           const used = userMap[p.id] || 0;
-          const total = p.plan === "elite" ? 500 : p.plan === "pro" ? 300 : 5;
-          const planKey = (p.plan || "free") as "free" | "pro" | "elite";
+          const total = p.plan === "pro" ? 300 : 5;
+          const planKey = (p.plan || "free") as "free" | "pro";
           if (quota[planKey]) {
             quota[planKey].used += used;
             quota[planKey].total += total;

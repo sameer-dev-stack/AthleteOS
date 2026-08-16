@@ -11,7 +11,6 @@ export default function UsageMonitor() {
     quotaConsumption: {
       free: { used: number; total: number; count: number };
       pro: { used: number; total: number; count: number };
-      elite: { used: number; total: number; count: number };
     };
   }>({
     toolUsage: [],
@@ -19,7 +18,6 @@ export default function UsageMonitor() {
     quotaConsumption: {
       free: { used: 0, total: 0, count: 0 },
       pro: { used: 0, total: 0, count: 0 },
-      elite: { used: 0, total: 0, count: 0 }
     }
   });
 
@@ -115,32 +113,6 @@ export default function UsageMonitor() {
             </div>
           </div>
         </div>
-
-        {/* Elite Plan Consumption */}
-        <div className="bg-neutral-900/50 p-4 rounded border border-neutral-800 space-y-3 relative overflow-hidden">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-[10px] text-purple-400 font-bold uppercase tracking-wider">Elite OS</p>
-              <h3 className="text-xs font-black text-white mt-0.5">500 ACTIONS / MONTH</h3>
-            </div>
-            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-purple-500/10 text-purple-400 border border-purple-500/20`}>
-              {metrics.quotaConsumption.elite.count} Athletes
-            </span>
-          </div>
-
-          <div className="space-y-1">
-            <div className="flex justify-between text-[10px] font-mono text-neutral-400">
-              <span className="uppercase">Consumption Aggregate</span>
-              <span className="font-bold text-neutral-300">{metrics.quotaConsumption.elite.total > 0 ? Math.round((metrics.quotaConsumption.elite.used / metrics.quotaConsumption.elite.total) * 100) : 0}%</span>
-            </div>
-            <div className="w-full h-2 bg-[#050505] rounded overflow-hidden border border-neutral-800">
-              <div 
-                className="h-full bg-purple-500 rounded transition-all duration-500" 
-                style={{ width: `${metrics.quotaConsumption.elite.total > 0 ? (metrics.quotaConsumption.elite.used / metrics.quotaConsumption.elite.total) * 100 : 0}%` }}
-              />
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Main Grid: Bar Chart & Top 20 Users */}
@@ -217,9 +189,7 @@ export default function UsageMonitor() {
                         <h5 className="font-bold text-white flex items-center gap-1.5 text-xs">
                           {user.full_name}
                           <span className={`text-[9px] uppercase px-1 rounded font-bold ${
-                            user.plan === 'elite' 
-                              ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' 
-                              : user.plan === 'pro'
+                            user.plan === 'pro'
                               ? 'bg-[#C6FF3D]/10 text-[#C6FF3D] border border-[#C6FF3D]/20'
                               : 'bg-neutral-800 text-neutral-400 border border-neutral-700'
                           }`}>

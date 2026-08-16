@@ -123,7 +123,7 @@ First 20–50 athletes are more important than vanity traffic — they become yo
 1. ✅ Landing page + real waitlist (DONE)
 2. ✅ Auth + admin dashboard (DONE)
 3. 🔜 **Athlete onboarding** — sign-up flow, profile creation
-4. 🔜 **Public athlete card** — `athleteos.app/username`
+4. 🔜 **Public athlete card** — `nilcard.app/username`
 5. 🔜 **First monetization feature** — tips or paid link blocks
 6. 🔜 **AI Bio Builder + Sponsor Pitch Writer**
 7. 🔜 **Subscription/paywall + usage metering**

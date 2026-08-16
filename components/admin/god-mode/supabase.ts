@@ -109,7 +109,6 @@ export const supabaseApi = {
     quotaConsumption: {
       free: { used: number; total: number; count: number };
       pro: { used: number; total: number; count: number };
-      elite: { used: number; total: number; count: number };
     };
   }> {
     const res = await fetch(`${API_BASE}/usage/ai`);

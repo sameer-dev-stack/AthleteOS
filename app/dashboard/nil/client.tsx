@@ -66,7 +66,7 @@ type Props = {
     used: number;
     limit: number;
     remaining: number;
-    plan: "free" | "pro" | "elite";
+    plan: "free" | "pro";
   };
 };
 
@@ -86,7 +86,7 @@ export function NilDashboardClient({
   const [knowledgeBreakdown, setKnowledgeBreakdown] = useState<NilBreakdown | null>(null);
   const [breakdownLoading, setBreakdownLoading] = useState(true);
 
-  const isPro = quotaState.plan === "pro" || quotaState.plan === "elite";
+  const isPro = quotaState.plan === "pro";
 
   // Load personalized knowledge breakdown on mount for Pro users
   useEffect(() => {

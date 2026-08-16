@@ -172,7 +172,7 @@ export default function PlatformSettings() {
                     </h4>
                     <p className="text-[10px] text-neutral-500 font-mono">
                       {flag === 'onboarding_active' && 'Allows new athlete accounts to claim usernames and onboard.'}
-                      {flag === 'ai_limitations_enabled' && 'Enforces monthly generation quotas per tier (Free/Pro/Elite).'}
+                      {flag === 'ai_limitations_enabled' && 'Enforces monthly generation quotas per tier (Free/Pro).'}
                       {flag === 'automatic_compliance_review' && 'Enables AI to auto-screen deals before human compliance audit.'}
                       {flag === 'platform_tipping_enabled' && 'Allows public card profiles to display the Stripe TIP support modal.'}
                       {flag === 'payout_instant_withdrawals' && 'Enables instant debit payouts to connected bank debit cards.'}

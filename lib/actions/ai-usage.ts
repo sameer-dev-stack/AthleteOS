@@ -9,7 +9,6 @@ export type Plan = EffectivePlan;
 const QUOTA_CONFIG = {
   free: { total: 5 },
   pro: { total: 300 },
-  elite: { total: 500 },
 } as const;
 
 function getCurrentPeriod(): string {

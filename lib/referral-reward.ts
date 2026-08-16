@@ -13,7 +13,7 @@ export function resolvePlan(
   proExpiresAt?: string | null | undefined,
   stripeSubscriptionId?: string | null | undefined
 ): Plan {
-  if (plan === "pro" || plan === "elite") {
+  if (plan === "pro") {
     // Paid subscriber — always Pro until they cancel
     if (stripeSubscriptionId) return "pro";
     // Promo grant — check if it expired

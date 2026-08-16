@@ -126,7 +126,7 @@ const entries = [
     tag: "Features",
     title: "Stripe billing goes live",
     items: [
-      "Pro plan ($14/mo) and Elite plan ($29/mo) via Stripe",
+      "Pro plan ($14/mo) via Stripe",
       "Downgrade flow via Stripe Customer Portal",
       "Webhook for subscription lifecycle events",
       "Weekly email digest with AI-powered action items",

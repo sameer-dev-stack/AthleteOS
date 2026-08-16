@@ -14,7 +14,7 @@ type Props = {
   accounts: SocialAccount[];
   themeAccent: string;
   onUpdate: () => void;
-  plan?: "free" | "pro" | "elite";
+  plan?: "free" | "pro";
 };
 
 const PLATFORMS = [
@@ -251,7 +251,7 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
                   key={p.value}
                   onClick={() => {
                     if (isLocked) {
-                      setError("TikTok connection is only available on Pro or Elite plans.");
+                      setError("TikTok connection is only available on Pro plans.");
                       return;
                     }
                     if (isLinked) {

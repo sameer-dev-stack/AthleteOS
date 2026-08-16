@@ -4,9 +4,8 @@ const future = new Date(Date.now() + 86400000).toISOString();
 const past = new Date(Date.now() - 86400000).toISOString();
 
 describe("resolvePlan", () => {
-  it("returns pro/elite directly from plan column", () => {
+  it("returns pro directly from plan column", () => {
     expect(resolvePlan("pro", null)).toBe<Plan>("pro");
-    expect(resolvePlan("elite", null)).toBe<Plan>("elite");
   });
   it("returns pro when extended_pro_until is in the future", () => {
     expect(resolvePlan("free", future)).toBe<Plan>("pro");

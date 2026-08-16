@@ -139,7 +139,7 @@ Add these to the Vercel project (Settings → Environment Variables):
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard → Settings → API | Supabase client |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Settings → API | Server actions, admin |
 | `RESEND_API_KEY` | Resend Dashboard → API Keys | Confirmation emails |
-| `NEXT_PUBLIC_SITE_URL` | `https://athlete-os-vert.vercel.app` | OAuth redirects, email links |
+| `NEXT_PUBLIC_SITE_URL` | `https://nilcard.app` | OAuth redirects, email links, canonical URLs |
 | `ANALYTICS_IP_HASH_SECRET` | Generated local secret | Server-side viewer IP hashing for analytics |
 
 ### Local Dev
@@ -287,23 +287,23 @@ To re-auth on a new machine, repeat the three commands above.
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard → Settings → API | Supabase client |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Settings → API | Server actions, admin |
 | `RESEND_API_KEY` | Resend Dashboard → API Keys | Confirmation emails |
-| `NEXT_PUBLIC_SITE_URL` | `https://athlete-os-vert.vercel.app` | OAuth redirects, email links |
+| `NEXT_PUBLIC_SITE_URL` | `https://nilcard.app` | OAuth redirects, email links, canonical URLs |
 
 **Rule:** Never commit `.env` files. `.gitignore` already covers `.env*`.
 
 ---
 
-## Domain setup (when ready)
+## Domain setup
 
-The brand assumes `athleteos.app` as the placeholder domain.
+The canonical production domain is `nilcard.app`.
 
 To go live:
-1. Register `athleteos.app` (Namecheap / Porkbun / Cloudflare Registrar)
+1. Ensure `nilcard.app` DNS points at Vercel (A record → `76.76.21.21` or CNAME → `cname.vercel-dns.com`)
 2. Add domain in Vercel: Project Settings → Domains
-3. Add DNS records as Vercel instructs (A record → `76.76.21.21` or CNAME → `cname.vercel-dns.com`)
+3. Add DNS records as Vercel instructs
 4. SSL auto-provisions in <60s
-5. Update `app/layout.tsx` `metadataBase` to `https://athleteos.app`
-6. Update any hardcoded URLs across the site
+5. Set `NEXT_PUBLIC_SITE_URL` to `https://nilcard.app` in Vercel env vars
+6. (Optional) 301 the `athlete-os-vert.vercel.app` deployment URL to `nilcard.app` in Vercel Project Settings → Redirects
 
 ---
 

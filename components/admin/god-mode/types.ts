@@ -12,7 +12,7 @@ export interface Profile {
   social: Record<string, any> | null;
   is_verified: boolean;
   profile_published: boolean;
-  plan: 'free' | 'pro' | 'elite';
+  plan: 'free' | 'pro';
   stripe_subscription_id: string | null;
   stripe_account_id: string | null;
   stripe_onboarding_complete: boolean;

@@ -89,7 +89,7 @@
 | Item | Value |
 |------|-------|
 | Name | **AthleteOS** |
-| Domain | `athleteos.app` (placeholder) |
+| Domain | `nilcard.app` (canonical) |
 | Tagline | One card. One link. Your entire NIL business. |
 | Accent | `#C6FF3D` (electric lime) |
 | Personality | Premium, confident, athlete-first, Gen Z |
@@ -451,7 +451,7 @@ Server Component (app/[username]/page.tsx)
 - Multi-athlete team accounts
 - Team member management (add, remove, invite)
 - Roster analytics dashboard
-- Team pages at `athleteos.app/team/[team-id]`
+- Team pages at `nilcard.app/team/[team-id]`
 
 ### 5.14 God Mode Admin
 
@@ -1088,7 +1088,7 @@ npx playwright test e2e/full-audit.spec.ts --config=playwright.prod.ts
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard |
 | `RESEND_API_KEY` | Resend Dashboard |
-| `NEXT_PUBLIC_SITE_URL` | `https://athlete-os-vert.vercel.app` |
+| `NEXT_PUBLIC_SITE_URL` | `https://nilcard.app` |
 | `STRIPE_SECRET_KEY` | Stripe Dashboard |
 | `STRIPE_WEBHOOK_SECRET` | Stripe Dashboard |
 | `STRIPE_PRICE_ID_PRO` | Stripe Dashboard |
@@ -1101,7 +1101,7 @@ npx playwright test e2e/full-audit.spec.ts --config=playwright.prod.ts
 
 ### Production URL
 
-`https://athlete-os-vert.vercel.app`
+`https://nilcard.app` (canonical) · `https://athlete-os-vert.vercel.app` (Vercel deploy)
 
 ---
 

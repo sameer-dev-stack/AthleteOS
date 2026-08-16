@@ -13,7 +13,7 @@
 | **Phase 0** | DONE | Marketing landing page (conversion + waitlist) |
 | **Phase 1** | DONE | Waitlist capture backend + auth + email confirmation |
 | **Phase 2** | DONE | **Athlete onboarding** — sign-up flow, profile creation |
-| **Phase 3** | DONE | **Public athlete card** — `athleteos.app/username` |
+| **Phase 3** | DONE | **Public athlete card** — `nilcard.app/username` |
 | **Phase 4** | DONE | **First monetization feature** — Stripe Connect tips |
 | **Phase 5** | DONE | **AI tools (metered)** — All 5 tools complete + plan-based quotas enforced |
 | **Phase 6** | DONE | **Subscription/paywall + usage metering** — Stripe Billing wired, webhook handlers complete |
@@ -102,7 +102,7 @@
 
 ## Phase 3 — Public Athlete Card (week 3–4)
 
-**Goal:** The core identity layer — a fast, shareable public profile at `athleteos.app/username`.
+**Goal:** The core identity layer — a fast, shareable public profile at `nilcard.app/username`.
 
 ### Card features
 - [ ] Server-rendered, fast, SEO-friendly
@@ -119,7 +119,7 @@
 - [ ] Scores card 0–100 with actionable suggestions
 - [ ] "Complete your profile" prompts
 
-**Definition of done:** An athlete can share `athleteos.app/their-name` to a phone that loads in <1 second on a mobile browser.
+**Definition of done:** An athlete can share `nilcard.app/their-name` to a phone that loads in <1 second on a mobile browser.
 
 ---
 
@@ -312,7 +312,7 @@
 
 - [ ] Multi-athlete account structure
 - [ ] Bulk roster onboarding (CSV upload + invite emails)
-- [ ] Branded team landing page (`athleteos.app/team/stanford-basketball`)
+- [ ] Branded team landing page (`nilcard.app/team/stanford-basketball`)
 - [ ] Roster analytics dashboard
 - [ ] Compliance: NIL deal disclosure flow, school-side approval workflow
 - [ ] Brand match-making: surface athletes that match a brand's audience

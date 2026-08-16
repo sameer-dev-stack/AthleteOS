@@ -163,7 +163,7 @@ export async function runNilValueEngine(
         data: {
           metrics: latestMetrics,
           scoreDetails,
-          aiExplanation: "You have used your free AI analysis this month. Upgrade to NIL CARD Pro or Elite to refresh your NIL Score and receive brand outreach action recommendations.",
+          aiExplanation: "You have used your free AI analysis this month. Upgrade to NIL CARD Pro to refresh your NIL Score and receive brand outreach action recommendations.",
           quotaUsed: quota.used,
           quotaLimit: quota.limit,
           plan: quota.plan,
@@ -298,10 +298,10 @@ export async function checkDeal(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { ok: false, error: "Not authenticated" };
 
-    // Plan gate check: Only Pro or Elite plans get the Deal Checker
+    // Plan gate check: Only Pro plans get the Deal Checker
     const { plan } = await getAiQuota();
     if (plan === "free") {
-      return { ok: false, error: "The Deal Checker is a Pro and Elite benefit. Upgrade your plan to test offers!" };
+      return { ok: false, error: "The Deal Checker is a Pro benefit. Upgrade your plan to test offers!" };
     }
 
     // Get latest metrics

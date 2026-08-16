@@ -61,7 +61,7 @@ export type ViewUserData = {
  */
 const UpdatePlanSchema = z.object({
   userId: z.string().uuid(),
-  plan: z.enum(["free", "pro", "elite"]),
+  plan: z.enum(["free", "pro"]),
 });
 
 const ToggleStatusSchema = z.object({

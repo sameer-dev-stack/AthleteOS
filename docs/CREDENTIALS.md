@@ -93,7 +93,7 @@ These must be set in Vercel Dashboard → Settings → Environment Variables for
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard → Settings → API |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Settings → API |
 | `RESEND_API_KEY` | Resend Dashboard → API Keys |
-| `NEXT_PUBLIC_SITE_URL` | `https://athleteos.app` |
+| `NEXT_PUBLIC_SITE_URL` | `https://nilcard.app` |
 | `STRIPE_SECRET_KEY` | Stripe Dashboard → Developers → API keys |
 | `STRIPE_PUBLISHABLE_KEY` | Stripe Dashboard → Developers → API keys |
 | `STRIPE_WEBHOOK_SECRET` | Stripe Dashboard → Developers → Webhooks |
@@ -267,7 +267,8 @@ ANALYTICS_IP_HASH_SECRET=<generated-local-secret>
 
 | URL | Purpose |
 |-----|---------|
-| https://athlete-os-vert.vercel.app | Live production site |
+| https://nilcard.app | Canonical production domain (SEO target) |
+| https://athlete-os-vert.vercel.app | Vercel deployment URL (redirects/non-canonical) |
 | http://localhost:3000 | Local dev server |
 | http://localhost:3000/api/waitlist | Local waitlist count API |
 | http://localhost:3000/api/confirm-waitlist | Waitlist email confirmation endpoint |
@@ -278,7 +279,7 @@ ANALYTICS_IP_HASH_SECRET=<generated-local-secret>
 | https://supabase.com/dashboard/project/nkyedqekfligqhrnwkqt | Supabase project dashboard |
 | https://vercel.com/sameer-projects/athlete-os/deployments | Vercel deployments |
 | https://resend.com | Email dashboard |
-| https://athleteos.app | Brand domain (not yet registered) |
+| https://athleteos.app | DIFFERENT product (AI lifting coaching app) — NOT this project |
 
 ---
 

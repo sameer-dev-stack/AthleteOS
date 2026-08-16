@@ -185,7 +185,7 @@ export default function UserManagement() {
   };
 
   // Handle plan override dropdown change
-  const handlePlanOverride = (profile: Profile, newPlan: 'free' | 'pro' | 'elite') => {
+  const handlePlanOverride = (profile: Profile, newPlan: 'free' | 'pro') => {
     if (profile.plan === newPlan) return;
     triggerConfirmation({
       title: `Override Tier to ${newPlan.toUpperCase()}`,

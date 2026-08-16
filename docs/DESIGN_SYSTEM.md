@@ -308,7 +308,7 @@ box-shadow:
 
 ## Social Share Assets
 
-- **`og-image.png`** (1200x630) — used by Facebook, LinkedIn, Slack, Discord, iMessage. Lime brand mark + "AthleteOS" wordmark top-left. Headline "One card. / One link. / Your entire / NIL business." with alternating white/lime lines. Mini athlete card mockup on the right (Maya Reyes · Stanford · stats · Gymshark $2,400 deal · Tip Maya CTA). URL `athleteos.app` bottom-left. "Join the waitlist →" pill bottom-right. Background: dark with two soft lime radial-gradient orbs and a faint grid mask.
+- **`og-image.png`** (1200x630) — used by Facebook, LinkedIn, Slack, Discord, iMessage. Lime brand mark + "AthleteOS" wordmark top-left. Headline "One card. / One link. / Your entire / NIL business." with alternating white/lime lines. Mini athlete card mockup on the right (Maya Reyes · Stanford · stats · Gymshark $2,400 deal · Tip Maya CTA). URL `nilcard.app` bottom-left. "Join the waitlist →" pill bottom-right. Background: dark with two soft lime radial-gradient orbs and a faint grid mask.
 - **`twitter-image.png`** (1200x675) — used by Twitter/X. Centered composition: lime brand mark + "AthleteOS" name, two-line headline ("One card. One link." / "Your entire NIL business." in lime), "Join the waitlist →" button.
 - **`apple-icon.png`** (180x180, rounded corners) — iOS home screen. Lime square with the brand chart mark centered.
 - **`icon.svg`** — Favicon for browser tabs. Lime rounded square with the chart mark.

@@ -308,8 +308,7 @@ export async function POST(request: NextRequest) {
           status: subscription.status,
           priceId,
           priceIdPro: process.env.STRIPE_PRICE_ID_PRO,
-          priceIdElite: process.env.STRIPE_PRICE_ID_ELITE,
-          priceMatch: priceId === process.env.STRIPE_PRICE_ID_PRO ? "pro" : priceId === process.env.STRIPE_PRICE_ID_ELITE ? "elite" : "none",
+          priceMatch: priceId === process.env.STRIPE_PRICE_ID_PRO ? "pro" : "none",
         });
 
         if (userId) {
@@ -319,8 +318,6 @@ export async function POST(request: NextRequest) {
           if (newStatus === "active" || newStatus === "trialing") {
             if (priceId === process.env.STRIPE_PRICE_ID_PRO) {
               newPlan = "pro";
-            } else if (priceId === process.env.STRIPE_PRICE_ID_ELITE) {
-              newPlan = "elite";
             }
           }
 

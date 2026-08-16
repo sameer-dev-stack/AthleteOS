@@ -96,7 +96,8 @@ An athlete signs up once, gets a premium public identity page, gets guided towar
 | Item | Value |
 |------|-------|
 | Name | **AthleteOS** |
-| Domain placeholder | `athleteos.app` |
+| Domain (canonical) | `nilcard.app` |
+| Domain (Vercel deploy) | `athlete-os-vert.vercel.app` |
 | Tagline | One card. One link. Your entire NIL business. |
 | Accent | `#C6FF3D` (electric lime) |
 | Personality | Premium, confident, athlete-first, gen Z |
@@ -258,7 +259,7 @@ Secondary CTA: **See how it works** (scroll to How It Works section)
 - **Sentry integration** (error monitoring)
 - **PostHog integration** (product analytics)
 - **GDPR/CCPA/COPPA compliance** (some HS recruits are minors)
-- **Custom domain** — `athleteos.app` not yet registered
+- **Custom domain** — `nilcard.app` live (canonical); `athleteos.app` is a DIFFERENT product, do not use
 - **Lighthouse performance audit** (target: >90 mobile)
 
 See [ROADMAP.md](./ROADMAP.md) and [VISION.md](./VISION.md) for the full build plan.

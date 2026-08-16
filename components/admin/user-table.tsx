@@ -256,7 +256,6 @@ export function UserTable() {
   const planStyles: Record<string, string> = {
     free: "bg-white/[0.06] text-ink-muted",
     pro: "bg-accent/15 text-accent",
-    elite: "bg-purple-500/15 text-purple-400",
   };
 
   return (
@@ -438,7 +437,7 @@ export function UserTable() {
                                 Change plan
                               </p>
                             </div>
-                            {["free", "pro", "elite"].map((plan) => (
+                            {["free", "pro"].map((plan) => (
                               <button
                                 key={plan}
                                 onClick={() => handlePlanChange(user.id, plan)}

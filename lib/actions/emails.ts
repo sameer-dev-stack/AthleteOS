@@ -435,7 +435,7 @@ export async function sendPaymentFailedEmail(
                     Hey ${escapeHtml(displayName)}, we were unable to process your latest payment. Your account has been downgraded to the Free plan.
                   </p>
                   <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#9A9AA3;">
-                    To restore your Pro or Elite features, please update your payment method in the billing dashboard.
+                    To restore your Pro features, please update your payment method in the billing dashboard.
                   </p>
                   <a href="${SITE_URL || "https://nilcard.app"}/dashboard/billing"
                      style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:14px;padding:12px 28px;border-radius:10px;text-decoration:none;">

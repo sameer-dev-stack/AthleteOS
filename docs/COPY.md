@@ -112,7 +112,7 @@
 - Brand-ready profile that gets you taken seriously
 
 **Live profile preview card:**
-- URL: `athleteos.app/maya` · Live profile chip
+- URL: `nilcard.app/maya` · Live profile chip
 - Bio · AI-drafted in 4 sec
 - Stats card · PPG · APG · Reach
 - Highlight reel · 3 videos · 14K plays
@@ -153,7 +153,7 @@
 > No agency. No web designer. No copywriter. Just you, your card, and a platform built specifically for the way athletes make money in 2026.
 
 **4 steps:**
-1. **Claim your athlete card** — Sign up, drop your sport and school, and grab your custom URL: `athleteos.app/yourname`. *Takes under 2 minutes. Free to start.*
+1. **Claim your athlete card** — Sign up, drop your sport and school, and grab your custom URL: `nilcard.app/yourname`. *Takes under 2 minutes. Free to start.*
 2. **Let AI build the first draft** — Generate your bio, captions, and sponsor pitches in one click. Edit, approve, publish. *5 free AI generations included.*
 3. **Plug in monetization** — Turn on tips, paid shoutouts, merch, and brand inquiries — all in one card. *Powered by Stripe. Direct deposit.*
 4. **Share it everywhere** — Drop your link in every bio. Fans support you. Brands DM you. The card does the rest. *Tracked, analyzed, and optimized.*
@@ -218,7 +218,7 @@
 **Trust line:** Payments via Stripe · Direct deposit · Athletes keep 92%+ of every dollar
 
 **Dashboard mockup:**
-- URL: `dashboard.athleteos.app`
+- URL: `dashboard.nilcard.app`
 - Lifetime earnings: **$12,847.20** (animated counter)
 - +$2,348 this mo (animated counter)
 - Chart (Jan–Jul)
@@ -283,7 +283,7 @@
 > Real questions, straight answers.
 
 **Contact line:**
-> Still curious? Email **hey@athleteos.app** and a real person will get back to you fast.
+> Still curious? Email **hey@nilcard.app** and a real person will get back to you fast.
 
 **7 Q&As:**
 

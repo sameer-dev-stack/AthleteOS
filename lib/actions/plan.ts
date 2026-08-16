@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { resolvePlan } from "@/lib/referral-reward";
 
-export type EffectivePlan = "free" | "pro" | "elite";
+export type EffectivePlan = "free" | "pro";
 
 // Resolves the user's effective plan including referral-granted Pro window.
 export async function getEffectivePlan(): Promise<EffectivePlan> {

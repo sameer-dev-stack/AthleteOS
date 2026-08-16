@@ -12,17 +12,15 @@ function getAdmin() {
 }
 
 // Subscription tier resolving helper
-function resolvePlan(plan: string | null, extendedUntil: string | null, proExpiresAt?: string | null, stripeSubscriptionId?: string | null): "free" | "pro" | "elite" {
+function resolvePlan(plan: string | null, extendedUntil: string | null, proExpiresAt?: string | null, stripeSubscriptionId?: string | null): "free" | "pro" {
   if (extendedUntil && new Date(extendedUntil) > new Date()) {
     return "pro";
   }
   const p = (plan || "").toLowerCase();
-  if (p === "pro" || p === "elite") {
-    // Paid subscriber — always Pro
-    if (stripeSubscriptionId) return p as "pro" | "elite";
-    // Promo grant — check if expired
+  if (p === "pro") {
+    if (stripeSubscriptionId) return "pro";
     if (proExpiresAt && new Date(proExpiresAt) < new Date()) return "free";
-    return p as "pro" | "elite";
+    return "pro";
   }
   return "free";
 }
@@ -92,8 +90,8 @@ export async function GET(req: NextRequest) {
       const lastScrapedTime = lastScrapedStr ? new Date(lastScrapedStr).getTime() : 0;
       const hoursSinceScrape = (now - lastScrapedTime) / (1000 * 60 * 60);
 
-      if (tier === "pro" || tier === "elite") {
-        // Pro/Elite: Poll weekly (every 168 hours), both Instagram and TikTok supported
+      if (tier === "pro") {
+        // Pro: Poll weekly (every 168 hours), both Instagram and TikTok supported
         return hoursSinceScrape >= 168;
       } else {
         // Free: Poll monthly (every 720 hours), Instagram only

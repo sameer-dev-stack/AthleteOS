@@ -76,7 +76,6 @@ export function UsageMonitor() {
               <div key={p.plan} className="flex items-center gap-2">
                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                   p.plan === "pro" ? "bg-accent/15 text-accent" :
-                  p.plan === "elite" ? "bg-purple-500/15 text-purple-400" :
                   "bg-white/[0.06] text-ink-muted"
                 }`}>
                   {p.plan}
@@ -108,7 +107,6 @@ export function UsageMonitor() {
                   <td className="px-6 py-3">
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
                       u.plan === "pro" ? "bg-accent/15 text-accent" :
-                      u.plan === "elite" ? "bg-purple-500/15 text-purple-400" :
                       "bg-white/[0.06] text-ink-muted"
                     }`}>
                       {u.plan}
@@ -148,7 +146,6 @@ export function UsageMonitor() {
                   <td className="px-6 py-3">
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
                       u.plan === "pro" ? "bg-accent/15 text-accent" :
-                      u.plan === "elite" ? "bg-purple-500/15 text-purple-400" :
                       "bg-white/[0.06] text-ink-muted"
                     }`}>
                       {u.plan}

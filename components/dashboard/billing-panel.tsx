@@ -278,7 +278,7 @@ export function BillingPanel({ subscription: initial }: Props) {
               <div className="flex items-center gap-3 border-b border-accent/20 bg-accent/10 px-6 py-3">
                 <PartyPopper className="h-5 w-5 flex-shrink-0 text-accent" />
                 <p className="flex-1 text-sm font-medium text-accent">
-                  Welcome to {upgradedTier === "elite" ? "Elite" : "Pro"}! Your upgrade is active.
+                  Welcome to Pro! Your upgrade is active.
                 </p>
                 <button
                   onClick={() => setShowSuccess(false)}
