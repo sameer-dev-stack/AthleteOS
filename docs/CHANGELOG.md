@@ -3,35 +3,6 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
-## 2026-08-17 — Session: 3D Spatial Context Fix & Pure Hardware Composited Card Flip
-
-### What changed
-- **`components/profile-card.tsx`**:
-  - **Removed `zIndex` Toggles from 3D Faces**: In CSS 3D Transforms (`transform-style: preserve-3d`), toggling `zIndex` breaks the 3D scene spatial sorting buffer in Chromium and WebKit, flattening the 3D scene into two 2D software layers and forcing expensive double-face compositing during flip. Removing `zIndex` restores pure hardware `backface-visibility: hidden` culling.
-  - **Fluid GPU Cubic-Bezier Curve**: Replaced high-stiffness spring calculations with an optimized Apple/iOS fluid motion curve (`ease: [0.23, 1, 0.32, 1]`, duration 0.48s) that is 100% offloaded directly to the GPU compositor thread without JS physics ticks.
-- **`components/reflective-card.css`**:
-  - Removed `transform: translateZ(0)` and `transition: ... transform` from `.rc-container` which were creating nested conflicting 3D stacking contexts that fought against the card's 3D rotation matrix.
-- **`app/globals.css`**:
-  - Explicitly declared `transform-style: preserve-3d` on `.flip-card-face`.
-- **`components/border-glow.tsx` & `components/border-glow.css`**:
-  - **Strictly UNTOUCHED** as instructed.
-
-### Why
-- Toggling `zIndex` during 3D flip forced the browser to destroy the 3D scene compositing tree on every flip click, causing intense frame drops.
-- Nested CSS `transition: transform` rules inside the card container collided with Framer Motion's matrix updates.
-
-### Files touched
-- `components/profile-card.tsx`
-- `components/reflective-card.css`
-- `app/globals.css`
-- `docs/CHANGELOG.md`
-
-### Verification
-- `npm test` — 54/54 tests passed.
-- `npm run lint` — 0 errors.
-- `npm run build` — exit code 0, 61 routes compiled successfully.
-
-
 ## 2026-08-17 — Session: Complete Elimination of Layout Thrashing & 60/120 FPS GPU Optimization
 
 ### What changed

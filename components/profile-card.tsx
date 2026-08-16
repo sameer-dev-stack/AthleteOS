@@ -1789,7 +1789,7 @@ export function ProfileCard({
       >
         <motion.div
           animate={{ rotateY: flipped ? 180 : 0 }}
-          transition={{ duration: 0.48, ease: [0.23, 1, 0.32, 1] }}
+          transition={{ type: "spring", stiffness: 380, damping: 38, mass: 1 }}
           onClick={handleFlip}
           className="relative w-full h-full cursor-pointer group"
           style={{ transformStyle: "preserve-3d", borderRadius: "20px", willChange: "transform" }}
@@ -1805,6 +1805,7 @@ export function ProfileCard({
             className="flip-card-face flex flex-col"
             style={{
               pointerEvents: flipped ? "none" : "auto",
+              zIndex: flipped ? 0 : 1,
             }}
           >
             <BorderGlow
@@ -1898,6 +1899,7 @@ export function ProfileCard({
             className="flip-card-face flip-card-back flex flex-col"
             style={{
               pointerEvents: flipped ? "auto" : "none",
+              zIndex: flipped ? 1 : 0,
             }}
             onMouseMove={resetAutoReturn}
             onTouchStart={resetAutoReturn}
