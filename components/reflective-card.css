@@ -203,27 +203,13 @@
   }
 }
 
-/* Coarse pointers (touch devices): the webcam never starts, so strip
-   the blend-heavy material layers that force the compositor to
-   re-blend every 3D flip frame. Keep a cheap static surface. */
+/* On touch devices, disable transitions on the container to avoid
+   unnecessary compositing during touch interactions. The material
+   layers (rc-noise, rc-sheen, rc-border) are static and cheap
+   to render — they stay visible on mobile for visual parity. */
 @media (pointer: coarse) {
-  .rc-noise,
-  .rc-sheen,
-  .rc-sheen::after,
-  .rc-overlay,
-  .rc-border {
-    display: none;
-  }
-
-  .rc-theme-gradient {
-    mix-blend-mode: normal !important;
-    opacity: 0.35 !important;
-  }
-
   .rc-container {
-    box-shadow:
-      0 0 0 1px rgba(255, 255, 255, 0.06) inset,
-      0 20px 60px rgba(0, 0, 0, 0.65);
     transition: none;
   }
 }
+

@@ -3,6 +3,32 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-17 — Session: Restored Snake Perimeter Animation & Mobile Theme Parity
+
+### What changed
+- **`components/border-glow.tsx`**:
+  - Restored the perimeter travel `requestAnimationFrame` loop with an optimized 32ms frame rate throttle (~30fps cap). This cuts mask rasterization operations in half compared to unthrottled 60fps loops while preserving the smooth snake border animation along all 4 edges.
+  - Retained the 50% slow speed setting (`speed = 0.0002`).
+- **`components/border-glow.css`**:
+  - Restored fallback position values (`var(--cursor-x, 50%) var(--cursor-y, 0%)`) and `calc(var(--cursor-x, 50%) + var(--glow-padding))` across all mask gradient definitions (`::before`, `::after`, `.edge-light`), ensuring mask rules never evaluate to invalid CSS when initialized.
+- **`components/reflective-card.css`**:
+  - Removed aggressive `@media (pointer: coarse)` overrides that previously hid `.rc-noise`, `.rc-sheen`, `.rc-border` and altered `.rc-theme-gradient` blending on touch devices. Mobile and desktop now render with 100% theme, sheen, and visual parity.
+
+### Why
+- The previous CSS `@property` keyframes were stripped by the bundler's PostCSS transform, causing the glow to freeze.
+- Mobile was displaying a different, flatter theme because coarse pointer queries were stripping the metallic and sheen layers.
+
+### Files touched
+- `components/border-glow.tsx`
+- `components/border-glow.css`
+- `components/reflective-card.css`
+- `docs/CHANGELOG.md`
+
+### Verification
+- `npm run lint` — 0 errors.
+- `npm run build` — exit code 0, 61 routes compiled successfully.
+
+
 ## 2026-08-17 — Session: True GPU Compositor Animation — Zero-JS Border Glow & SVG Filter Removal
 
 ### What changed
