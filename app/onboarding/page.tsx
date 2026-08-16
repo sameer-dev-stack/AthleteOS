@@ -1080,30 +1080,36 @@ export default function OnboardingPage() {
                   <span className="w-9" />
                 </div>
                 {stats.map((stat, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={stat.label}
-                      onChange={(e) =>
-                        setStats((prev) => prev.map((s, j) => (j === i ? { ...s, label: e.target.value } : s)))
-                      }
-                      placeholder="Label (e.g., PPG)"
-                      maxLength={50}
-                      className="w-1/2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
-                    />
-                    <input
-                      type="text"
-                      value={stat.value}
-                      onChange={(e) =>
-                        setStats((prev) => prev.map((s, j) => (j === i ? { ...s, value: e.target.value } : s)))
-                      }
-                      placeholder="Value (e.g., 18.4)"
-                      maxLength={50}
-                      className="flex-1 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
-                    />
+                  <div key={i} className="flex items-start gap-2">
+                    <div className="w-1/2">
+                      <input
+                        type="text"
+                        value={stat.label}
+                        onChange={(e) =>
+                          setStats((prev) => prev.map((s, j) => (j === i ? { ...s, label: e.target.value } : s)))
+                        }
+                        placeholder="Label (e.g., PPG)"
+                        maxLength={50}
+                        className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+                      />
+                      <p className="mt-0.5 text-right text-[10px] text-ink-dim">{stat.label.length}/50</p>
+                    </div>
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        value={stat.value}
+                        onChange={(e) =>
+                          setStats((prev) => prev.map((s, j) => (j === i ? { ...s, value: e.target.value } : s)))
+                        }
+                        placeholder="Value (e.g., 18.4)"
+                        maxLength={50}
+                        className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+                      />
+                      <p className="mt-0.5 text-right text-[10px] text-ink-dim">{stat.value.length}/50</p>
+                    </div>
                     <button
                       onClick={() => setStats((prev) => prev.filter((_, j) => j !== i))}
-                      className="rounded-lg border border-white/[0.06] p-2 text-ink-dim hover:text-red-400 transition-colors"
+                      className="rounded-lg border border-white/[0.06] p-2 text-ink-dim hover:text-red-400 transition-colors mt-2"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -1118,6 +1124,7 @@ export default function OnboardingPage() {
                     Add stat
                   </button>
                 )}
+                <p className="text-[11px] text-ink-dim mt-1">{stats.length}/10 stats</p>
               </div>
 
               {availableStatTemplates.length > 0 && stats.length < 10 && (
@@ -1215,30 +1222,36 @@ export default function OnboardingPage() {
                   </div>
                   <div className="space-y-2.5">
                     {links.map((link, i) => (
-                      <div key={i} className="flex gap-2">
-                        <input
-                          type="text"
-                          value={link.label}
-                          onChange={(e) =>
-                            setLinks((prev) => prev.map((l, j) => (j === i ? { ...l, label: e.target.value } : l)))
-                          }
-                          placeholder="Label (e.g., Hudl)"
-                          maxLength={100}
-                          className="w-2/5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
-                        />
-                        <input
-                          type="url"
-                          value={link.url}
-                          onChange={(e) =>
-                            setLinks((prev) => prev.map((l, j) => (j === i ? { ...l, url: e.target.value } : l)))
-                          }
-                          placeholder="https://..."
-                          maxLength={500}
-                          className="flex-1 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
-                        />
+                      <div key={i} className="flex items-start gap-2">
+                        <div className="w-2/5">
+                          <input
+                            type="text"
+                            value={link.label}
+                            onChange={(e) =>
+                              setLinks((prev) => prev.map((l, j) => (j === i ? { ...l, label: e.target.value } : l)))
+                            }
+                            placeholder="Label (e.g., Hudl)"
+                            maxLength={100}
+                            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+                          />
+                          <p className="mt-0.5 text-right text-[10px] text-ink-dim">{link.label.length}/100</p>
+                        </div>
+                        <div className="flex-1">
+                          <input
+                            type="url"
+                            value={link.url}
+                            onChange={(e) =>
+                              setLinks((prev) => prev.map((l, j) => (j === i ? { ...l, url: e.target.value } : l)))
+                            }
+                            placeholder="https://..."
+                            maxLength={500}
+                            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+                          />
+                          <p className="mt-0.5 text-right text-[10px] text-ink-dim">{link.url.length}/500</p>
+                        </div>
                         <button
                           onClick={() => setLinks((prev) => prev.filter((_, j) => j !== i))}
-                          className="rounded-lg border border-white/[0.06] p-2 text-ink-dim hover:text-red-400 transition-colors"
+                          className="rounded-lg border border-white/[0.06] p-2 text-ink-dim hover:text-red-400 transition-colors mt-2"
                         >
                           <X className="h-4 w-4" />
                         </button>
@@ -1254,6 +1267,7 @@ export default function OnboardingPage() {
                       Add link
                     </button>
                   )}
+                  <p className="text-[11px] text-ink-dim mt-1">{links.length}/3 links</p>
                 </div>
 
                 <div>
@@ -1263,37 +1277,43 @@ export default function OnboardingPage() {
                   </div>
                   <div className="space-y-2.5">
                     {highlights.map((h, i) => (
-                      <div key={i} className="flex gap-2">
-                        <input
-                          type="text"
-                          value={h.title}
-                          onChange={(e) =>
-                            setHighlights((prev) => prev.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))
-                          }
-                          placeholder="Title (e.g., Junior Season Highlights)"
-                          maxLength={100}
-                          className="w-2/5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
-                        />
-                        <input
-                          type="url"
-                          value={h.url}
-                          onChange={(e) =>
-                            setHighlights((prev) => prev.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))
-                          }
-                          placeholder="https://..."
-                          maxLength={500}
-                          className="flex-1 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
-                        />
+                      <div key={i} className="flex items-start gap-2">
+                        <div className="w-2/5">
+                          <input
+                            type="text"
+                            value={h.title}
+                            onChange={(e) =>
+                              setHighlights((prev) => prev.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))
+                            }
+                            placeholder="Title (e.g., Junior Season Highlights)"
+                            maxLength={100}
+                            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+                          />
+                          <p className="mt-0.5 text-right text-[10px] text-ink-dim">{h.title.length}/100</p>
+                        </div>
+                        <div className="flex-1">
+                          <input
+                            type="url"
+                            value={h.url}
+                            onChange={(e) =>
+                              setHighlights((prev) => prev.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))
+                            }
+                            placeholder="https://..."
+                            maxLength={500}
+                            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+                          />
+                          <p className="mt-0.5 text-right text-[10px] text-ink-dim">{h.url.length}/500</p>
+                        </div>
                         <button
                           onClick={() => setHighlights((prev) => prev.filter((_, j) => j !== i))}
-                          className="rounded-lg border border-white/[0.06] p-2 text-ink-dim hover:text-red-400 transition-colors"
+                          className="rounded-lg border border-white/[0.06] p-2 text-ink-dim hover:text-red-400 transition-colors mt-2"
                         >
                           <X className="h-4 w-4" />
                         </button>
                       </div>
                     ))}
                   </div>
-                  {highlights.length < 3 && (
+                  {highlights.length < 2 && (
                     <button
                       onClick={() => setHighlights((prev) => [...prev, { title: "", url: "" }])}
                       className="mt-2.5 flex items-center gap-1.5 text-sm text-ink-muted hover:text-accent transition-colors"
@@ -1302,6 +1322,7 @@ export default function OnboardingPage() {
                       Add highlight
                     </button>
                   )}
+                  <p className="text-[11px] text-ink-dim mt-1">{highlights.length}/2 highlights</p>
                 </div>
 
                 <div>
@@ -1323,6 +1344,7 @@ export default function OnboardingPage() {
                         maxLength={200}
                         className={`w-full rounded-lg border bg-white/[0.03] px-3 py-2.5 text-sm text-white placeholder:text-ink-dim focus:outline-none ${contactEmailInvalid ? "border-red-500/60 focus:border-red-500/60" : "border-white/[0.08] focus:border-accent/40"}`}
                       />
+                      <p className="mt-0.5 text-right text-[10px] text-ink-dim">{contactEmail.length}/200</p>
                       {contactEmailInvalid && (
                         <p className="mt-1 text-[11px] text-red-400">Please enter a valid email address.</p>
                       )}
@@ -1344,6 +1366,7 @@ export default function OnboardingPage() {
                           className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
                         />
                       </div>
+                      <p className="mt-0.5 text-right text-[10px] text-ink-dim">{contactPhone.length}/17</p>
                     </div>
                     <p className="text-[11px] text-ink-dim">
                       Provide an email or phone number (with area code) so brands and fans can reach you directly.

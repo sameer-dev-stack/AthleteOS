@@ -811,7 +811,7 @@ function StatsEditor({
             const SelectedIcon = selectedIconObj.Icon;
 
             return (
-              <div key={i} className="flex items-center gap-2">
+              <div key={i} className="flex items-start gap-2">
                 {i < 3 ? (
                   <span
                     className="flex w-9 shrink-0 justify-center rounded-md border border-accent/30 bg-accent/10 text-[8px] font-bold uppercase tracking-wide text-accent py-1"
@@ -875,22 +875,28 @@ function StatsEditor({
                   </div>
                 )}
 
-                <input
-                  type="text"
-                  value={stat.label}
-                  onChange={(e) => updateStat(i, "label", e.target.value)}
-                  placeholder="e.g., 40-yard"
-                  maxLength={50}
-                  className="w-[45%] rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
-                />
-                <input
-                  type="text"
-                  value={stat.value}
-                  onChange={(e) => updateStat(i, "value", e.target.value)}
-                  placeholder="e.g., 4.5s"
-                  maxLength={50}
-                  className="w-[45%] rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
-                />
+                <div className="w-[45%]">
+                  <input
+                    type="text"
+                    value={stat.label}
+                    onChange={(e) => updateStat(i, "label", e.target.value)}
+                    placeholder="e.g., 40-yard"
+                    maxLength={50}
+                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+                  />
+                  <p className="mt-0.5 text-right text-[10px] text-ink-dim">{stat.label.length}/50</p>
+                </div>
+                <div className="w-[45%]">
+                  <input
+                    type="text"
+                    value={stat.value}
+                    onChange={(e) => updateStat(i, "value", e.target.value)}
+                    placeholder="e.g., 4.5s"
+                    maxLength={50}
+                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+                  />
+                  <p className="mt-0.5 text-right text-[10px] text-ink-dim">{stat.value.length}/50</p>
+                </div>
                 <button
                   onClick={() => removeStat(i)}
                   className="w-9 shrink-0 rounded-lg border border-white/[0.06] p-2 text-ink-dim hover:text-red-400 transition-colors"
@@ -909,6 +915,7 @@ function StatsEditor({
               Add stat
             </button>
           )}
+          <p className="text-[11px] text-ink-dim mt-1">{stats.length}/10 stats</p>
           {availableTemplates.length > 0 && stats.length < 10 && (
             <div className="mt-4 rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
               <p className="text-xs font-medium text-ink-muted mb-2">
@@ -972,26 +979,32 @@ function LinksEditor({
       ) : (
         <>
           {links.map((link, i) => (
-            <div key={i} className="flex gap-2">
-              <input
-                type="text"
-                value={link.label}
-                onChange={(e) => updateLink(i, "label", e.target.value)}
-                placeholder="Label (e.g., Hudl)"
-                maxLength={100}
-                className="w-2/5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
-              />
-              <input
-                type="url"
-                value={link.url}
-                onChange={(e) => updateLink(i, "url", e.target.value)}
-                placeholder="https://..."
-                maxLength={500}
-                className="flex-1 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
-              />
+            <div key={i} className="flex items-start gap-2">
+              <div className="w-2/5">
+                <input
+                  type="text"
+                  value={link.label}
+                  onChange={(e) => updateLink(i, "label", e.target.value)}
+                  placeholder="Label (e.g., Hudl)"
+                  maxLength={100}
+                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+                />
+                <p className="mt-0.5 text-right text-[10px] text-ink-dim">{link.label.length}/100</p>
+              </div>
+              <div className="flex-1">
+                <input
+                  type="url"
+                  value={link.url}
+                  onChange={(e) => updateLink(i, "url", e.target.value)}
+                  placeholder="https://..."
+                  maxLength={500}
+                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+                />
+                <p className="mt-0.5 text-right text-[10px] text-ink-dim">{link.url.length}/500</p>
+              </div>
               <button
                 onClick={() => removeLink(i)}
-                className="rounded-lg border border-white/[0.06] p-2 text-ink-dim hover:text-red-400 transition-colors"
+                className="rounded-lg border border-white/[0.06] p-2 text-ink-dim hover:text-red-400 transition-colors mt-2"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1006,6 +1019,7 @@ function LinksEditor({
               Add link
             </button>
           )}
+          <p className="text-[11px] text-ink-dim mt-1">{links.length}/3 links</p>
         </>
       )}
     </div>
@@ -1043,9 +1057,12 @@ function SocialEditor({
             maxLength={50}
             className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
           />
-          <p className="mt-1 text-[11px] text-white/50">
-            Handle only — e.g. <span className="font-semibold text-white/70">{p.placeholder}</span>. If you paste a full link, we&apos;ll trim it to your handle automatically.
-          </p>
+          <div className="mt-0.5 flex items-center justify-between">
+            <p className="text-[11px] text-white/50">
+              Handle only — e.g. <span className="font-semibold text-white/70">{p.placeholder}</span>. If you paste a full link, we&apos;ll trim it to your handle automatically.
+            </p>
+            <p className="text-[10px] text-ink-dim">{((social as Record<string, string | undefined>)[p.key] || "").length}/50</p>
+          </div>
         </div>
       ))}
     </div>
@@ -1089,26 +1106,32 @@ function HighlightsEditor({
       ) : (
         <>
           {highlights.map((h, i) => (
-            <div key={i} className="flex gap-2">
-              <input
-                type="text"
-                value={h.title}
-                onChange={(e) => updateHighlight(i, "title", e.target.value)}
-                placeholder="Title (e.g., Junior Season Highlights)"
-                maxLength={100}
-                className="w-2/5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
-              />
-              <input
-                type="url"
-                value={h.url}
-                onChange={(e) => updateHighlight(i, "url", e.target.value)}
-                placeholder="https://..."
-                maxLength={500}
-                className="flex-1 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
-              />
+            <div key={i} className="flex items-start gap-2">
+              <div className="w-2/5">
+                <input
+                  type="text"
+                  value={h.title}
+                  onChange={(e) => updateHighlight(i, "title", e.target.value)}
+                  placeholder="Title (e.g., Junior Season Highlights)"
+                  maxLength={100}
+                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+                />
+                <p className="mt-0.5 text-right text-[10px] text-ink-dim">{h.title.length}/100</p>
+              </div>
+              <div className="flex-1">
+                <input
+                  type="url"
+                  value={h.url}
+                  onChange={(e) => updateHighlight(i, "url", e.target.value)}
+                  placeholder="https://..."
+                  maxLength={500}
+                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
+                />
+                <p className="mt-0.5 text-right text-[10px] text-ink-dim">{h.url.length}/500</p>
+              </div>
               <button
                 onClick={() => removeHighlight(i)}
-                className="rounded-lg border border-white/[0.06] p-2 text-ink-dim hover:text-red-400 transition-colors"
+                className="rounded-lg border border-white/[0.06] p-2 text-ink-dim hover:text-red-400 transition-colors mt-2"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1123,6 +1146,7 @@ function HighlightsEditor({
               Add highlight
             </button>
           )}
+          <p className="text-[11px] text-ink-dim mt-1">{highlights.length}/2 highlights</p>
         </>
       )}
     </div>
@@ -1164,6 +1188,7 @@ function ContactEditor({
               : "border-white/[0.08] focus:border-accent/40"
             }`}
         />
+        <p className="mt-0.5 text-right text-[10px] text-ink-dim">{email.length}/200</p>
         {emailError ? (
           <p className="mt-1 text-[11px] text-red-400">Please enter a valid email address.</p>
         ) : (
@@ -1186,6 +1211,7 @@ function ContactEditor({
           maxLength={17}
           className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-ink-dim focus:border-accent/40 focus:outline-none"
         />
+        <p className="mt-0.5 text-right text-[10px] text-ink-dim">{phone.length}/17</p>
         <p className="mt-1 text-[11px] text-white/20">
           Your phone number for direct calls, texts, or WhatsApp. Digits only — formatting is applied automatically.
         </p>
