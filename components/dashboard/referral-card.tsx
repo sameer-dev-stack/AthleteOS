@@ -63,7 +63,7 @@ export function ReferralCard() {
         {/* Milestone Progress Bar */}
         <div className="rounded-xl border border-white/[0.05] bg-[#0D0D11] p-3 mb-4 space-y-2">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-white/50 font-medium">Completed Athletes:</span>
+            <span className="text-white/50 font-medium">Your referrals:</span>
             <span className="font-bold text-white">
               <span className="text-accent">{stats.completedReferrals}</span> / 25
             </span>
@@ -77,9 +77,9 @@ export function ReferralCard() {
           </div>
 
           <div className="flex items-center justify-between text-[10px] text-white/40 pt-1">
-            <span>5 (1 Mo)</span>
-            <span>15 (3 Mo + Gold)</span>
-            <span>25 (6 Mo)</span>
+            <span>5 referrals = 1 month</span>
+            <span>15 referrals = 3 months + Gold</span>
+            <span>25 referrals = 6 months</span>
           </div>
         </div>
 
