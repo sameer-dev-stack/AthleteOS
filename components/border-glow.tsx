@@ -126,7 +126,7 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
       const w = rect.width || 300;
       const h = rect.height || 400;
       const perimeter = 2 * (w + h);
-      const speed = 0.0004;
+      const speed = 0.0002; // 50% slower, elegant smooth perimeter travel
 
       card.classList.add('glow-looping');
       card.style.setProperty('--edge-proximity', '90');

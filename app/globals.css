@@ -343,10 +343,6 @@
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
   }
-
-  .card-ambient-glow {
-    filter: blur(20px) !important;
-  }
 }
 
 @keyframes gold-badge-glow {

@@ -3,6 +3,36 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-16 — Session: Comprehensive Profile Card Optimization & 50% Snake Slowdown
+
+### What changed
+- **`components/border-glow.tsx`**:
+  - Reduced the snake perimeter loop speed by 50% (`speed = 0.0002`), producing a graceful, luxurious and smooth travel along the card edges.
+- **`components/profile-card.tsx`**:
+  - **Ambient Aura**: Replaced `filter: blur(60px)` on `.card-ambient-glow` with a GPU-composited multi-stop radial gradient and `willChange: transform`, eliminating heavy CPU Gaussian blur rasterization.
+  - **Flip Spring Tuning**: Tuned the 3D flip spring to `stiffness: 380, damping: 38, mass: 1` so it settles smoothly in ~250ms rather than 600ms, minimizing the duration both card faces composite simultaneously.
+  - **SVG Filter Optimization**: Removed redundant duplicate `feTurbulence` overlay from `AthletePhoto` (which was overlapping with `ReflectiveCard`'s `.rc-noise`).
+  - **React Render Optimization**: Memoized `themeObj`, `cleanStats`, `statCells`, and `socialLinks` to prevent redundant object allocation and re-renders.
+- **`components/reflective-card.css`**:
+  - Added `contain: layout style;` to `.rc-container` to isolate style recalculations within the card subtree.
+- **`app/globals.css`**:
+  - Removed `filter: blur(20px)` override from `.card-ambient-glow` in coarse pointer media query.
+
+### Why
+- Requested complete card optimization while preserving 100% of the rich visual effects and reducing the snake movement speed by 50%.
+
+### Files touched
+- `components/border-glow.tsx`
+- `components/profile-card.tsx`
+- `components/reflective-card.css`
+- `app/globals.css`
+- `docs/CHANGELOG.md`
+
+### Verification
+- `npm run lint` — 0 errors.
+- `npm test` — all 9 test suites / 54 tests passed.
+- `npm run build` — successfully compiled with zero errors.
+
 ## 2026-08-16 — Session: 120 FPS GPU-Accelerated Snake Border Glow Optimization
 
 ### What changed

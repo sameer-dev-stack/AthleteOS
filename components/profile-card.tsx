@@ -33,7 +33,7 @@
  * ═══════════════════════════════════════════════════════════════════════
  */
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import {
   Share2, Check as CheckIcon, Copy, Mail, Send,
@@ -71,6 +71,7 @@ import { isValidPosition, getFallbackGradient } from "@/lib/sport-config";
 
 const AUTO_RETURN_MS = 12_000;
 const PHOTO_INTERVAL_MS = 4_000;
+const PLACEHOLDER_RE = /^(test|asdf|foo|bar|baz|aaa|123|000|xxx|yyy|zzz|na|n\/a|none|sample|demo|example|temp|placeholder)$/i;
 
 /** Maps well-known stat keys to lucide icons */
 const STAT_ICON_MAP: Record<string, React.ElementType> = {
@@ -241,18 +242,6 @@ function AthletePhoto({ photos, photoIdx, displayName, initials, accent, sport }
           height: "55%",
           background:
             "linear-gradient(to top, #0d0d12 0%, #0d0d12e8 18%, #0d0d1290 45%, transparent 100%)",
-        }}
-      />
-
-      {/* Noise grain for premium texture */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-          backgroundSize: "160px 160px",
-          mixBlendMode: "overlay",
-          opacity: 0.025,
         }}
       />
 
@@ -1623,7 +1612,7 @@ export function ProfileCard({
   }, [searchParams, profile.id]);
 
   /* ── Derived data ───────────────────────────────── */
-  const themeObj = resolveTheme(profile.theme_accent);
+  const themeObj = useMemo(() => resolveTheme(profile.theme_accent), [profile.theme_accent]);
   const accent = themeObj.primaryColor;
 
   const displayName = cleanName(profile.full_name, profile.username);
@@ -1635,7 +1624,6 @@ export function ProfileCard({
     .join("")
     .slice(0, 2)
     .toUpperCase();
-  const athleteId = formatAthleteId(profile.username);
 
   const photos: string[] = [profile.avatar_url].filter(Boolean) as string[];
   const hasMultiplePhotos = photos.length > 1;
@@ -1657,8 +1645,7 @@ export function ProfileCard({
     profile.class_year?.toLowerCase() === "senior"    ? "SR" : null;
 
   /* Stats filtering */
-  const PLACEHOLDER_RE = /^(test|asdf|foo|bar|baz|aaa|123|000|xxx|yyy|zzz|na|n\/a|none|sample|demo|example|temp|placeholder)$/i;
-  const cleanStats = (profile.stats ?? []).filter((s) => {
+  const cleanStats = useMemo(() => (profile.stats ?? []).filter((s) => {
     if (!s.label?.trim() || !s.value?.trim()) return false;
     const l = s.label.trim().toLowerCase();
     const v = s.value.trim();
@@ -1667,14 +1654,14 @@ export function ProfileCard({
     if (v.length > 50) return false;
     if (PLACEHOLDER_RE.test(l) || PLACEHOLDER_RE.test(v)) return false;
     return true;
-  }).slice(0, 3);
+  }).slice(0, 3), [profile.stats]);
 
-  const statCells: StatCell[] = [
+  const statCells: StatCell[] = useMemo(() => [
     ...(nilScore !== null && nilScore > 0
       ? [{ key: "nil", label: "NIL", value: String(nilScore), isAccent: true }]
       : []),
     ...cleanStats.map((s) => ({ key: s.label, label: sanitize(s.label), value: s.value, isAccent: false, icon: s.icon })),
-  ];
+  ], [nilScore, cleanStats]);
 
   const links = (profile.links ?? []).slice(0, 6);
   const MAX_VISIBLE_LINKS = 2;
@@ -1687,12 +1674,13 @@ export function ProfileCard({
     !profile.bio.includes("@") &&
     !/^[a-z]{2,6}$/i.test(profile.bio.trim());
 
-  const socialLinks = SOCIAL_MAP
-    .filter((s) => profile.social?.[s.key as keyof typeof profile.social])
+  const social = profile.social;
+  const socialLinks = useMemo(() => SOCIAL_MAP
+    .filter((s) => social?.[s.key as keyof typeof social])
     .map((s) => ({
       ...s,
-      href: s.prefix + encodeURIComponent(profile.social![s.key as keyof typeof profile.social]!),
-    }));
+      href: s.prefix + encodeURIComponent(social![s.key as keyof typeof social]!),
+    })), [social]);
 
   const hasContact = Boolean(profile.contact_email?.trim() || profile.contact_phone?.trim());
 
@@ -1776,12 +1764,13 @@ export function ProfileCard({
     >
       {/* Ambient glow behind card */}
       <div
-        className="card-ambient-glow absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
+        className="card-ambient-glow absolute left-1/2 top-1/2 rounded-full pointer-events-none"
         style={{
           width: "640px",
           height: "640px",
-          background: `radial-gradient(circle, ${accent}07 0%, transparent 70%)`,
-          filter: "blur(60px)",
+          background: `radial-gradient(circle, ${accent}14 0%, ${accent}05 35%, transparent 70%)`,
+          transform: "translate(-50%, -50%) translateZ(0)",
+          willChange: "transform",
         }}
         aria-hidden
       />
@@ -1797,7 +1786,7 @@ export function ProfileCard({
       >
         <motion.div
           animate={{ rotateY: flipped ? 180 : 0 }}
-          transition={{ type: "spring", stiffness: 270, damping: 30, mass: 0.85 }}
+          transition={{ type: "spring", stiffness: 380, damping: 38, mass: 1 }}
           onClick={handleFlip}
           className="relative w-full h-full cursor-pointer group"
           style={{ transformStyle: "preserve-3d", borderRadius: "20px" }}
