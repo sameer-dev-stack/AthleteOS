@@ -252,19 +252,11 @@ export function ReflectiveCard({
 
       {/* ── Reflective surface ────────────────────── */}
       {webcamDenied ? (
-        /* Static metallic gradient fallback */
+        /* Static dark surface fallback */
         <div
           className="rc-video-fallback"
           style={{
-            background: `linear-gradient(
-              145deg,
-              #1e1e28 0%,
-              #131318 18%,
-              #22222e 38%,
-              #0e0e16 58%,
-              #1a1a24 78%,
-              #0d0d14 100%
-            )`,
+            background: "#0d0d12",
           }}
           aria-hidden="true"
         />

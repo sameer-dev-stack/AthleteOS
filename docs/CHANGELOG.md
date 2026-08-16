@@ -3,6 +3,33 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-17 — Session: Live Dimension Tracking for Border Glow & Pure Dark Mobile Theme
+
+### What changed
+- **`components/border-glow.tsx`**:
+  - Replaced one-time mount bounding rect measurements with live `card.offsetWidth` and `card.offsetHeight` directly in the animation loop. This prevents perimeter dimension collapse during initial hydration/font loading (where hardcoded 300x400 fallbacks caused the glow to travel 60px inside the card instead of along outer edges).
+  - Dynamically calculates `--cursor-angle` so perimeter-following gradients turn corners precisely.
+  - Retained the smooth perimeter progression and throttle for silky 60fps tracking.
+- **`components/reflective-card.tsx` & `components/reflective-card.css`**:
+  - Replaced the light metallic gradient fallback on mobile with true pitch-black `#0d0d12`.
+  - Refined `rc-sheen` white specular highlight opacity from 0.38 down to 0.12 (with container opacity 0.35) to eliminate the cloudy/milky white film that appeared on mobile screens. Both desktop and mobile now share the exact same sleek dark aesthetic.
+
+### Why
+- The border glow appeared stuck because dimensions measured at mount time before final layout caused the snake to trace an inner path off the visible edge.
+- Mobile displayed a washed-out white/gray surface due to an overly bright fallback gradient and specular overlay.
+
+### Files touched
+- `components/border-glow.tsx`
+- `components/reflective-card.tsx`
+- `components/reflective-card.css`
+- `docs/CHANGELOG.md`
+
+### Verification
+- `npm test` — 54/54 tests passed.
+- `npm run lint` — 0 errors.
+- `npm run build` — exit code 0, 61 routes compiled successfully.
+
+
 ## 2026-08-17 — Session: Restored Snake Perimeter Animation & Mobile Theme Parity
 
 ### What changed

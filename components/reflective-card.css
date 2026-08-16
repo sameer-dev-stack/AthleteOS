@@ -84,20 +84,12 @@
 }
 
 /* Graceful fallback when webcam is unavailable:
-   Use a static dark metallic gradient instead */
+   Use a deep dark surface */
 .rc-video-fallback {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: linear-gradient(
-    145deg,
-    #1a1a20 0%,
-    #111116 20%,
-    #1e1e26 40%,
-    #0e0e14 60%,
-    #1a1a22 80%,
-    #0d0d12 100%
-  );
+  background: #0d0d12;
 }
 
 /* ── Noise grain — roughness / micro-texture ───────── */
@@ -106,7 +98,7 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: var(--rc-roughness, 0.38);
+  opacity: var(--rc-roughness, 0.25);
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 192px 192px;
@@ -119,15 +111,15 @@
   z-index: 2;
   pointer-events: none;
   mix-blend-mode: overlay;
-  opacity: var(--rc-metalness, 0.9);
+  opacity: var(--rc-metalness, 0.35);
 
   background: linear-gradient(
     138deg,
-    rgba(255, 255, 255, 0.38) 0%,
-    rgba(255, 255, 255, 0.10) 35%,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.04) 35%,
     rgba(255, 255, 255, 0.00) 50%,
-    rgba(255, 255, 255, 0.08) 65%,
-    rgba(255, 255, 255, 0.26) 100%
+    rgba(255, 255, 255, 0.03) 65%,
+    rgba(255, 255, 255, 0.08) 100%
   );
 }
 
@@ -139,7 +131,7 @@
   background: linear-gradient(
     50deg,
     rgba(255, 255, 255, 0.00) 30%,
-    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.03) 50%,
     rgba(255, 255, 255, 0.00) 70%
   );
 }

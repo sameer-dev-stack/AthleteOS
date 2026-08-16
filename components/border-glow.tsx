@@ -136,32 +136,54 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
       loopStartRef.current = null;
 
       const tick = (now: number) => {
-        // Throttle to ~30fps — skip frames under 32ms apart
-        if (now - lastFrameTimeRef.current < 32) {
+        // Limit throttle to 16-32ms for responsive, continuous animation
+        if (lastFrameTimeRef.current && now - lastFrameTimeRef.current < 24) {
           rafRef.current = requestAnimationFrame(tick);
           return;
         }
         lastFrameTimeRef.current = now;
 
+        const w = card.offsetWidth || 360;
+        const h = card.offsetHeight || 600;
+        const perimeter = 2 * (w + h);
+
         if (!loopStartRef.current) loopStartRef.current = now;
-        const dist = ((now - loopStartRef.current) * speed % 1) * perimeter;
+        const elapsed = (now - loopStartRef.current) * speed;
+        const progress = elapsed - Math.floor(elapsed);
+        const dist = progress * perimeter;
 
         let x: number, y: number;
+        let angle = 0;
+
         if (dist < w) {
-          x = dist;              y = 0;
+          // Top edge: moving from left to right
+          x = dist;
+          y = 0;
+          angle = (dist / w) * 90;
         } else if (dist < w + h) {
-          x = w;                 y = dist - w;
+          // Right edge: moving from top to bottom
+          x = w;
+          y = dist - w;
+          angle = 90 + ((dist - w) / h) * 90;
         } else if (dist < 2 * w + h) {
-          x = w - (dist - (w + h)); y = h;
+          // Bottom edge: moving from right to left
+          x = w - (dist - (w + h));
+          y = h;
+          angle = 180 + ((dist - (w + h)) / w) * 90;
         } else {
-          x = 0;                 y = h - (dist - (2 * w + h));
+          // Left edge: moving from bottom to top
+          x = 0;
+          y = h - (dist - (2 * w + h));
+          angle = 270 + ((dist - (2 * w + h)) / h) * 90;
         }
 
-        const xi = x | 0;
-        const yi = y | 0;
+        const xi = Math.round(x);
+        const yi = Math.round(y);
+
         if (xi !== lastXRef.current || yi !== lastYRef.current) {
           card.style.setProperty('--cursor-x', `${xi}px`);
           card.style.setProperty('--cursor-y', `${yi}px`);
+          card.style.setProperty('--cursor-angle', `${Math.round(angle)}deg`);
           lastXRef.current = xi;
           lastYRef.current = yi;
         }
