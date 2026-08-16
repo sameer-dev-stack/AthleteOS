@@ -17,7 +17,7 @@ export function ShareSheet({ link, text }: { link: string; text: string }) {
   }
   async function native() {
     if (navigator.share) {
-      try { await navigator.share({ title: "Join AthleteOS", text, url: link }); } catch {}
+      try { await navigator.share({ title: "Join NIL CARD", text, url: link }); } catch {}
     } else copy();
   }
 

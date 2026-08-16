@@ -31,7 +31,7 @@ export function ReferralCard() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "Join me on AthleteOS",
+          title: "Join me on NIL CARD",
           text: buildShareText(),
           url: stats!.referralLink,
         });

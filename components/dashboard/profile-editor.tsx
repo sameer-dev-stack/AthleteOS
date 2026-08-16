@@ -595,7 +595,7 @@ function BioEditor({
             Username
           </label>
           <div className="relative flex items-center">
-            <span className="absolute left-4 text-sm text-white/20 select-none">athleteos.app/</span>
+            <span className="absolute left-4 text-sm text-white/20 select-none">nilcard.app/</span>
             <input
               type="text"
               value={username}

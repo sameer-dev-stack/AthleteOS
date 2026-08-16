@@ -157,7 +157,7 @@ export function AnalyticsPanel({ athleteId, initialData, themeAccent = "#C6FF3D"
     setExporting(true);
     const rangeLabel = range === "custom" ? `${customStart}_to_${customEnd}` : range;
     const rows: string[] = [
-      "AthleteOS Analytics Report",
+      "NIL CARD Analytics Report",
       `Generated,${new Date().toISOString()}`,
       `Range,${rangeLabel}`,
       "",
@@ -357,7 +357,7 @@ export function AnalyticsPanel({ athleteId, initialData, themeAccent = "#C6FF3D"
                         <div>
                           <h3 className="text-lg font-black text-white">Full Analytics Locked</h3>
                           <p className="mt-1.5 text-xs text-white/70 leading-relaxed">
-                            30 & 90-day traffic charts, link click heatmaps, referrer traffic sources, device breakdowns, and CSV exports are exclusive to AthleteOS Pro members.
+                            30 & 90-day traffic charts, link click heatmaps, referrer traffic sources, device breakdowns, and CSV exports are exclusive to NIL CARD Pro members.
                           </p>
                         </div>
                         <Link
@@ -628,7 +628,7 @@ export function AnalyticsPanel({ athleteId, initialData, themeAccent = "#C6FF3D"
             <div>
               <h4 className="text-lg font-black text-white">Unlock Full Analytics</h4>
               <p className="mt-1.5 text-xs text-white/70 leading-relaxed">
-                Historical trends, link click heatmaps, referrer traffic sources, device breakdowns, and CSV exports are exclusive to AthleteOS Pro.
+                Historical trends, link click heatmaps, referrer traffic sources, device breakdowns, and CSV exports are exclusive to NIL CARD Pro.
               </p>
             </div>
             <div className="flex gap-2.5 pt-2">

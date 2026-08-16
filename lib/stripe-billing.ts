@@ -39,7 +39,7 @@ export async function createCheckoutSession({
       price_data: {
         currency: "usd",
         product_data: {
-          name: "AthleteOS Pro Plan",
+          name: "NIL CARD Pro Plan",
           description:
             interval === "annual"
               ? "Annual Pro Membership ($9/mo - Save 36%)"
@@ -76,8 +76,8 @@ export async function createCheckoutSession({
       interval,
       promo_trial: trialDays ? "launch_500" : null,
     },
-    success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app"}/dashboard?upgraded=${tier}${trialDays ? "&trial=claimed" : ""}`,
-    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app"}/dashboard?cancelled=true`,
+    success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app"}/dashboard?upgraded=${tier}${trialDays ? "&trial=claimed" : ""}`,
+    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app"}/dashboard?cancelled=true`,
   });
 
   return { url: session.url };
@@ -90,7 +90,7 @@ export async function createCustomerPortalSession({
 }): Promise<{ url: string | null; error?: string }> {
   const session = await stripe.billingPortal.sessions.create({
     customer: customerId,
-    return_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app"}/dashboard`,
+    return_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app"}/dashboard`,
   });
 
   return { url: session.url };

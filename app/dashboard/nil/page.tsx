@@ -9,7 +9,7 @@ import { NilDashboardClient } from "./client";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "NIL Value Engine | AthleteOS",
+  title: "NIL Value Engine | NIL CARD",
   description: "Monitor your NIL score, recommended rates, and evaluate sponsorship deal offers.",
 };
 

@@ -304,7 +304,7 @@ export function SocialAccountsEditor({ accounts, themeAccent, onUpdate, plan }: 
                 </h4>
               </div>
               <p className="text-xs text-white/70 leading-relaxed">
-                AthleteOS requires a public account to securely aggregate engagement analytics and verify your
+                NIL CARD requires a public account to securely aggregate engagement analytics and verify your
                 suggested market value. Please temporarily switch your profile to public in your app settings and
                 click Retry Sync.
               </p>

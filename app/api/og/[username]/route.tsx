@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
   if (!username) {
     return new ImageResponse(
-      CardImage("Athlete", "AthleteOS", null, null),
+      CardImage("Athlete", "NIL CARD", null, null),
       { width: 1200, height: 630 }
     );
   }
@@ -55,7 +55,7 @@ function CardImage(
   sport: string | null,
   school: string | null
 ) {
-  const subtitle = [sport, school].filter(Boolean).join(" · ") || "AthleteOS";
+  const subtitle = [sport, school].filter(Boolean).join(" · ") || "NIL CARD";
 
   return (
     <div
@@ -130,7 +130,7 @@ function CardImage(
           marginBottom: "0",
         }}
       >
-        athleteos.app/{username}
+        nilcard.app/{username}
       </div>
 
       {/* Bottom bar */}

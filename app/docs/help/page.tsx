@@ -3,8 +3,8 @@ import { Footer } from "@/components/footer";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Help Center — AthleteOS",
-  description: "Get help with your AthleteOS account and athlete card.",
+  title: "Help Center — NIL CARD",
+  description: "Get help with your NIL CARD account and athlete card.",
 };
 
 export default function HelpCenterPage() {
@@ -17,14 +17,14 @@ export default function HelpCenterPage() {
             Help Center
           </h1>
           <p className="mt-4 text-lg text-ink-muted">
-            Answers to common questions about AthleteOS.
+            Answers to common questions about NIL CARD.
           </p>
           <div className="mt-12 max-w-2xl space-y-8">
             <section>
               <h2 className="text-xl font-bold text-white">How do I create my athlete card?</h2>
               <p className="mt-3 text-sm leading-relaxed text-ink-muted">
                 Sign up for free, complete the onboarding flow, and your card will be live at
-                athleteos.app/your-username. You can customize your card from the Profile Editor
+                nilcard.app/your-username. You can customize your card from the Profile Editor
                 in your dashboard.
               </p>
             </section>
@@ -54,8 +54,8 @@ export default function HelpCenterPage() {
               <h2 className="text-xl font-bold text-white">Contact support</h2>
               <p className="mt-3 text-sm leading-relaxed text-ink-muted">
                 Need more help? Email us at{" "}
-                <a href="mailto:hey@athleteos.app" className="text-accent hover:underline">
-                  hey@athleteos.app
+                <a href="mailto:                  hey@nilcard.app" className="text-accent hover:underline">
+                  hey@nilcard.app
                 </a>
               </p>
             </section>

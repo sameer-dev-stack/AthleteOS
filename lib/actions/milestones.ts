@@ -70,7 +70,7 @@ const MILESTONE_DEFINITIONS: Record<string, { title: string; description: (val?:
   },
   streak_7_days: {
     title: "7-day streak",
-    description: () => "You've been active on AthleteOS for 7 consecutive days.",
+    description: () => "You've been active on NIL CARD for 7 consecutive days.",
   },
 };
 

@@ -522,7 +522,7 @@ export function Header({ profile, email }: HeaderProps) {
                   className="font-black tracking-[0.15em] uppercase text-sm"
                   style={{ color: accentColor }}
                 >
-                  AthleteOS
+                  NIL CARD
                 </span>
               </Link>
               <button

@@ -474,7 +474,7 @@ Return only these 3 sections. No preamble. No markdown formatting.`;
     const breakdown: NilBreakdown = {
       marketPosition:
         marketMatch?.[1]?.trim() ||
-        `With a NIL Score of ${nilScore}/100, you're building a solid foundation. Focus on growing your digital presence and completing your AthleteOS profile.`,
+        `With a NIL Score of ${nilScore}/100, you're building a solid foundation. Focus on growing your digital presence and completing your NIL CARD profile.`,
       whatsWorking:
         whatsWorking.length > 0
           ? whatsWorking

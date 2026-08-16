@@ -26,7 +26,7 @@ export function NilPitchGenerator({
 
   // Template generators
   const templates = {
-    dm: `Hey ${cleanBrand} team! 👋 My name is ${athleteName}, a ${sport} athlete at ${school}. I love your brand and use your products regularly. I'd love to partner up on a ${deliverable} to feature ${cleanBrand} to my engaged audience. Let me know if you'd be open to checking out my AthleteOS rate card! 🚀`,
+    dm: `Hey ${cleanBrand} team! 👋 My name is ${athleteName}, a ${sport} athlete at ${school}. I love your brand and use your products regularly. I'd love to partner up on a ${deliverable} to feature ${cleanBrand} to my engaged audience. Let me know if you'd be open to checking out my NIL CARD rate card! 🚀`,
 
     email: `Subject: Partnership Proposal: ${athleteName} x ${cleanBrand}
 
@@ -36,7 +36,7 @@ My name is ${athleteName}, and I am currently a ${sport} student-athlete at ${sc
 
 I am a genuine fan of ${cleanBrand} and would love to collaborate on a sponsored ${deliverable} targeting collegiate fans and active lifestyle consumers in our community.
 
-Attached/linked is my verified AthleteOS media card detailing my audience metrics and rate card.
+Attached/linked is my verified NIL CARD media card detailing my audience metrics and rate card.
 
 Would you be open to a brief discussion this week regarding potential NIL collaboration opportunities?
 
@@ -44,7 +44,7 @@ Best regards,
 
 ${athleteName}
 ${sport} | ${school}
-AthleteOS Profile: https://athleteos.app`,
+NIL CARD Profile: https://nilcard.app`,
 
     followup: `Hi ${cleanBrand} team,
 

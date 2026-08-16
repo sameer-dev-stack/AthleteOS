@@ -163,7 +163,7 @@ export async function runNilValueEngine(
         data: {
           metrics: latestMetrics,
           scoreDetails,
-          aiExplanation: "You have used your free AI analysis this month. Upgrade to AthleteOS Pro or Elite to refresh your NIL Score and receive brand outreach action recommendations.",
+          aiExplanation: "You have used your free AI analysis this month. Upgrade to NIL CARD Pro or Elite to refresh your NIL Score and receive brand outreach action recommendations.",
           quotaUsed: quota.used,
           quotaLimit: quota.limit,
           plan: quota.plan,

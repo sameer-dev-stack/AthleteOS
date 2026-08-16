@@ -7,7 +7,7 @@ export async function GET() {
     {
       status: "healthy",
       timestamp: new Date().toISOString(),
-      service: "AthleteOS API",
+      service: "NIL CARD API",
     },
     { status: 200 }
   );

@@ -8,7 +8,7 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app";
 
 function sanitizeJsonLd(input: string): string {
   return input.replace(/[<>]/g, "").replace(/&/g, "&amp;");
@@ -36,21 +36,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const p = result.data;
   const displayName = cleanDisplayName(p.full_name, p.username);
   const title = p.sport
-    ? `${displayName} — ${p.sport} | AthleteOS`
-    : `${displayName} — AthleteOS`;
+    ? `${displayName} — ${p.sport} | NIL CARD`
+    : `${displayName} — NIL CARD`;
 
   const description =
     p.bio && p.bio.trim().length > 10 && !p.bio.includes("@")
       ? p.bio.slice(0, 200)
-      : `${displayName} (${p.sport || "Athlete"}${p.position ? ` · ${p.position}` : ""} at ${p.school || "School"}). Official AthleteOS card.`;
+      : `${displayName} (${p.sport || "Athlete"}${p.position ? ` · ${p.position}` : ""} at ${p.school || "School"}). Official NIL CARD card.`;
 
   const ogImageUrl = `${SITE_URL}/api/og/${username}`;
   const images = p.avatar_url
     ? [
         { url: p.avatar_url, alt: `${displayName} Avatar` },
-        { url: ogImageUrl, width: 1200, height: 630, alt: `${displayName} — AthleteOS` },
+        { url: ogImageUrl, width: 1200, height: 630, alt: `${displayName} — NIL CARD` },
       ]
-    : [{ url: ogImageUrl, width: 1200, height: 630, alt: `${displayName} — AthleteOS` }];
+    : [{ url: ogImageUrl, width: 1200, height: 630, alt: `${displayName} — NIL CARD` }];
 
   return {
     title,
@@ -62,7 +62,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       type: "profile",
-      siteName: "AthleteOS",
+      siteName: "NIL CARD",
       url: `${SITE_URL}/${username}`,
       images,
     },

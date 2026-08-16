@@ -126,7 +126,7 @@ export default function UserManagement() {
     triggerConfirmation({
       title: nextVal ? 'Verify Athlete Badge' : 'Revoke Verification Badge',
       description: nextVal
-        ? `Apply the green AthleteOS verified badge to ${profile.full_name || 'this profile'}? This displays a verification signal across all search portals and cards.`
+        ? `Apply the green NIL CARD verified badge to ${profile.full_name || 'this profile'}? This displays a verification signal across all search portals and cards.`
         : `Remove the verification badge from ${profile.full_name || 'this profile'}?`,
       actionLabel: nextVal ? 'Verify Profile' : 'Revoke Verification',
       onConfirm: async () => {
@@ -593,7 +593,7 @@ export default function UserManagement() {
                 <div className="space-y-3">
                   <h4 className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Connected Social Analytics</h4>
                   {detailSocials.length === 0 ? (
-                    <p className="text-xs text-neutral-500 italic">No social accounts connected to this AthleteOS profile.</p>
+                    <p className="text-xs text-neutral-500 italic">No social accounts connected to this NIL CARD profile.</p>
                   ) : (
                     <div className="grid gap-2">
                       {detailSocials.map((s, index) => (

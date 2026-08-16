@@ -129,7 +129,7 @@ export async function getSystemNotifications(): Promise<{
             id: `ref-${ref.id}`,
             type: "referral",
             title: "New Referral Joined",
-            message: `${name} joined AthleteOS using your link! You earned Pro rewards.`,
+            message: `${name} joined NIL CARD using your link! You earned Pro rewards.`,
             createdAt: ref.created_at,
             link: "/dashboard/referrals",
           });
@@ -154,7 +154,7 @@ export async function getSystemNotifications(): Promise<{
           id: "sys-launch-promo",
           type: "milestone",
           title: "First 500 Promo Available 🎉",
-          message: "Claim 3 free months of AthleteOS Pro today with verified card setup.",
+          message: "Claim 3 free months of NIL CARD Pro today with verified card setup.",
           createdAt: new Date().toISOString(),
           link: "/dashboard/billing",
         });
@@ -166,7 +166,7 @@ export async function getSystemNotifications(): Promise<{
           id: "sys-card-live",
           type: "published",
           title: "Athlete Card Live 🚀",
-          message: `Your card is live at athleteos.app/${profile.username || ""}. Share it to get inquiries!`,
+          message: `Your card is live at nilcard.app/${profile.username || ""}. Share it to get inquiries!`,
           createdAt: profile.created_at,
           link: `/${profile.username}`,
         });
@@ -185,7 +185,7 @@ export async function getSystemNotifications(): Promise<{
       notifications.push({
         id: "sys-welcome",
         type: "system",
-        title: "Welcome to AthleteOS",
+        title: "Welcome to NIL CARD",
         message: "Your NIL Business Operating System is configured and ready.",
         createdAt: profile.created_at,
         link: "/dashboard",

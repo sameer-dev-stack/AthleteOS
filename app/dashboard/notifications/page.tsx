@@ -150,7 +150,7 @@ export default function NotificationsPage() {
           </Link>
           <div className="flex items-center gap-2">
             <Logo className="h-6 w-6 rounded-md bg-[#C6FF3D]" />
-            <span className="text-sm font-black tracking-wider uppercase text-white">AthleteOS</span>
+            <span className="text-sm font-black tracking-wider uppercase text-white">NIL CARD</span>
           </div>
         </div>
 

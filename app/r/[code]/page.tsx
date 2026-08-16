@@ -42,12 +42,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const headline = view.valid
     ? view.referrerName
-      ? `${view.referrerName} invited you to AthleteOS`
-      : "You've been invited to AthleteOS"
-    : "Join AthleteOS";
+      ? `${view.referrerName} invited you to NIL CARD`
+      : "You've been invited to NIL CARD"
+    : "Join NIL CARD";
 
   return {
-    title: "You're invited to AthleteOS",
+    title: "You're invited to NIL CARD",
     openGraph: {
       title: headline,
       description:
@@ -111,14 +111,14 @@ export default async function ReferralLanding({ params }: Props) {
 
   const headline = view.valid
     ? view.referrerName
-      ? `${view.referrerName} invited you to AthleteOS`
-      : "You've been invited to AthleteOS"
-    : "Join AthleteOS";
+      ? `${view.referrerName} invited you to NIL CARD`
+      : "You've been invited to NIL CARD"
+    : "Join NIL CARD";
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-bg px-6">
       <div className="w-full max-w-[420px] rounded-3xl border border-white/[0.06] bg-card p-10 text-center shadow-[0_1px_0_0_rgba(255,255,255,0.04) inset,0_30px_80px_-20px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.05)]">
-        <p className="eyebrow justify-center">AthleteOS</p>
+        <p className="eyebrow justify-center">NIL CARD</p>
         <h1 className="mt-5 text-[1.65rem] font-bold leading-tight text-ink">
           {headline}
         </h1>

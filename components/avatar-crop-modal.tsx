@@ -207,7 +207,7 @@ export function AvatarCropModal({ imageUrl, onCancel, onConfirm }: Props) {
             )}
           </div>
           <span className="text-center text-[11px] text-ink-muted">
-            This is how your image will appear on your AthleteOS card.
+            This is how your image will appear on your NIL CARD.
           </span>
         </div>
 

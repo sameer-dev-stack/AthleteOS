@@ -66,7 +66,7 @@ export function ThemePicker({ accent, onAccentChange, isPro = false }: Props) {
               </h3>
 
               <p className="text-xs sm:text-sm text-white/70 leading-relaxed">
-                Free accounts use the classic <span className="text-accent font-bold">AthleteOS Default Theme</span> (Obsidian Dark with Electric Lime accents). Upgrade to Pro to unlock custom accent colors, 24K Gold, Cyber Neon, Titanium Platinum, Holographic Iridescent, and Rose Gold finishes.
+                Free accounts use the classic <span className="text-accent font-bold">NIL CARD Default Theme</span> (Obsidian Dark with Electric Lime accents). Upgrade to Pro to unlock custom accent colors, 24K Gold, Cyber Neon, Titanium Platinum, Holographic Iridescent, and Rose Gold finishes.
               </p>
             </div>
 
@@ -87,7 +87,7 @@ export function ThemePicker({ accent, onAccentChange, isPro = false }: Props) {
               <ShieldCheck className="h-4 w-4 text-black font-bold" />
             </div>
             <div>
-              <p className="text-xs font-bold text-white">Active Card Theme: <span className="text-accent">Default AthleteOS</span></p>
+              <p className="text-xs font-bold text-white">Active Card Theme: <span className="text-accent">Default NIL CARD</span></p>
               <p className="text-[11px] text-white/40">Free plan profile cards use signature Electric Lime highlights.</p>
             </div>
           </div>
@@ -147,7 +147,7 @@ export function ThemePicker({ accent, onAccentChange, isPro = false }: Props) {
               <div>
                 <h4 className="text-lg font-black text-white">Unlock Custom Card Themes</h4>
                 <p className="mt-1.5 text-xs text-white/70 leading-relaxed">
-                  All card themes — including <span className="text-white font-bold">{lockedModal.name}</span>, custom accent colors, 24K Gold, Cyber Neon, Titanium Platinum, and Holographic finishes — are exclusive to AthleteOS Pro.
+                  All card themes — including <span className="text-white font-bold">{lockedModal.name}</span>, custom accent colors, 24K Gold, Cyber Neon, Titanium Platinum, and Holographic finishes — are exclusive to NIL CARD Pro.
                 </p>
               </div>
               <div className="flex gap-2.5 pt-2">
@@ -188,7 +188,7 @@ export function ThemePicker({ accent, onAccentChange, isPro = false }: Props) {
           )}
         </div>
         <p className="text-xs text-ink-dim">
-          Keep your card in the signature AthleteOS classic look (dark obsidian with electric lime accents).
+          Keep your card in the signature NIL CARD classic look (dark obsidian with electric lime accents).
         </p>
 
         <button
@@ -210,7 +210,7 @@ export function ThemePicker({ accent, onAccentChange, isPro = false }: Props) {
             </div>
             <div>
               <p className="text-xs font-bold text-white flex items-center gap-2">
-                <span>Default AthleteOS Theme</span>
+                <span>Default NIL CARD Theme</span>
                 <span className="text-[10px] font-semibold text-accent uppercase tracking-wider">(Original)</span>
               </p>
               <p className="text-[11px] text-white/50 mt-0.5">

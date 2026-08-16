@@ -9,8 +9,8 @@ import {
 import { ReferralsPageClient } from "./client";
 
 export const metadata = {
-  title: "Referrals | AthleteOS",
-  description: "Refer athletes to AthleteOS and earn free Pro plan days.",
+  title: "Referrals | NIL CARD",
+  description: "Refer athletes to NIL CARD and earn free Pro plan days.",
 };
 
 export default async function ReferralsPage() {

@@ -37,7 +37,7 @@ export default function DashboardError({
 
         <div className="mt-10 pt-6 border-t border-white/[0.06]">
           <a
-            href="mailto:support@athleteos.com"
+            href="mailto:support@nilcard.com"
             className="inline-flex items-center gap-2 text-xs text-ink-dim hover:text-ink-muted transition-colors"
           >
             <Mail className="h-3.5 w-3.5" />

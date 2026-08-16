@@ -186,7 +186,7 @@ export function ReferralsPageClient({ profile, initialStats, initialHistory, ini
           <Step
             num={1}
             title="Share your unique link"
-            desc="Copy your link and invite real student-athletes to AthleteOS."
+            desc="Copy your link and invite real student-athletes to NIL CARD."
           />
           <Step
             num={2}

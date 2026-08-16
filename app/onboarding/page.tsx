@@ -229,7 +229,7 @@ function PreviewCard({
         )}
 
         <p className="mt-3 text-[9px] text-ink-dim text-center font-medium truncate">
-          athleteos.app/{username || "yourname"}
+          nilcard.app/{username || "yourname"}
         </p>
       </div>
     </div>

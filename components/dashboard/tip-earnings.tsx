@@ -100,7 +100,7 @@ export function TipEarnings({
     const url = username ? `${siteUrl}/${username}` : siteUrl;
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Tip me on AthleteOS", text: "Support me through my AthleteOS tip jar!", url });
+        await navigator.share({ title: "Tip me on NIL CARD", text: "Support me through my NIL CARD tip jar!", url });
       } catch {}
     } else {
       try {

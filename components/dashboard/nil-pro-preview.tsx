@@ -21,7 +21,7 @@ export function NilProPreviewCard({ themeAccent = "#C6FF3D" }: Props) {
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 rounded-full bg-accent/10 border border-accent/20 px-3 py-1 text-xs font-black text-accent uppercase tracking-wider">
             <Sparkles className="h-3.5 w-3.5" />
-            AthleteOS Pro Exclusive
+            NIL CARD Pro Exclusive
           </div>
           <h2 className="text-2xl font-black text-white tracking-tight mt-2">
             NIL Valuation & Brand Pitch Suite

@@ -3,7 +3,7 @@ import { Footer } from "@/components/footer";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "NIL Guide — AthleteOS",
+  title: "NIL Guide — NIL CARD",
   description: "Everything you need to know about Name, Image, and Likeness (NIL) opportunities.",
 };
 
@@ -31,7 +31,7 @@ export default function NilGuidePage() {
             <section>
               <h2 className="text-xl font-bold text-white">Getting Started</h2>
               <p className="mt-3 text-sm leading-relaxed text-ink-muted">
-                The first step is building your professional digital identity. Your AthleteOS card
+                The first step is building your professional digital identity.                 Your NIL CARD card
                 is your hub — it&apos;s where brands, fans, and schools find you. Complete your
                 profile, add your stats, and share your card link everywhere.
               </p>
@@ -47,7 +47,7 @@ export default function NilGuidePage() {
             <section>
               <h2 className="text-xl font-bold text-white">Monetization Strategies</h2>
               <p className="mt-3 text-sm leading-relaxed text-ink-muted">
-                Start with tips from fans. Build relationships with local brands. The AthleteOS
+                Start with tips from fans. Build relationships with local brands.                 The NIL CARD
                 monetization tools make it easy to get paid — directly from your card.
               </p>
             </section>

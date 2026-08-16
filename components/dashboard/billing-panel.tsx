@@ -489,7 +489,7 @@ export function BillingPanel({ subscription: initial }: Props) {
                   <div className="flex items-center gap-2">
                     <Zap className="h-4 w-4 text-accent" />
                     <span className="text-base font-bold text-white">
-                      AthleteOS Pro
+                      NIL CARD Pro
                     </span>
                     {isCurrent ? (
                       <span className="ml-auto rounded-md bg-accent/15 px-2 py-0.5 text-[10px] font-bold text-accent">
