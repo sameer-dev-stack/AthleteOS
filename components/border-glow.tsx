@@ -84,9 +84,8 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
   const loopStartRef = useRef<number | null>(null);
   const lastXRef = useRef<number>(-1);
   const lastYRef = useRef<number>(-1);
-  // Throttle the rAF loop to ~30fps — halves mask rasterization cost
-  // vs full 60fps while remaining visually indistinguishable for a slow snake.
   const lastFrameTimeRef = useRef<number>(0);
+  const dimRef = useRef<{ w: number; h: number }>({ w: 360, h: 600 });
 
   const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     const card = cardRef.current;
@@ -100,12 +99,10 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
     const dx = x - cx;
     const dy = y - cy;
 
-    // Edge proximity: how close cursor is to the card border (0 = center, 1 = edge)
     let kx = dx !== 0 ? cx / Math.abs(dx) : Infinity;
     let ky = dy !== 0 ? cy / Math.abs(dy) : Infinity;
     const edge = Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
 
-    // Cursor angle around center, 0 = top, clockwise
     let degrees = 0;
     if (dx !== 0 || dy !== 0) {
       degrees = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
@@ -122,11 +119,24 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
     const card = cardRef.current;
     if (!card) return;
 
+    // Cache dimensions via ResizeObserver — ZERO forced reflows during rAF ticks
+    const updateDims = () => {
+      if (card) {
+        dimRef.current = {
+          w: card.offsetWidth || 360,
+          h: card.offsetHeight || 600,
+        };
+      }
+    };
+    updateDims();
+
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(updateDims);
+      ro.observe(card);
+    }
+
     if (loop && active) {
-      const rect = card.getBoundingClientRect();
-      const w = rect.width || 300;
-      const h = rect.height || 400;
-      const perimeter = 2 * (w + h);
       const speed = 0.0002;
 
       card.classList.add('glow-looping');
@@ -136,15 +146,14 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
       loopStartRef.current = null;
 
       const tick = (now: number) => {
-        // Limit throttle to 16-32ms for responsive, continuous animation
-        if (lastFrameTimeRef.current && now - lastFrameTimeRef.current < 24) {
+        // Run at steady ~40-60fps
+        if (lastFrameTimeRef.current && now - lastFrameTimeRef.current < 20) {
           rafRef.current = requestAnimationFrame(tick);
           return;
         }
         lastFrameTimeRef.current = now;
 
-        const w = card.offsetWidth || 360;
-        const h = card.offsetHeight || 600;
+        const { w, h } = dimRef.current;
         const perimeter = 2 * (w + h);
 
         if (!loopStartRef.current) loopStartRef.current = now;
@@ -156,22 +165,18 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
         let angle = 0;
 
         if (dist < w) {
-          // Top edge: moving from left to right
           x = dist;
           y = 0;
           angle = (dist / w) * 90;
         } else if (dist < w + h) {
-          // Right edge: moving from top to bottom
           x = w;
           y = dist - w;
           angle = 90 + ((dist - w) / h) * 90;
         } else if (dist < 2 * w + h) {
-          // Bottom edge: moving from right to left
           x = w - (dist - (w + h));
           y = h;
           angle = 180 + ((dist - (w + h)) / w) * 90;
         } else {
-          // Left edge: moving from bottom to top
           x = 0;
           y = h - (dist - (2 * w + h));
           angle = 270 + ((dist - (2 * w + h)) / h) * 90;
@@ -195,11 +200,13 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
 
       return () => {
         if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        if (ro) ro.disconnect();
         card.classList.remove('glow-looping');
         loopStartRef.current = null;
       };
     } else {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (ro) ro.disconnect();
       card.classList.remove('glow-looping');
       loopStartRef.current = null;
     }

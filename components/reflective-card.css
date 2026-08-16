@@ -98,9 +98,9 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: var(--rc-roughness, 0.25);
+  opacity: var(--rc-roughness, 0.22);
   mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 192px 192px;
 }
 
@@ -136,32 +136,14 @@
   );
 }
 
-/* ── Border — gradient mask inset ring ─────────────── */
+/* ── Border — crisp hairline border ring ─────────────── */
 .rc-border {
   position: absolute;
   inset: 0;
   z-index: 20;
   pointer-events: none;
   border-radius: var(--rc-radius, 20px);
-
-  /* Paint gradient ONLY on the 1px border, not the fill */
-  padding: 1px;
-  background: linear-gradient(
-    138deg,
-    rgba(255, 255, 255, 0.72) 0%,
-    rgba(255, 255, 255, 0.18) 45%,
-    rgba(255, 255, 255, 0.50) 100%
-  );
-
-  /* Mask trick: paint border pixels only */
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 /* ── Overlay tint — surface color wash ─────────────── */

@@ -1792,7 +1792,7 @@ export function ProfileCard({
           transition={{ type: "spring", stiffness: 380, damping: 38, mass: 1 }}
           onClick={handleFlip}
           className="relative w-full h-full cursor-pointer group"
-          style={{ transformStyle: "preserve-3d", borderRadius: "20px" }}
+          style={{ transformStyle: "preserve-3d", borderRadius: "20px", willChange: "transform" }}
           role="button"
           aria-label={flipped ? "Flip card to front" : "Flip card to see more"}
           aria-pressed={flipped}
