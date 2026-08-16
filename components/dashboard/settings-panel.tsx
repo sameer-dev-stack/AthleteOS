@@ -221,7 +221,7 @@ export function SettingsPanel({ profile, user }: Props) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `athleteos-data-${new Date().toISOString().split("T")[0]}.json`;
+        a.download = `nilcard-data-${new Date().toISOString().split("T")[0]}.json`;
         a.click();
         URL.revokeObjectURL(url);
         showToast("Data exported successfully");

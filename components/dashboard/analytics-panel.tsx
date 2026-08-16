@@ -182,7 +182,7 @@ export function AnalyticsPanel({ athleteId, initialData, themeAccent = "#C6FF3D"
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `athleteos-analytics-${rangeLabel}.csv`;
+    a.download = `nilcard-analytics-${rangeLabel}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     setTimeout(() => setExporting(false), 500);

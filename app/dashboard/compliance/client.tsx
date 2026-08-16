@@ -135,7 +135,7 @@ export function ComplianceClient({ initialDeals, accentColor }: Props) {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `athleteos_nil_disclosures_${new Date().toISOString().split("T")[0]}.csv`);
+    link.setAttribute("download", `nilcard-nil-disclosures_${new Date().toISOString().split("T")[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

@@ -133,7 +133,7 @@ export async function getPayoutHistory(): Promise<{
 }
 
 /**
- * Create a withdrawal request. Money is NOT moved here — AthleteOS reviews
+ * Create a withdrawal request. Money is NOT moved here — NIL CARD reviews
  * pending requests and sends the funds to the athlete's payout method
  * within 48 hours.
  */

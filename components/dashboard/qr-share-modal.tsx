@@ -67,7 +67,7 @@ export function QrShareModal({ url, open, onClose }: Props) {
     if (!qrDataUrl) return;
     const a = document.createElement("a");
     a.href = qrDataUrl;
-    a.download = "athleteos-qr.png";
+    a.download = "nilcard-qr.png";
     a.click();
   }
 

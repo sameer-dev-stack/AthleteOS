@@ -419,7 +419,7 @@ export async function sendAnalyticsReportEmail(
             <tr><td align="center">
               <table width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;background-color:#111113;border-radius:20px;border:1px solid rgba(255,255,255,0.06);overflow:hidden;">
                 <tr><td style="padding:40px 40px 20px;">
-                  <div style="margin-bottom:24px;"><span style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:900;font-size:11px;padding:4px 10px;border-radius:6px;letter-spacing:1px;text-transform:uppercase;">ATHLETEOS</span></div>
+                  <div style="margin-bottom:24px;"><span style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:900;font-size:11px;padding:4px 10px;border-radius:6px;letter-spacing:1px;text-transform:uppercase;">NIL CARD</span></div>
                   <h1 style="color:#FFFFFF;font-size:24px;font-weight:900;margin:0 0 8px;text-transform:uppercase;letter-spacing:-0.5px;">Analytics Report</h1>
                   <p style="color:#88888A;font-size:14px;margin:0;">Hey ${profile.full_name || "there"}, here is your ${dateRange} performance summary.</p>
                 </td></tr>

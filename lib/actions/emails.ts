@@ -85,7 +85,7 @@ export async function sendConfirmationEmail(
                   <tr>
                     <td style="padding:40px 32px 32px;">
                       <div style="margin-bottom:24px;">
-                        <span style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:13px;padding:4px 10px;border-radius:6px;letter-spacing:0.5px;">ATHLETEOS</span>
+                        <span style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:13px;padding:4px 10px;border-radius:6px;letter-spacing:0.5px;">NIL CARD</span>
                       </div>
                       <h1 style="color:#FFFFFF;font-size:24px;font-weight:700;margin:0 0 16px;line-height:1.3;">Confirm your email</h1>
                       <p style="color:#88888A;font-size:15px;line-height:1.6;margin:0 0 32px;">
@@ -220,7 +220,7 @@ export async function sendWeeklyBriefing(
                   <tr>
                     <td style="padding:40px 40px 20px;">
                       <div style="margin-bottom:24px;">
-                        <span style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:900;font-size:11px;padding:4px 10px;border-radius:6px;letter-spacing:1px;text-transform:uppercase;">ATHLETEOS</span>
+                        <span style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:900;font-size:11px;padding:4px 10px;border-radius:6px;letter-spacing:1px;text-transform:uppercase;">NIL CARD</span>
                       </div>
                       <h1 style="color:#FFFFFF;font-size:24px;font-weight:900;margin:0 0 8px;line-height:1.2;text-transform:uppercase;letter-spacing:-0.5px;">This week on NIL CARD</h1>
                       <p style="color:#88888A;font-size:14px;margin:0;line-height:1.5;">
@@ -428,7 +428,7 @@ export async function sendPaymentFailedEmail(
               <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background-color:#111113;border-radius:16px;border:1px solid rgba(255,255,255,0.06);overflow:hidden;">
                 <tr><td style="padding:40px 32px;">
                   <div style="margin-bottom:24px;">
-                    <span style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:13px;padding:4px 10px;border-radius:6px;letter-spacing:0.5px;">ATHLETEOS</span>
+                    <span style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:13px;padding:4px 10px;border-radius:6px;letter-spacing:0.5px;">NIL CARD</span>
                   </div>
                   <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#F5F5F7;">Payment failed</h1>
                   <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#9A9AA3;">
@@ -940,7 +940,7 @@ export async function sendQuotaWarningEmail(
                   <tr>
                     <td style="padding:40px 32px 32px;">
                       <div style="margin-bottom:24px;">
-                        <span style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:13px;padding:4px 10px;border-radius:6px;letter-spacing:0.5px;">ATHLETEOS</span>
+                        <span style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:13px;padding:4px 10px;border-radius:6px;letter-spacing:0.5px;">NIL CARD</span>
                       </div>
                       <h1 style="color:#FFFFFF;font-size:20px;font-weight:700;margin:0 0 16px;line-height:1.3;">Your AI Credits are Depleted</h1>
                       <p style="color:#88888A;font-size:14px;line-height:1.6;margin:0 0 24px;">
