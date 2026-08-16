@@ -43,7 +43,7 @@ export function Sidebar({ profile, email }: SidebarProps) {
             </div>
             {!collapsed && (
               <span className="font-black tracking-[0.15em] uppercase text-sm text-accent whitespace-nowrap">
-                ATHLETEOS
+                NIL CARD
               </span>
             )}
           </Link>

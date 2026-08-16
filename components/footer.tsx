@@ -248,7 +248,7 @@ function ParallaxWordmark() {
               transition: "all 0.6s ease",
             }}
           >
-            ATHLETEOS
+            NIL CARD
           </div>
 
           {/* Accent layer that lights up on hover */}
@@ -265,7 +265,7 @@ function ParallaxWordmark() {
               opacity: active ? 1 : 0,
             }}
           >
-            ATHLETEOS
+            NIL CARD
           </div>
         </motion.div>
       </div>
