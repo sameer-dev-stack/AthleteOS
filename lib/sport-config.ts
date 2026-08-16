@@ -152,6 +152,86 @@ export const SPORT_CONFIG: Record<string, SportConfig> = {
     ],
     fallbackGradient: "linear-gradient(160deg, #0a2a3a 0%, #081a2a 40%, #05121a 100%)",
   },
+  XC: {
+    code: "XC",
+    label: "Cross Country",
+    positions: ["Runner"],
+    statsSchema: [
+      { key: "5k-time", label: "5K Time", unit: "" },
+      { key: "10k-time", label: "10K Time", unit: "" },
+      { key: "state-rank", label: "State Rank", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #1a2a1a 0%, #0d1a0d 40%, #0a120a 100%)",
+  },
+  GYM: {
+    code: "GYM",
+    label: "Gymnastics",
+    positions: ["All-Around", "Vault", "Bars", "Beam", "Floor"],
+    statsSchema: [
+      { key: "aa-score", label: "AA Score", unit: "" },
+      { key: "vt-score", label: "VT Score", unit: "" },
+      { key: "fx-score", label: "FX Score", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #2a1a2a 0%, #1a0d1a 40%, #120a12 100%)",
+  },
+  FH: {
+    code: "FH",
+    label: "Field Hockey",
+    positions: ["Forward", "Midfielder", "Defender", "Goalkeeper"],
+    statsSchema: [
+      { key: "goals", label: "Goals", unit: "" },
+      { key: "assists", label: "Assists", unit: "" },
+      { key: "shots", label: "Shots", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #0a2a2a 0%, #081a1a 40%, #051212 100%)",
+  },
+  SF: {
+    code: "SF",
+    label: "Softball",
+    positions: [
+      "Pitcher", "Catcher", "First Base", "Second Base",
+      "Shortstop", "Third Base", "Left Field", "Center Field", "Right Field",
+    ],
+    statsSchema: [
+      { key: "avg", label: "AVG", unit: "" },
+      { key: "hr", label: "HR", unit: "" },
+      { key: "rbi", label: "RBI", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #2a2a0a 0%, #1a1a08 40%, #121205 100%)",
+  },
+  WP: {
+    code: "WP",
+    label: "Water Polo",
+    positions: ["Center Forward", "Driver", "Wing", "Point", "Goalkeeper"],
+    statsSchema: [
+      { key: "goals", label: "Goals", unit: "" },
+      { key: "assists", label: "Assists", unit: "" },
+      { key: "steals", label: "Steals", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #0a1a2a 0%, #081220 40%, #050a18 100%)",
+  },
+  ROW: {
+    code: "ROW",
+    label: "Rowing",
+    positions: ["Single Sculls", "Double Sculls", "Quad Sculls", "Eight", "Pair", "Four"],
+    statsSchema: [
+      { key: "500m-time", label: "500m Time", unit: "" },
+      { key: "2000m-time", label: "2K Time", unit: "" },
+      { key: "wattage", label: "Wattage", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #0a2a0a 0%, #081a08 40%, #051205 100%)",
+  },
+  RUG: {
+    code: "RUG",
+    label: "Rugby",
+    positions: ["Prop", "Hooker", "Lock", "Flanker", "Number 8", "Scrum Half", "Fly Half", "Wing", "Fullback"],
+    statsSchema: [
+      { key: "tries", label: "Tries", unit: "" },
+      { key: "tackles", label: "Tackles", unit: "" },
+      { key: "meters", label: "Meters", unit: "" },
+    ],
+    fallbackGradient: "linear-gradient(160deg, #1a1a1a 0%, #121212 40%, #0a0a0a 100%)",
+  },
 };
 
 const LABEL_TO_CODE: Record<string, string> = {};
