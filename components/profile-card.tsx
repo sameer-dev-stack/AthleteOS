@@ -1789,10 +1789,10 @@ export function ProfileCard({
       >
         <motion.div
           animate={{ rotateY: flipped ? 180 : 0 }}
-          transition={{ type: "spring", stiffness: 220, damping: 32, mass: 1.3 }}
+          transition={{ duration: 0.75, ease: [0.4, 0, 0.2, 1] }}
           onClick={handleFlip}
           className="relative w-full h-full cursor-pointer group"
-          style={{ transformStyle: "preserve-3d", borderRadius: "20px", willChange: "transform" }}
+          style={{ transformStyle: "preserve-3d", borderRadius: "20px" }}
           role="button"
           aria-label={flipped ? "Flip card to front" : "Flip card to see more"}
           aria-pressed={flipped}
