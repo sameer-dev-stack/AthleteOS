@@ -889,7 +889,10 @@ function BackHeader({
         }}
         role="button"
         aria-label="Flip card back"
-        onClick={onFlipBack}
+        onClick={(e) => {
+          e.stopPropagation();
+          onFlipBack();
+        }}
       >
         <RotateCcw className="h-3 w-3" style={{ color: accent }} />
         <span className="text-[8.5px] font-black tracking-wider text-white/60 uppercase">
@@ -1728,7 +1731,7 @@ export function ProfileCard({
     >
       {/* Ambient glow behind card */}
       <div
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
+        className="card-ambient-glow absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
         style={{
           width: "640px",
           height: "640px",

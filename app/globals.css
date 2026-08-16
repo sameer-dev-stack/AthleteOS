@@ -335,6 +335,20 @@
   transform: rotateY(180deg);
 }
 
+/* Coarse pointers (touch devices): backdrop-filter re-samples the
+   backdrop on every 3D flip frame and blurs are the priciest compositor
+   work on mobile. Drop them inside the flip faces. */
+@media (pointer: coarse) {
+  .flip-card-face [style*="backdrop-filter"] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .card-ambient-glow {
+    filter: blur(20px) !important;
+  }
+}
+
 @keyframes gold-badge-glow {
   0%, 100% { box-shadow: 0 0 8px rgba(250, 204, 21, 0.5); }
   50% { box-shadow: 0 0 14px rgba(250, 204, 21, 0.8); }

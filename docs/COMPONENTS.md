@@ -58,7 +58,7 @@ Webcam-based metallic card material shell from React Bits. Renders a live blurre
 - **Used by:** `components/profile-card.tsx` — both front and back card faces
 - **Requires:** `components/reflective-card.css` (imported inside the component)
 - **Fallback:** When webcam is unavailable/denied, renders a static dark metallic gradient. No UI blocking, no error thrown.
-- **Mobile performance [UPDATED 2026-08-16]:** On touch / coarse-pointer devices the webcam + SVG displacement filter is skipped entirely — the static metallic gradient fallback is rendered instead. The live filtered `<video>` recomposites on every frame on a mobile GPU, and two faces mounted two of them simultaneously. Desktop (hover) keeps the full webcam material.
+- **Mobile performance [UPDATED 2026-08-16]:** On touch / coarse-pointer devices the webcam + SVG displacement filter is skipped entirely — the static metallic gradient fallback is rendered instead. The live filtered `<video>` recomposites on every frame on a mobile GPU, and two faces mounted two of them simultaneously. Desktop (hover) keeps the full webcam material. Additionally, on coarse pointers the `mix-blend-mode` layers (`.rc-noise`, `.rc-sheen`, `.rc-overlay`, `.rc-border`) are hidden and `.rc-theme-gradient` uses normal blending — blend-mode layers force the compositor to re-blend every 3D flip frame.
 - **Props:**
   | Prop | Type | Default | Description |
   |---|---|---|---|
@@ -83,6 +83,9 @@ Webcam-based metallic card material shell from React Bits. Renders a live blurre
 ## `<ProfileCard>` (rebuilt) — `components/profile-card.tsx` [REFACTORED 2026-08-09]
 
 Root public athlete identity card. Now a composition of named sub-components rather than a monolith. Uses `ReflectiveCard` as the material shell for both card faces. Spring-animated 3D flip (Framer Motion). Shared webcam stream between faces.
+
+- **Flip-back bug fix [2026-08-16]:** the `BackHeader` flip-back affordance now calls `e.stopPropagation()` before `onFlipBack()`. Without it the click bubbled to the parent `motion.div`'s `onClick={handleFlip}` and toggled `flipped` twice (net no-op), so the button appeared dead.
+- **Coarse-pointer overrides [2026-08-16]:** on touch devices a `@media (pointer: coarse)` block in `globals.css` forces inline `backdrop-filter` off inside `.flip-card-face` and shrinks the `.card-ambient-glow` blur from `60px` to `20px`. See `components/border-glow.css` + `components/reflective-card.css` for their matching coarse-pointer blocks.
 
 **Sub-components (all local, not exported):**
 

@@ -3,6 +3,35 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-16 — Session: Fix Flip-Back Button + Strip Heavy Layers on Mobile Card
+
+### What changed
+- `components/profile-card.tsx`:
+  - **Flip-back button bug fix** — the "Flip Back" affordance in `BackHeader` previously called `onFlipBack` without stopping propagation, so the click bubbled up to the parent `motion.div`'s `onClick={handleFlip}` and toggled `flipped` **twice** (front→back→front = net no-op). Now `e.stopPropagation()` is called before `onFlipBack()`, so a single toggle runs. This was why "the flip back button does not work" on both desktop and mobile.
+  - Added `card-ambient-glow` class to the 640px radial-glow div behind the card (for the coarse-pointer CSS override below).
+- `components/border-glow.css`:
+  - Added `@media (pointer: coarse)` block. On touch devices the cursor-tracked masked gradient mesh (7 radial gradients + 2 masks + `soft-light`/`plus-lighter` blend modes, driven by hover/sweep that never fires on touch) is `display: none`, replaced by a cheap static accent border + `box-shadow` glow. This also fixes "bottom glow is nowhere to be shown" on mobile — previously the glow only appeared on hover or during the (now touch-disabled) sweep.
+- `components/reflective-card.css`:
+  - Added `@media (pointer: coarse)` block: `.rc-noise`, `.rc-sheen`, `.rc-overlay`, `.rc-border` are hidden and `.rc-theme-gradient` drops `mix-blend-mode: overlay` for normal blending on touch devices. These `mix-blend-mode` layers force the compositor to re-blend on every 3D flip frame; with the webcam already off on touch they were pure cost.
+- `app/globals.css`:
+  - Added `@media (pointer: coarse)` block: inside `.flip-card-face`, any element with an inline `backdrop-filter` gets it forced off (`!important` beats the inline style), and `.card-ambient-glow` blur is reduced from `60px` to `20px`. `backdrop-filter` re-samples the backdrop on every flip frame and blurs are the most expensive compositor work on mobile.
+
+### Why
+- User reported the first mobile fix (webcam + sweep off) was not enough: the card is still "very laggy," FPS drops when tapping the photo, the flip animation stutters, the card does not auto-flip back, and the flip-back button does nothing. Root causes: (1) a genuine double-toggle event bug on the flip-back button, and (2) the faces still composited expensive `mix-blend-mode` layers, masked gradients, `backdrop-filter` blurs, and a `blur(60px)` ambient glow on every frame of the `preserve-3d` spring flip.
+
+### Files touched
+- `components/profile-card.tsx`
+- `components/border-glow.css`
+- `components/reflective-card.css`
+- `app/globals.css`
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings (baseline).
+- `npm run build` — green.
+
+### Commit
+- *(pending — fill after push)*
+
 ## 2026-08-16 — Session: Mobile Profile Card Performance Fix (Webcam + Filter Off on Touch)
 
 ### What changed

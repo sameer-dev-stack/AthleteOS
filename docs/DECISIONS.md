@@ -5,6 +5,27 @@
 
 ---
 
+## ADR-053 — Mobile Card: Fix Flip-Back Double-Toggle + Strip Blend/Blur Layers from Flip Faces
+
+**Status:** Accepted · 2026-08-16
+
+**Context:**
+After ADR-052 (webcam + BorderGlow sweep off on touch), the profile card was still laggy on mobile and the flip-back control was broken. Investigation found two distinct issues: (1) the "Flip Back" button's `onClick={onFlipBack}` event bubbled to the parent `motion.div`'s `onClick={handleFlip}`, so `flipped` was toggled twice (front→back→front) — a genuine logic bug, not a performance artifact; and (2) even with the webcam disabled, each flip face still contained expensive per-frame compositor work: `mix-blend-mode: overlay`/`soft-light`/`plus-lighter` layers (BorderGlow masked gradient mesh, ReflectiveCard noise/sheen/overlay/border), inline `backdrop-filter: blur()` chips, and a `blur(60px)` ambient glow.
+
+**Decision:**
+- Flip-back button: `e.stopPropagation()` before calling `onFlipBack()` so the toggle fires exactly once.
+- Add `@media (pointer: coarse)` CSS blocks that, on touch devices:
+  - Hide the BorderGlow gradient mesh and render a static accent border + `box-shadow` glow (which also restores a visible "bottom glow" that previously only showed on hover/sweep).
+  - Hide ReflectiveCard's `mix-blend-mode` layers (noise, sheen, overlay, border) and switch `theme-gradient` to normal blending.
+  - Force `backdrop-filter: none !important` on any element inside `.flip-card-face`, and shrink the ambient glow blur `60px → 20px`.
+
+**Consequences:**
+- The flip-back button works on all devices; auto-return (12s) timer was already correct once the double-toggle no longer raced it.
+- Mobile card faces composite as near-plain layers during the `preserve-3d` flip, dramatically reducing per-frame cost.
+- Mobile loses the layered "live metal" look (noise grain / sheen / blend-overlays); the static metallic gradient + static glow remain, so the card still reads premium. Desktop is unaffected.
+
+---
+
 ## ADR-052 — Mobile Card: Skip Webcam Material + 3D Backface Culling on Touch
 
 **Status:** Accepted · 2026-08-16
