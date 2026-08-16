@@ -3,6 +3,43 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-17 — Session: True GPU Compositor Animation — Zero-JS Border Glow & SVG Filter Removal
+
+### What changed
+- **`components/border-glow.css`**:
+  - Registered `--cursor-x` and `--cursor-y` as CSS `@property` with `<length-percentage>` syntax. Typed registered properties are animated entirely on the GPU compositor thread in Chrome, Edge, and Safari — the main thread is not involved.
+  - Added `@keyframes border-glow-orbit` that traces the card perimeter (top → right → bottom → left) via 8 keyframe stops using absolute pixel values.
+  - Added `.glow-looping { animation: border-glow-orbit 25s linear infinite; }` — the CSS engine drives the position with no JS involvement.
+  - Removed `will-change: opacity` from pseudo-elements (unnecessary now that positions are compositor-animated).
+- **`components/border-glow.tsx`**:
+  - Removed the entire `requestAnimationFrame` loop that was calling `style.setProperty('--cursor-x', ...)` and `--cursor-y` on every frame (60–120 times/second).
+  - Removed `loopStartRef`, `lastXRef`, `lastYRef`, and `rafRef` — no longer needed.
+  - When `loop && active`: only adds `glow-looping` class + sets `--edge-proximity: 90`. CSS takes over completely.
+  - Hover interactive mode (`onPointerMove`) kept unchanged — it only fires on user input, not every frame.
+- **`components/reflective-card.tsx`**:
+  - Removed `url(#${filterId})` from the `<video>` element's inline `filter` style.
+  - The SVG filter chain (`feTurbulence → feDisplacementMap → feSpecularLighting → feComposite → feBlend`) was running on the browser's software rasterizer for every decoded video frame. Removing it eliminates a continuous per-frame GPU re-upload.
+  - Kept `blur()`, `saturate()`, `contrast()`, `brightness()` — all are GPU-composited CSS filters.
+
+### Why
+- The JS rAF loop writing `--cursor-x`/`--cursor-y` forced style recalculation + rasterization of three gradient mask layers every frame. This was the primary cause of the reported frame drops.
+- The SVG displacement filter on a live webcam video blocked the compositor on every video frame decode.
+- Combined, these two changes eliminate the main-thread render bottleneck and should deliver stable 60/120fps on both the idle card and during flip.
+
+### Files touched
+- `components/border-glow.css`
+- `components/border-glow.tsx`
+- `components/reflective-card.tsx`
+- `docs/CHANGELOG.md`
+
+### Commit
+`6c480d9`
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings (unchanged).
+- `npm run build` — exit code 0, all 61 routes compiled successfully.
+
+
 ## 2026-08-16 — Session: 3D Flip Stutter Elimination & SVG Filter Optimization
 
 ### What changed
