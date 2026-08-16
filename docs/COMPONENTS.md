@@ -10,7 +10,7 @@ An SVG infinity-path loader that animates a continuous dash for long-running/con
 
 ## `<AvatarCropModal>` — `components/avatar-crop-modal.tsx` [NEW 2026-08-15]
 
-Full-screen square (1:1) avatar crop modal built on `react-easy-crop`. Crop area is a square (`cropShape="rect"`, `aspect={1}`); the circle is a preview overlay guide only (lightweight radial-gradient mask + ring) since the card shows the photo as a full-bleed rectangular hero (`object-cover object-top`) plus a circular avatar. Rule-of-thirds grid is drawn as an SVG clipped to the circle (square grid clipped by the circle read as broken). Drag to position, pinch or slider to zoom, Reset returns to fit. No face detection — the user positions the crop. When `previewProfile` is passed, the "Live card preview" panel renders a scaled (0.5x) static replica of the card front face — hero, circular avatar, name, sport·position, school, accent hairlines — fed by the live 256px crop so the user sees the actual card output while dragging. Helper copy below the zoom controls explains the circle only affects the small badge photo (the card hero keeps the full photo) and nudges toward solo headshots. Falls back to a small circular "Result" thumb when no profile is provided. Emits a cropped blob bounded to 512x512 WebP; "Use as is" center-crops to 1:1 and bounds the same, disabled when the source is under 200px.
+Full-screen square (1:1) avatar crop modal built on `react-easy-crop`. Crop area is a square (`cropShape="rect"`, `aspect={1}`); the circle is a preview overlay guide only (lightweight radial-gradient mask + ring) since the card shows the photo as a full-bleed rectangular hero (`object-cover object-top`) plus a circular avatar. Rule-of-thirds grid is drawn as an SVG clipped to the circle (square grid clipped by the circle read as broken). Drag to position, pinch or slider to zoom, Reset returns to fit. No face detection — the user positions the crop. Layout is a vertical stack: **Main Image** (crop area, full-width square) → **Badge Preview** (large 160px circular "Actual Result" thumb fed by the live 256px crop, so the user can judge the real badge output while dragging) → **Zoom** (`-` slider `+` on one row, current zoom % and Reset on a second row, so the controls never overflow a narrow viewport). Helper copy explains the badge relationship ("This is how your image will appear on your AthleteOS card."). Modal is vertically scrollable (`overflow-y-auto`) on short viewports; every child stays within the viewport width. Emits a cropped blob bounded to 512x512 WebP; "Use as is" center-crops to 1:1 and bounds the same, disabled when the source is under 200px.
 
 - **Used by:** `components/avatar-upload.tsx`
 - **Requires:** `react-easy-crop` (^6.2.3), `lib/crop-image.ts`
@@ -20,11 +20,10 @@ Full-screen square (1:1) avatar crop modal built on `react-easy-crop`. Crop area
   | `imageUrl` | `string \| null` | — | Object URL of the picked image to crop; `null` hides the modal |
   | `onCancel` | `() => void` | — | Close without uploading |
   | `onConfirm` | `(blob: Blob) => void` | — | Called with the cropped or bounded WebP blob |
-  | `previewProfile` | `Profile \| null` | `null` | Optional profile used to render the live card-front preview instead of the circular thumb |
 
 ## `<AvatarUpload>` — `components/avatar-upload.tsx` [NEW 2026-08-15]
 
-Hover-to-upload avatar control used across the dashboard, profile editor, onboarding, and the dashboard avatar. Accepts an optional `previewProfile` prop it forwards to `AvatarCropModal` so the crop modal can show the live card preview.
+Hover-to-upload avatar control used across the dashboard, profile editor, onboarding, and the dashboard avatar. Renders the file input and delegates cropping to `AvatarCropModal`.
 
 - **Props:**
   | Prop | Type | Default | Description |
@@ -34,7 +33,6 @@ Hover-to-upload avatar control used across the dashboard, profile editor, onboar
   | `onUpload` | `(url: string, localUrl?: string) => void` | — | Fired with the public URL after upload |
   | `size` | `"sm" \| "md" \| "lg"` | `"md"` | Preview circle size |
   | `triggerOnly` | `boolean` | `false` | Render only the hidden file input + crop modal (no visible circle) |
-  | `previewProfile` | `Profile \| null` | `null` | Forwarded to `AvatarCropModal` for the live card preview |
 
 Wired with profile data at: `components/dashboard/overview.tsx`, `components/dashboard/profile-editor.tsx`, `app/onboarding/page.tsx`.
 

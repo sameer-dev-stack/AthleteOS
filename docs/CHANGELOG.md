@@ -3,6 +3,36 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-16 — Session: Avatar Crop Modal Restructure (Badge-First Editor)
+
+### What changed
+- `components/avatar-crop-modal.tsx`:
+  - Replaced the two-panel layout (crop + full card-front replica with a tiny badge inside) with a single vertical stack: **Main Image** (full-width square crop area) → **Badge Preview** → **Zoom**.
+  - **Badge Preview** is now a large 160px circular thumb of the actual live 256px crop — the "Actual Result" the user is editing — with the caption "This is how your image will appear on your AthleteOS card." Replaces the `CardFrontPreview` scaled card replica that made users hunt for the small circle.
+  - **Zoom** controls restructured to two rows so they never overflow a narrow viewport: row 1 is `-` / slider / `+`, row 2 is the current zoom % and a Reset button. Dropped the cramped `100% / 300%` endpoint label column.
+  - Modal is now vertically scrollable (`overflow-y-auto` on the overlay, `items-start sm:items-center`) so on short mobile viewports the user scrolls vertically while each component stays within the viewport width.
+  - Compacted instructional copy to the two section hints ("Drag to position · Pinch to zoom" under Main Image) plus the badge caption — removed the redundant stacked paragraphs.
+  - Removed `CardFrontPreview`, the `previewProfile` prop, and now-unused imports/constants (`resolveTheme`, `cleanName`, `getFallbackGradient`, `Profile`, `CARD_W`/`CARD_H`).
+- `components/avatar-upload.tsx`: removed the `previewProfile` prop (was only forwarded for the card preview).
+- `app/onboarding/page.tsx`, `components/dashboard/overview.tsx`, `components/dashboard/profile-editor.tsx`: dropped the `previewProfile={...}` prop from `AvatarUpload` (onboarding's inline profile object no longer constructed).
+
+### Why
+- UX review: the full card-front preview was tall/portrait and the badge being edited was a tiny circle the user had to hunt for inside it; the preview felt disconnected from the edit controls. The badge is the actual result of this crop, so it now gets the large, dedicated preview and an explicit mental model: Main Image → Badge Preview → Zoom. The previous zoom control row also overflowed the mobile viewport (the `100% / 300%` label column + Reset in one row).
+
+### Files touched
+- `components/avatar-crop-modal.tsx`
+- `components/avatar-upload.tsx`
+- `app/onboarding/page.tsx`
+- `components/dashboard/overview.tsx`
+- `components/dashboard/profile-editor.tsx`
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings.
+- `npm run build` — green.
+
+### Commit
+(see this session's push)
+
 ## 2026-08-16 — Session: Tip Refund Clawback + Profile Editor Tab Rail UX
 
 ### What changed

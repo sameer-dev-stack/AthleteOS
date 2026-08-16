@@ -760,42 +760,6 @@ export default function OnboardingPage() {
                         setAvatarLocalUrl(localUrl ?? null);
                       }}
                       size="lg"
-                      previewProfile={{
-                        id: userId,
-                        email: "",
-                        full_name: fullName || null,
-                        avatar_url: avatarUrl,
-                        cover_url: null,
-                        username: username || null,
-                        sport: sport || null,
-                        school: school || null,
-                        class_year: classYear || null,
-                        position: position || null,
-                        bio: bio || null,
-                        stats,
-                        links,
-                        social: { instagram: instagram || undefined, tiktok: tiktok || undefined },
-                        highlights,
-                        is_verified: false,
-                        profile_published: false,
-                        onboarding_completed: false,
-                        plan: "free",
-                        stripe_account_id: null,
-                        stripe_subscription_id: null,
-                        stripe_onboarding_complete: false,
-                        theme_accent: "#C6FF3D",
-                        theme_layout: "default",
-                        moderation_status: "pending",
-                        extended_pro_until: null,
-                        pro_expires_at: null,
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString(),
-                        contact_phone: contactPhone || null,
-                        contact_email: contactEmail || null,
-                        payout_method: null,
-                        payout_settings: null,
-                        email_preferences: null,
-                      }}
                     />
                   </div>
                   {!avatarUrl && (
