@@ -29,7 +29,7 @@
 - `npm run build` — green.
 
 ### Commit
-- (pending — to be filled after commit)
+- `6f3c38e`
 
 ## 2026-08-16 — Session: Fix OAuth Callback Race (Session Is Source of Truth)
 
