@@ -616,6 +616,7 @@ Dashboard analytics panel for published profiles. Shows total views, unique visi
 - **Used by:** `components/dashboard/dashboard-content.tsx`
 - **Props:**
   - `athleteId: string`
+- **Free-tier paywall UX:** Single lock pattern. Locked 30d/90d ranges are greyed out (no inline lock icons) and open the upgrade modal on click. The Link clicks card shows a `•••` placeholder + small amber "Pro" badge for free users. Metric icons are differentiated (Eye / Users / MousePointerClick). A dismissible "Full Analytics Locked" overlay (`showLockedOverlay`) sits over a blurred chart teaser (30/90-day graph, referrers, devices). Persistent conversion paths: header "Upgrade" button and tappable FREE PLAN badge, both linking to `/dashboard/billing`. The "Unlock Full Analytics" modal has an X close.
 
 ### `<ProfileScore>` — `components/dashboard/profile-score.tsx`
 Profile completion score with circular progress indicator and breakdown of completed fields.

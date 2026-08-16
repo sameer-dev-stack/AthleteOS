@@ -3,6 +3,30 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-16 — Session: Free-Tier Analytics Paywall & Overview UX Redesign
+
+### What changed
+- `components/dashboard/analytics-panel.tsx`:
+  - **Single lock pattern** — removed the inline amber lock icons from the 30d/90d range buttons; locked ranges are now greyed out (`text-ink-dim/70`) and still open the upgrade modal on click. The full-screen "Full Analytics Locked" overlay remains the one upsell.
+  - **Link clicks card** — keeps the metric layout (MousePointerClick icon + label) with a `•••` placeholder instead of a number, plus a small amber "Pro" lock badge in the corner. No more "🔒 Pro" text masquerading as a metric value.
+  - **Distinct metric icons** — Total views = `Eye`, Unique visitors = `Users` (new import), Link clicks = `MousePointerClick`.
+  - **Blurred chart teaser fills dead space** — the dummy preview below the summary cards now renders at `opacity-30` (behind the overlay) and `opacity-60` (after the overlay is dismissed) instead of `opacity-20`, so the 30/90-day graph, top referrers, and device breakdown read as a teaser rather than empty black.
+  - **Overlay card is dismissible** — added an `X` close button (`showLockedOverlay` state, default on); closing it reveals the fuller chart teaser. The persistent upgrade path stays via the header "Upgrade" button and the tappable FREE PLAN badge.
+  - **Value prop** — added "See what's driving your clicks." under the upgrade CTA.
+  - **Persistent upgrade CTA** — added a small "Upgrade" (Crown) button in the header controls for free users, linking to `/dashboard/billing`.
+  - **FREE PLAN badge is tappable** — converted from a `<span>` to a `<Link href="/dashboard/billing">`.
+  - **Upgrade modal close** — added an `X` to the "Unlock Full Analytics" modal (previously only had Cancel).
+
+### Why
+- UX review of the free-tier analytics experience flagged: two competing lock patterns (inline icons + full-screen modal), the Link clicks card showing "Pro" in place of a number, empty black space below the summary cards, no close/back on the modal, no persistent upgrade CTA, a passive FREE PLAN badge, and duplicate eye icons. This change consolidates to a single upsell pattern, greys out inline elements instead of repeating the lock message, fills the dead space with a blurred chart teaser, and gives every page a conversion path.
+
+### Files touched
+- `components/dashboard/analytics-panel.tsx`
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings.
+- `npm run build` — green.
+
 ## 2026-08-16 — Session: Avatar Crop Modal Restructure (Badge-First Editor)
 
 ### What changed
