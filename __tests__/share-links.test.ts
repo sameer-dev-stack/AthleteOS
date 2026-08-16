@@ -2,7 +2,7 @@ import { buildShareLinks } from "@/lib/share-links";
 
 describe("buildShareLinks", () => {
   const link = "https://athlete-os-vert.vercel.app/r/ABC123";
-  const text = "Claim your free athlete card on AthleteOS";
+  const text = "Claim your free athlete card on NIL CARD";
   const enc = encodeURIComponent;
 
   it("builds twitter intent", () => {
@@ -16,7 +16,7 @@ describe("buildShareLinks", () => {
   it("builds mailto link", () => {
     const m = buildShareLinks(link, text).email;
     expect(m.startsWith("mailto:?")).toBe(true);
-    expect(m).toContain(`subject=${enc("Join AthleteOS")}`);
+    expect(m).toContain(`subject=${enc("Join NIL CARD")}`);
     expect(m).toContain(`body=${enc(text + " " + link)}`);
   });
 });

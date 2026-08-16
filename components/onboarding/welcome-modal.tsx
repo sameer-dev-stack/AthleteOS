@@ -9,7 +9,7 @@ const STEPS = [
   {
     icon: User,
     title: "Pick your username",
-    description: "This becomes your public card link — athleteos.app/yourname",
+    description: "This becomes your public card link — nilcard.app/yourname",
   },
   {
     icon: Palette,
@@ -65,7 +65,7 @@ export function WelcomeModal({ onDismiss }: WelcomeModalProps) {
           </div>
 
           <h2 className="mb-2 text-center text-xl font-bold text-white">
-            Welcome to AthleteOS
+            Welcome to NIL CARD
           </h2>
           <p className="mb-8 text-center text-sm text-ink-muted">
             Let&apos;s get your athlete card live in 3 quick steps.

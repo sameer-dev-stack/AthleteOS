@@ -13,9 +13,9 @@ const inter = Inter({
   display: "swap",
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app";
-const SITE_NAME = "AthleteOS";
-const TITLE = "AthleteOS — The NIL operating system for athletes";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app";
+const SITE_NAME = "NIL CARD";
+const TITLE = "NIL CARD — The NIL operating system for athletes";
 const DESCRIPTION =
   "One card. One link. One platform to build your NIL brand, get discovered, and turn your audience into income. AI-powered. Athlete-owned.";
 
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     "student athlete",
     "college athlete",
     "sports marketing",
-    "AthleteOS",
+    "NIL CARD",
   ],
   authors: [{ name: SITE_NAME, url: SITE_URL }],
   creator: SITE_NAME,
@@ -55,21 +55,21 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: TITLE,
     description: DESCRIPTION,
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "AthleteOS — One card. One link. Your entire NIL business.",
-      },
-    ],
+        images: [
+          {
+            url: "/og-image.png",
+            width: 1200,
+            height: 630,
+            alt: "NIL CARD — One card. One link. Your entire NIL business.",
+          },
+        ],
   },
   twitter: {
     card: "summary_large_image",
     title: TITLE,
     description: DESCRIPTION,
     images: ["/twitter-image.png"],
-    creator: "@athleteos",
+    creator: "@nilcard",
   },
   robots: {
     index: true,
@@ -89,7 +89,7 @@ export const metadata: Metadata = {
   other: {
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "black-translucent",
-    "apple-mobile-web-app-title": "AthleteOS",
+    "apple-mobile-web-app-title": "NIL CARD",
     "mobile-web-app-capable": "yes",
     "msapplication-TileColor": "#0A0A0B",
     "msapplication-tap-highlight": "no",
@@ -117,14 +117,14 @@ const jsonLd = {
   logo: `${SITE_URL}/icon.svg`,
   description: DESCRIPTION,
   sameAs: [
-    "https://twitter.com/athleteos",
-    "https://instagram.com/athleteos",
-    "https://youtube.com/@athleteos",
-    "https://tiktok.com/@athleteos",
+    "https://twitter.com/nilcard",
+    "https://instagram.com/nilcard",
+    "https://youtube.com/@nilcard",
+    "https://tiktok.com/@nilcard",
   ],
   contactPoint: {
     "@type": "ContactPoint",
-    email: "hey@athleteos.app",
+    email: "hey@nilcard.app",
     contactType: "customer support",
   },
 };

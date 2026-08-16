@@ -591,7 +591,7 @@ export default function OnboardingPage() {
         <div className="mb-4 sm:mb-8 text-center">
           <div className="inline-flex items-center gap-2.5 mb-4 sm:mb-6">
             <Logo />
-            <span className="text-lg font-semibold tracking-tight">AthleteOS</span>
+            <span className="text-lg font-semibold tracking-tight">NIL CARD</span>
           </div>
 
           <div className="flex items-center justify-center gap-1 sm:gap-2 mb-3">
@@ -664,7 +664,7 @@ export default function OnboardingPage() {
             >
               <h1 className="text-2xl font-bold tracking-tight">Claim your athlete card</h1>
               <p className="mt-2 text-sm text-ink-muted">
-                This will be your public URL: athleteos.app/
+                This will be your public URL: nilcard.app/
                 <span className="text-accent">{username || "yourname"}</span>
               </p>
 
@@ -713,7 +713,7 @@ export default function OnboardingPage() {
                       <p className="text-xs text-red-400">Only lowercase letters, numbers, hyphens, and underscores.</p>
                     )}
                     {usernameStatus === "available" && (
-                      <p className="text-xs text-accent">athleteos.app/{username} is available!</p>
+                      <p className="text-xs text-accent">nilcard.app/{username} is available!</p>
                     )}
                   </div>
                 </div>
@@ -1451,7 +1451,7 @@ export default function OnboardingPage() {
                 transition={{ delay: 0.6 }}
                 className="mt-2 text-sm"
               >
-                <span className="text-accent font-semibold">athleteos.app/{username}</span>
+                <span className="text-accent font-semibold">nilcard.app/{username}</span>
               </motion.p>
 
               <motion.div
@@ -1462,7 +1462,7 @@ export default function OnboardingPage() {
               >
                 <button
                   onClick={() => {
-                    const url = `${process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app"}/${username}`;
+                    const url = `${process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app"}/${username}`;
                     navigator.clipboard.writeText(url);
                     setCopiedLink(true);
                     setTimeout(() => setCopiedLink(false), 2000);

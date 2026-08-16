@@ -5,7 +5,7 @@ const STEPS = [
   {
     n: "01",
     title: "Claim your athlete card",
-    body: "Sign up, drop your sport and school, and grab your custom URL: athleteos.app/yourname.",
+    body: "Sign up, drop your sport and school, and grab your custom URL: nilcard.app/yourname.",
     detail: "Takes under 2 minutes. Free to start.",
   },
   {

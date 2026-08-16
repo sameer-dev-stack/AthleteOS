@@ -35,7 +35,7 @@ export default function ResetPasswordPage() {
   return (
     <AuthLayout
       title="Create new password"
-      subtitle="Choose a strong password to secure your AthleteOS account"
+      subtitle="Choose a strong password to secure your NIL CARD account"
     >
       <ProcessingOverlay show={loading} message="Updating password..." />
 

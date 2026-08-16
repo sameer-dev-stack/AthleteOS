@@ -23,7 +23,7 @@ function BannerInner() {
           <Check className="h-4 w-4 text-accent" />
         </span>
         <p className="flex-1 text-sm font-medium text-ink">
-          Your email has been successfully verified! Welcome to AthleteOS.
+          Your email has been successfully verified! Welcome to NIL CARD.
         </p>
         <button
           type="button"

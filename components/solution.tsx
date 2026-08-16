@@ -34,7 +34,7 @@ export function Solution() {
             </Reveal>
             <Reveal delay={0.12}>
               <p className="mt-5 max-w-lg text-lg text-ink-muted text-pretty">
-                AthleteOS is the operating system for your name, image, and likeness. Build a premium public
+                 NIL CARD is the operating system for your name, image, and likeness. Build a premium public
                 card, plug in monetization, and let AI do the writing — so your audience becomes your business.
               </p>
             </Reveal>
@@ -65,7 +65,7 @@ export function Solution() {
                     <div className="mb-5 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div className="h-2 w-2 rounded-full bg-accent animate-pulse-soft" />
-                        <span className="font-mono text-[11px] text-ink-muted">athleteos.app/maya</span>
+                        <span className="font-mono text-[11px] text-ink-muted">nilcard.app/maya</span>
                       </div>
                       <span className="chip">Live profile</span>
                     </div>

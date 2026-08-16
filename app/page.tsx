@@ -6,11 +6,11 @@ import { LandingSections } from "@/components/landing-sections";
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "AthleteOS",
+  name: "NIL CARD",
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web",
   description: "The operating system for the next generation of NIL athletes. Build your digital card, monetize your brand, and grow your NIL business.",
-  url: "https://athleteos.app",
+  url: "https://nilcard.app",
   offers: [
     {
       "@type": "Offer",

@@ -17,11 +17,11 @@ export default async function AuthErrorPage({
           <Link
             href="/"
             className="inline-flex items-center gap-2.5"
-            aria-label="AthleteOS home"
+            aria-label="NIL CARD home"
           >
             <Logo />
             <span className="text-lg font-semibold tracking-tight">
-              AthleteOS
+              NIL CARD
             </span>
           </Link>
         </div>

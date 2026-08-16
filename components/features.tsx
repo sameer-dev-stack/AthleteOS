@@ -142,7 +142,7 @@ export function Features() {
             <FeatureCard
               icon={ChartLine}
               title="Profile improvement engine"
-              body="AthleteOS scores your card and tells you exactly what to fix to look more brand-ready."
+              body="NIL CARD scores your card and tells you exactly what to fix to look more brand-ready."
             />
           </RevealItem>
         </RevealStagger>

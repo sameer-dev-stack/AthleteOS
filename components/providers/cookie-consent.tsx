@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Shield } from "lucide-react";
 
-const CONSENT_KEY = "athleteos_cookie_consent";
+const CONSENT_KEY = "nilcard_cookie_consent";
 
 export function CookieConsent() {
   const [visible, setVisible] = useState(false);

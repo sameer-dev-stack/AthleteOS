@@ -7,7 +7,7 @@ import { Suspense } from "react";
 function WelcomeContent() {
   const searchParams = useSearchParams();
   const message =
-    searchParams.get("message") || "Welcome to AthleteOS!";
+    searchParams.get("message") || "Welcome to NIL CARD!";
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg px-4">

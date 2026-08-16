@@ -30,7 +30,7 @@ function AccountCreatedContent() {
   return (
     <AuthLayout
       title={copy.heading}
-      subtitle="Verify your account to activate your AthleteOS card"
+      subtitle="Verify your account to activate your NIL CARD"
     >
       <div className="py-4 text-center space-y-6">
         <div className="w-16 h-16 rounded-2xl bg-accent/10 text-accent flex items-center justify-center mx-auto border border-accent/20">

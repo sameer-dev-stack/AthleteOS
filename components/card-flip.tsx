@@ -76,7 +76,7 @@ export function CardFlip() {
         <div className="flex items-center justify-between px-5 pt-4 pb-2">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-medium uppercase tracking-wider text-white/40">
-              AthleteOS
+              NIL CARD
             </span>
           </div>
           <div className="flex items-center gap-1.5 rounded-full bg-accent/10 px-2 py-0.5">

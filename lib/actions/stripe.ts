@@ -19,9 +19,9 @@ export type TipResult = {
 
 /**
  * Creates a one-time payment Checkout Session for a fan tip.
- * Money is collected into AthleteOS's own Stripe account (platform model).
+ * Money is collected into NIL CARD's own Stripe account (platform model).
  * The athlete sees the tip in their dashboard and requests a withdrawal,
- * which AthleteOS fulfills manually within 48 hours.
+ * which NIL CARD fulfills manually within 48 hours.
  */
 export async function createTipSession(
   athleteId: string,
@@ -55,15 +55,15 @@ export async function createTipSession(
             currency: "usd",
             product_data: {
               name: `Tip for ${athlete.full_name || athlete.username || "Athlete"}`,
-              description: `Support ${athlete.full_name || "this athlete"} on AthleteOS`,
+              description: `Support ${athlete.full_name || "this athlete"} on NIL CARD`,
             },
             unit_amount: amount,
           },
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app"}/${athlete.username}?tip=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app"}/${athlete.username}?tip=cancelled`,
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app"}/${athlete.username}?tip=success`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app"}/${athlete.username}?tip=cancelled`,
       metadata: {
         athleteos_athlete_id: athleteId,
         sender_email: senderEmail || "",

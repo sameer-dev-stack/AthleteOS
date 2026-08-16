@@ -24,8 +24,8 @@ function emailLayout(content: string): string {
             <tr><td style="padding:0 32px 32px;">
               <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:24px;">
                 <p style="color:#555557;font-size:12px;margin:0 0 8px;">
-                  AthleteOS — The NIL operating system for athletes.<br>
-                  <a href="${SITE_URL}" style="color:#88888A;text-decoration:underline;">athleteos.app</a>
+                  NIL CARD — The NIL operating system for athletes.<br>
+                  <a href="${SITE_URL}" style="color:#88888A;text-decoration:underline;">nilcard.app</a>
                 </p>
                 <p style="color:#444446;font-size:11px;margin:0;">
                   <a href="${SITE_URL}/dashboard/notifications" style="color:#555557;text-decoration:underline;">Email preferences</a>
@@ -41,7 +41,7 @@ function emailLayout(content: string): string {
 }
 
 function brandBadge(): string {
-  return `<span style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:13px;padding:4px 10px;border-radius:6px;letter-spacing:0.5px;">ATHLETEOS</span>`;
+  return `<span style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:13px;padding:4px 10px;border-radius:6px;letter-spacing:0.5px;">NIL CARD</span>`;
 }
 
 export async function generateToken(): Promise<string> {
@@ -67,9 +67,9 @@ export async function sendConfirmationEmail(
     const resend = new Resend(RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "AthleteOS <onboarding@resend.dev>",
+      from: "NIL CARD <onboarding@resend.dev>",
       to: email,
-      subject: "Confirm your AthleteOS account",
+      subject: "Confirm your NIL CARD account",
       html: `
         <!DOCTYPE html>
         <html>
@@ -95,7 +95,7 @@ export async function sendConfirmationEmail(
                         Confirm my account
                       </a>
                       <p style="color:#555557;font-size:13px;line-height:1.5;margin:32px 0 0;">
-                        If you didn't sign up for AthleteOS, you can safely ignore this email.
+                        If you didn't sign up for NIL CARD, you can safely ignore this email.
                       </p>
                     </td>
                   </tr>
@@ -103,8 +103,8 @@ export async function sendConfirmationEmail(
                     <td style="padding:0 32px 32px;">
                       <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:24px;">
                         <p style="color:#555557;font-size:12px;margin:0;">
-                          AthleteOS — The NIL operating system for athletes.<br>
-                          <a href="${SITE_URL}" style="color:#88888A;text-decoration:underline;">athleteos.app</a>
+                          NIL CARD — The NIL operating system for athletes.<br>
+                          <a href="${SITE_URL}" style="color:#88888A;text-decoration:underline;">nilcard.app</a>
                         </p>
                       </div>
                     </td>
@@ -200,9 +200,9 @@ export async function sendWeeklyBriefing(
     const resend = new Resend(RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "AthleteOS <onboarding@resend.dev>",
+      from: "NIL CARD <onboarding@resend.dev>",
       to: email,
-      subject: `Your Weekly AthleteOS Briefing — NIL Score: ${scoreText}`,
+      subject: `Your Weekly NIL CARD Briefing — NIL Score: ${scoreText}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -222,7 +222,7 @@ export async function sendWeeklyBriefing(
                       <div style="margin-bottom:24px;">
                         <span style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:900;font-size:11px;padding:4px 10px;border-radius:6px;letter-spacing:1px;text-transform:uppercase;">ATHLETEOS</span>
                       </div>
-                      <h1 style="color:#FFFFFF;font-size:24px;font-weight:900;margin:0 0 8px;line-height:1.2;text-transform:uppercase;letter-spacing:-0.5px;">This week on AthleteOS</h1>
+                      <h1 style="color:#FFFFFF;font-size:24px;font-weight:900;margin:0 0 8px;line-height:1.2;text-transform:uppercase;letter-spacing:-0.5px;">This week on NIL CARD</h1>
                       <p style="color:#88888A;font-size:14px;margin:0;line-height:1.5;">
                         Hey ${escapeHtml(firstName)}, here is a breakdown of your profile performance and tailored brand actions for the week.
                       </p>
@@ -370,7 +370,7 @@ export async function sendWeeklyBriefing(
                         <tr>
                           <td>
                             <p style="color:#555557;font-size:12px;line-height:1.5;margin:0;">
-                              You have been building your card on AthleteOS for <strong>${daysOnPlatform} days</strong>.<br>
+                              You have been building your card on NIL CARD for <strong>${daysOnPlatform} days</strong>.<br>
                               Our AI model has saved your preferences to refine future brand pitches.
                             </p>
                           </td>
@@ -415,9 +415,9 @@ export async function sendPaymentFailedEmail(
     const resend = new Resend(RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "AthleteOS <onboarding@resend.dev>",
+      from: "NIL CARD <onboarding@resend.dev>",
       to: email,
-      subject: "Action required: Your AthleteOS payment failed",
+      subject: "Action required: Your NIL CARD payment failed",
       html: `
         <!DOCTYPE html>
         <html>
@@ -437,12 +437,12 @@ export async function sendPaymentFailedEmail(
                   <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#9A9AA3;">
                     To restore your Pro or Elite features, please update your payment method in the billing dashboard.
                   </p>
-                  <a href="${SITE_URL || "https://athleteos.app"}/dashboard/billing"
+                  <a href="${SITE_URL || "https://nilcard.app"}/dashboard/billing"
                      style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:14px;padding:12px 28px;border-radius:10px;text-decoration:none;">
                     Update payment method
                   </a>
                   <p style="margin:24px 0 0;font-size:13px;color:#6B6B74;">
-                    If you did not initiate this change, contact us at hey@athleteos.app.
+                    If you did not initiate this change, contact us at hey@nilcard.app.
                   </p>
                 </td></tr>
               </table>
@@ -473,14 +473,14 @@ export async function sendProUpgradeEmail(
     const resend = new Resend(RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "AthleteOS <onboarding@resend.dev>",
+      from: "NIL CARD <onboarding@resend.dev>",
       to: email,
-      subject: "You're now on AthleteOS Pro",
+      subject: "You're now on NIL CARD Pro",
       html: emailLayout(`
         <div style="margin-bottom:24px;">${brandBadge()}</div>
         <h1 style="color:#FFFFFF;font-size:24px;font-weight:700;margin:0 0 16px;line-height:1.3;">Pro access unlocked</h1>
         <p style="color:#88888A;font-size:15px;line-height:1.6;margin:0 0 24px;">
-          Hey ${escapeHtml(displayName)}, your AthleteOS Pro subscription is now active (${escapeHtml(billingLabel)}).
+          Hey ${escapeHtml(displayName)}, your NIL CARD Pro subscription is now active (${escapeHtml(billingLabel)}).
         </p>
         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
           <tr>
@@ -529,7 +529,7 @@ export async function sendPayoutRequestedEmail(
     const resend = new Resend(RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "AthleteOS <onboarding@resend.dev>",
+      from: "NIL CARD <onboarding@resend.dev>",
       to: email,
       subject: `Payout of $${amountDollars} requested`,
       html: emailLayout(`
@@ -571,9 +571,9 @@ export async function sendWelcomeEmail(
     const resend = new Resend(RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "AthleteOS <onboarding@resend.dev>",
+      from: "NIL CARD <onboarding@resend.dev>",
       to: email,
-      subject: "Welcome to AthleteOS — your card is live",
+      subject: "Welcome to NIL CARD — your card is live",
       html: emailLayout(`
         <div style="margin-bottom:24px;">${brandBadge()}</div>
         <h1 style="color:#FFFFFF;font-size:24px;font-weight:700;margin:0 0 16px;line-height:1.3;">Welcome aboard, ${escapeHtml(firstName)}</h1>
@@ -629,14 +629,14 @@ export async function sendCardPublishedEmail(
     const resend = new Resend(RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "AthleteOS <onboarding@resend.dev>",
+      from: "NIL CARD <onboarding@resend.dev>",
       to: email,
       subject: "Your athlete card is now live",
       html: emailLayout(`
         <div style="margin-bottom:24px;">${brandBadge()}</div>
         <h1 style="color:#FFFFFF;font-size:24px;font-weight:700;margin:0 0 16px;line-height:1.3;">Your card is public</h1>
         <p style="color:#88888A;font-size:15px;line-height:1.6;margin:0 0 28px;">
-          Hey ${escapeHtml(firstName)}, your athlete card is now live at <a href="${cardUrl}" style="color:#C6FF3D;text-decoration:none;">athleteos.app/${username}</a>. Anyone with the link can view it.
+          Hey ${escapeHtml(firstName)}, your athlete card is now live at <a href="${cardUrl}" style="color:#C6FF3D;text-decoration:none;">nilcard.app/${username}</a>. Anyone with the link can view it.
         </p>
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#16161A;border-radius:12px;border:1px solid rgba(255,255,255,0.04);padding:20px;margin-bottom:28px;">
           <tr>
@@ -682,7 +682,7 @@ export async function sendInquiryNotificationEmail(
     const resend = new Resend(RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "AthleteOS <onboarding@resend.dev>",
+      from: "NIL CARD <onboarding@resend.dev>",
       to: athleteEmail,
       subject: `${typeLabel}: ${senderName}${companyText}`,
       html: emailLayout(`
@@ -690,7 +690,7 @@ export async function sendInquiryNotificationEmail(
         <p style="color:#C6FF3D;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">${escapeHtml(typeLabel)}</p>
         <h1 style="color:#FFFFFF;font-size:20px;font-weight:700;margin:0 0 8px;line-height:1.3;">${escapeHtml(senderName)}${escapeHtml(companyText)}</h1>
         <p style="color:#88888A;font-size:14px;line-height:1.5;margin:0 0 24px;">
-          ${escapeHtml(athleteName)}, you received a new inquiry on your AthleteOS card.
+          ${escapeHtml(athleteName)}, you received a new inquiry on your NIL CARD card.
         </p>
         <div style="background-color:#16161A;border-radius:12px;border:1px solid rgba(255,255,255,0.04);padding:20px;margin-bottom:24px;">
           <p style="color:#FFFFFF;font-size:14px;line-height:1.6;margin:0 0 0;white-space:pre-wrap;">${escapeHtml(messagePreview.slice(0, 500))}${messagePreview.length > 500 ? "..." : ""}</p>
@@ -719,14 +719,14 @@ export async function sendTipReceivedEmail(
     const resend = new Resend(RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "AthleteOS <onboarding@resend.dev>",
+      from: "NIL CARD <onboarding@resend.dev>",
       to: athleteEmail,
       subject: `You received a $${amount} tip`,
       html: emailLayout(`
         <div style="margin-bottom:24px;">${brandBadge()}</div>
         <h1 style="color:#FFFFFF;font-size:24px;font-weight:700;margin:0 0 16px;line-height:1.3;">Tip received</h1>
         <p style="color:#88888A;font-size:15px;line-height:1.6;margin:0 0 24px;">
-          Hey ${escapeHtml(athleteName)}, <strong style="color:#FFFFFF;">${escapeHtml(senderName)}</strong> sent you a tip of <strong style="color:#C6FF3D;">$${amount}</strong> through your AthleteOS card.
+          Hey ${escapeHtml(athleteName)}, <strong style="color:#FFFFFF;">${escapeHtml(senderName)}</strong> sent you a tip of <strong style="color:#C6FF3D;">$${amount}</strong> through your NIL CARD card.
         </p>
         <a href="${SITE_URL}/dashboard/billing" style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:14px;padding:12px 24px;border-radius:10px;text-decoration:none;">View balance</a>
       `),
@@ -753,7 +753,7 @@ export async function sendProfileNudgeEmail(
     const resend = new Resend(RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "AthleteOS <onboarding@resend.dev>",
+      from: "NIL CARD <onboarding@resend.dev>",
       to: email,
       subject: "Your athlete card is almost ready",
       html: emailLayout(`
@@ -811,7 +811,7 @@ export async function sendCardStrengthDigest(
     const resend = new Resend(RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "AthleteOS <onboarding@resend.dev>",
+      from: "NIL CARD <onboarding@resend.dev>",
       to: email,
       subject: `Your card strength: ${currentScore}/100`,
       html: emailLayout(`
@@ -877,16 +877,16 @@ export async function sendTeamInviteEmail(
     const resend = new Resend(RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "AthleteOS <onboarding@resend.dev>",
+      from: "NIL CARD <onboarding@resend.dev>",
       to: email,
-      subject: `You've been invited to join ${teamName} on AthleteOS`,
+      subject: `You've been invited to join ${teamName} on NIL CARD`,
       html: emailLayout(`
         <div style="margin-bottom:24px;">
           ${brandBadge()}
         </div>
         <h1 style="color:#FFFFFF;font-size:24px;font-weight:700;margin:0 0 16px;line-height:1.3;">Team invitation</h1>
         <p style="color:#88888A;font-size:15px;line-height:1.6;margin:0 0 24px;">
-          <strong style="color:#FFFFFF;">${escapeHtml(inviterName)}</strong> has invited you to join <strong style="color:#C6FF3D;">${escapeHtml(teamName)}</strong> on AthleteOS.
+          <strong style="color:#FFFFFF;">${escapeHtml(inviterName)}</strong> has invited you to join <strong style="color:#C6FF3D;">${escapeHtml(teamName)}</strong> on NIL CARD.
         </p>
         <p style="color:#88888A;font-size:15px;line-height:1.6;margin:0 0 32px;">
           Join your team to collaborate on NIL strategies, share analytics, and grow together.
@@ -922,9 +922,9 @@ export async function sendQuotaWarningEmail(
     const resend = new Resend(RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "AthleteOS <onboarding@resend.dev>",
+      from: "NIL CARD <onboarding@resend.dev>",
       to: email,
-      subject: "Action Required: AthleteOS AI Credits Depleted",
+      subject: "Action Required: NIL CARD AI Credits Depleted",
       html: `
         <!DOCTYPE html>
         <html>
@@ -949,7 +949,7 @@ export async function sendQuotaWarningEmail(
                       <p style="color:#88888A;font-size:14px;line-height:1.6;margin:0 0 24px;">
                         We require at least 2 credits to run the data analysis and generate your brand insights.
                       </p>
-                      <a href="${SITE_URL || "https://athleteos.app"}/dashboard/settings" style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;letter-spacing:-0.1px;">
+                      <a href="${SITE_URL || "https://nilcard.app"}/dashboard/settings" style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;letter-spacing:-0.1px;">
                         Upgrade Plan or Buy Credits
                       </a>
                     </td>

@@ -3,8 +3,8 @@ import { Footer } from "@/components/footer";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — AthleteOS",
-  description: "Privacy policy for AthleteOS.",
+  title: "Privacy Policy — NIL CARD",
+  description: "Privacy policy for NIL CARD.",
 };
 
 export default function PrivacyPage() {
@@ -19,7 +19,7 @@ export default function PrivacyPage() {
           <p className="mt-4 text-sm text-ink-dim">Last updated: July 2026</p>
           <div className="mt-8 max-w-2xl space-y-6 text-sm leading-relaxed text-ink-muted">
             <p>
-              Your privacy is important to us. This policy describes how AthleteOS
+              Your privacy is important to us. This policy describes how NIL CARD
               collects, uses, and protects your information.
             </p>
             <h2 className="text-lg font-bold text-white">Information We Collect</h2>
@@ -44,8 +44,8 @@ export default function PrivacyPage() {
             <p>
               You can export your data or delete your account at any time from
               Settings. For GDPR/CCPA requests, contact us at{" "}
-              <a href="mailto:hey@athleteos.app" className="text-accent hover:underline">
-                hey@athleteos.app
+              <a href="mailto:hey@nilcard.app" className="text-accent hover:underline">
+                hey@nilcard.app
               </a>
             </p>
             <h2 className="text-lg font-bold text-white">Security</h2>

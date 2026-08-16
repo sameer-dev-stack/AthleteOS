@@ -3,8 +3,8 @@ import { Footer } from "@/components/footer";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — AthleteOS",
-  description: "Terms of service for AthleteOS.",
+  title: "Terms of Service — NIL CARD",
+  description: "Terms of service for NIL CARD.",
 };
 
 export default function TermsPage() {
@@ -19,27 +19,27 @@ export default function TermsPage() {
           <p className="mt-4 text-sm text-ink-dim">Last updated: July 2026</p>
           <div className="mt-8 max-w-2xl space-y-6 text-sm leading-relaxed text-ink-muted">
             <p>
-              Welcome to AthleteOS. By using our service, you agree to these terms.
+              Welcome to NIL CARD. By using our service, you agree to these terms.
             </p>
             <h2 className="text-lg font-bold text-white">1. Service</h2>
             <p>
-              AthleteOS provides a digital identity and monetization platform for athletes.
+              NIL CARD provides a digital identity and monetization platform for athletes.
               We reserve the right to modify or discontinue the service at any time.
             </p>
             <h2 className="text-lg font-bold text-white">2. Accounts</h2>
             <p>
               You are responsible for maintaining the security of your account. You must
-              be at least 13 years old to use AthleteOS.
+              be at least 13 years old to use NIL CARD.
             </p>
             <h2 className="text-lg font-bold text-white">3. Payments</h2>
             <p>
-              All payments are processed through Stripe. AthleteOS charges a 5% platform
+              All payments are processed through Stripe. NIL CARD charges a 5% platform
               fee on tips. Subscription fees are billed monthly. Refunds are handled
               case-by-case.
             </p>
             <h2 className="text-lg font-bold text-white">4. Content</h2>
             <p>
-              You retain ownership of all content you upload. You grant AthleteOS a
+              You retain ownership of all content you upload. You grant NIL CARD a
               license to display your content on the platform. You agree not to upload
               content that is illegal, harmful, or violates others&apos; rights.
             </p>
@@ -50,8 +50,8 @@ export default function TermsPage() {
             </p>
             <p>
               Contact us at{" "}
-              <a href="mailto:hey@athleteos.app" className="text-accent hover:underline">
-                hey@athleteos.app
+              <a href="mailto:hey@nilcard.app" className="text-accent hover:underline">
+                hey@nilcard.app
               </a>{" "}
               for questions about these terms.
             </p>

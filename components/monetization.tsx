@@ -74,7 +74,7 @@ export function Monetization() {
                       <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
                       <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
                     </div>
-                    <span className="font-mono text-[11px] text-ink-dim">dashboard.athleteos.app</span>
+                    <span className="font-mono text-[11px] text-ink-dim">dashboard.nilcard.app</span>
                     <div className="w-8" />
                   </div>
 

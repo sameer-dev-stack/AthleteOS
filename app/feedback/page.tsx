@@ -82,7 +82,7 @@ const INITIAL_FEATURES: Omit<Feature, "votes">[] = [
   {
     id: "custom-domain",
     title: "Custom Domain Support",
-    description: "Use your own domain like maya.com instead of athleteos.app/maya.",
+    description: "Use your own domain like maya.com instead of nilcard.app/maya.",
     category: "Platform",
     icon: Globe,
     status: "planned",
@@ -97,7 +97,7 @@ const INITIAL_FEATURES: Omit<Feature, "votes">[] = [
   },
 ];
 
-const VOTES_KEY = "athleteos_feature_votes";
+const VOTES_KEY = "nilcard_feature_votes";
 
 export default function FeedbackPage() {
   const [features, setFeatures] = useState<Feature[]>([]);
@@ -111,7 +111,7 @@ export default function FeedbackPage() {
   useEffect(() => {
     const stored = localStorage.getItem(VOTES_KEY);
     const voted = new Set<string>(stored ? JSON.parse(stored) : []);
-    const savedCounts = localStorage.getItem("athleteos_feature_counts");
+    const savedCounts = localStorage.getItem("nilcard_feature_counts");
     const counts: Record<string, number> = savedCounts ? JSON.parse(savedCounts) : {};
 
     queueMicrotask(() => {
@@ -145,7 +145,7 @@ export default function FeedbackPage() {
 
     const counts: Record<string, number> = {};
     newFeatures.forEach((f) => { counts[f.id] = f.votes; });
-    localStorage.setItem("athleteos_feature_counts", JSON.stringify(counts));
+    localStorage.setItem("nilcard_feature_counts", JSON.stringify(counts));
   }
 
   function handleSubmit(e: React.FormEvent) {

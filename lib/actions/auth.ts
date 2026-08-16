@@ -17,7 +17,7 @@ export type AuthResult = {
   email?: string;
 };
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app";
 const CONFIRM_EXPIRY_HOURS = 24;
 
 function getServiceClient() {

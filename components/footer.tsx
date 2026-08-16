@@ -32,8 +32,8 @@ const COLS = [
     title: "Company",
     links: [
       { label: "About", href: "/about" },
-      { label: "Contact", href: "mailto:hey@athleteos.app" },
-      { label: "Twitter", href: "https://x.com/athleteos" },
+      { label: "Contact", href: "mailto:hey@nilcard.app" },
+      { label: "Twitter", href: "https://x.com/nilcard" },
     ],
   },
   {
@@ -50,10 +50,10 @@ const COLS = [
 ];
 
 const SOCIALS = [
-  { icon: Instagram, label: "Instagram", href: "https://instagram.com/athleteos" },
-  { icon: Twitter, label: "X", href: "https://x.com/athleteos" },
-  { icon: Youtube, label: "YouTube", href: "https://youtube.com/@athleteos" },
-  { icon: Music2, label: "TikTok", href: "https://tiktok.com/@athleteos" },
+  { icon: Instagram, label: "Instagram", href: "https://instagram.com/nilcard" },
+  { icon: Twitter, label: "X", href: "https://x.com/nilcard" },
+  { icon: Youtube, label: "YouTube", href: "https://youtube.com/@nilcard" },
+  { icon: Music2, label: "TikTok", href: "https://tiktok.com/@nilcard" },
 ];
 
 export function Footer() {
@@ -102,7 +102,7 @@ export function Footer() {
           <div className="lg:col-span-4">
             <Link href="/" className="inline-flex items-center gap-2.5">
               <Logo />
-              <span className="text-lg font-semibold tracking-tight">AthleteOS</span>
+              <span className="text-lg font-semibold tracking-tight">NIL CARD</span>
             </Link>
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-ink-muted text-pretty">
               The operating system for the next generation of NIL athletes. Build your card,
@@ -149,7 +149,7 @@ export function Footer() {
         {/* Status row */}
         <div className="flex flex-col items-start justify-between gap-4 border-t border-white/[0.05] py-7 sm:flex-row sm:items-center">
           <p className="text-xs text-ink-dim">
-            © {new Date().getFullYear()} AthleteOS, Inc. Built for the athlete economy.
+            © {new Date().getFullYear()} NIL CARD, Inc. Built for the athlete economy.
           </p>
           <div className="flex items-center gap-5 text-xs text-ink-dim">
             <span className="flex items-center gap-1.5">

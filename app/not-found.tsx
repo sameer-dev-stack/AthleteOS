@@ -41,7 +41,7 @@ export default function NotFound() {
 
         <div className="mt-12 pt-8 border-t border-white/[0.06]">
           <a
-            href="mailto:support@athleteos.com"
+            href="mailto:support@nilcard.com"
             className="text-xs text-ink-dim hover:text-ink-muted transition-colors"
           >
             Contact support

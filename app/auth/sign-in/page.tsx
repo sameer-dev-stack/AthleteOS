@@ -111,7 +111,7 @@ export default function SignInPage() {
   return (
     <AuthLayout
       title="Welcome back"
-      subtitle="Sign in to your AthleteOS business suite"
+      subtitle="Sign in to your NIL CARD business suite"
     >
       <ProcessingOverlay
         show={processing}

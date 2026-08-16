@@ -5,18 +5,18 @@ import { DiscoverClient } from "./client";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Discover Athletes — AthleteOS",
+  title: "Discover Athletes — NIL CARD",
   description:
     "Browse and discover student-athletes for brand partnerships, sponsorships, and NIL deals. Filter by sport, school, position, and audience size.",
   openGraph: {
-    title: "Discover Athletes — AthleteOS",
+    title: "Discover Athletes — NIL CARD",
     description:
       "Browse and discover student-athletes for brand partnerships, sponsorships, and NIL deals.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Discover Athletes — AthleteOS",
+    title: "Discover Athletes — NIL CARD",
     description:
       "Browse and discover student-athletes for brand partnerships, sponsorships, and NIL deals.",
   },

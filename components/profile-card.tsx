@@ -2,7 +2,7 @@
 
 /*
  * ═══════════════════════════════════════════════════════════════════════
- *  AthleteOS · Public Athlete Identity Card
+ *  NIL CARD · Public Athlete Identity Card
  *  ─────────────────────────────────────────
  *  Component Architecture:
  *
@@ -509,7 +509,7 @@ function AthleteIdentity({
 }: AthleteIdentityProps) {
   let resolvedPosition = position;
   if (process.env.NODE_ENV === "development" && sport && position && !isValidPosition(sport, position)) {
-    console.warn(`[AthleteOS] Position "${position}" is not valid for sport "${sport}". Falling back to "Athlete".`);
+    console.warn(`[NIL CARD] Position "${position}" is not valid for sport "${sport}". Falling back to "Athlete".`);
     resolvedPosition = "Athlete";
   }
   const metaLine = [resolvedPosition, sport].filter(Boolean).join(" · ");
@@ -733,7 +733,7 @@ function AthleteIDBlock({ username, athleteId, accent, urlCopied, onCopy }: Athl
             className="text-[10.5px] font-medium truncate"
             style={{ color: "rgba(255,255,255,0.32)" }}
           >
-            athleteos.app/{username}
+            nilcard.app/{username}
           </span>
         </div>
         <span className="flex-shrink-0 ml-2">
@@ -1154,7 +1154,7 @@ function ConnectSection({ socialLinks, publicUrl, displayName, bio, accent, onIn
           <div className="h-4 w-px" style={{ background: "rgba(255,255,255,0.06)" }} />
           <ShareButtons
             url={publicUrl}
-            title={`${displayName} on AthleteOS`}
+            title={`${displayName} on NIL CARD`}
             description={bio || `Check out ${displayName}'s athlete card`}
           />
         </div>
@@ -1691,8 +1691,8 @@ export function ProfileCard({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${displayName} on AthleteOS`,
-          text: `${displayName}'s AthleteOS card`,
+          title: `${displayName} on NIL CARD`,
+          text: `${displayName}'s NIL CARD`,
           url: publicUrl,
         });
       } catch { /* */ }
@@ -1708,7 +1708,7 @@ export function ProfileCard({
   async function handleCopyUrl(e: React.MouseEvent) {
     e.stopPropagation();
     try {
-      await navigator.clipboard.writeText(`https://athleteos.app/${profile.username}`);
+      await navigator.clipboard.writeText(`https://nilcard.app/${profile.username}`);
       setUrlCopied(true);
       setTimeout(() => setUrlCopied(false), 1500);
     } catch { /* */ }
@@ -2042,7 +2042,7 @@ export function ProfileCard({
                 </span>
                 <Logo className="h-2 w-2 rounded-[2px]" style={{ backgroundColor: `${accent}35` }} />
                 <span className="text-[7px] font-bold tracking-[0.28em] uppercase" style={{ color: "rgba(255,255,255,0.18)" }}>
-                  AthleteOS
+                  NIL CARD
                 </span>
               </div>
             )}

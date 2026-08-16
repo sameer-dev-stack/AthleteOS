@@ -3,7 +3,7 @@ import { Reveal } from "./motion/reveal";
 
 const TESTIMONIALS = [
   {
-    quote: "I set up my card in 10 minutes and got my first brand inquiry the next week. AthleteOS made me look legit.",
+    quote: "I set up my card in 10 minutes and got my first brand inquiry the next week. NIL CARD made me look legit.",
     name: "Maya Chen",
     sport: "Track & Field",
     school: "University of Oregon",
@@ -19,7 +19,7 @@ const TESTIMONIALS = [
     gradient: "from-blue-500/60 to-blue-500/20",
   },
   {
-    quote: "I've earned more from tips on AthleteOS than I ever did from DM deals. The Stripe integration just works.",
+    quote: "I've earned more from tips on NIL CARD than I ever did from DM deals. The Stripe integration just works.",
     name: "Sofia Rodriguez",
     sport: "Soccer",
     school: "Stanford University",

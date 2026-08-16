@@ -7,6 +7,6 @@ export function buildShareLinks(link: string, text: string): ShareLinks {
   return {
     twitter: `https://twitter.com/intent/tweet?text=${t}&url=${u}`,
     whatsapp: `https://wa.me/?text=${encodeURIComponent(text + " " + link)}`,
-    email: `mailto:?subject=${encodeURIComponent("Join AthleteOS")}&body=${encodeURIComponent(text + " " + link)}`,
+    email: `mailto:?subject=${encodeURIComponent("Join NIL CARD")}&body=${encodeURIComponent(text + " " + link)}`,
   };
 }

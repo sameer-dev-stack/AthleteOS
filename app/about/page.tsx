@@ -3,7 +3,7 @@ import { Footer } from "@/components/footer";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About — AthleteOS",
+  title: "About — NIL CARD",
   description: "The operating system for the next generation of NIL athletes.",
 };
 
@@ -14,11 +14,11 @@ export default function AboutPage() {
       <main className="min-h-screen bg-bg pt-24 pb-20">
         <div className="container-tight">
           <h1 className="text-4xl font-black tracking-tight text-white sm:text-5xl">
-            About AthleteOS
+            About NIL CARD
           </h1>
           <div className="mt-8 max-w-2xl space-y-6 text-base leading-relaxed text-ink-muted">
             <p>
-              AthleteOS is the operating system for the next generation of NIL athletes.
+              NIL CARD is the operating system for the next generation of NIL athletes.
               We believe every athlete deserves a professional digital identity, the tools
               to monetize their brand, and the AI assistance to grow — without needing an
               agency or a marketing team.

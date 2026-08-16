@@ -3,8 +3,8 @@ import { Footer } from "@/components/footer";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Changelog — AthleteOS",
-  description: "See what's new in AthleteOS. Features, improvements, and fixes.",
+  title: "Changelog — NIL CARD",
+  description: "See what's new in NIL CARD. Features, improvements, and fixes.",
 };
 
 const entries = [

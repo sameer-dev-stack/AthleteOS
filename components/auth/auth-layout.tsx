@@ -18,9 +18,9 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
 
       {/* Top Navbar */}
       <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between z-10">
-        <Link href="/" className="flex items-center gap-2" aria-label="AthleteOS home">
+        <Link href="/" className="flex items-center gap-2" aria-label="NIL CARD home">
           <Logo />
-          <span className="text-lg font-semibold tracking-tight">AthleteOS</span>
+          <span className="text-lg font-semibold tracking-tight">NIL CARD</span>
         </Link>
         <div className="text-xs text-ink-dim">
           Need help?{" "}
@@ -46,7 +46,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
 
       {/* Footer */}
       <footer className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-2.5 text-center text-[11px] text-ink-dim z-10 flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-line shrink-0">
-        <div>&copy; {new Date().getFullYear()} AthleteOS, Inc. All rights reserved.</div>
+        <div>&copy; {new Date().getFullYear()} NIL CARD, Inc. All rights reserved.</div>
         <div className="flex items-center gap-4 text-[11px]">
           <Link href="/privacy" className="hover:text-white transition-colors">
             Privacy Policy

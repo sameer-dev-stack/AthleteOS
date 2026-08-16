@@ -17,7 +17,7 @@ export default function Error({
       <div className="w-full max-w-md text-center">
         <div className="mb-10 inline-flex items-center gap-2.5">
           <Logo />
-          <span className="text-lg font-semibold tracking-tight">AthleteOS</span>
+          <span className="text-lg font-semibold tracking-tight">NIL CARD</span>
         </div>
 
         <ErrorIllustration code="!" />
@@ -43,7 +43,7 @@ export default function Error({
 
         <div className="mt-12 pt-8 border-t border-white/[0.06]">
           <a
-            href="mailto:support@athleteos.com"
+            href="mailto:support@nilcard.com"
             className="inline-flex items-center gap-2 text-xs text-ink-dim hover:text-ink-muted transition-colors"
           >
             <Mail className="h-3.5 w-3.5" />

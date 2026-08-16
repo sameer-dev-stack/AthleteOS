@@ -98,7 +98,7 @@ export default function SignUpPage() {
     >
       <ProcessingOverlay
         show={processing}
-        message="Creating your AthleteOS account..."
+        message="Creating your NIL CARD account..."
       />
 
       <div className="mb-6">

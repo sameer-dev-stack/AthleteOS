@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/admin/"],
       },
     ],
-    sitemap: "https://athleteos.app/sitemap.xml",
+    sitemap: "https://nilcard.app/sitemap.xml",
   };
 }

@@ -59,9 +59,9 @@ export function Navbar() {
       )}
     >
       <div className="container-wide flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5" aria-label="AthleteOS home">
+        <Link href="/" className="flex items-center gap-2.5" aria-label="NIL CARD home">
           <Logo />
-          <span className="text-[15px] font-semibold tracking-tight">AthleteOS</span>
+          <span className="text-[15px] font-semibold tracking-tight">NIL CARD</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">

@@ -8,12 +8,12 @@ import { Reveal, RevealStagger, RevealItem } from "./motion/reveal";
 
 const FAQS = [
   {
-    q: "Who is AthleteOS for?",
+    q: "Who is NIL CARD for?",
     a: "Student-athletes at any level who want to look professional, get discovered by brands, and turn their audience into income. Works for D1 stars, JUCO, high-school recruits, and Olympic hopefuls.",
   },
   {
     q: "Is this compliant with NCAA and state NIL rules?",
-    a: "Yes. AthleteOS gives athletes the platform; you control which deals you accept. We integrate with standard NIL disclosure flows and support school and collective compliance teams at the Team tier.",
+    a: "Yes. NIL CARD gives athletes the platform; you control which deals you accept. We integrate with standard NIL disclosure flows and support school and collective compliance teams at the Team tier.",
   },
   {
     q: "What does the free plan actually include?",
@@ -61,8 +61,8 @@ export function FAQ() {
             <Reveal delay={0.12}>
               <p className="mt-5 text-sm text-ink-muted text-pretty">
                 Still curious? Email{" "}
-                <a href="mailto:hey@athleteos.app" className="text-accent hover:underline">
-                  hey@athleteos.app
+                <a href="mailto:hey@nilcard.app" className="text-accent hover:underline">
+                  hey@nilcard.app
                 </a>{" "}
                 and a real person will get back to you fast.
               </p>

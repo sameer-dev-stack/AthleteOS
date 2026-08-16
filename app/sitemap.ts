@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { MetadataRoute } from "next";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://athleteos.app";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Return basic sitemap if env vars not available (CI builds)

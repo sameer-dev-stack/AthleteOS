@@ -91,7 +91,7 @@ export function InstallBanner() {
             <Download className="h-5 w-5 text-accent" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-ink">Install AthleteOS</p>
+            <p className="text-sm font-semibold text-ink">Install NIL CARD</p>
             <p className="mt-0.5 text-xs text-ink-muted">
               Add to your home screen for the full app experience
             </p>
