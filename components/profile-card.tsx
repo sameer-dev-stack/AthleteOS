@@ -175,9 +175,6 @@ interface CardHeaderProps {
   copied: boolean;
   displayName: string;
   classLabel: string | null;
-  sport?: string | null;
-  position?: string | null;
-  school?: string | null;
 }
 
 function CardHeader({
@@ -189,9 +186,6 @@ function CardHeader({
   copied,
   displayName,
   classLabel,
-  sport,
-  position,
-  school,
 }: CardHeaderProps) {
   const isPro = plan === "pro" || plan === "team";
 
@@ -205,74 +199,8 @@ function CardHeader({
       ? "clamp(13px, 3.8vw, 15px)"
       : "clamp(11px, 3.2vw, 13px)";
 
-  const metaLine = [position, sport].filter(Boolean).join(" · ");
-  const schoolLine = school ?? null;
-
   return (
-    <div className={`flex items-center justify-between w-full z-20 ${isPro ? "mb-1" : "mb-3.5"}`}>
-      {/* Left: Name + info */}
-      <div className="flex-1 min-w-0 pr-3">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <h1
-            className="font-black text-white line-clamp-2"
-            style={{
-              fontSize,
-              lineHeight: 1.2,
-              letterSpacing: "-0.02em",
-              wordBreak: "keep-all",
-              overflowWrap: "anywhere",
-              maxWidth: "100%",
-              minWidth: 0,
-            } as React.CSSProperties}
-          >
-            <span>{displayName}</span>
-            {(isVerified || isPro || classLabel) && (
-              <span className="inline-flex items-center gap-1 align-middle ml-1 flex-shrink-0 relative -top-[1px]">
-                {(isVerified || isPro) && (
-                  <Image
-                    src="/verified.gif"
-                    alt="Verified Athlete"
-                    width={48}
-                    height={48}
-                    className="inline-block h-[32px] w-[32px] flex-shrink-0 align-middle"
-                    unoptimized
-                  />
-                )}
-                {classLabel && (
-                  <span
-                    className="flex-shrink-0 inline-flex items-center rounded px-1.5 py-0.5 text-[7.5px] font-black tracking-widest uppercase"
-                    style={{
-                      color: "rgba(255,255,255,0.35)",
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                    }}
-                  >
-                    {classLabel}
-                  </span>
-                )}
-              </span>
-            )}
-          </h1>
-        </div>
-        {metaLine && (
-          <p
-            className="text-[12px] font-semibold mt-1 leading-none"
-            style={{ color: "rgba(255,255,255,0.50)", letterSpacing: "0.02em" }}
-          >
-            {metaLine}
-          </p>
-        )}
-        {schoolLine && (
-          <p
-            className="text-[10.5px] mt-0.5 leading-none font-medium truncate"
-            style={{ color: "rgba(255,255,255,0.28)" }}
-            title={schoolLine}
-          >
-            {schoolLine}
-          </p>
-        )}
-      </div>
-
+    <div className={`flex items-center justify-end w-full z-20 ${isPro ? "mb-1" : "mb-3.5"}`}>
       {/* Right actions */}
       <div className="flex flex-col items-end gap-2 flex-shrink-0">
         <div className="flex items-center gap-1.5 pointer-events-auto">
@@ -560,6 +488,82 @@ function AthleteIdentity({
           background: `linear-gradient(90deg, transparent, ${accent}30, transparent)`,
         }}
       />
+      {/* Card Header (Logo, QR, Share) relocated here */}
+      <CardHeader
+        accent={accent}
+        plan={plan}
+        isVerified={isVerified}
+        profile={{} as any} // Profile is not used inside CardHeader, passed empty mock to satisfy TS
+        onQr={onQr}
+        onShare={onShare}
+        copied={copied}
+        displayName={displayName}
+        classLabel={classLabel}
+      />
+      {/* Name row */}
+      {!isPro && (
+        <h1
+          className="font-black text-white line-clamp-2"
+          style={{
+            fontSize,
+            lineHeight: 1.2,
+            letterSpacing: "-0.02em",
+            wordBreak: "keep-all",
+            overflowWrap: "anywhere",
+            maxWidth: "100%",
+            minWidth: 0,
+          } as React.CSSProperties}
+        >
+          <span>{displayName}</span>
+          {(isVerified || isPro || classLabel) && (
+            <span className="inline-flex items-center gap-1 align-middle ml-1 flex-shrink-0 relative -top-[1px]">
+              {(isVerified || isPro) && (
+                <Image
+                  src="/verified.gif"
+                  alt="Verified Athlete"
+                  width={48}
+                  height={48}
+                  className="inline-block h-[32px] w-[32px] flex-shrink-0 align-middle"
+                  unoptimized
+                />
+              )}
+              {classLabel && (
+                <span
+                  className="flex-shrink-0 inline-flex items-center rounded px-1.5 py-0.5 text-[7.5px] font-black tracking-widest uppercase"
+                  style={{
+                    color: "rgba(255,255,255,0.35)",
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  {classLabel}
+                </span>
+              )}
+            </span>
+          )}
+        </h1>
+      )}
+
+      {/* Sport · Position */}
+      {metaLine && (
+        <p
+          className="text-[12px] font-semibold mt-1 leading-none"
+          style={{ color: "rgba(255,255,255,0.50)", letterSpacing: "0.02em" }}
+        >
+          {metaLine}
+        </p>
+      )}
+
+      {/* School */}
+      {schoolLine && (
+        <p
+          className="text-[10.5px] mt-0.5 leading-none font-medium truncate"
+          style={{ color: "rgba(255,255,255,0.28)" }}
+          title={schoolLine}
+        >
+          {schoolLine}
+        </p>
+      )}
     </div>
   );
 }
