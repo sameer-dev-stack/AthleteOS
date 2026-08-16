@@ -5,6 +5,27 @@
 
 ---
 
+## ADR-051 — OAuth Callback: Session Is the Source of Truth, Not the Code Exchange
+
+**Status:** Accepted · 2026-08-16
+
+**Context:**
+The OAuth callback route (`app/auth/callback/route.ts`) treated `exchangeCodeForSession(code)` as the source of truth: any exchange error (or absent `code`) immediately redirected to `/auth/error` ("Sign-in failed"). This produced a classic OAuth race — the sign-in genuinely succeeds on Google's/Supabase's side, but a replayed callback URL, an expired PKCE `code_verifier`, or a retried request caused the exchange to error while `getUser()` would have returned a valid session, so the user saw a failure page despite being signed in.
+
+**Decision:**
+- Always exchange the code when present, but log (do not surface) exchange errors.
+- Read the session via `supabase.auth.getUser()` as the single source of truth for routing.
+- If no user session exists, redirect to `/auth/sign-in?error=sign-in-required` (retry path) rather than the dead-end error page.
+- Keep `/auth/error` for genuine failures only (e.g., profile upsert failure).
+
+**Consequences:**
+- Eliminates the "Sign-in failed despite successful OAuth" race.
+- Stale/replayed callback codes no longer produce a false failure.
+- `/auth/error` becomes a real-failure surface instead of a default fallback.
+- Requires `getUser()` (verified session, hits Supabase) rather than a cached `getSession()` — already the project convention.
+
+---
+
 ## ADR-050 — Tip Refund Policy: Claw Back Net from Balance
 
 **Status:** Accepted · 2026-08-16

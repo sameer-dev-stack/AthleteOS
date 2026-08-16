@@ -3,6 +3,25 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-16 — Session: Fix OAuth Callback Race (Session Is Source of Truth)
+
+### What changed
+- `app/auth/callback/route.ts`:
+  - **Race fix** — the callback no longer bounces to `/auth/error` when `exchangeCodeForSession(code)` fails or the `code` param is missing. Previously the exchange result was treated as the source of truth: a replayed/expired code (retried callback, stale PKCE `code_verifier`, or a browser that re-hit the callback URL after success) would show "Sign-in failed" even though a valid session already existed — while the OAuth exchange had genuinely succeeded on Google/Supabase's side.
+  - The route now always exchanges the code if present (logging but not surfacing exchange errors), then reads the session via `supabase.auth.getUser()` as the single source of truth.
+  - If `getUser()` returns no user, the route redirects to `/auth/sign-in?error=sign-in-required` instead of the error page (gives the user a chance to sign in again rather than a dead-end failure screen).
+  - Genuine failures still surface: profile upsert errors redirect to `/auth/error?message=Could not create profile`.
+
+### Why
+- User reported the classic OAuth race: sign-in succeeds on Google's/Supabase's side but the app shows "Sign-in failed" before the session state propagates. Root cause traced to `app/auth/callback/route.ts` treating a failed `exchangeCodeForSession` (or absent `code`) as a hard failure without first checking whether a session already exists.
+
+### Files touched
+- `app/auth/callback/route.ts`
+
+### Verification
+- `npm run lint` — 0 errors, 11 pre-existing warnings.
+- `npm run build` — green.
+
 ## 2026-08-16 — Session: Free-Tier Analytics Paywall & Overview UX Redesign
 
 ### What changed
