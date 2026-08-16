@@ -1069,7 +1069,7 @@ export default function OnboardingPage() {
               <div>
                 <h1 className="text-2xl font-bold tracking-tight">Show your numbers</h1>
                 <p className="mt-2 text-sm text-ink-muted">
-                  At least one stat is required. The first 3 appear on the front of your card.
+                  At least one stat is required. Stats appear on the front of your card.
                 </p>
               </div>
 
@@ -1115,7 +1115,7 @@ export default function OnboardingPage() {
                     </button>
                   </div>
                 ))}
-                {stats.length < 10 && (
+                {stats.length < 3 && (
                   <button
                     onClick={() => setStats((prev) => [...prev, { label: "", value: "" }])}
                     className="flex items-center gap-1.5 text-sm text-ink-muted hover:text-accent transition-colors"
@@ -1124,26 +1124,26 @@ export default function OnboardingPage() {
                     Add stat
                   </button>
                 )}
-                <p className="text-[11px] text-ink-dim mt-1">{stats.length}/10 stats</p>
+                <p className="text-[11px] text-ink-dim mt-1">{stats.length}/3 stats</p>
               </div>
 
-              {availableStatTemplates.length > 0 && stats.length < 10 && (
-                <div className="mt-4 rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
-                  <p className="text-xs font-medium text-ink-muted mb-2">Quick add {sport} stats:</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {availableStatTemplates.slice(0, 8).map((t) => (
-                      <button
-                        key={t.label}
-                        onClick={() => setStats((prev) => [...prev, { label: t.label, value: "" }])}
-                        className="rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-xs text-ink-muted hover:border-accent/40 hover:text-accent transition-colors"
-                        title={t.example}
-                      >
-                        {t.label}
-                      </button>
-                    ))}
+              {availableStatTemplates.length > 0 && stats.length < 3 && (
+                  <div className="mt-4 rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
+                    <p className="text-xs font-medium text-ink-muted mb-2">Quick add {sport} stats:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {availableStatTemplates.slice(0, 8).map((t) => (
+                        <button
+                          key={t.label}
+                          onClick={() => setStats((prev) => [...prev, { label: t.label, value: "" }])}
+                          className="rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-xs text-ink-muted hover:border-accent/40 hover:text-accent transition-colors"
+                          title={t.example}
+                        >
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {stats.length > 0 && !canProceedStats && (
                 <p className="mt-3 text-xs text-red-400">

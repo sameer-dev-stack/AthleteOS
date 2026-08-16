@@ -85,7 +85,7 @@ const UpdateProfileSchema = z.object({
   bio: z.string().max(280).nullable().optional(),
   avatar_url: z.string().max(500).nullable().optional(),
   cover_url: z.string().max(500).nullable().optional(),
-  stats: z.array(StatSchema).max(10).optional(),
+  stats: z.array(StatSchema).max(3).optional(),
   links: z.array(LinkSchema).max(10).optional(),
   social: SocialSchema.optional(),
   highlights: z.array(HighlightSchema).max(10).optional(),

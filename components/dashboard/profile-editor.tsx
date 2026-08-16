@@ -758,12 +758,12 @@ function StatsEditor({
   const [activePicker, setActivePicker] = useState<number | null>(null);
 
   function addStat() {
-    if (stats.length >= 10) return;
+    if (stats.length >= 3) return;
     onChange([...stats, { label: "", value: "", icon: null }]);
   }
 
   function addFromTemplate(template: { label: string; placeholder: string; example: string }) {
-    if (stats.length >= 10) return;
+    if (stats.length >= 3) return;
     onChange([...stats, { label: template.label, value: "", icon: null }]);
   }
 
@@ -781,7 +781,7 @@ function StatsEditor({
     <div className="space-y-3">
       <p className="text-xs text-ink-dim">
         Add key stats that show up on your public card (e.g., PPG, GPA, 40-yard
-        dash). The first 3 are featured on the front face of your card — reorder
+        dash). Stats appear on the front face of your card — reorder
         by removing and re-adding, or clear a row to push others up.
       </p>
       {stats.length === 0 ? (
@@ -815,7 +815,7 @@ function StatsEditor({
                 {i < 3 ? (
                   <span
                     className="flex w-9 shrink-0 justify-center rounded-md border border-accent/30 bg-accent/10 text-[8px] font-bold uppercase tracking-wide text-accent py-1"
-                    title="Featured on the front of your card"
+                    title="Featured on your card"
                   >
                     ★
                   </span>
@@ -906,7 +906,7 @@ function StatsEditor({
               </div>
             );
           })}
-          {stats.length < 10 && (
+          {stats.length < 3 && (
             <button
               onClick={addStat}
               className="flex items-center gap-1.5 text-sm text-ink-muted hover:text-accent transition-colors"
@@ -915,8 +915,8 @@ function StatsEditor({
               Add stat
             </button>
           )}
-          <p className="text-[11px] text-ink-dim mt-1">{stats.length}/10 stats</p>
-          {availableTemplates.length > 0 && stats.length < 10 && (
+          <p className="text-[11px] text-ink-dim mt-1">{stats.length}/3 stats</p>
+          {availableTemplates.length > 0 && stats.length < 3 && (
             <div className="mt-4 rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
               <p className="text-xs font-medium text-ink-muted mb-2">
                 Quick add {sport} stats:
