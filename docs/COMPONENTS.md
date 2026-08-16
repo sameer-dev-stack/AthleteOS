@@ -607,7 +607,7 @@ Premium standard-sized (360x504px) interactive trading card with 3D flip animati
 ## Dashboard Components (`components/dashboard/`)
 
 ### `<DashboardEditor>` — `components/dashboard/profile-editor.tsx`
-Tabbed profile editor with 7 sections (Bio, Stats, Links, Social, Highlights, Contact, Theme). Client component with local form state and optimistic save via `updateProfile` server action. Theme tab includes `<ThemePicker>` for accent color and layout customization.
+Tabbed profile editor with 7 sections (Bio, Stats, Links, Social, Highlights, Contact, Theme). Client component with local form state and optimistic save via `updateProfile` server action. Theme tab includes `<ThemePicker>` for accent color and layout customization. Tab strip is a single-line horizontal scroll rail (hidden scrollbar, `scrollbar-none` + `overscroll-x-contain`) with left/right gradient fades from `#111113` that appear when scrollable, and the active tab auto-scrolls into view (`tabRailRef`/`tabButtonRefs`, `ResizeObserver` + scroll listener updating `tabCanScrollLeft/Right`).
 - **Used by:** `app/dashboard/page.tsx`
 - **Props:**
   - `profile: Profile` — current profile data

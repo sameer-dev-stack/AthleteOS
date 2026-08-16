@@ -5,6 +5,27 @@
 
 ---
 
+## ADR-050 — Tip Refund Policy: Claw Back Net from Balance
+
+**Status:** Accepted · 2026-08-16
+
+**Context:**
+When a fan requests a refund for a platform-collected tip, the athlete's balance has already been credited the net payout. Stripe retains its processing fee on refunds, so a full reversal of the original gross is impossible without the platform eating more than the fee. The policy needed to decide what is debited from the athlete's balance and whether the tip stays in their earnings history.
+
+**Decision:**
+Claw back only the athlete's net from their balance; the platform absorbs the `stripe_fee`. Refund handling in the `charge.refunded` webhook handler:
+- Full refund → `net_amount = 0`, `status = "refunded"` (drops out of earned, which is `net_amount` where `status = succeeded`).
+- Partial refund → `net_amount` reduced proportionally (`min(1, amount_refunded / charge.amount)`), status unchanged, so the remaining earned amount stays credited.
+- Missing tip or already-refunded tip → skip; update failure → throw so Stripe retries the event.
+
+**Consequences:**
+- Athletes never owe more than what they were credited; the platform covers the non-refundable Stripe fee.
+- Refunded tips disappear from the earnings/balance totals, matching the `status = succeeded` accounting in `getBalanceSummary`.
+- Partial refunds keep the remaining net in the balance rather than zeroing the tip.
+- No UI surfaces refunds as "negative" earnings — they are simply removed from the balance.
+
+---
+
 ## ADR-001 — Use Next.js 14 App Router
 
 **Status:** Accepted · 2026-06-06

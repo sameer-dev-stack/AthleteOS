@@ -3,6 +3,37 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-16 — Session: Tip Refund Clawback + Profile Editor Tab Rail UX
+
+### What changed
+- `app/api/stripe/webhook/route.ts`: added `charge.refunded` handler (event already in `ALLOWED_EVENTS`):
+  - Resolves the tip by `stripe_payment_intent_id`, skips when no tip exists or status is already `refunded`.
+  - Handles partial refunds: `refundRatio = min(1, amount_refunded / charge.amount)`, clawback scales `net_amount` proportionally, `net_amount` clamped to 0.
+  - Marks the tip `status = "refunded"` only when the charge is fully refunded.
+  - Stripe does not return its processing fee on refunds, so only the athlete's credited net is reversed — the platform absorbs the `stripe_fee`.
+  - Revalidates `/dashboard` and `/dashboard/billing`; throws on update error so Stripe retries.
+- `components/dashboard/profile-editor.tsx`: tab strip UX polish for narrow/mobile widths:
+  - Tab strip is now a single-line horizontally scrollable rail with the scrollbar hidden (`overflow-x-auto scrollbar-none overscroll-x-contain`).
+  - Left/right gradient fade overlays (from `#111113`) fade in when content is scrolled/scrollable, hinting at more tabs.
+  - Selected tab auto-scrolls into view (centered) on selection change and resize.
+  - `flex-shrink-0` on tab buttons so they never compress; all 7 sections preserved.
+
+### Why
+- Refund policy decision (user-confirmed): when a fan refunds a tip, the athlete's balance must be debited back. Because Stripe retains the processing fee on refunds, only the net credited to the balance is clawed back — this matches the `getBalanceSummary` "earned = net_amount where status = succeeded" semantics, where flipping status to `refunded` removes the tip from earned.
+- The profile editor tab strip previously clipped section tabs on small screens with no affordance that more tabs existed. A hidden-scrollbar rail with edge fades and auto-scroll makes the strip mobile-friendly while staying compact on desktop.
+
+### Files touched
+- `app/api/stripe/webhook/route.ts`
+- `components/dashboard/profile-editor.tsx`
+
+### Verification
+- `npx jest __tests__/tip-payout.test.ts` — 11 passed.
+- `npm run lint` — 0 errors, 11 pre-existing warnings.
+- `npm run build` — green.
+
+### Commit
+`eaae745` (tab rail, swept in by parallel session) + webhook change (see this session's push)
+
 ## 2026-08-15 — Session 2: Fix Optimistic Tip Success Bug
 
 ### What changed

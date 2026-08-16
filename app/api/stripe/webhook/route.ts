@@ -230,6 +230,72 @@ export async function POST(request: NextRequest) {
         break;
       }
 
+      case "charge.refunded": {
+        // Claw back the net payout from the athlete's balance. Stripe does not
+        // return its processing fee on refunds, so the platform absorbs the
+        // stripe_fee; only the athlete's net (which was credited to their
+        // balance as earned) is reversed.
+        const charge = event.data.object as Stripe.Charge;
+        const paymentIntentId =
+          typeof charge.payment_intent === "string"
+            ? charge.payment_intent
+            : charge.payment_intent?.id ?? null;
+
+        if (!paymentIntentId) {
+          console.log("[webhook] charge.refunded missing payment_intent — skipping");
+          break;
+        }
+
+        const { data: tip } = await supabase
+          .from("tips")
+          .select("id, net_amount, status")
+          .eq("stripe_payment_intent_id", paymentIntentId)
+          .single();
+
+        if (!tip) {
+          console.log("[webhook] charge.refunded — no tip found for PI", paymentIntentId);
+          break;
+        }
+
+        if (tip.status === "refunded") {
+          console.log("[webhook] charge.refunded — tip already refunded, skipping", tip.id);
+          break;
+        }
+
+        // Refunds may be partial. Scale the clawback by the refunded fraction.
+        const chargeAmount = charge.amount ?? 0;
+        const refundedAmount = charge.amount_refunded ?? 0;
+        const refundRatio = chargeAmount > 0 ? Math.min(1, refundedAmount / chargeAmount) : 1;
+        const clawbackCents = Math.round((tip.net_amount ?? 0) * refundRatio);
+        const newNetAmount = Math.max(0, (tip.net_amount ?? 0) - clawbackCents);
+
+        const isFullyRefunded = refundRatio >= 1;
+
+        const { error: updateErr } = await supabase
+          .from("tips")
+          .update({
+            net_amount: newNetAmount,
+            status: isFullyRefunded ? "refunded" : tip.status,
+          })
+          .eq("id", tip.id);
+
+        if (updateErr) {
+          console.error("[webhook] charge.refunded clawback FAILED:", updateErr);
+          throw new Error(`Failed to claw back refunded tip ${tip.id}: ${updateErr.message}`);
+        }
+
+        console.log("[webhook] charge.refunded clawed back:", {
+          tipId: tip.id,
+          refundRatio,
+          clawbackCents,
+          newNetAmount,
+          status: isFullyRefunded ? "refunded" : tip.status,
+        });
+        revalidatePath("/dashboard");
+        revalidatePath("/dashboard/billing");
+        break;
+      }
+
       case "customer.subscription.created":
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription;
