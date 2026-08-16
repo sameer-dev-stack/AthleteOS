@@ -324,10 +324,9 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  /* Cull the rotated-away face during the 3D flip instead of
-     compositing both heavy faces every frame on mobile */
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
+  transform-style: preserve-3d;
   will-change: transform;
 }
 
