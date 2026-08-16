@@ -21,7 +21,7 @@
 - `npm run build` — green.
 
 ### Commit
-- *(pending — fill after push)*
+- `b29a305`
 
 ## 2026-08-16 — Session: Restore Premium Border Glow on Mobile (Static Mesh, No Sweep)
 
