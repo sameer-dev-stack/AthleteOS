@@ -112,7 +112,7 @@
 - Brand-ready profile that gets you taken seriously
 
 **Live profile preview card:**
-- URL: `nilcard.app/maya` · Live profile chip
+- URL: `www.nilcard.app/maya` · Live profile chip
 - Bio · AI-drafted in 4 sec
 - Stats card · PPG · APG · Reach
 - Highlight reel · 3 videos · 14K plays
@@ -153,7 +153,7 @@
 > No agency. No web designer. No copywriter. Just you, your card, and a platform built specifically for the way athletes make money in 2026.
 
 **4 steps:**
-1. **Claim your athlete card** — Sign up, drop your sport and school, and grab your custom URL: `nilcard.app/yourname`. *Takes under 2 minutes. Free to start.*
+1. **Claim your athlete card** — Sign up, drop your sport and school, and grab your custom URL: `www.nilcard.app/yourname`. *Takes under 2 minutes. Free to start.*
 2. **Let AI build the first draft** — Generate your bio, captions, and sponsor pitches in one click. Edit, approve, publish. *5 free AI generations included.*
 3. **Plug in monetization** — Turn on tips, paid shoutouts, merch, and brand inquiries — all in one card. *Powered by Stripe. Direct deposit.*
 4. **Share it everywhere** — Drop your link in every bio. Fans support you. Brands DM you. The card does the rest. *Tracked, analyzed, and optimized.*

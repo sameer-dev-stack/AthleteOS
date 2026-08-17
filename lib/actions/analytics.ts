@@ -207,7 +207,7 @@ export async function generateShareableReport(
       return { ok: false, error: error.message };
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app";
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app";
     const url = `${siteUrl}/api/analytics-report/${token}`;
 
     return { ok: true, token, url };
@@ -393,7 +393,7 @@ export async function sendAnalyticsReportEmail(
 
     const { Resend } = await import("resend");
     const resend = new Resend(RESEND_API_KEY);
-    const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app";
+    const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app";
 
     const referrerRows = d.topReferrers.slice(0, 5).map(r =>
       `<tr><td style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);color:#fff;font-size:13px;">${r.referrer}</td><td style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);color:#C6FF3D;font-size:13px;text-align:right;">${r.count.toLocaleString()}</td></tr>`

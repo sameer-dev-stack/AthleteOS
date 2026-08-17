@@ -135,7 +135,7 @@ function ogSvg() {
 
   <!-- Bottom bar -->
   <g transform="translate(0,560)">
-    <text x="80" y="0" font-family="Inter, system-ui, sans-serif" font-size="20" fill="${INK_DIM}">nilcard.app</text>
+    <text x="80" y="0" font-family="Inter, system-ui, sans-serif" font-size="20" fill="${INK_DIM}">www.nilcard.app</text>
     <g transform="translate(960,-22)">
       <rect width="160" height="44" rx="22" fill="${ACCENT}"/>
       <text x="32" y="28" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" fill="#0A0A0B">Join the waitlist</text>

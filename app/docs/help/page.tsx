@@ -24,7 +24,7 @@ export default function HelpCenterPage() {
               <h2 className="text-xl font-bold text-white">How do I create my athlete card?</h2>
               <p className="mt-3 text-sm leading-relaxed text-ink-muted">
                 Sign up for free, complete the onboarding flow, and your card will be live at
-                nilcard.app/your-username. You can customize your card from the Profile Editor
+                www.nilcard.app/your-username. You can customize your card from the Profile Editor
                 in your dashboard.
               </p>
             </section>

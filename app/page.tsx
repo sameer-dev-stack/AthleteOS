@@ -3,7 +3,7 @@ import { Navbar } from "@/components/navbar";
 import { Hero } from "@/components/hero";
 import { LandingSections } from "@/components/landing-sections";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app";
 
 const jsonLd = {
   "@context": "https://schema.org",

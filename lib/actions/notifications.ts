@@ -166,7 +166,7 @@ export async function getSystemNotifications(): Promise<{
           id: "sys-card-live",
           type: "published",
           title: "Athlete Card Live 🚀",
-          message: `Your card is live at nilcard.app/${profile.username || ""}. Share it to get inquiries!`,
+          message: `Your card is live at www.nilcard.app/${profile.username || ""}. Share it to get inquiries!`,
           createdAt: profile.created_at,
           link: `/${profile.username}`,
         });

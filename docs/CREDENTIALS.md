@@ -71,7 +71,7 @@ Run via Supabase Management API. The `supabase/schema.sql` file already includes
 |------|-------|
 | Project name | `athlete-os` |
 | Team/account | `sameer-dev-stack` |
-| Production URL | `https://athlete-os-vert.vercel.app` |
+| Production URL | `https://www.nilcard.app` (canonical); deploy URL `https://athlete-os-vert.vercel.app` |
 | Project ID | `prj_ysAdRgOP9l40afrTbzQb0vPokiBD` |
 | Deployments | https://vercel.com/sameer-projects/athlete-os/deployments |
 | SSO Protection | `none` (disabled in Session 12 for public access) |
@@ -93,7 +93,7 @@ These must be set in Vercel Dashboard → Settings → Environment Variables for
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard → Settings → API |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Settings → API |
 | `RESEND_API_KEY` | Resend Dashboard → API Keys |
-| `NEXT_PUBLIC_SITE_URL` | `https://nilcard.app` |
+| `NEXT_PUBLIC_SITE_URL` | `https://www.nilcard.app` |
 | `STRIPE_SECRET_KEY` | Stripe Dashboard → Developers → API keys |
 | `STRIPE_PUBLISHABLE_KEY` | Stripe Dashboard → Developers → API keys |
 | `STRIPE_WEBHOOK_SECRET` | Stripe Dashboard → Developers → Webhooks |
@@ -267,7 +267,7 @@ ANALYTICS_IP_HASH_SECRET=<generated-local-secret>
 
 | URL | Purpose |
 |-----|---------|
-| https://nilcard.app | Canonical production domain (SEO target) |
+| https://www.nilcard.app | Canonical production domain (SEO target) |
 | https://athlete-os-vert.vercel.app | Vercel deployment URL (redirects/non-canonical) |
 | http://localhost:3000 | Local dev server |
 | http://localhost:3000/api/waitlist | Local waitlist count API |

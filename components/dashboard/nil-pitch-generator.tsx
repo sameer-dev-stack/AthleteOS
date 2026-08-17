@@ -44,7 +44,7 @@ Best regards,
 
 ${athleteName}
 ${sport} | ${school}
-NIL CARD Profile: https://nilcard.app`,
+NIL CARD Profile: https://www.nilcard.app`,
 
     followup: `Hi ${cleanBrand} team,
 

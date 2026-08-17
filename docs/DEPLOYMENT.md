@@ -11,7 +11,7 @@
 | Source control | GitHub — `sameer-dev-stack/AthleteOS` |
 | CI / Build / Host | Vercel — project `athlete-os` (Sameer's projects · Hobby) |
 | Branch → environment | `main` → Production · all other branches → Preview |
-| Domain | `*.vercel.app` (default); custom domain TBD |
+| Domain | `www.nilcard.app` (canonical) + `nilcard.app` + `*.vercel.app` (deploy) |
 | Database | Supabase Postgres — `nkyedqekfligqhrnwkqt` (Tokyo) |
 | Auth | Supabase Auth (email/password + Google OAuth) |
 | Email | Resend — transactional emails |
@@ -139,7 +139,7 @@ Add these to the Vercel project (Settings → Environment Variables):
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard → Settings → API | Supabase client |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Settings → API | Server actions, admin |
 | `RESEND_API_KEY` | Resend Dashboard → API Keys | Confirmation emails |
-| `NEXT_PUBLIC_SITE_URL` | `https://nilcard.app` | OAuth redirects, email links, canonical URLs |
+| `NEXT_PUBLIC_SITE_URL` | `https://www.nilcard.app` | OAuth redirects, email links, canonical URLs |
 | `ANALYTICS_IP_HASH_SECRET` | Generated local secret | Server-side viewer IP hashing for analytics |
 
 ### Local Dev
@@ -235,13 +235,17 @@ Currently using `onboarding@resend.dev` (Resend's default sandbox). To use a cus
 - **Email/Password** — built-in, no setup needed
 - **Google OAuth** — requires Google Cloud Console setup
 
-### Google OAuth Setup (when ready)
+### Google OAuth Setup
 
 1. Go to https://console.cloud.google.com/apis/credentials
 2. Create OAuth 2.0 Client ID
 3. Add authorized redirect URI: `https://nkyedqekfligqhrnwkqt.supabase.co/auth/v1/callback`
 4. Copy Client ID + Client Secret
 5. In Supabase Dashboard → Authentication → Providers → Google → paste credentials
+6. In Supabase Dashboard → Authentication → URL Configuration → Site URL must be `https://www.nilcard.app`, and **Redirect URLs** must include `https://www.nilcard.app/**` (and `http://localhost:3000/**` for dev).
+7. In Vercel, set `NEXT_PUBLIC_SITE_URL=https://www.nilcard.app` (and `NEXT_PUBLIC_APP_URL=https://www.nilcard.app`) and redeploy.
+
+> **OAuth redirect host allowlist** — `lib/actions/auth.ts` (`signInWithGoogle`) builds the post-Google callback URL from the request host, but only trusts a host allowlist (`NEXT_PUBLIC_SITE_URL` host, its bare/www variant, and localhost) before passing it to Supabase. If the visitor's host isn't allowed, it falls back to `NEXT_PUBLIC_SITE_URL`. So if `NEXT_PUBLIC_SITE_URL` is stale (e.g. still the old Vercel domain), Google OAuth returns users to the OLD domain. Fix: keep `NEXT_PUBLIC_SITE_URL=https://www.nilcard.app` in Vercel + Supabase URL Configuration. The allowlist now also accepts `nilcard.app` (bare) and `www.nilcard.app` regardless of which is configured.
 
 ---
 
@@ -287,7 +291,7 @@ To re-auth on a new machine, repeat the three commands above.
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard → Settings → API | Supabase client |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Settings → API | Server actions, admin |
 | `RESEND_API_KEY` | Resend Dashboard → API Keys | Confirmation emails |
-| `NEXT_PUBLIC_SITE_URL` | `https://nilcard.app` | OAuth redirects, email links, canonical URLs |
+| `NEXT_PUBLIC_SITE_URL` | `https://www.nilcard.app` | OAuth redirects, email links, canonical URLs |
 
 **Rule:** Never commit `.env` files. `.gitignore` already covers `.env*`.
 
@@ -295,15 +299,16 @@ To re-auth on a new machine, repeat the three commands above.
 
 ## Domain setup
 
-The canonical production domain is `nilcard.app`.
+The canonical production domain is `www.nilcard.app` (the bare `nilcard.app` also resolves and is accepted by the OAuth host allowlist).
 
 To go live:
-1. Ensure `nilcard.app` DNS points at Vercel (A record → `76.76.21.21` or CNAME → `cname.vercel-dns.com`)
-2. Add domain in Vercel: Project Settings → Domains
+1. Ensure `nilcard.app` + `www.nilcard.app` DNS point at Vercel (A record → `76.76.21.21` or CNAME → `cname.vercel-dns.com`)
+2. Add domains in Vercel: Project Settings → Domains
 3. Add DNS records as Vercel instructs
 4. SSL auto-provisions in <60s
-5. Set `NEXT_PUBLIC_SITE_URL` to `https://nilcard.app` in Vercel env vars
-6. (Optional) 301 the `athlete-os-vert.vercel.app` deployment URL to `nilcard.app` in Vercel Project Settings → Redirects
+5. Set `NEXT_PUBLIC_SITE_URL` to `https://www.nilcard.app` in Vercel env vars
+6. (Optional) 301 the `athlete-os-vert.vercel.app` deployment URL to `https://www.nilcard.app` in Vercel Project Settings → Redirects
+7. Update Supabase Dashboard → Authentication → URL Configuration → Site URL + Redirect URLs to include `https://www.nilcard.app/**` (see Google OAuth Setup above)
 
 ---
 

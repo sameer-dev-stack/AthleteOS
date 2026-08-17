@@ -137,7 +137,7 @@ export function DashboardOverview({ profile: initialProfile, promo }: Props) {
 
   async function handleShareCard() {
     haptic.lightTap();
-    const url = `${process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app"}/${profile.username}`;
+    const url = `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app"}/${profile.username}`;
     if (navigator.share) {
       try {
         await navigator.share({ title: `${cardName} on NIL CARD`, text: "Check out my athlete card", url });
@@ -492,7 +492,7 @@ export function DashboardOverview({ profile: initialProfile, promo }: Props) {
                   {/* Bottom bar: URL + actions */}
                   <div className="mt-3 flex items-center justify-between">
                     <span className="text-[11px] font-medium text-white/25 truncate max-w-[150px]">
-                      nilcard.app/{profile.username}
+                      www.nilcard.app/{profile.username}
                     </span>
                     <div className="flex items-center gap-1.5">
                       <button
@@ -553,7 +553,7 @@ export function DashboardOverview({ profile: initialProfile, promo }: Props) {
       )}
       {profile.username && (
         <QrShareModal
-          url={`${process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app"}/${profile.username}`}
+          url={`${process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app"}/${profile.username}`}
           open={showQr}
           onClose={() => setShowQr(false)}
         />

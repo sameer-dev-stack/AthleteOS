@@ -5,20 +5,20 @@
 
 ---
 
-## ADR-057 — Lock `nilcard.app` as the Canonical SEO Domain
+## ADR-057 — Lock `www.nilcard.app` as the Canonical SEO Domain
 
-**Status:** Accepted · 2026-08-16
+**Status:** Accepted (updated) · 2026-08-16
 
 **Context:**
-An SEO audit found critical domain chaos. The code's `NEXT_PUBLIC_SITE_URL` fallback is `https://nilcard.app`, but the live HTML canonicals/og:url/JSON-LD pointed at `https://athlete-os-vert.vercel.app` (the env var is set to the vercel URL in prod). `nilcard.app` serves the same content (a second live domain), and `docs/CREDENTIALS.md` + `.env.example` incorrectly listed `https://athleteos.app` — which is a completely different product (an AI lifting-coaching app). Search engines were seeing duplicate sites, split link signals, and mismatched canonicals between robots.txt, sitemap.xml, and page canonicals.
+An SEO audit found critical domain chaos. The code's `NEXT_PUBLIC_SITE_URL` fallback was `https://nilcard.app`, but the live HTML canonicals/og:url/JSON-LD pointed at `https://athlete-os-vert.vercel.app` (the env var is set to the vercel URL in prod). `nilcard.app` serves the same content (a second live domain), and `docs/CREDENTIALS.md` + `.env.example` incorrectly listed `https://athleteos.app` — which is a completely different product (an AI lifting-coaching app). Search engines were seeing duplicate sites, split link signals, and mismatched canonicals between robots.txt, sitemap.xml, and page canonicals. Separately, Google OAuth was returning users to the OLD Vercel domain because the `signInWithGoogle` host allowlist fell back to a stale `NEXT_PUBLIC_SITE_URL`.
 
 **Decision:**
-`nilcard.app` is the ONE canonical production domain. All SEO output (canonical, og:url, sitemap, robots.txt sitemap line, JSON-LD URLs) must resolve to `nilcard.app`. The Vercel deployment URL stays but is non-canonical (optionally 301-redirected). `athleteos.app` is explicitly documented as a different product and never used.
+`www.nilcard.app` is the ONE canonical production domain. All SEO output (canonical, og:url, sitemap, robots.txt sitemap line, JSON-LD URLs) must resolve to `www.nilcard.app`. The Vercel deployment URL stays but is non-canonical (optionally 301-redirected). `athleteos.app` is explicitly documented as a different product and never used. The bare `nilcard.app` resolves and is accepted by the OAuth host allowlist, so visitors on either host get OAuth callbacks on their own host.
 
 **Consequences:**
-- Code now derives URLs from `NEXT_PUBLIC_SITE_URL || "https://nilcard.app"` everywhere (robots.ts, sitemap.ts, page.tsx, [username]/page.tsx already did).
-- Deployment action required (not code): set `NEXT_PUBLIC_SITE_URL=https://nilcard.app` in Vercel env and redeploy, so live canonicals flip to nilcard.app. Optionally add a 301 from `athlete-os-vert.vercel.app` in Vercel Project Settings → Redirects.
-- Duplicate-content risk between nilcard.app and the vercel URL remains until the redirect is added.
+- Code now derives URLs from `NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app"` everywhere (robots.ts, sitemap.ts, page.tsx, [username]/page.tsx already did).
+- Deployment action required (not code): set `NEXT_PUBLIC_SITE_URL=https://www.nilcard.app` in Vercel env and redeploy, plus Supabase Dashboard → Authentication → URL Configuration → Site URL + Redirect URLs (`https://www.nilcard.app/**`). Without this, Google OAuth still returns users to the stale URL.
+- Duplicate-content risk between nilcard.app/www and the vercel URL remains until the redirect is added.
 
 ---
 

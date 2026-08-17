@@ -65,7 +65,7 @@ export function Solution() {
                     <div className="mb-5 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div className="h-2 w-2 rounded-full bg-accent animate-pulse-soft" />
-                        <span className="font-mono text-[11px] text-ink-muted">nilcard.app/maya</span>
+                        <span className="font-mono text-[11px] text-ink-muted">www.nilcard.app/maya</span>
                       </div>
                       <span className="chip">Live profile</span>
                     </div>

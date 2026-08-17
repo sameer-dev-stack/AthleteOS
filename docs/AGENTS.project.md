@@ -12,7 +12,7 @@ Built as a startup-grade conversion page that scales into the athlete's full NIL
 
 **Repo:** https://github.com/sameer-dev-stack/AthleteOS
 **Local path:** `C:\Users\Sameer\Desktop\NIL`
-**Live (canonical):** `https://nilcard.app` · **Live (Vercel deploy):** `https://athlete-os-vert.vercel.app`
+**Live (canonical):** `https://www.nilcard.app` · **Live (Vercel deploy):** `https://athlete-os-vert.vercel.app`
 
 ---
 

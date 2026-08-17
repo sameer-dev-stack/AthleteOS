@@ -252,10 +252,12 @@
 - `npm test` — all 9 test suites / 54 tests passed.
 - `npm run build` — compiled successfully with zero errors.
 
-## 2026-08-16 — Session: SEO/SEM Foundation — Canonical Domain, Robots, Sitemap, Noindex, Structured Data
+## 2026-08-16 — Session: SEO/SEM Foundation + Fix Google OAuth Redirecting to Old Domain
 
 ### What changed
-- **Canonical domain locked to `nilcard.app`** (user decision). Fixed every source that claimed otherwise:
+- **Canonical domain changed to `www.nilcard.app`** (user decision; was `nilcard.app`). Every URL fallback, display string, and doc now uses `https://www.nilcard.app`. The bare `nilcard.app` still resolves and is accepted by the OAuth host allowlist.
+- **Fixed Google OAuth returning users to the OLD domain.** Root cause in `lib/actions/auth.ts` (`signInWithGoogle`): the host allowlist compared the visitor's host against `NEXT_PUBLIC_SITE_URL`'s host, and fell back to `SITE_URL` for any non-matching host. In production `NEXT_PUBLIC_SITE_URL` was still the old Vercel domain (`athlete-os-vert.vercel.app`), so anyone on `www.nilcard.app` got a Google callback URL pointing at the old domain. Fix: the allowlist now accepts the site host AND its bare/www variant (plus localhost), so `nilcard.app` and `www.nilcard.app` both resolve regardless of which is configured. Requires the deployment-side fix too: `NEXT_PUBLIC_SITE_URL=https://www.nilcard.app` in Vercel + Supabase URL Configuration (Site URL + Redirect URLs `https://www.nilcard.app/**`).
+- **Canonical domain locked to `nilcard.app`** (earlier in session; now superseded to `www.nilcard.app`). Fixed every source that claimed otherwise:
   - `.env.example` — `NEXT_PUBLIC_SITE_URL`/`NEXT_PUBLIC_APP_URL` corrected from the wrong `https://athleteos.app` to `https://nilcard.app`. (`athleteos.app` is a DIFFERENT product — an AI lifting-coaching app, not this project.)
   - `docs/CREDENTIALS.md` — env table + Important URLs updated; `athleteos.app` now flagged as a different product, `nilcard.app` marked canonical, `athlete-os-vert.vercel.app` marked as the (non-canonical) deployment URL.
   - `docs/DEPLOYMENT.md` — both `NEXT_PUBLIC_SITE_URL` tables now `https://nilcard.app`; Domain setup section rewritten (register → point DNS at Vercel, set env var, optional 301 from the vercel URL).
@@ -271,10 +273,12 @@
 - SEO audit found critical domain chaos: code default `nilcard.app` vs live HTML canonicals pointing at `athlete-os-vert.vercel.app` vs wrong `athleteos.app` in docs/env. Search engines were seeing duplicate sites, split signals, and mismatched canonicals. Also: thin sitemap (only `/`, `/discover`, athlete URLs), junk test URLs in the sitemap, indexable auth/dashboard/admin pages (crawl-budget leak), hardcoded robots sitemap, and no FAQ structured data despite an on-page FAQ.
 
 ### Files touched
-- `app/robots.ts`, `app/sitemap.ts`, `app/page.tsx`, `scripts/gen-og.js`, `.env.example`
+- `lib/actions/auth.ts` — OAuth host allowlist fix + `SITE_URL` fallback → `https://www.nilcard.app`
+- `app/robots.ts`, `app/sitemap.ts`, `app/page.tsx`, `app/layout.tsx`, `app/[username]/page.tsx`, `scripts/gen-og.js`, `.env.example`
+- URL fallbacks/display strings updated to `https://www.nilcard.app`: `app/onboarding/page.tsx`, `app/r/[code]/page.tsx`, `app/api/og/[username]/route.tsx`, `app/docs/help/page.tsx`, `app/feedback/page.tsx`, `lib/actions/{emails,referrals,analytics,stripe,notifications}.ts`, `lib/stripe-billing.ts`, `components/dashboard/{overview,profile-editor,settings-panel,business-dashboard,nil-pitch-generator}.tsx`, `components/{onboarding/welcome-modal,how-it-works,profile-card,solution}.tsx`
 - New: `app/auth/layout.tsx`, `app/onboarding/layout.tsx`, `app/offline/layout.tsx`, `app/brands/setup/layout.tsx`, `app/brands/dashboard/layout.tsx`, `app/teams/setup/layout.tsx`
 - `app/dashboard/layout.tsx`, `app/admin/page.tsx`, `app/stripe/status/page.tsx`, `app/suspended/page.tsx`
-- Docs: `docs/CREDENTIALS.md`, `docs/DEPLOYMENT.md`, `docs/CONTEXT.md`, `docs/PRODUCT_SPECIFICATION.md`, `docs/VISION.md`, `docs/ROADMAP.md`, `docs/DESIGN_SYSTEM.md`, `docs/COPY.md`, `docs/AGENTS.project.md`, `docs/brain/master-memory.md`, `docs/CHANGELOG.md`, `docs/DECISIONS.md`
+- Docs: `docs/CREDENTIALS.md`, `docs/DEPLOYMENT.md`, `docs/CONTEXT.md`, `docs/PRODUCT_SPECIFICATION.md`, `docs/VISION.md`, `docs/ROADMAP.md`, `docs/DESIGN_SYSTEM.md`, `docs/COPY.md`, `docs/AGENTS.project.md`, `docs/brain/master-memory.md`, `docs/CHANGELOG.md`, `docs/DECISIONS.md`, `docs/ARCHITECTURE.md`, `docs/COMPONENTS.md`
 
 ### Verification
 - `npm run lint` — 0 errors, 11 pre-existing warnings (baseline).

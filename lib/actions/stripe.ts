@@ -62,8 +62,8 @@ export async function createTipSession(
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app"}/${athlete.username}?tip=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app"}/${athlete.username}?tip=cancelled`,
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app"}/${athlete.username}?tip=success`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app"}/${athlete.username}?tip=cancelled`,
       metadata: {
         athleteos_athlete_id: athleteId,
         sender_email: senderEmail || "",

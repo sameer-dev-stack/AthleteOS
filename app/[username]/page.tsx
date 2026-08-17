@@ -8,7 +8,7 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app";
 
 function sanitizeJsonLd(input: string): string {
   return input.replace(/[<>]/g, "").replace(/&/g, "&amp;");

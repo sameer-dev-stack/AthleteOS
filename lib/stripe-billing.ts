@@ -76,8 +76,8 @@ export async function createCheckoutSession({
       interval,
       promo_trial: trialDays ? "launch_500" : null,
     },
-    success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app"}/dashboard?upgraded=${tier}${trialDays ? "&trial=claimed" : ""}`,
-    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app"}/dashboard?cancelled=true`,
+    success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app"}/dashboard?upgraded=${tier}${trialDays ? "&trial=claimed" : ""}`,
+    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app"}/dashboard?cancelled=true`,
   });
 
   return { url: session.url };
@@ -90,7 +90,7 @@ export async function createCustomerPortalSession({
 }): Promise<{ url: string | null; error?: string }> {
   const session = await stripe.billingPortal.sessions.create({
     customer: customerId,
-    return_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app"}/dashboard`,
+    return_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app"}/dashboard`,
   });
 
   return { url: session.url };

@@ -82,7 +82,7 @@ const INITIAL_FEATURES: Omit<Feature, "votes">[] = [
   {
     id: "custom-domain",
     title: "Custom Domain Support",
-    description: "Use your own domain like maya.com instead of nilcard.app/maya.",
+    description: "Use your own domain like maya.com instead of www.nilcard.app/maya.",
     category: "Platform",
     icon: Globe,
     status: "planned",

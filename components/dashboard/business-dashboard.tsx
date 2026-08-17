@@ -29,7 +29,7 @@ export function BusinessDashboard({ themeAccent = "#C6FF3D", username }: Props) 
   }, []);
 
   function handleShareCard() {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app";
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app";
     const url = username ? `${siteUrl}/${username}` : siteUrl;
     if (navigator.share) {
       navigator.share({ title: "Check out my athlete card", url }).catch(() => {});

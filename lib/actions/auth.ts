@@ -17,7 +17,7 @@ export type AuthResult = {
   email?: string;
 };
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app";
 const CONFIRM_EXPIRY_HOURS = 24;
 
 function getServiceClient() {
@@ -158,18 +158,24 @@ export async function signInWithGoogle(): Promise<void> {
 
   // Host allowlist: never trust x-forwarded-host blindly — it is attacker
   // controllable and would let an attacker steer the OAuth redirect to their
-  // own domain (session-token theft). Allow only the configured site URL and
-  // localhost (dev).
+  // own domain (session-token theft). Allow only the configured site URL, its
+  // www/bare variants, and localhost (dev).
   const headersList = await headers();
   const siteHost = new URL(SITE_URL).host;
   const forwardedHost = headersList.get("x-forwarded-host") ?? headersList.get("host");
   const host = forwardedHost ? forwardedHost.split(",")[0].trim() : siteHost;
   const hostName = host.replace(/:\d+$/, "");
   const proto = headersList.get("x-forwarded-proto") ?? "https";
-  const origin =
-    hostName === siteHost || hostName === "localhost" || hostName === "127.0.0.1"
-      ? `${proto}://${host}`
-      : SITE_URL;
+  const allowedHosts = new Set([
+    siteHost,
+    siteHost.replace(/^www\./, ""),
+    siteHost.startsWith("www.") ? `www.${siteHost.replace(/^www\./, "")}` : siteHost,
+    "localhost",
+    "127.0.0.1",
+  ]);
+  const origin = allowedHosts.has(hostName)
+    ? `${proto}://${host}`
+    : SITE_URL;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",

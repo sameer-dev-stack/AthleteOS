@@ -130,7 +130,7 @@ function CardImage(
           marginBottom: "0",
         }}
       >
-        nilcard.app/{username}
+        www.nilcard.app/{username}
       </div>
 
       {/* Bottom bar */}

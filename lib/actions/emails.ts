@@ -25,7 +25,7 @@ function emailLayout(content: string): string {
               <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:24px;">
                 <p style="color:#555557;font-size:12px;margin:0 0 8px;">
                   NIL CARD — The NIL operating system for athletes.<br>
-                  <a href="${SITE_URL}" style="color:#88888A;text-decoration:underline;">nilcard.app</a>
+                  <a href="${SITE_URL}" style="color:#88888A;text-decoration:underline;">www.nilcard.app</a>
                 </p>
                 <p style="color:#444446;font-size:11px;margin:0;">
                   <a href="${SITE_URL}/dashboard/notifications" style="color:#555557;text-decoration:underline;">Email preferences</a>
@@ -104,7 +104,7 @@ export async function sendConfirmationEmail(
                       <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:24px;">
                         <p style="color:#555557;font-size:12px;margin:0;">
                           NIL CARD — The NIL operating system for athletes.<br>
-                          <a href="${SITE_URL}" style="color:#88888A;text-decoration:underline;">nilcard.app</a>
+                          <a href="${SITE_URL}" style="color:#88888A;text-decoration:underline;">www.nilcard.app</a>
                         </p>
                       </div>
                     </td>
@@ -437,7 +437,7 @@ export async function sendPaymentFailedEmail(
                   <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#9A9AA3;">
                     To restore your Pro features, please update your payment method in the billing dashboard.
                   </p>
-                  <a href="${SITE_URL || "https://nilcard.app"}/dashboard/billing"
+                  <a href="${SITE_URL || "https://www.nilcard.app"}/dashboard/billing"
                      style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:14px;padding:12px 28px;border-radius:10px;text-decoration:none;">
                     Update payment method
                   </a>
@@ -636,7 +636,7 @@ export async function sendCardPublishedEmail(
         <div style="margin-bottom:24px;">${brandBadge()}</div>
         <h1 style="color:#FFFFFF;font-size:24px;font-weight:700;margin:0 0 16px;line-height:1.3;">Your card is public</h1>
         <p style="color:#88888A;font-size:15px;line-height:1.6;margin:0 0 28px;">
-          Hey ${escapeHtml(firstName)}, your athlete card is now live at <a href="${cardUrl}" style="color:#C6FF3D;text-decoration:none;">nilcard.app/${username}</a>. Anyone with the link can view it.
+          Hey ${escapeHtml(firstName)}, your athlete card is now live at <a href="${cardUrl}" style="color:#C6FF3D;text-decoration:none;">www.nilcard.app/${username}</a>. Anyone with the link can view it.
         </p>
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#16161A;border-radius:12px;border:1px solid rgba(255,255,255,0.04);padding:20px;margin-bottom:28px;">
           <tr>
@@ -949,7 +949,7 @@ export async function sendQuotaWarningEmail(
                       <p style="color:#88888A;font-size:14px;line-height:1.6;margin:0 0 24px;">
                         We require at least 2 credits to run the data analysis and generate your brand insights.
                       </p>
-                      <a href="${SITE_URL || "https://nilcard.app"}/dashboard/settings" style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;letter-spacing:-0.1px;">
+                      <a href="${SITE_URL || "https://www.nilcard.app"}/dashboard/settings" style="display:inline-block;background-color:#C6FF3D;color:#0A0A0B;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;letter-spacing:-0.1px;">
                         Upgrade Plan or Buy Credits
                       </a>
                     </td>

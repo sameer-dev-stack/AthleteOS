@@ -7,7 +7,7 @@ import { REFERRAL_CODE_CHARS } from "@/lib/constants";
 import { hashIp } from "@/lib/referral-click";
 import { isDisposableEmail, isProfileQualifiedForReferral, getReferralMilestoneStatus } from "@/lib/referral-reward";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://nilcard.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app";
 
 function createAdmin() {
   return createServiceClient(

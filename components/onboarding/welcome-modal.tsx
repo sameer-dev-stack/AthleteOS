@@ -9,7 +9,7 @@ const STEPS = [
   {
     icon: User,
     title: "Pick your username",
-    description: "This becomes your public card link — nilcard.app/yourname",
+    description: "This becomes your public card link — www.nilcard.app/yourname",
   },
   {
     icon: Palette,
