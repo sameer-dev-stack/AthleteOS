@@ -3,6 +3,26 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-17 — Session: Create test admin account Admin@nilcard.app
+
+### What changed
+- **`lib/admin.ts`**: Added `Admin@nilcard.app` to `ADMIN_EMAILS`.
+- **`scripts/create-admin-user.ts`**: New script to create admin users via Supabase Admin API.
+- **`docs/CREDENTIALS.md`**: Documented new admin account `Admin@nilcard.app`.
+
+### Why
+- User requested a test admin account with email `Admin@nilcard.app`.
+
+### Files touched
+- `lib/admin.ts`
+- `scripts/create-admin-user.ts`
+- `docs/CREDENTIALS.md`
+- `docs/CHANGELOG.md`
+
+### Commit
+- `062508c` — `feat: promote bdzone010@gmail.com to admin`
+
+
 ## 2026-08-17 — Session: Promote bdzone010@gmail.com to admin
 
 ### What changed

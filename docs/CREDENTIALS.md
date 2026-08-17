@@ -71,6 +71,14 @@ Run via Supabase Management API. The `supabase/schema.sql` file already includes
 | Status | Admin access granted |
 | Profile ID | — |
 
+| Field | Value |
+|-------|-------|
+| Email | `Admin@nilcard.app` |
+| Password | `mzplayz123@` |
+| Type | Email/password auth (Supabase Auth) |
+| Status | Admin access granted |
+| Profile ID | `2cd7ce07-e260-4a5d-b899-ba56db846f99` |
+
 ---
 
 ## Vercel
