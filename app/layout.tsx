@@ -84,7 +84,7 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
     apple: "/apple-icon.svg",
   },
   other: {
@@ -115,7 +115,7 @@ const jsonLd = {
   "@type": "Organization",
   name: SITE_NAME,
   url: SITE_URL,
-  logo: `${SITE_URL}/icon.svg`,
+  logo: `${SITE_URL}/favicon.svg`,
   description: DESCRIPTION,
   sameAs: [
     "https://twitter.com/nilcard",
