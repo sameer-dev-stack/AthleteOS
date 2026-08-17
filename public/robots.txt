@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /onboarding/
+Disallow: /settings/
+Disallow: /teams/
+Disallow: /brands/
+Disallow: /auth/
+
+Sitemap: https://www.nilcard.app/sitemap.xml
