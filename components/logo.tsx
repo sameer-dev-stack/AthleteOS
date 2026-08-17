@@ -10,8 +10,8 @@ export function Logo({ className, style }: { className?: string; style?: React.C
         height="32"
         className="h-8 w-8"
       >
-        <rect width="180" height="180" rx="40" fill="#000000" />
-        <text x="90" y="118" fontFamily="Arial, sans-serif" fontSize="100" fontWeight="bold" fill="#C6FF3D" textAnchor="middle">N</text>
+        <rect width="180" height="180" rx="40" fill="#C6FF3D" />
+        <text x="90" y="118" fontFamily="Arial, sans-serif" fontSize="100" fontWeight="bold" fill="#000000" textAnchor="middle">N</text>
       </svg>
     </div>
   );
