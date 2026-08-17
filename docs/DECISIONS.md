@@ -25,6 +25,24 @@ Opening or closing the Digital Card's popups (Contact details, Send Inquiry, Sup
 
 ---
 
+## ADR-060 — Compositing Hints on Overlays: Viewport-Sized Layers Hurt, Card-Sized Layers Help
+
+**Status:** Accepted · 2026-08-17
+
+**Context:**
+After ADR-059 the popups were smooth on a dev server but still dropped frames when measured against a local **production build** (`next build` + `next start` + Playwright/CDP rAF frame timer). The remaining compositing-hint placement was inconsistent: ContactModal and TipButton overlays had `willChange: transform` + `translateZ(0)`, InquiryForm's full-viewport overlay had the same, and TipButton's full-viewport backdrop had none. It wasn't clear which hints were earning their keep.
+
+**Decision:**
+- **Remove `transform: translateZ(0)` + `willChange: transform` from the InquiryForm full-viewport `fixed` overlay.** Measured on the production bundle, this single change dropped Inquiry open from 3.6 → 0.2 avg dropped frames. The hint was forcing a repaint each frame on a layer that covers the whole viewport instead of letting the opacity fade composite.
+- **Keep `willChange: transform` on the card-size ContactModal overlay** (`absolute inset-0`): measuring showed it helps (0.4 avg dropped frames open, 0 close).
+- **Rule going forward:** compositing hints on viewport-sized (`fixed inset-0`) layers hurt — the layer is too large to composite cheaply; on small card-sized layers they help. TipButton's full-viewport overlay stays hint-free (committed state), its card-size dialog keeps `translateZ(0)` + `willChange`.
+
+**Consequences:**
+- Full popup set on production build now measures near zero dropped frames: baseline 0; contact open 0.4 / close 0; inquiry open 0.2 / close 0 (exit animation plays); support open 0.6–0.8 / close 0.
+- Only `components/inquiry-form.tsx` changed this session (a −1 line diff); no visual, layout, or functional changes.
+
+---
+
 
 
 ## ADR-057 — Lock `www.nilcard.app` as the Canonical SEO Domain

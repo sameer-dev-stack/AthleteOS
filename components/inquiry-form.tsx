@@ -78,7 +78,6 @@ export function InquiryForm({ athleteId, athleteName, open, onClose }: Props) {
         exit={{ opacity: 0 }}
         transition={{ duration: 0.15 }}
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
-        style={{ transform: "translateZ(0)", willChange: "transform" }}
         onClick={onClose}
       >
         <motion.div

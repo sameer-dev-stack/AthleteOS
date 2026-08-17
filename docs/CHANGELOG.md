@@ -3,7 +3,28 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
-## 2026-08-17 — Session: Optimize Digital Card popup animations (Contacts / Inquiry / Tips)
+## 2026-08-17 — Session: Follow-up perf pass on Digital Card popups (verified against production build)
+
+### What changed
+- **`components/inquiry-form.tsx`**: Removed `transform: translateZ(0)` + `willChange: transform` from the full-viewport `fixed` overlay (it only animates opacity).
+- Verified the full popup set (Contacts / Send Inquiry / Support-Tips) on a local **production build** (`next build` + `next start`) with a Playwright/CDP rAF frame-timing harness:
+  - Baseline (no popup): 0 dropped frames.
+  - Contact open: 0.4 avg dropped frames (was 1.3 pre-fix), close 0.
+  - Inquiry open: 0.2 avg dropped frames (was 3.6 with the will-change present), close 0 (exit animation now actually plays).
+  - Support open: 0.6–0.8 avg dropped frames, close 0.
+
+### Why
+- Measuring the production bundle showed `will-change: transform` + `translateZ(0)` on a **full-viewport** `fixed` overlay makes the fade repaint instead of compositing (Inquiry open dropped 3.6 → 0.2 avg frames when removed). The same hint on the **card-size** ContactModal overlay is correct and helps (kept). Rule: compositing hints on viewport-sized layers hurt; on small card-sized layers they help.
+
+### Files touched
+- `components/inquiry-form.tsx`
+- `docs/DECISIONS.md`
+- `docs/CHANGELOG.md`
+
+### Commit
+- (pending — this session)
+
+
 
 ### What changed
 - **`components/profile-card.tsx`**: Added `BusinessModalProvider` — a context provider that owns the open/close state for the Contact and Inquiry popups (`showContact`, `showInquiry`, `copiedEmail`, `copiedPhone`). The card tree is passed through as `children`, so toggling a popup no longer re-renders `BorderGlow`/`ReflectiveCard`/sections. `BusinessBlock` now reads `openContact`/`openInquiry` from context instead of receiving `onContactOpen`/`onInquiryOpen` props. Removed the 4 popup state hooks from `ProfileCard` and the inline ContactModal portal + InquiryForm mounts. ContactModal got an explicit `opacity` transition (`0.15s easeOut`) and lost a redundant `willChange: transform`.
