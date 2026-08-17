@@ -139,8 +139,25 @@ export default async function UserProfilePage({ params }: Props) {
     .replace(/</g, "\\u003c")
     .replace(/>/g, "\\u003e");
 
+  // LCP preload: the hero <img> (AthletePhoto) for the public card is the
+  // largest contentful paint element. next/image's `priority` does not emit a
+  // fetchpriority="high" preload for a fill+unoptimized image, so we declare the
+  // LCP request explicitly in the initial document. This makes the image
+  // discoverable immediately (not gated on JS/React hydration) and tells the
+  // browser to fetch it at high priority — fixing the LCP audit failures.
+  const lcpImage = p.avatar_url ?? null;
+
   return (
     <>
+      {lcpImage && (
+        <link
+          rel="preload"
+          as="image"
+          href={lcpImage}
+          fetchPriority="high"
+          crossOrigin="anonymous"
+        />
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd }}
