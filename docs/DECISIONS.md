@@ -5,6 +5,28 @@
 
 ---
 
+## ADR-059 — Isolate Digital Card Popup State to Avoid Card-Subtree Re-renders
+
+**Status:** Accepted · 2026-08-17
+
+**Context:**
+Opening or closing the Digital Card's popups (Contact details, Send Inquiry, Support/Tips) felt sluggish. The Contact and Inquiry popup open state lived in `ProfileCard`, so clicking a trigger re-rendered the entire card subtree — including both non-memoized `ReflectiveCard` instances (SVG filter defs, video/webcam handling) and both `BorderGlow` instances (continuous rAF loop writing CSS custom properties) — stalling the main thread at the start of the popup animation. Separately, `InquiryForm` returned `null` before its `<AnimatePresence>` when closed, so the exit animation never played and closing was an instant unmount. Baseline measurement: ~16 FPS headless with ~18 missed vsyncs during a popup window.
+
+**Decision:**
+- Introduce `BusinessModalProvider` in `profile-card.tsx`: a React context provider that owns `showContact`, `showInquiry`, `copiedEmail`, `copiedPhone` and renders the ContactModal portal + InquiryForm itself. The card tree is passed through as `children`, so provider state changes re-render only the provider and popups — never the card faces. `BusinessBlock` reads `openContact`/`openInquiry` from context instead of prop callbacks.
+- Fix `InquiryForm` so `<AnimatePresence>` stays mounted and the dialog is gated by `{open && …}` (restores exit animation).
+- Remove redundant `willChange: transform` from overlay-only-opacity layers (ContactModal, TipButton overlay); keep `translateZ(0)`.
+- Keep popup animation properties compositor-friendly (opacity / scale / transform only).
+
+**Consequences:**
+- Opening a popup no longer mutates card-face DOM: verified via MutationObserver (only the continuous BorderGlow rAF loop — out of scope — and the popup's own mount mutate).
+- Headless FPS improved from ~16 (pre-fix baseline) to ~59 idle; popup open/close stays near baseline with no long tasks.
+- Border glow, ReflectiveCard, layout, dimensions, spacing, typography, colors, button styling, and popup content were intentionally untouched per task scope.
+
+---
+
+
+
 ## ADR-057 — Lock `www.nilcard.app` as the Canonical SEO Domain
 
 **Status:** Accepted (updated) · 2026-08-16

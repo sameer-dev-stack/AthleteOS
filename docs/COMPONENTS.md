@@ -123,6 +123,9 @@ Root public athlete identity card. Now a composition of named sub-components rat
 | `BusinessBlock` | Contact / Send Inquiry / Tip CTA section |
 | `SectionLabel` | Reusable icon + uppercase label row |
 | `ReflectiveCardShell` | **REMOVED** — replaced by `<ReflectiveCard>` |
+| `BusinessModalProvider` | **NEW [2026-08-17]** — context provider owning Contact + Inquiry popup open/close state; card tree passes through as `children` so popup toggles never re-render the card faces. Renders ContactModal (portaled) + InquiryForm. Exposes `openContact()` / `openInquiry()` via `BusinessModalCtx`. |
+
+**Popup perf fix [2026-08-17]:** popup state (`showContact`, `showInquiry`, `copiedEmail`, `copiedPhone`) moved out of `ProfileCard` into `BusinessModalProvider`. Opening Contacts or Inquiry previously re-rendered the whole card subtree (non-memoized `ReflectiveCard` SVG/video/webcam + `BorderGlow` rAF loop) causing a main-thread stall at animation start; now only the provider + popup re-render. InquiryForm exit animation also fixed (it returned `null` before `<AnimatePresence>`, so close was an instant unmount).
 
 **Props (ProfileCard):**
 - `profile: Profile` — full athlete profile from Supabase

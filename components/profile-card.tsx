@@ -33,7 +33,7 @@
  * ═══════════════════════════════════════════════════════════════════════
  */
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, useContext, memo, createContext } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import {
@@ -1223,6 +1223,7 @@ const ContactModal = memo(function ContactModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      transition={{ opacity: { duration: 0.15, ease: "easeOut" } }}
       onClick={(e) => e.stopPropagation()}
       className="absolute inset-0 z-30 flex flex-col justify-center gap-5 p-5 rounded-[18.5px]"
       style={{
@@ -1333,6 +1334,92 @@ const ContactModal = memo(function ContactModal({
   );
 });
 
+/* ── Business modal state boundary ── */
+/**
+ * Owns the open/close state for the contact + inquiry popups so that
+ * opening them never re-renders the card subtree (BorderGlow, ReflectiveCard,
+ * sections). Popup open/close only re-renders this provider and the modals.
+ */
+const BusinessModalCtx = createContext<{
+  openContact: () => void;
+  openInquiry: () => void;
+}>({
+  openContact: () => {},
+  openInquiry: () => {},
+});
+
+function BusinessModalProvider({
+  profile,
+  accent,
+  displayName,
+  children,
+}: {
+  profile: Profile;
+  accent: string;
+  displayName: string;
+  children: React.ReactNode;
+}) {
+  const [showContact, setShowContact] = useState(false);
+  const [showInquiry, setShowInquiry] = useState(false);
+  const [copiedEmail, setCopiedEmail] = useState(false);
+  const [copiedPhone, setCopiedPhone] = useState(false);
+  const mounted = useMounted();
+
+  const value = useMemo(
+    () => ({
+      openContact: () => setShowContact(true),
+      openInquiry: () => setShowInquiry(true),
+    }),
+    []
+  );
+
+  return (
+    <BusinessModalCtx.Provider value={value}>
+      {children}
+      {mounted && typeof document !== "undefined"
+        ? createPortal(
+            <AnimatePresence>
+              {showContact && (
+                <ContactModal
+                  profile={profile}
+                  accent={accent}
+                  onClose={() => setShowContact(false)}
+                  copiedEmail={copiedEmail}
+                  copiedPhone={copiedPhone}
+                  onCopyEmail={async () => {
+                    try {
+                      await navigator.clipboard.writeText(
+                        profile.contact_email || profile.email
+                      );
+                      setCopiedEmail(true);
+                      setTimeout(() => setCopiedEmail(false), 2000);
+                    } catch { /* */ }
+                  }}
+                  onCopyPhone={async () => {
+                    try {
+                      await navigator.clipboard.writeText(
+                        profile.contact_phone || ""
+                      );
+                      setCopiedPhone(true);
+                      setTimeout(() => setCopiedPhone(false), 2000);
+                    } catch { /* */ }
+                  }}
+                />
+              )}
+            </AnimatePresence>,
+            document.body
+          )
+        : null}
+      <InquiryForm
+        athleteId={profile.id}
+        athleteName={displayName}
+        open={showInquiry}
+        onClose={() => setShowInquiry(false)}
+      />
+    </BusinessModalCtx.Provider>
+  );
+}
+
 /* ── BusinessBlock (Monetization architecture boundary) ── */
 /**
  * Architecture placeholder for future monetization blocks.
@@ -1351,8 +1438,6 @@ interface BusinessBlockProps {
   displayName: string;
   accent: string;
   hasContact: boolean;
-  onContactOpen: () => void;
-  onInquiryOpen: () => void;
   onInteract: () => void;
   isPro?: boolean;
 }
@@ -1362,11 +1447,10 @@ const BusinessBlock = memo(function BusinessBlock({
   displayName,
   accent,
   hasContact,
-  onContactOpen,
-  onInquiryOpen,
   onInteract,
   isPro,
 }: BusinessBlockProps) {
+  const { openContact, openInquiry } = useContext(BusinessModalCtx);
   return (
     <div className={`flex flex-col gap-2 w-full px-4 pt-2 flex-shrink-0 ${isPro ? "pb-4" : "pb-2"}`}>
       {/* Sponsor / business affordance label */}
@@ -1384,7 +1468,7 @@ const BusinessBlock = memo(function BusinessBlock({
             onClick={(e) => {
               e.stopPropagation();
               onInteract();
-              onContactOpen();
+              openContact();
             }}
             className="flex-1 flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[11.5px] font-black tracking-wide transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
             style={{
@@ -1401,7 +1485,7 @@ const BusinessBlock = memo(function BusinessBlock({
           onClick={(e) => {
             e.stopPropagation();
             onInteract();
-            onInquiryOpen();
+            openInquiry();
           }}
           className={`${hasContact ? "flex-1" : "w-full"} flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[11.5px] font-black tracking-wide transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]`}
           style={{
@@ -1563,11 +1647,7 @@ export function ProfileCard({
   const [urlCopied, setUrlCopied] = useState(false);
   const [photoIdx, setPhotoIdx] = useState(0);
   const [hintVisible, setHintVisible] = useState(true);
-  const [showContactModal, setShowContactModal] = useState(false);
-  const [showInquiry, setShowInquiry] = useState(false);
   const [showQr, setShowQr] = useState(false);
-  const [copiedEmail, setCopiedEmail] = useState(false);
-  const [copiedPhone, setCopiedPhone] = useState(false);
   const [linksExpanded, setLinksExpanded] = useState(false);
   const [showTipSuccess, setShowTipSuccess] = useState(false);
   const [showTipConfirming, setShowTipConfirming] = useState(false);
@@ -1577,7 +1657,6 @@ export function ProfileCard({
   const trackedRef = useRef(false);
   /** Shared webcam stream between front and back ReflectiveCard instances */
   const webcamStreamRef = useRef<MediaStream | null>(null);
-  const mounted = useMounted();
 
   /* ── Analytics ──────────────────────────────────── */
   useEffect(() => {
@@ -1776,11 +1855,12 @@ export function ProfileCard({
 
   /* ── Render ─────────────────────────────────────── */
   return (
-    <div className="min-h-dvh w-full flex items-center justify-center select-none p-4 relative overflow-hidden"
-      style={{
-        background: "radial-gradient(ellipse 70% 60% at 50% -5%, #111116, #07070a 60%)",
-      }}
-    >
+    <BusinessModalProvider profile={profile} accent={accent} displayName={displayName}>
+      <div className="min-h-dvh w-full flex items-center justify-center select-none p-4 relative overflow-hidden"
+        style={{
+          background: "radial-gradient(ellipse 70% 60% at 50% -5%, #111116, #07070a 60%)",
+        }}
+      >
       {/* Ambient glow behind card */}
       <div
         className="card-ambient-glow absolute left-1/2 top-1/2 rounded-full pointer-events-none"
@@ -1960,42 +2040,6 @@ export function ProfileCard({
                   "--rc-accent-glow-hover": `${accent}40`,
                 } as React.CSSProperties}
               >
-            {/* Contact modal overlay */}
-            {mounted && typeof document !== "undefined"
-              ? createPortal(
-                  <AnimatePresence>
-                    {showContactModal && (
-                      <ContactModal
-                        profile={profile}
-                        accent={accent}
-                        onClose={() => setShowContactModal(false)}
-                        copiedEmail={copiedEmail}
-                        copiedPhone={copiedPhone}
-                        onCopyEmail={async () => {
-                          try {
-                            await navigator.clipboard.writeText(
-                              profile.contact_email || profile.email
-                            );
-                            setCopiedEmail(true);
-                            setTimeout(() => setCopiedEmail(false), 2000);
-                          } catch { /* */ }
-                        }}
-                        onCopyPhone={async () => {
-                          try {
-                            await navigator.clipboard.writeText(
-                              profile.contact_phone || ""
-                            );
-                            setCopiedPhone(true);
-                            setTimeout(() => setCopiedPhone(false), 2000);
-                          } catch { /* */ }
-                        }}
-                      />
-                    )}
-                  </AnimatePresence>,
-                  document.body
-                )
-              : null}
-
             {/* Back header */}
             <BackHeader
               avatarUrl={profile.avatar_url}
@@ -2075,8 +2119,6 @@ export function ProfileCard({
                 displayName={displayName}
                 accent={accent}
                 hasContact={hasContact}
-                onContactOpen={() => setShowContactModal(true)}
-                onInquiryOpen={() => setShowInquiry(true)}
                 onInteract={resetAutoReturn}
                 isPro={isPro}
               />
@@ -2109,12 +2151,6 @@ export function ProfileCard({
 
       {/* ── Global Modals ───────────────────────────── */}
       <QrShareModal url={publicUrl} open={showQr} onClose={() => setShowQr(false)} />
-      <InquiryForm
-        athleteId={profile.id}
-        athleteName={displayName}
-        open={showInquiry}
-        onClose={() => setShowInquiry(false)}
-      />
 
       {/* Tip confirming modal */}
       <AnimatePresence>
@@ -2220,6 +2256,7 @@ export function ProfileCard({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+      </div>
+    </BusinessModalProvider>
   );
 }

@@ -3,7 +3,28 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
-## 2026-08-17 — Session: Create test admin account Admin@nilcard.app
+## 2026-08-17 — Session: Optimize Digital Card popup animations (Contacts / Inquiry / Tips)
+
+### What changed
+- **`components/profile-card.tsx`**: Added `BusinessModalProvider` — a context provider that owns the open/close state for the Contact and Inquiry popups (`showContact`, `showInquiry`, `copiedEmail`, `copiedPhone`). The card tree is passed through as `children`, so toggling a popup no longer re-renders `BorderGlow`/`ReflectiveCard`/sections. `BusinessBlock` now reads `openContact`/`openInquiry` from context instead of receiving `onContactOpen`/`onInquiryOpen` props. Removed the 4 popup state hooks from `ProfileCard` and the inline ContactModal portal + InquiryForm mounts. ContactModal got an explicit `opacity` transition (`0.15s easeOut`) and lost a redundant `willChange: transform`.
+- **`components/inquiry-form.tsx`**: Fixed broken exit animation — `if (!open) return null` preceded `<AnimatePresence>`, so closing was an instant unmount. Now the component always returns `<AnimatePresence>` and gates the dialog behind `{open && …}`, so the fade-out actually plays. Added `transition: duration 0.15`.
+- **`components/tip-button.tsx`**: Removed redundant `willChange: transform` from the full-screen overlay (it only animates opacity).
+
+### Why
+- Popup open/close previously re-rendered the entire card subtree (including the non-memoized `ReflectiveCard` SVG-filter/video/webcam work and the `BorderGlow` rAF loop), stalling the main thread at animation start. Isolating the popup state into a provider keeps the card faces untouched when a popup toggles. The inquiry form's exit animation never ran due to the early `return null`, so closing was instant.
+
+### Files touched
+- `components/profile-card.tsx`
+- `components/inquiry-form.tsx`
+- `components/tip-button.tsx`
+- `docs/COMPONENTS.md`
+- `docs/DECISIONS.md`
+- `docs/CHANGELOG.md`
+
+### Commit
+- TBD (commit hash after push)
+
+
 
 ### What changed
 - **`lib/admin.ts`**: Added `Admin@nilcard.app` to `ADMIN_EMAILS`.

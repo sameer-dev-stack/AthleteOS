@@ -67,15 +67,18 @@ export function InquiryForm({ athleteId, athleteName, open, onClose }: Props) {
     }
   }
 
-  if (!open) return null;
+  if (!open) return <AnimatePresence />;
 
    return (
     <AnimatePresence>
+      {open && (
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
+        transition={{ duration: 0.15 }}
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
+        style={{ transform: "translateZ(0)", willChange: "transform" }}
         onClick={onClose}
       >
         <motion.div
@@ -193,6 +196,7 @@ export function InquiryForm({ athleteId, athleteName, open, onClose }: Props) {
           )}
         </motion.div>
       </motion.div>
+      )}
     </AnimatePresence>
   );
 }
