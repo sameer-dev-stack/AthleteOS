@@ -60,6 +60,7 @@ export default function SignUpPage() {
     const checkAuth = async () => {
       try {
         const res = await fetch("/api/auth/profile-status");
+        if (!res.ok) return;
         const data = await res.json();
         if (cancelled) return;
         if (data.isAdmin) {
