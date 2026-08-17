@@ -204,7 +204,6 @@ const AthletePhoto = memo(function AthletePhoto({ photos, photoIdx, displayName,
                 sizes="420px"
                 className="object-cover object-top"
                 draggable={false}
-                unoptimized
                 priority={i === 0}
                 loading={i === 0 ? "eager" : "lazy"}
               />
@@ -307,7 +306,6 @@ const ProfileAvatar = memo(function ProfileAvatar({ photos, photoIdx, displayNam
             sizes="72px"
             className=""
             draggable={false}
-            unoptimized
           />
         ) : (
           <div
