@@ -22,7 +22,7 @@
 - `docs/CHANGELOG.md`
 
 ### Commit
-- (pending — this session)
+- `d7e3d23` — "perf: remove compositing hints from full-viewport inquiry overlay; docs: ADR-060 and changelog"
 
 
 
