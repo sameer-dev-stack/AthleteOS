@@ -17,7 +17,8 @@ export type AuthResult = {
   email?: string;
 };
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app";
+const _rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app";
+const SITE_URL = _rawSiteUrl.startsWith("http://") || _rawSiteUrl.startsWith("https://") ? _rawSiteUrl : `https://${_rawSiteUrl}`;
 const CONFIRM_EXPIRY_HOURS = 24;
 
 function getServiceClient() {

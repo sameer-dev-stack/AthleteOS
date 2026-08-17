@@ -13,7 +13,8 @@ const inter = Inter({
   display: "swap",
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app";
+const _rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app";
+const SITE_URL = _rawSiteUrl.startsWith("http://") || _rawSiteUrl.startsWith("https://") ? _rawSiteUrl : `https://${_rawSiteUrl}`;
 const SITE_NAME = "NIL CARD";
 const TITLE = "NIL CARD — The NIL operating system for athletes";
 const DESCRIPTION =
