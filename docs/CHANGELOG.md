@@ -22,7 +22,7 @@
 - `docs/CHANGELOG.md`
 
 ### Commit
-- TBD (commit hash after push)
+- `ff4942b` — `perf: isolate card popup state and fix popup animation jank`
 
 
 
