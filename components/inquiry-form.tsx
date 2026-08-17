@@ -85,7 +85,7 @@ export function InquiryForm({ athleteId, athleteName, open, onClose }: Props) {
           transition={{ duration: 0.15 }}
           onClick={(e) => e.stopPropagation()}
           className="w-full max-w-lg rounded-2xl bg-[#111113] border border-white/[0.08] shadow-2xl overflow-hidden"
-          style={{ transform: "translateZ(0)", willChange: "transform" }}
+           style={{ transform: "translateZ(0)" }}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">

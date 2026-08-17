@@ -61,7 +61,7 @@ export function TipButton({ athleteId, athleteName, accentColor = "#C6FF3D" }: P
         whileHover={{ scale: 1.01, boxShadow: `0 0 32px -2px ${accentColor}60, 0 12px 40px -6px ${accentColor}40` }}
         whileTap={{ scale: 0.98 }}
         aria-label={`Support ${athleteName.split(" ")[0] || "me"}`}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-[13px] font-black tracking-wide transition-all duration-300 overflow-hidden min-w-0 transform translate-z-0 [backface-visibility:hidden] [will-change:transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+        className="w-full flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-[13px] font-black tracking-wide transition-all duration-300 overflow-hidden min-w-0 transform translate-z-0 [backface-visibility:hidden] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
         style={{
           background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)`,
           color: "#0A0A0B",

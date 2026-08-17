@@ -31,7 +31,6 @@
   /* Hardware-accelerate the container so the SVG filter
      doesn't cause layout repaints on every frame */
   transform: translateZ(0);
-  will-change: transform;
   contain: layout style;
   transition: box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }

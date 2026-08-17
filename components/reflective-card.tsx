@@ -66,6 +66,8 @@ export interface ReflectiveCardProps {
   filterId?:             string;
   /** Pass a shared MediaStream ref so multiple faces share one webcam */
   streamRef?:            React.RefObject<MediaStream | null>;
+  /** When false, skip webcam + SVG filters and render a static surface */
+  active?:               boolean;
   /* Passthrough */
   className?:            string;
   style?:                React.CSSProperties;
@@ -88,6 +90,7 @@ export function ReflectiveCard({
   radius               = 20,
   filterId             = "rc-metallic-displacement",
   streamRef,
+  active               = true,
   className            = "",
   style                = {},
   children,
@@ -181,77 +184,75 @@ export function ReflectiveCard({
       style={{ ...cssVars, ...style }}
     >
       {/* ── SVG filter definitions ────────────────── */}
-      {/*
-        The filter is scoped to this instance via filterId.
-        Multiple card faces get unique IDs so they don't collide.
-      */}
-      <svg className="rc-svg-filters" aria-hidden="true" focusable="false">
-        <defs>
-          <filter
-            id={filterId}
-            x="-20%"
-            y="-20%"
-            width="140%"
-            height="140%"
-          >
-            {/* Step 1: Generate organic noise field */}
-            <feTurbulence
-              type="turbulence"
-              baseFrequency={baseFrequency}
-              numOctaves="1"
-              result="noise"
-            />
-
-            {/* Step 2: Extract luminance → alpha channel */}
-            <feColorMatrix
-              in="noise"
-              type="luminanceToAlpha"
-              result="noiseAlpha"
-            />
-
-            {/* Step 3: Warp the source image with the noise field */}
-            <feDisplacementMap
-              in="SourceGraphic"
-              in2="noise"
-              scale={displacementStrength}
-              xChannelSelector="R"
-              yChannelSelector="G"
-              result="rippled"
-            />
-
-            {/* Step 4: Generate specular lighting from the noise */}
-            <feSpecularLighting
-              in="noiseAlpha"
-              surfaceScale={displacementStrength}
-              specularConstant={specularConstant}
-              specularExponent="20"
-              lightingColor="#ffffff"
-              result="light"
+      {active && webcamReady && !webcamDenied ? (
+        <svg className="rc-svg-filters" aria-hidden="true" focusable="false">
+          <defs>
+            <filter
+              id={filterId}
+              x="-20%"
+              y="-20%"
+              width="140%"
+              height="140%"
             >
-              <fePointLight x="0" y="0" z="300" />
-            </feSpecularLighting>
+              {/* Step 1: Generate organic noise field */}
+              <feTurbulence
+                type="turbulence"
+                baseFrequency={baseFrequency}
+                numOctaves="1"
+                result="noise"
+              />
 
-            {/* Step 5: Clip lighting to the warped image shape */}
-            <feComposite
-              in="light"
-              in2="rippled"
-              operator="in"
-              result="light-effect"
-            />
+              {/* Step 2: Extract luminance → alpha channel */}
+              <feColorMatrix
+                in="noise"
+                type="luminanceToAlpha"
+                result="noiseAlpha"
+              />
 
-            {/* Step 6: Blend specular highlights over displaced image */}
-            <feBlend
-              in="light-effect"
-              in2="rippled"
-              mode="screen"
-              result="final"
-            />
-          </filter>
-        </defs>
-      </svg>
+              {/* Step 3: Warp the source image with the noise field */}
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="noise"
+                scale={displacementStrength}
+                xChannelSelector="R"
+                yChannelSelector="G"
+                result="rippled"
+              />
+
+              {/* Step 4: Generate specular lighting from the noise */}
+              <feSpecularLighting
+                in="noiseAlpha"
+                surfaceScale={displacementStrength}
+                specularConstant={specularConstant}
+                specularExponent="20"
+                lightingColor="#ffffff"
+                result="light"
+              >
+                <fePointLight x="0" y="0" z="300" />
+              </feSpecularLighting>
+
+              {/* Step 5: Clip lighting to the warped image shape */}
+              <feComposite
+                in="light"
+                in2="rippled"
+                operator="in"
+                result="light-effect"
+              />
+
+              {/* Step 6: Blend specular highlights over displaced image */}
+              <feBlend
+                in="light-effect"
+                in2="rippled"
+                mode="screen"
+                result="final"
+              />
+            </filter>
+          </defs>
+        </svg>
+      ) : null}
 
       {/* ── Reflective surface ────────────────────── */}
-      {webcamDenied ? (
+      {(!active || webcamDenied) ? (
         /* Static dark surface fallback */
         <div
           className="rc-video-fallback"

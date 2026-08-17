@@ -33,7 +33,7 @@
  * ═══════════════════════════════════════════════════════════════════════
  */
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import {
@@ -179,7 +179,7 @@ interface AthletePhotoProps {
   sport: string | null;
 }
 
-function AthletePhoto({ photos, photoIdx, displayName, initials, accent, sport }: AthletePhotoProps) {
+const AthletePhoto = memo(function AthletePhoto({ photos, photoIdx, displayName, initials, accent, sport }: AthletePhotoProps) {
   const hasPhoto = photos.length > 0;
 
   return (
@@ -272,7 +272,7 @@ function AthletePhoto({ photos, photoIdx, displayName, initials, accent, sport }
       )}
     </div>
   );
-}
+});
 
 /* ── ProfileAvatar — circular profile picture overlapping hero/content ── */
 interface ProfileAvatarProps {
@@ -284,7 +284,7 @@ interface ProfileAvatarProps {
   sport: string | null;
 }
 
-function ProfileAvatar({ photos, photoIdx, displayName, initials, accent, sport }: ProfileAvatarProps) {
+const ProfileAvatar = memo(function ProfileAvatar({ photos, photoIdx, displayName, initials, accent, sport }: ProfileAvatarProps) {
   const hasPhoto = photos.length > 0;
 
   return (
@@ -325,7 +325,7 @@ function ProfileAvatar({ photos, photoIdx, displayName, initials, accent, sport 
       </div>
     </div>
   );
-}
+});
 
 /* ── AthleteIdentity ─────────────────────────────────── */
 interface AthleteIdentityProps {
@@ -343,7 +343,7 @@ interface AthleteIdentityProps {
   copied: boolean;
 }
 
-function AthleteIdentity({
+const AthleteIdentity = memo(function AthleteIdentity({
   displayName,
   sport,
   position,
@@ -510,7 +510,7 @@ function AthleteIdentity({
       </div>
     </div>
   );
-}
+});
 
 /* ── AthleteStats ─────────────────────────────────────── */
 interface StatCell {
@@ -526,7 +526,7 @@ interface AthleteStatsProps {
   accent: string;
 }
 
-function AthleteStats({ cells, accent }: AthleteStatsProps) {
+const AthleteStats = memo(function AthleteStats({ cells, accent }: AthleteStatsProps) {
   if (cells.length === 0) return null;
 
   return (
@@ -591,7 +591,7 @@ function AthleteStats({ cells, accent }: AthleteStatsProps) {
       </div>
     </div>
   );
-}
+});
 
 /* ── AthleteIDBlock (URL copy + athlete ID) ─────────── */
 interface AthleteIDBlockProps {
@@ -602,7 +602,7 @@ interface AthleteIDBlockProps {
   onCopy: (e: React.MouseEvent) => void;
 }
 
-function AthleteIDBlock({ username, athleteId, accent, urlCopied, onCopy }: AthleteIDBlockProps) {
+const AthleteIDBlock = memo(function AthleteIDBlock({ username, athleteId, accent, urlCopied, onCopy }: AthleteIDBlockProps) {
   return (
     <div className="flex-shrink-0 mx-4 mt-2">
       <button
@@ -644,7 +644,7 @@ function AthleteIDBlock({ username, athleteId, accent, urlCopied, onCopy }: Athl
       </button>
     </div>
   );
-}
+});
 
 /* ── FlipCTA ─────────────────────────────────────────── */
 interface FlipCTAProps {
@@ -652,7 +652,7 @@ interface FlipCTAProps {
   hintVisible: boolean;
 }
 
-function FlipCTA({ accent, hintVisible }: FlipCTAProps) {
+const FlipCTA = memo(function FlipCTA({ accent, hintVisible }: FlipCTAProps) {
   return (
     <div className="flex items-center justify-center py-2 px-4 flex-shrink-0">
       <div
@@ -682,7 +682,7 @@ function FlipCTA({ accent, hintVisible }: FlipCTAProps) {
       </div>
     </div>
   );
-}
+});
 
 /* ══════════════════════════════════════════════════════════
    SUB-COMPONENTS — BACK FACE
@@ -702,7 +702,7 @@ interface BackHeaderProps {
   onFlipBack: () => void;
 }
 
-function BackHeader({
+const BackHeader = memo(function BackHeader({
   avatarUrl,
   displayName,
   sport,
@@ -799,10 +799,10 @@ function BackHeader({
       </div>
     </div>
   );
-}
+});
 
 /* ── AboutSection ─────────────────────────────────────── */
-function AboutSection({ bio, accent }: { bio: string; accent: string }) {
+const AboutSection = memo(function AboutSection({ bio, accent }: { bio: string; accent: string }) {
   return (
     <div>
       <SectionLabel icon={<Sparkles className="h-2.5 w-2.5" />} label="About" accent={accent} />
@@ -818,10 +818,10 @@ function AboutSection({ bio, accent }: { bio: string; accent: string }) {
       </p>
     </div>
   );
-}
+});
 
 /* ── SectionLabel ─────────────────────────────────────── */
-function SectionLabel({
+const SectionLabel = memo(function SectionLabel({
   icon,
   label,
   accent,
@@ -841,7 +841,7 @@ function SectionLabel({
       </span>
     </div>
   );
-}
+});
 
 /* ── LinkFavicon & Domain Utilities ───────────────────── */
 function getCleanDomain(rawUrl: string): string {
@@ -863,7 +863,7 @@ interface LinkFaviconProps {
   accent: string;
 }
 
-function LinkFavicon({ url, label, accent }: LinkFaviconProps) {
+const LinkFavicon = memo(function LinkFavicon({ url, label, accent }: LinkFaviconProps) {
   const domain = getCleanDomain(url);
   const [sourceIdx, setSourceIdx] = useState(0);
   const [imgError, setImgError] = useState(false);
@@ -970,7 +970,7 @@ function LinkFavicon({ url, label, accent }: LinkFaviconProps) {
       )}
     </div>
   );
-}
+});
 
 /* ── LinksSection ─────────────────────────────────────── */
 interface LinksSectionProps {
@@ -983,7 +983,7 @@ interface LinksSectionProps {
   onInteract: () => void;
 }
 
-function LinksSection({
+const LinksSection = memo(function LinksSection({
   links,
   accent,
   expanded,
@@ -1090,7 +1090,7 @@ function LinksSection({
       </div>
     </div>
   );
-}
+});
 
 /* ── HighlightsSection ──────────────────────────────── */
 interface HighlightsSectionProps {
@@ -1100,7 +1100,7 @@ interface HighlightsSectionProps {
   onInteract: () => void;
 }
 
-function HighlightsSection({ highlights, accent, profileId, onInteract }: HighlightsSectionProps) {
+const HighlightsSection = memo(function HighlightsSection({ highlights, accent, profileId, onInteract }: HighlightsSectionProps) {
   return (
     <div>
       <SectionLabel
@@ -1142,7 +1142,7 @@ function HighlightsSection({ highlights, accent, profileId, onInteract }: Highli
       </div>
     </div>
   );
-}
+});
 
 /* ── ConnectSection ───────────────────────────────────── */
 interface ConnectSectionProps {
@@ -1154,7 +1154,7 @@ interface ConnectSectionProps {
   onInteract: () => void;
 }
 
-function ConnectSection({ socialLinks, publicUrl, displayName, bio, accent, onInteract }: ConnectSectionProps) {
+const ConnectSection = memo(function ConnectSection({ socialLinks, publicUrl, displayName, bio, accent, onInteract }: ConnectSectionProps) {
   if (socialLinks.length === 0) return null;
 
   return (
@@ -1194,7 +1194,7 @@ function ConnectSection({ socialLinks, publicUrl, displayName, bio, accent, onIn
       </div>
     </div>
   );
-}
+});
 
 /* ── ContactModal ─────────────────────────────────────── */
 interface ContactModalProps {
@@ -1207,7 +1207,7 @@ interface ContactModalProps {
   onCopyPhone: () => void;
 }
 
-function ContactModal({
+const ContactModal = memo(function ContactModal({
   profile,
   accent,
   onClose,
@@ -1331,7 +1331,7 @@ function ContactModal({
       </div>
     </motion.div>
   );
-}
+});
 
 /* ── BusinessBlock (Monetization architecture boundary) ── */
 /**
@@ -1357,7 +1357,7 @@ interface BusinessBlockProps {
   isPro?: boolean;
 }
 
-function BusinessBlock({
+const BusinessBlock = memo(function BusinessBlock({
   profileId,
   displayName,
   accent,
@@ -1425,7 +1425,7 @@ function BusinessBlock({
       </div>
     </div>
   );
-}
+});
 
 /* ══════════════════════════════════════════════════════════
    REFLECTIVE CARD SHELL
@@ -1455,7 +1455,7 @@ interface ReflectiveCardShellProps {
   onTouchStart?: () => void;
 }
 
-function ReflectiveCardShell({
+const ReflectiveCardShell = memo(function ReflectiveCardShell({
   accent,
   borderGlow,
   children,
@@ -1539,7 +1539,7 @@ function ReflectiveCardShell({
       </div>
     </div>
   );
-}
+});
 
 /* ══════════════════════════════════════════════════════════
    ROOT COMPONENT — ProfileCard (exported)
@@ -1636,17 +1636,30 @@ export function ProfileCard({
   const isPro = plan === "pro";
   const isVerified = profile.is_verified || isPro;
 
-  const classLabel =
-    profile.class_year?.toLowerCase() === "fr"        ? "FR" :
-    profile.class_year?.toLowerCase() === "so"        ? "SO" :
-    profile.class_year?.toLowerCase() === "jr"        ? "JR" :
-    profile.class_year?.toLowerCase() === "sr"        ? "SR" :
-    profile.class_year?.toLowerCase() === "gs"        ? "GS" :
-    profile.class_year?.toLowerCase() === "pro"       ? "PRO" :
-    profile.class_year?.toLowerCase() === "freshman"  ? "FR" :
-    profile.class_year?.toLowerCase() === "sophomore" ? "SO" :
-    profile.class_year?.toLowerCase() === "junior"    ? "JR" :
-    profile.class_year?.toLowerCase() === "senior"    ? "SR" : null;
+  const classLabel = useMemo(() => {
+    const cy = profile.class_year?.toLowerCase();
+    if (!cy) return null;
+    switch (cy) {
+      case "fr":
+      case "freshman":
+        return "FR";
+      case "so":
+      case "sophomore":
+        return "SO";
+      case "jr":
+      case "junior":
+        return "JR";
+      case "sr":
+      case "senior":
+        return "SR";
+      case "gs":
+        return "GS";
+      case "pro":
+        return "PRO";
+      default:
+        return null;
+    }
+  }, [profile.class_year]);
 
   /* Stats filtering */
   const cleanStats = useMemo(() => (profile.stats ?? []).filter((s) => {
@@ -1750,7 +1763,7 @@ export function ProfileCard({
   async function handleCopyUrl(e: React.MouseEvent) {
     e.stopPropagation();
     try {
-      await navigator.clipboard.writeText(`https://nilcard.app/${profile.username}`);
+      await navigator.clipboard.writeText(`https://www.nilcard.app/${profile.username}`);
       setUrlCopied(true);
       setTimeout(() => setUrlCopied(false), 1500);
     } catch { /* */ }
@@ -1792,10 +1805,10 @@ export function ProfileCard({
       >
         <motion.div
           animate={{ rotateY: flipped ? 180 : 0 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
           onClick={handleFlip}
           className="relative w-full h-full cursor-pointer group"
-          style={{ transformStyle: "preserve-3d", borderRadius: "20px", willChange: "transform" }}
+          style={{ transformStyle: "preserve-3d", borderRadius: "20px" }}
           role="button"
           aria-label={flipped ? "Flip card to front" : "Flip card to see more"}
           aria-pressed={flipped}
@@ -1840,15 +1853,16 @@ export function ProfileCard({
                 glassDistortion={8}
                 overlayColor={themeObj.isPro ? "rgba(0, 0, 0, 0.35)" : "rgba(0, 0, 0, 0.20)"}
                 radius={20}
-              filterId="rc-filter-front"
-              streamRef={webcamStreamRef}
-              style={{
-                width: "100%",
-                height: "100%",
-                "--rc-accent-glow": `${accent}1f`,
-                "--rc-accent-glow-hover": `${accent}40`,
-              } as React.CSSProperties}
-            >
+                filterId="rc-filter-front"
+                streamRef={webcamStreamRef}
+                active={!flipped}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  "--rc-accent-glow": `${accent}1f`,
+                  "--rc-accent-glow-hover": `${accent}40`,
+                } as React.CSSProperties}
+              >
               {/* Top accent hairline */}
               <div
                 className="absolute top-0 inset-x-0 h-px z-20 pointer-events-none"
@@ -1936,15 +1950,16 @@ export function ProfileCard({
                 glassDistortion={8}
                 overlayColor={themeObj.isPro ? "rgba(0, 0, 0, 0.35)" : "rgba(0, 0, 0, 0.20)"}
                 radius={20}
-              filterId="rc-filter-back"
-              streamRef={webcamStreamRef}
-              style={{
-                width: "100%",
-                height: "100%",
-                "--rc-accent-glow": `${accent}1f`,
-                "--rc-accent-glow-hover": `${accent}40`,
-              } as React.CSSProperties}
-            >
+                filterId="rc-filter-back"
+                streamRef={webcamStreamRef}
+                active={flipped}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  "--rc-accent-glow": `${accent}1f`,
+                  "--rc-accent-glow-hover": `${accent}40`,
+                } as React.CSSProperties}
+              >
             {/* Contact modal overlay */}
             {mounted && typeof document !== "undefined"
               ? createPortal(
