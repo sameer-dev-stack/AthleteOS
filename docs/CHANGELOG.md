@@ -8,9 +8,11 @@
 ### What changed
 - **`components/profile-card.tsx`**: `BusinessModalCtx` gains an `anyOpen` boolean (`showContact || showInquiry`), added to the provider's memoized context value with deps `[showContact, showInquiry]`. New local `FaceGlow` consumer reads `anyOpen` and renders `<BorderGlow {...glow} active={baseActive && !anyOpen} />`; both face usages switched from `active={...}` to `baseActive={!flipped && !isFlipping}` (front) / `baseActive={flipped && !isFlipping}` (back).
 - `BorderGlow` itself is untouched — its `[loop, active]` effect already cancels the rAF sweep when `active` drops, so the pause is free.
+- **Close-phase coverage [follow-up]:** the provider now tracks a `closing` flag — `closePopup()` (used as both popups' `onClose`) clears the popup states and holds `closing` true for 250 ms, so `anyOpen = showContact || showInquiry || closing` keeps the sweep paused through each popup's 0.15 s exit animation and resumes only after the popup is unmounted. Timer cleaned up on provider unmount.
 
 ### Why
 - User reported the "Send Inquiry" button on mobile "takes time" and the card animation looks laggy as the popup opens. The card's continuous `BorderGlow` rAF sweep kept running underneath the dimmed `bg-black/80` scrim while the popup entrance (0.15 s fade + scale) played — competing for main-thread time on a phone GPU right when the entrance is visible. Verified on a local production build (Pixel 7 emulation): sweep running pre-open, paused the instant the popup mounts, resumed on close; popup-open rAF window showed only 2 gaps >30 ms (max 33 ms).
+- **Close-phase coverage [follow-up]:** closing was equally sluggish — `anyOpen` flipped false the moment the close button was pressed, so the sweep restarted mid-exit (0.15 s) and fought the fade-out the same way. With the `closing` grace the sweep stays off through the exit. Verified: at +150 ms after close the popup is still animating out with the sweep paused; at +450 ms it's gone and the sweep resumed; close-window rAF showed 0 gaps >30 ms (max 17 ms).
 
 ### Files touched
 - `components/profile-card.tsx`
@@ -20,6 +22,7 @@
 
 ### Commit
 - `dfbc6b8` — "perf: pause card BorderGlow sweep while business popups are open"
+- (pending follow-up commit + hash)
 
 ## 2026-08-17 — Session: Mobile card flip smoothness — strip blend layers during flip + fix back-face tap dead zone
 

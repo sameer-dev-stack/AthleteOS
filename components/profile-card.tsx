@@ -1365,15 +1365,32 @@ function BusinessModalProvider({
   const [showInquiry, setShowInquiry] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
+  const [closing, setClosing] = useState(false);
+  const closeTimerRef = useRef<number | null>(null);
   const mounted = useMounted();
+
+  useEffect(
+    () => () => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    },
+    []
+  );
+
+  const closePopup = useCallback(() => {
+    setShowContact(false);
+    setShowInquiry(false);
+    setClosing(true);
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = window.setTimeout(() => setClosing(false), 250);
+  }, []);
 
   const value = useMemo(
     () => ({
       openContact: () => setShowContact(true),
       openInquiry: () => setShowInquiry(true),
-      anyOpen: showContact || showInquiry,
+      anyOpen: showContact || showInquiry || closing,
     }),
-    [showContact, showInquiry]
+    [showContact, showInquiry, closing]
   );
 
   return (
@@ -1386,7 +1403,7 @@ function BusinessModalProvider({
                 <ContactModal
                   profile={profile}
                   accent={accent}
-                  onClose={() => setShowContact(false)}
+                  onClose={closePopup}
                   copiedEmail={copiedEmail}
                   copiedPhone={copiedPhone}
                   onCopyEmail={async () => {
@@ -1417,7 +1434,7 @@ function BusinessModalProvider({
         athleteId={profile.id}
         athleteName={displayName}
         open={showInquiry}
-        onClose={() => setShowInquiry(false)}
+        onClose={closePopup}
       />
     </BusinessModalCtx.Provider>
   );
