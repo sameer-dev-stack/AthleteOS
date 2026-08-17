@@ -19,7 +19,7 @@
 - `docs/COMPONENTS.md`
 
 ### Commit
-- (pending commit + hash)
+- `dfbc6b8` — "perf: pause card BorderGlow sweep while business popups are open"
 
 ## 2026-08-17 — Session: Mobile card flip smoothness — strip blend layers during flip + fix back-face tap dead zone
 
