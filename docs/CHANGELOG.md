@@ -3,6 +3,26 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-17 — Session: Mobile card flip smoothness — strip blend layers during flip + fix back-face tap dead zone
+
+### What changed
+- **`components/reflective-card.tsx`**: `.rc-noise`, `.rc-sheen`, and `.rc-theme-gradient` (the `mix-blend-mode: overlay` material layers) now render only when `active` is true. During the 3D flip both faces are forced inactive, so the rotating faces are flat, blend-free textures instead of layers the compositor must re-blend every frame.
+- **`components/profile-card.tsx`**: front/back `ReflectiveCard` instances now pass `active={!flipped && !isFlipping}` / `active={flipped && !isFlipping}` (previously just `active={!flipped}` / `active={flipped}`), mirroring the existing `BorderGlow` gating. Removed the redundant `onClick={handleFlip}` on the back face div — it bubbled to the parent `motion.div`'s `onClick={handleFlip}` in the same event, so `setFlipped(f=>!f)` ran twice (net no-op) and tapping the back of the card never flipped it back.
+
+### Why
+- CDP tracing (Playwright Pixel 7 emulation, local production build) showed the browser re-rasterizing the card faces during the flip: baseline `SmoothnessDroppedFrame: 10`, `DroppedFrameDuration: 14`, `JankV3: 26` in the flip window, plus hundreds of `RasterTask`/`GpuRasterBuffer::Playback` events. The blend-mode material layers can't be cached as flip textures, forcing per-frame GPU re-raster — which is what makes the flip stutter on phones (desktop GPUs hide it). Post-fix trace: `SmoothnessDroppedFrame: 4`, `DroppedFrameDuration: 2`, `JankV3: 8`; CDP screencast frame-diffing confirms the flip still interpolates over ~350 ms (not snapped).
+- Back-face tap dead zone was confirmed on live production (`www.nilcard.app`) with a Playwright dispatch test before the fix; after removing the redundant handler a back-face tap flips the card back.
+
+### Files touched
+- `components/reflective-card.tsx`
+- `components/profile-card.tsx`
+- `docs/DECISIONS.md`
+- `docs/CHANGELOG.md`
+- `docs/COMPONENTS.md`
+
+### Commit
+- `f8539c4` — "perf: strip blend-mode material layers during card flip; fix back-face tap no-op"
+
 ## 2026-08-17 — Session: Follow-up perf pass on Digital Card popups (verified against production build)
 
 ### What changed

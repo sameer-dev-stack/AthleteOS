@@ -43,6 +43,25 @@ After ADR-059 the popups were smooth on a dev server but still dropped frames wh
 
 ---
 
+## ADR-061 — Strip Blend-Mode Material Layers From Card Faces During the 3D Flip
+
+**Status:** Accepted · 2026-08-17
+
+**Context:**
+Users reported the card flip feeling instant/janky on mobile. CDP tracing (Pixel 7 emulation against a local production build) showed the browser re-rasterizing the card faces during the flip — `SmoothnessDroppedFrame: 10`, `DroppedFrameDuration: 14`, `JankV3: 26` in the flip window, with hundreds of `RasterTask`/`GpuRasterBuffer::Playback` events. The faces contain `mix-blend-mode: overlay` layers (`.rc-noise`, `.rc-sheen`, `.rc-theme-gradient`); blend-mode layers can't be cached as static flip textures, so every rotateY frame forces a GPU re-blend/re-raster. Desktop GPUs absorb this; phone GPUs stutter. The codebase already had the same pattern of coarse-pointer carve-outs (webcam skipped on touch, `backdrop-filter` off inside faces) and `BorderGlow`'s `active`-during-flip gating.
+
+**Decision:**
+- `ReflectiveCard` renders its three blend-mode layers only when `active` is true.
+- Both `ReflectiveCard` instances pass `active` gated on `!isFlipping` (front `!flipped && !isFlipping`, back `flipped && !isFlipping`), mirroring `BorderGlow`.
+- Remove the back face's redundant `onClick={handleFlip}` — it double-fired with the parent `motion.div` handler in the same event (net no-op), so tapping the back never flipped back; taps now bubble to the parent's single handler.
+
+**Consequences:**
+- Post-fix trace: `SmoothnessDroppedFrame: 4`, `DroppedFrameDuration: 2`, `JankV3: 8`; screencast frame-diffing confirms the flip still interpolates over ~350 ms (not snapped).
+- During the 0.35 s flip the faces show the flat `#0d0d12` surface instead of the metallic sheen — invisible in practice while rotating; `active` returns when the flip completes.
+- Back-face taps now flip the card back (verified against the production build); the `BackHeader` button still works via its `stopPropagation` handler.
+
+---
+
 
 
 ## ADR-057 — Lock `www.nilcard.app` as the Canonical SEO Domain
