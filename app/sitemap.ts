@@ -1,7 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import type { MetadataRoute } from "next";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app";
+const _rawBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app";
+const BASE_URL = _rawBaseUrl.startsWith("http://") || _rawBaseUrl.startsWith("https://") ? _rawBaseUrl : `https://${_rawBaseUrl}`;
 
 const STATIC_PAGES: Array<{
   path: string;
