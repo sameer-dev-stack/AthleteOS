@@ -3,6 +3,24 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-17 — Session: Promote bdzone010@gmail.com to admin
+
+### What changed
+- **`lib/admin.ts`**: Added `bdzone010@gmail.com` to `ADMIN_EMAILS`.
+- **`docs/CREDENTIALS.md`**: Documented new admin account `bdzone010@gmail.com`.
+
+### Why
+- User requested promotion of `bdzone010@gmail.com` to admin.
+
+### Files touched
+- `lib/admin.ts`
+- `docs/CREDENTIALS.md`
+- `docs/CHANGELOG.md`
+
+### Commit
+- `a4fb5c1` — `fix: normalize SITE_URL to include protocol for Vercel build`
+
+
 ## 2026-08-17 — Session: Complete Elimination of Layout Thrashing & 60/120 FPS GPU Optimization
 
 ### What changed

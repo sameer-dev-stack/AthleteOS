@@ -53,7 +53,7 @@ ALTER TABLE waitlist ADD COLUMN IF NOT EXISTS confirmation_token TEXT;
 ```
 Run via Supabase Management API. The `supabase/schema.sql` file already includes this column.
 
-### Admin User
+### Admin Users
 
 | Field | Value |
 |-------|-------|
@@ -62,6 +62,14 @@ Run via Supabase Management API. The `supabase/schema.sql` file already includes
 | Type | Email/password auth (Supabase Auth) |
 | Status | Email confirmed, has logged in before |
 | Profile ID | `83c283e5-ef8f-4c4f-a255-abc7e66f4970` |
+
+| Field | Value |
+|-------|-------|
+| Email | `bdzone010@gmail.com` |
+| Password | Set via Supabase Auth |
+| Type | Email/password auth (Supabase Auth) |
+| Status | Admin access granted |
+| Profile ID | — |
 
 ---
 
