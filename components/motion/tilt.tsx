@@ -8,8 +8,9 @@ import {
   useMotionTemplate,
   useReducedMotion,
 } from "framer-motion";
-import { useRef, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { useMounted } from "@/lib/hooks/use-mounted";
+import { useCachedRect } from "@/lib/hooks/use-cached-rect";
 
 export function Tilt({
   children,
@@ -26,9 +27,9 @@ export function Tilt({
   perspective?: number;
   sheen?: boolean;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const mounted = useMounted();
+  const { ref, rectRef } = useCachedRect<HTMLDivElement>();
 
   const px = useMotionValue(0.5);
   const py = useMotionValue(0.5);
@@ -46,9 +47,8 @@ export function Tilt({
   }
 
   const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
+    const rect = rectRef.current;
+    if (!rect || rect.width === 0 || rect.height === 0) return;
     px.set((e.clientX - rect.left) / rect.width);
     py.set((e.clientY - rect.top) / rect.height);
   };

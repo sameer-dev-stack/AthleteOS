@@ -46,7 +46,11 @@ export function CoverImageUpload({ currentUrl, userId, onUpload, onRemove }: Pro
 
         const { error: uploadErr } = await supabase.storage
           .from("covers")
-          .upload(filePath, file, { upsert: true });
+          .upload(filePath, file, {
+            upsert: true,
+            // URLs are ?t=-versioned on read, so a long immutable origin TTL is safe.
+            cacheControl: "max-age=31536000, immutable",
+          });
 
         if (uploadErr) throw uploadErr;
 

@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { ArrowUpRight, Instagram, Twitter, Youtube, Music2, Check } from "lucide-react";
 import { Logo } from "./logo";
 import { Magnetic } from "./motion/magnetic";
+import { useCachedRect } from "@/lib/hooks/use-cached-rect";
 import { subscribeNewsletterAction } from "@/lib/actions/waitlist";
 
 const COLS = [
@@ -195,7 +196,7 @@ function FooterLink({
 }
 
 function ParallaxWordmark() {
-  const ref = useRef<HTMLDivElement>(null);
+  const { ref, rectRef } = useCachedRect<HTMLDivElement>();
   const [active, setActive] = useState(false);
 
   const mx = useMotionValue(0);
@@ -209,9 +210,9 @@ function ParallaxWordmark() {
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
-      const el = ref.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
+      // Use the cached rect — never read layout on every mouse move.
+      const rect = rectRef.current;
+      if (!rect || rect.width === 0) return;
       const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2;
       const dx = (e.clientX - cx) / (window.innerWidth / 2);
@@ -219,9 +220,9 @@ function ParallaxWordmark() {
       mx.set(Math.max(-1, Math.min(1, dx)));
       my.set(Math.max(-1, Math.min(1, dy)));
     };
-    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mousemove", onMove, { passive: true });
     return () => window.removeEventListener("mousemove", onMove);
-  }, [mx, my]);
+  }, [mx, my, rectRef]);
 
   return (
     <div

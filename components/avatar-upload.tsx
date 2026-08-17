@@ -64,7 +64,13 @@ export function AvatarUpload({ currentUrl, userId, onUpload, size = "md", trigge
 
       const { error: uploadErr } = await supabase.storage
         .from("avatars")
-        .upload(filePath, blob, { upsert: true, contentType: blob.type });
+        .upload(filePath, blob, {
+          upsert: true,
+          contentType: blob.type,
+          // URLs are ?t=-versioned on read, so a long immutable origin TTL is safe
+          // and clears the "short cache lifetime" audit for avatars.
+          cacheControl: "max-age=31536000, immutable",
+        });
 
       if (uploadErr) throw uploadErr;
 

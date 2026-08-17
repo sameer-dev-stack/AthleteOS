@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -13,6 +13,13 @@ type Props = {
 export function PhotoGallery({ images, alt, accent }: Props) {
   const [active, setActive] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const childWidthRef = useRef<number>(0);
+
+  // Reset the cached child width whenever the image set changes so it is
+  // recomputed from the new DOM.
+  useEffect(() => {
+    childWidthRef.current = 0;
+  }, [images]);
 
   const scrollTo = useCallback((index: number) => {
     if (!scrollRef.current) return;
@@ -62,7 +69,13 @@ export function PhotoGallery({ images, alt, accent }: Props) {
         onScroll={(e) => {
           const container = e.currentTarget;
           const scrollLeft = container.scrollLeft;
-          const childWidth = container.children[0]?.getBoundingClientRect().width || 1;
+          // Cache child width on the first scroll; only recompute it when the
+          // layout can actually change. Reading getBoundingClientRect() here
+          // on every scroll frame forces a synchronous layout flush.
+          if (childWidthRef.current === 0) {
+            childWidthRef.current = container.children[0]?.getBoundingClientRect().width || 1;
+          }
+          const childWidth = childWidthRef.current;
           const newActive = Math.round(scrollLeft / childWidth);
           if (newActive !== active) setActive(newActive);
         }}

@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { useMounted } from "@/lib/hooks/use-mounted";
 import { motion, useMotionValue, useMotionTemplate, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useCachedRect } from "@/lib/hooks/use-cached-rect";
 
 export function Spotlight({
   children,
@@ -16,9 +17,9 @@ export function Spotlight({
   size?: number;
   color?: string;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const mounted = useMounted();
+  const { ref, rectRef } = useCachedRect<HTMLDivElement>();
 
   const x = useMotionValue(-9999);
   const y = useMotionValue(-9999);
@@ -30,9 +31,8 @@ export function Spotlight({
   }
 
   const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
+    const rect = rectRef.current;
+    if (!rect) return;
     x.set(e.clientX - rect.left);
     y.set(e.clientY - rect.top);
     opacity.set(1);

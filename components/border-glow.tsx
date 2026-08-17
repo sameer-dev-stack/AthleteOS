@@ -86,12 +86,35 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
   const lastYRef = useRef<number>(-1);
   const lastFrameTimeRef = useRef<number>(0);
   const dimRef = useRef<{ w: number; h: number }>({ w: 360, h: 600 });
+  const rectRef = useRef<DOMRect | null>(null);
+
+  // Cache the bounding rect on scroll/resize only — NOT inside pointermove.
+  // Reading getBoundingClientRect() on every pointer move forces a sync layout
+  // flush (forced reflow) and is the main driver of DevTools' reflow warning.
+  useEffect(() => {
+    const measure = () => {
+      if (cardRef.current) rectRef.current = cardRef.current.getBoundingClientRect();
+    };
+    measure();
+    window.addEventListener("scroll", measure, { passive: true });
+    window.addEventListener("resize", measure);
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined" && cardRef.current) {
+      ro = new ResizeObserver(measure);
+      ro.observe(cardRef.current);
+    }
+    return () => {
+      window.removeEventListener("scroll", measure);
+      window.removeEventListener("resize", measure);
+      ro?.disconnect();
+    };
+  }, []);
 
   const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     const card = cardRef.current;
-    if (!card) return;
+    const rect = rectRef.current;
+    if (!card || !rect) return;
 
-    const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const cx = rect.width / 2;
