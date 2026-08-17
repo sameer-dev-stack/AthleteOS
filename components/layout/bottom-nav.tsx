@@ -50,9 +50,7 @@ export function BottomNav() {
         role="navigation"
         aria-label="Main navigation"
         style={{
-          backgroundColor: "rgba(10, 10, 11, 0.88)",
-          backdropFilter: "saturate(180%) blur(20px)",
-          WebkitBackdropFilter: "saturate(180%) blur(20px)",
+          backgroundColor: "rgba(10, 10, 11, 0.92)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >

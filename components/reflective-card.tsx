@@ -270,7 +270,7 @@ export function ReflectiveCard({
           className="rc-video"
           aria-hidden="true"
           style={{
-            filter: `saturate(var(--rc-saturation, 0)) contrast(125%) brightness(108%) blur(var(--rc-blur, 12px))`,
+            filter: `saturate(var(--rc-saturation, 0)) contrast(125%) brightness(108%)`,
             opacity: webcamReady ? 0.88 : 0,
           } as React.CSSProperties}
         />

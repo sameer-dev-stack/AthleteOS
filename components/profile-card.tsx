@@ -458,9 +458,8 @@ const AthleteIdentity = memo(function AthleteIdentity({
               aria-label="Show QR code"
               className="h-9 w-9 rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
               style={{
-                background: "rgba(0,0,0,0.5)",
-                border: "1px solid rgba(255,255,255,0.10)",
-                backdropFilter: "blur(12px)",
+                background: "rgba(0,0,0,0.62)",
+                border: "1px solid rgba(255,255,255,0.12)",
               }}
             >
               <QrCode className="h-4 w-4" style={{ color: "rgba(255,255,255,0.55)" }} />
@@ -472,9 +471,8 @@ const AthleteIdentity = memo(function AthleteIdentity({
               aria-label="Share profile"
               className="h-9 w-9 rounded-full flex items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
               style={{
-                background: "rgba(0,0,0,0.5)",
-                border: "1px solid rgba(255,255,255,0.10)",
-                backdropFilter: "blur(12px)",
+                background: "rgba(0,0,0,0.62)",
+                border: "1px solid rgba(255,255,255,0.12)",
               }}
             >
               {copied ? (
@@ -490,9 +488,8 @@ const AthleteIdentity = memo(function AthleteIdentity({
             <div
               className="flex items-center gap-1.5 rounded-full px-2.5 py-1 pointer-events-auto"
               style={{
-                background: "rgba(0,0,0,0.5)",
-                border: "1px solid rgba(255,255,255,0.10)",
-                backdropFilter: "blur(12px)",
+                background: "rgba(0,0,0,0.62)",
+                border: "1px solid rgba(255,255,255,0.12)",
               }}
             >
               <Logo
@@ -1918,7 +1915,7 @@ export function ProfileCard({
           transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
           onClick={handleFlip}
           className="relative w-full h-full cursor-pointer group"
-          style={{ transformStyle: "preserve-3d", borderRadius: "20px" }}
+          style={{ transformStyle: "preserve-3d", borderRadius: "20px", willChange: "transform" }}
           role="button"
           aria-label={flipped ? "Flip card to front" : "Flip card to see more"}
           aria-pressed={flipped}
@@ -2190,9 +2187,7 @@ export function ProfileCard({
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[150] flex items-center justify-center p-4"
             style={{
-              background: "rgba(0,0,0,0.88)",
-              backdropFilter: "blur(14px)",
-              WebkitBackdropFilter: "blur(14px)",
+              background: "rgba(0,0,0,0.92)",
             }}
             onClick={() => setShowTipConfirming(false)}
           >
@@ -2238,9 +2233,7 @@ export function ProfileCard({
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[150] flex items-center justify-center p-4"
             style={{
-              background: "rgba(0,0,0,0.88)",
-              backdropFilter: "blur(14px)",
-              WebkitBackdropFilter: "blur(14px)",
+              background: "rgba(0,0,0,0.92)",
             }}
             onClick={() => setShowTipSuccess(false)}
           >
