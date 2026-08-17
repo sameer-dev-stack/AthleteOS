@@ -1343,9 +1343,11 @@ const ContactModal = memo(function ContactModal({
 const BusinessModalCtx = createContext<{
   openContact: () => void;
   openInquiry: () => void;
+  anyOpen: boolean;
 }>({
   openContact: () => {},
   openInquiry: () => {},
+  anyOpen: false,
 });
 
 function BusinessModalProvider({
@@ -1369,8 +1371,9 @@ function BusinessModalProvider({
     () => ({
       openContact: () => setShowContact(true),
       openInquiry: () => setShowInquiry(true),
+      anyOpen: showContact || showInquiry,
     }),
-    []
+    [showContact, showInquiry]
   );
 
   return (
@@ -1418,6 +1421,18 @@ function BusinessModalProvider({
       />
     </BusinessModalCtx.Provider>
   );
+}
+
+/* ── Card glow gate ────────────────────────────────
+   Pauses the BorderGlow sweep while a business popup is open so the
+   card's continuous animation doesn't fight the popup's entrance on
+   a mobile GPU (the card sits dimmed behind the scrim anyway). */
+function FaceGlow({
+  baseActive,
+  ...glow
+}: Omit<React.ComponentProps<typeof BorderGlow>, "active"> & { baseActive: boolean }) {
+  const { anyOpen } = useContext(BusinessModalCtx);
+  return <BorderGlow {...glow} active={baseActive && !anyOpen} />;
 }
 
 /* ── BusinessBlock (Monetization architecture boundary) ── */
@@ -1905,7 +1920,7 @@ export function ProfileCard({
               zIndex: flipped ? 0 : 1,
             }}
           >
-            <BorderGlow
+            <FaceGlow
               edgeSensitivity={30}
               glowColor="78 100 62"
               backgroundColor="#0d0d12"
@@ -1914,7 +1929,7 @@ export function ProfileCard({
               glowIntensity={1.2}
               coneSpread={25}
               loop
-              active={!flipped && !isFlipping}
+              baseActive={!flipped && !isFlipping}
               colors={[accent, `${accent}cc`, `${accent}88`]}
               className="w-full h-full"
               style={{
@@ -1987,7 +2002,7 @@ export function ProfileCard({
                 style={{ background: `linear-gradient(90deg, transparent 10%, ${accent}22 50%, transparent 90%)` }}
               />
               </ReflectiveCard>
-            </BorderGlow>
+            </FaceGlow>
           </div>
 
           {/* ═══════════════════════════════════════════
@@ -2001,7 +2016,7 @@ export function ProfileCard({
             }}
             onTouchStart={resetAutoReturn}
           >
-            <BorderGlow
+            <FaceGlow
               edgeSensitivity={30}
               glowColor="78 100 62"
               backgroundColor="#0d0d12"
@@ -2010,7 +2025,7 @@ export function ProfileCard({
               glowIntensity={1.2}
               coneSpread={25}
               loop
-              active={flipped && !isFlipping}
+              baseActive={flipped && !isFlipping}
               colors={[accent, `${accent}cc`, `${accent}88`]}
               className="w-full h-full"
               style={{
@@ -2142,7 +2157,7 @@ export function ProfileCard({
               </div>
             )}
               </ReflectiveCard>
-            </BorderGlow>
+            </FaceGlow>
           </div>
 
         </motion.div>

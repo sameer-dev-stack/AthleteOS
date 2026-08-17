@@ -3,6 +3,24 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-17 — Session: Pause card glow sweep while business popups are open
+
+### What changed
+- **`components/profile-card.tsx`**: `BusinessModalCtx` gains an `anyOpen` boolean (`showContact || showInquiry`), added to the provider's memoized context value with deps `[showContact, showInquiry]`. New local `FaceGlow` consumer reads `anyOpen` and renders `<BorderGlow {...glow} active={baseActive && !anyOpen} />`; both face usages switched from `active={...}` to `baseActive={!flipped && !isFlipping}` (front) / `baseActive={flipped && !isFlipping}` (back).
+- `BorderGlow` itself is untouched — its `[loop, active]` effect already cancels the rAF sweep when `active` drops, so the pause is free.
+
+### Why
+- User reported the "Send Inquiry" button on mobile "takes time" and the card animation looks laggy as the popup opens. The card's continuous `BorderGlow` rAF sweep kept running underneath the dimmed `bg-black/80` scrim while the popup entrance (0.15 s fade + scale) played — competing for main-thread time on a phone GPU right when the entrance is visible. Verified on a local production build (Pixel 7 emulation): sweep running pre-open, paused the instant the popup mounts, resumed on close; popup-open rAF window showed only 2 gaps >30 ms (max 33 ms).
+
+### Files touched
+- `components/profile-card.tsx`
+- `docs/DECISIONS.md`
+- `docs/CHANGELOG.md`
+- `docs/COMPONENTS.md`
+
+### Commit
+- (pending commit + hash)
+
 ## 2026-08-17 — Session: Mobile card flip smoothness — strip blend layers during flip + fix back-face tap dead zone
 
 ### What changed

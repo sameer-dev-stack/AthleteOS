@@ -62,6 +62,25 @@ Users reported the card flip feeling instant/janky on mobile. CDP tracing (Pixel
 
 ---
 
+## ADR-062 — Pause the Card Glow Sweep While a Popup Is Open
+
+**Status:** Accepted · 2026-08-17
+
+**Context:**
+A user reported that pressing "Send Inquiry" on mobile "takes time" and the card animation animates "very laggy" as the popup opens. After ADR-059/060 the popup itself mounts cheaply (provider state only, compositor-friendly overlay), but the card's `BorderGlow` sweep — a continuous rAF loop writing CSS custom properties every frame — keeps running underneath the dimmed `bg-black/80` scrim while the popup entrance (fade + scale, 0.15 s) plays. On a phone GPU that background sweep competes with the popup animation for main-thread time exactly when the user is watching the entrance.
+
+**Decision:**
+- `BusinessModalCtx` gains an `anyOpen` boolean (`showContact || showInquiry`), added to the provider's memoized context value with deps `[showContact, showInquiry]`.
+- Introduce `FaceGlow` — a tiny local consumer in `profile-card.tsx` that reads `anyOpen` and renders `<BorderGlow {...glow} active={baseActive && !anyOpen} />`. Both face usages switch from `active={...}` to `baseActive={!flipped && !isFlipping}` (front) / `baseActive={flipped && !isFlipping}` (back).
+- `BorderGlow` already cancels its rAF cleanly when `active` flips false (effect cleanup on deps `[loop, active]`), so the pause is free — no change to `border-glow.tsx`/`.css`.
+
+**Consequences:**
+- Verified against the local production build (Pixel 7 emulation): sweep running pre-open (`glow-looping` class present, `--cursor-x` advancing), paused the instant the popup mounts (class removed, cursor static), resumed on close; popup-open rAF window showed only 2 gaps >30 ms, max gap 33 ms.
+- Preserves ADR-059 isolation: `anyOpen` lives in provider state, so toggling it re-renders only the provider and `FaceGlow` consumers — never the `ReflectiveCard`/card subtree.
+- Only `components/profile-card.tsx` changed (context type + provider value + `FaceGlow` + two usages); no visual change (the glow is hidden behind the scrim while dimmed anyway).
+
+---
+
 
 
 ## ADR-057 — Lock `www.nilcard.app` as the Canonical SEO Domain

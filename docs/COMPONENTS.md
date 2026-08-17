@@ -125,9 +125,11 @@ Root public athlete identity card. Now a composition of named sub-components rat
 | `BusinessBlock` | Contact / Send Inquiry / Tip CTA section |
 | `SectionLabel` | Reusable icon + uppercase label row |
 | `ReflectiveCardShell` | **REMOVED** — replaced by `<ReflectiveCard>` |
-| `BusinessModalProvider` | **NEW [2026-08-17]** — context provider owning Contact + Inquiry popup open/close state; card tree passes through as `children` so popup toggles never re-render the card faces. Renders ContactModal (portaled) + InquiryForm. Exposes `openContact()` / `openInquiry()` via `BusinessModalCtx`. |
+| `BusinessModalProvider` | **NEW [2026-08-17]** — context provider owning Contact + Inquiry popup open/close state; card tree passes through as `children` so popup toggles never re-render the card faces. Renders ContactModal (portaled) + InquiryForm. Exposes `openContact()` / `openInquiry()` / `anyOpen` via `BusinessModalCtx`. |
 
 **Popup perf fix [2026-08-17]:** popup state (`showContact`, `showInquiry`, `copiedEmail`, `copiedPhone`) moved out of `ProfileCard` into `BusinessModalProvider`. Opening Contacts or Inquiry previously re-rendered the whole card subtree (non-memoized `ReflectiveCard` SVG/video/webcam + `BorderGlow` rAF loop) causing a main-thread stall at animation start; now only the provider + popup re-render. InquiryForm exit animation also fixed (it returned `null` before `<AnimatePresence>`, so close was an instant unmount). **Follow-up [2026-08-17]:** `InquiryForm`'s full-viewport overlay lost its `translateZ(0)` + `willChange: transform` hint (measured 3.6 → 0.2 avg dropped frames on a production build). Rule: compositing hints on viewport-sized `fixed` overlays hurt; on card-size overlays (e.g. ContactModal) they help. See ADR-060.
+
+**Popup-open card glow pause [2026-08-17]:** `BusinessModalCtx` now exposes `anyOpen` (`showContact || showInquiry`, included in the memoized provider value). The card faces' `BorderGlow` sweep is now rendered through a local `FaceGlow` wrapper that gates `active` on `baseActive && !anyOpen`, so the continuous rAF glow loop (which sits dimmed behind the black/80 scrim) stops the moment a popup opens and resumes on close — freeing the main thread during the popup entrance on mobile GPUs. Both face usages moved from `active={...}` to `baseActive={!flipped && !isFlipping}` / `baseActive={flipped && !isFlipping}`. See ADR-062.
 
 **Props (ProfileCard):**
 - `profile: Profile` — full athlete profile from Supabase
