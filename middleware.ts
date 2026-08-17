@@ -149,6 +149,7 @@ export async function middleware(request: NextRequest) {
     const isPublicProfile = /^\/[a-zA-Z0-9_-]+$/.test(pathname) && !pathname.startsWith("/_next");
     if (
       !profile?.onboarding_completed &&
+      !isAdmin(user.email) &&
       pathname !== "/onboarding" &&
       !pathname.startsWith("/auth/") &&
       !pathname.startsWith("/onboarding/") &&
