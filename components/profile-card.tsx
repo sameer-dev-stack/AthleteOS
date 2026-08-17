@@ -1935,7 +1935,7 @@ export function ProfileCard({
                 radius={20}
                 filterId="rc-filter-front"
                 streamRef={webcamStreamRef}
-                active={!flipped}
+                active={!flipped && !isFlipping}
                 style={{
                   width: "100%",
                   height: "100%",
@@ -2000,7 +2000,6 @@ export function ProfileCard({
               zIndex: flipped ? 1 : 0,
             }}
             onTouchStart={resetAutoReturn}
-            onClick={handleFlip}
           >
             <BorderGlow
               edgeSensitivity={30}
@@ -2032,7 +2031,7 @@ export function ProfileCard({
                 radius={20}
                 filterId="rc-filter-back"
                 streamRef={webcamStreamRef}
-                active={flipped}
+                active={flipped && !isFlipping}
                 style={{
                   width: "100%",
                   height: "100%",

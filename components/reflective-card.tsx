@@ -277,22 +277,26 @@ export function ReflectiveCard({
       )}
 
       {/* ── Material layers ───────────────────────── */}
-      <div className="rc-noise"   aria-hidden="true" />
-      <div className="rc-sheen"   aria-hidden="true" />
-      {backgroundGradient && (
-        <div
-          className="rc-theme-gradient"
-          style={{
-            position: "absolute",
-            inset: 0,
-            zIndex: 2,
-            pointerEvents: "none",
-            background: backgroundGradient,
-            opacity: 0.70,
-            mixBlendMode: "overlay",
-          }}
-          aria-hidden="true"
-        />
+      {active && (
+        <>
+          <div className="rc-noise"   aria-hidden="true" />
+          <div className="rc-sheen"   aria-hidden="true" />
+          {backgroundGradient && (
+            <div
+              className="rc-theme-gradient"
+              style={{
+                position: "absolute",
+                inset: 0,
+                zIndex: 2,
+                pointerEvents: "none",
+                background: backgroundGradient,
+                opacity: 0.70,
+                mixBlendMode: "overlay",
+              }}
+              aria-hidden="true"
+            />
+          )}
+        </>
       )}
       <div className="rc-overlay" aria-hidden="true" />
       <div className="rc-border"  aria-hidden="true" />
