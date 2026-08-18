@@ -17,7 +17,7 @@
 - `docs/CHANGELOG.md`
 
 ### Commit
-- (pending commit + hash)
+- `dc18d21` — "perf: inline CSS on SSR pages to remove render-blocking stylesheet requests"
 
 ## 2026-08-17 — Session: Pause card glow sweep while business popups are open
 
