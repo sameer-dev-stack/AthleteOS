@@ -54,20 +54,17 @@ async function verifyAdminAuth() {
   }
 }
 
-// -------------------------------------------------------------
-// LOCAL SEEDED DATABASE FALLBACKS
-// -------------------------------------------------------------
-const MOCK_ADMIN_ID = "83c283e5-ef8f-4c4f-a255-abc7e66f4970";
+const MOCK_ADMIN_ID = "00000000-0000-0000-0000-000000000000";
 
 let mockPlatformSettings = {
   featureFlags: {
-    onboarding_active: true,
-    ai_limitations_enabled: true,
-    automatic_compliance_review: false,
-    platform_tipping_enabled: true,
-    payout_instant_withdrawals: false
-  }
+    newCheckout: true,
+    darkMode: true,
+    analytics: true,
+  } as Record<string, boolean>,
 };
+
+// Feature flags are now DB-backed (see supabase/migrations/20260818_feature_flags.sql)
 
 let mockAuditLog: any[] = [
   {
@@ -490,12 +487,19 @@ export async function GET(
         const { count: waitlistCount } = await serviceRoleClient.from("waitlist").select("*", { count: "exact", head: true });
         const { count: newsletterCount } = await serviceRoleClient.from("newsletter").select("*", { count: "exact", head: true });
 
+        // Read feature flags from DB
+        const { data: flagRows } = await serviceRoleClient.from("feature_flags").select("flag_name, enabled");
+        const featureFlags: Record<string, boolean> = {};
+        (flagRows || []).forEach((row: any) => {
+          featureFlags[row.flag_name] = row.enabled;
+        });
+
         return NextResponse.json({
           supabaseStatus: "connected",
           stripeWebhookHealth: "healthy",
           waitlistCount: waitlistCount || 0,
           newsletterCount: newsletterCount || 0,
-          featureFlags: mockPlatformSettings.featureFlags
+          featureFlags
         });
       }
     } catch (error: any) {
@@ -504,7 +508,7 @@ export async function GET(
         stripeWebhookHealth: "error",
         waitlistCount: 0,
         newsletterCount: 0,
-        featureFlags: mockPlatformSettings.featureFlags
+        featureFlags: {}
       });
     }
   }

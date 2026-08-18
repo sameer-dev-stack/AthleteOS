@@ -261,7 +261,9 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
       style={mergedStyles}
     >
       <div ref={glowLayerRef} className="border-glow-layer" aria-hidden="true">
+        <div className="border-glow-layer" aria-hidden="true">
         <span className="edge-light" />
+      </div>
       </div>
       <div className="border-glow-inner w-full h-full">
         {children}
