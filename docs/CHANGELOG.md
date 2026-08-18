@@ -22,7 +22,7 @@
 - `docs/COMPONENTS.md`
 
 ### Commit
-- Pending commit hash.
+- `283c360` — "perf(card): scope glow CSS-var writes to a dedicated layer and gate hover for touch"
 
 
 
