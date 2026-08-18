@@ -57,18 +57,6 @@ async function verifyAdminAuth() {
 // Feature flags are DB-backed (supabase/migrations/20260818_feature_flags.sql)
 const MOCK_ADMIN_ID = "83c283e5-ef8f-4c4f-a255-abc7e66f4970";
 
-let mockAuditLog: any[] = [
-  {
-    id: "audit-100",
-    admin_id: MOCK_ADMIN_ID,
-    action: "SYSTEM_BOOT",
-    target_type: "platform",
-    target_id: "system",
-    metadata: { version: "1.001305", env: "development", mode: "initialized" },
-    created_at: new Date().toISOString()
-  }
-];
-
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ adminPath: string[] }> }
