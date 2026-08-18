@@ -10,6 +10,7 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
+    inlineCss: true,
   },
   async headers() {
     return [

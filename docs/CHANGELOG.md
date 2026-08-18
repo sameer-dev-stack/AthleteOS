@@ -3,6 +3,22 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-17 — Session: Inline CSS to eliminate render-blocking stylesheets
+
+### What changed
+- **`next.config.mjs`**: added `experimental.inlineCss: true`. Next.js now inlines page CSS as `<style>` tags in SSR'd HTML instead of emitting render-blocking `<link rel="stylesheet">` requests.
+
+### Why
+- Lighthouse flagged "Render-blocking requests · Est savings of 750 ms" on the live public card: the critical path included 4 separate CSS chunk requests (2.1 / 19.2 / 2.4 / 2.3 KiB, 190–760 ms each) before first paint. Inlining moves that CSS into the single document request — a net win on slow mobile connections. Fonts stay external `url()` (no base64 bloat); verified card + homepage render with 0 blocking stylesheet links and no console errors.
+
+### Files touched
+- `next.config.mjs`
+- `docs/DECISIONS.md`
+- `docs/CHANGELOG.md`
+
+### Commit
+- (pending commit + hash)
+
 ## 2026-08-17 — Session: Pause card glow sweep while business popups are open
 
 ### What changed

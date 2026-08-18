@@ -84,6 +84,23 @@ A user reported that pressing "Send Inquiry" on mobile "takes time" and the card
 
 
 
+## ADR-063 — Inline CSS on SSR'd Pages to Remove Render-Blocking Stylesheets
+
+**Status:** Accepted · 2026-08-17
+
+**Context:**
+A Lighthouse run against the live public card (`www.nilcard.app`) flagged "Render-blocking requests · Est savings of 750 ms". The critical path carried the 25.9 KiB HTML document plus 4 separate `/_next/static/chunks/*.css` stylesheet requests (2.1 KiB, 19.2 KiB, 2.4 KiB, 2.3 KiB) — each a full network round trip (190–760 ms) before first paint. The app ships three stylesheets (globals.css 14.8 KiB, border-glow.css 5.6 KiB, reflective-card.css 5.9 KiB), which Turbopack emits as multiple blocking `<link rel="stylesheet">` tags in `<head>`.
+
+**Decision:**
+- Enable `experimental.inlineCss: true` in `next.config.mjs`. Next.js then inlines the page's CSS as `<style>` tags in the SSR'd HTML instead of emitting render-blocking `<link>` stylesheets, eliminating the four blocking requests from the critical path. Applied globally; production builds only; fonts remain external `url()` references (no base64 bloat); prerendered pages keep `<link>` to avoid duplication during navigation.
+
+**Consequences:**
+- Verified on a local production build: the card route (`/alexmercer`) and homepage now emit 0 `<link rel="stylesheet">` tags; CSS is inline (`@font-face` + globals + component CSS), no base64 font embeds, two distinct non-duplicated `<style>` blocks. Card still renders with the glow sweep running and no console errors.
+- Tradeoff: HTML document grows (the inline CSS is ~120 KiB unminified text) but is fetched in the single document request instead of 4 parallel round trips — a net win on slow mobile connections, which is what the Lighthouse savings estimate targets.
+- Docs: ADR-063; changelog entry pending commit hash.
+
+---
+
 ## ADR-057 — Lock `www.nilcard.app` as the Canonical SEO Domain
 
 **Status:** Accepted (updated) · 2026-08-16
