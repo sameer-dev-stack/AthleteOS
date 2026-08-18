@@ -3,7 +3,26 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
-## 2026-08-18 — Session: Android card performance pass — scope glow CSS-var writes + touch hover gating
+## 2026-08-18 — Session: Card glow re-architecture — compositor-only sprite (no per-frame mask/blend repaint)
+
+### What changed
+- **`components/border-glow.css`**: removed every `mask-image` from the three gradient layers (`::before`, `::after`, `.edge-light`); they are now static, paint-once layers revealed by `:hover` / `.sweep-active` / `.glow-looping` at baked opacities (`::before` 0.4, `::after` `fill * 0.45`, `.edge-light` 0.55). Added `.border-glow-spot`: a 480px (glow-padding * 12) radial-gradient light sprite, `will-change: transform, opacity`, no blend mode, positioned behind `.border-glow-inner` — the ONLY per-frame-animated element.
+- **`components/border-glow.tsx`**: all per-frame `--cursor-x` / `--cursor-y` / `--edge-proximity` writes deleted. Loop tick and `onPointerMove` now write `transform: translate3d(...)` and `opacity` directly to the spot (both compositor-only). `onPointerLeave` clears the inline opacity; loop cleanup also clears it so a paused sweep leaves no static glow blob. The `glowLayerRef` was removed (no longer needed).
+
+### Why
+- The Android perf target (TECNO KL4 ~4.5 FPS, continuous full-page repaint) traced to per-frame re-raster of two full-card masked gradient layers plus `mix-blend-mode` re-blend each time `--cursor-x/y` changed. Mask gradients are not compositor-animatable, and custom-property writes invalidate styles. ADR-065 scoped the writes but did not remove the repaint. Replacing the moving mask with a transform-driven sprite means the sweep never triggers a paint on the main thread — only GPU composite.
+- The old emulator measurement path was abandoned (stock Android 11 Chrome 83 can't parse the production JS bundle; sideloaded Chrome 151 crashes on the system image's GPU). The fix is verified functionally on a local production build instead; the user tests the visual on-device.
+
+### Files touched
+- `components/border-glow.tsx`
+- `components/border-glow.css`
+- `docs/DECISIONS.md`
+- `docs/CHANGELOG.md`
+- `docs/COMPONENTS.md`
+
+### Commit
+- pending — pushed after user visual confirmation cycle
+
 
 ### What changed
 - **`components/border-glow.tsx`**: per-frame `--cursor-x` / `--cursor-y` / `--edge-proximity` writes moved from `.border-glow-card` onto a new minimal `.border-glow-layer` element (owns `::before`, `::after`, `.edge-light`). Removed `--cursor-angle` writes (no CSS consumer) and the `degrees` math. Loop tick interval now 32 ms on `(pointer: coarse)`, 20 ms on fine pointers, and the loop skips work while `document.hidden`.

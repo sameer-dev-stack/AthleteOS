@@ -8,6 +8,10 @@ const nextConfig = {
   turbopack: {
     root: process.cwd(),
   },
+  allowedDevOrigins: [
+    "disabilities-drill-conducted-advocate.trycloudflare.com",
+    "were-proudly-mesh-cowboy.trycloudflare.com",
+  ],
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
     inlineCss: true,

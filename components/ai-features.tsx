@@ -131,9 +131,11 @@ export function AIFeatures() {
                     <span className="font-mono text-[10px] text-ink-dim">attempt 1 of 2 free</span>
                   </div>
                   <div className="mt-4 rounded-xl border border-white/[0.05] bg-bg p-4 font-mono text-[12px] leading-relaxed text-ink-muted">
-                    <span className="text-accent">{"// To:"}</span> partnerships@gymshark.com
+                    <span className="text-accent">{"// To:"}</span>
+                    {"partnerships@gymshark.com"}
                     <br />
-                    <span className="text-accent">{"// Subject:"}</span> D1 guard at Stanford — quick collab idea
+                    <span className="text-accent">{"// Subject:"}</span>
+                    {"D1 guard at Stanford — quick collab idea"}
                     <br />
                     <br />
                     Hey Gymshark team — I&rsquo;m Maya, a starting guard at Stanford. Played in front of
