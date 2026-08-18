@@ -3,6 +3,26 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-18 — Session: Restore perimeter snake glow via compositor-only transform snake-head
+
+### What changed
+- **`components/border-glow.tsx`**: the rAF perimeter loop no longer writes `--cursor-x`/`--cursor-y` every frame. Instead it moves a dedicated `.snake-head` div via `transform: translate3d(...)`. Transform updates bypass style invalidation and are handled by the GPU compositor, so the snake travels at 60fps with zero main-thread style recalc. On `(pointer: coarse)` the snake head is hidden and a CSS `conic-gradient` orbit provides a similar moving edge glow with zero JS cost.
+- **`components/border-glow.css`**: added `.snake-head` (64×64 radial gradient, `mix-blend-mode: plus-lighter`, `will-change: transform`). Removed per-frame `mask-image` dependency from the sweep path. `@media (pointer: coarse)` hides `.snake-head` and uses the existing `conic-gradient` orbit on `::before`.
+
+### Why
+- User wants the old snake perimeter glow back, but the previous implementation caused ~4.5 fps on mobile because writing CSS custom properties every frame forced style invalidation + mask re-raster across the glow subtree. Moving a single element by `transform` is compositor-only and avoids all of that.
+
+### Files touched
+- `components/border-glow.tsx`
+- `components/border-glow.css`
+- `docs/DECISIONS.md`
+- `docs/CHANGELOG.md`
+- `docs/COMPONENTS.md`
+
+### Commit
+- `2c770d6` — "perf: replace glow sweep CSS-var writes with compositor-only snake-head transform"
+
+
 ## 2026-08-18 — Session: Fix mobile BorderGlow perf — disable sweep + blend modes on coarse pointers
 
 ### What changed

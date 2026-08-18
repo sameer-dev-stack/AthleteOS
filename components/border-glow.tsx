@@ -82,75 +82,27 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const glowLayerRef = useRef<HTMLDivElement>(null);
+  const snakeRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
   const loopStartRef = useRef<number | null>(null);
   const lastXRef = useRef<number>(-1);
   const lastYRef = useRef<number>(-1);
   const lastFrameTimeRef = useRef<number>(0);
   const dimRef = useRef<{ w: number; h: number }>({ w: 360, h: 600 });
-  const rectRef = useRef<DOMRect | null>(null);
 
   const isCoarsePointer =
     typeof window !== 'undefined' &&
     window.matchMedia?.('(pointer: coarse)').matches === true;
 
-  // Cache the bounding rect on scroll/resize only — NOT inside pointermove.
-  // Reading getBoundingClientRect() on every pointer move forces a sync layout
-  // flush (forced reflow) and is the main driver of DevTools' reflow warning.
-  useEffect(() => {
-    const measure = () => {
-      if (cardRef.current) rectRef.current = cardRef.current.getBoundingClientRect();
-    };
-    measure();
-    window.addEventListener("scroll", measure, { passive: true });
-    window.addEventListener("resize", measure);
-    let ro: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== "undefined" && cardRef.current) {
-      ro = new ResizeObserver(measure);
-      ro.observe(cardRef.current);
-    }
-    return () => {
-      window.removeEventListener("scroll", measure);
-      window.removeEventListener("resize", measure);
-      ro?.disconnect();
-    };
-  }, []);
-
-  const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    const layer = glowLayerRef.current;
-    const rect = rectRef.current;
-    if (!layer || !rect) return;
-
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const cx = rect.width / 2;
-    const cy = rect.height / 2;
-    const dx = x - cx;
-    const dy = y - cy;
-
-    let kx = dx !== 0 ? cx / Math.abs(dx) : Infinity;
-    let ky = dy !== 0 ? cy / Math.abs(dy) : Infinity;
-    const edge = Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
-
-    layer.style.setProperty('--edge-proximity', `${(edge * 100) | 0}`);
-    layer.style.setProperty('--cursor-x', `${x | 0}px`);
-    layer.style.setProperty('--cursor-y', `${y | 0}px`);
-  }, []);
-
   useEffect(() => {
     const card = cardRef.current;
     if (!card) return;
 
-    const shouldAnimate = animated !== false && !isCoarsePointer;
-
-    // Cache dimensions via ResizeObserver — ZERO forced reflows during rAF ticks
     const updateDims = () => {
-      if (card) {
-        dimRef.current = {
-          w: card.offsetWidth || 360,
-          h: card.offsetHeight || 600,
-        };
-      }
+      dimRef.current = {
+        w: card.offsetWidth || 360,
+        h: card.offsetHeight || 600,
+      };
     };
     updateDims();
 
@@ -160,25 +112,18 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
       ro.observe(card);
     }
 
+    const shouldAnimate = animated !== false && !isCoarsePointer;
+
     if (shouldAnimate && active) {
-      const layer = glowLayerRef.current;
-      if (!layer) return;
       const speed = 0.0002;
-      // Coarse pointers (mobile) get a slower tick so the per-frame
-      // custom-property writes — which invalidate the glow layer's styles —
-      // happen ~31fps instead of ~50fps. The sweep takes 5s per perimeter,
-      // so the halved write rate is visually indistinguishable.
-      const frameInterval = window.matchMedia?.('(pointer: coarse)').matches === true ? 32 : 20;
+      const frameInterval = isCoarsePointer ? 32 : 20;
 
       card.classList.add('glow-looping');
-      layer.style.setProperty('--edge-proximity', '90');
+      loopStartRef.current = null;
       lastXRef.current = -1;
       lastYRef.current = -1;
-      loopStartRef.current = null;
 
       const tick = (now: number) => {
-        // rAF keeps firing in background tabs; skip work and reset the gate
-        // so the sweep resumes immediately on return.
         if (document.hidden) {
           lastFrameTimeRef.current = 0;
           rafRef.current = requestAnimationFrame(tick);
@@ -218,8 +163,10 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
         const yi = Math.round(y);
 
         if (xi !== lastXRef.current || yi !== lastYRef.current) {
-          layer.style.setProperty('--cursor-x', `${xi}px`);
-          layer.style.setProperty('--cursor-y', `${yi}px`);
+          const snake = snakeRef.current;
+          if (snake) {
+            snake.style.transform = `translate3d(${xi - 28}px, ${yi - 28}px, 0)`;
+          }
           lastXRef.current = xi;
           lastYRef.current = yi;
         }
@@ -243,8 +190,25 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
     }
   }, [loop, active, animated, isCoarsePointer]);
 
+  const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const layer = glowLayerRef.current;
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (!layer || !rect) return;
 
-  // Memoize static CSS vars — only recompute when props actually change
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    const dx = x - cx;
+    const dy = y - cy;
+
+    let kx = dx !== 0 ? cx / Math.abs(dx) : Infinity;
+    let ky = dy !== 0 ? cy / Math.abs(dy) : Infinity;
+    const edge = Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
+
+    layer.style.setProperty('--edge-proximity', `${(edge * 100) | 0}`);
+  }, []);
+
   const glowVars = useMemo(() => buildGlowVars(glowColor, glowIntensity), [glowColor, glowIntensity]);
   const gradientVars = useMemo(() => buildGradientVars(colors), [colors]);
 
@@ -268,9 +232,8 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
       style={mergedStyles}
     >
       <div ref={glowLayerRef} className="border-glow-layer" aria-hidden="true">
-        <div className="border-glow-layer" aria-hidden="true">
         <span className="edge-light" />
-      </div>
+        <div ref={snakeRef} className="snake-head" aria-hidden="true" />
       </div>
       <div className="border-glow-inner w-full h-full">
         {children}
