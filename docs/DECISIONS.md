@@ -5,6 +5,27 @@
 
 ---
 
+## ADR-065 — Scope Card Glow CSS-Var Writes to a Dedicated Layer; Hover Gating for Touch
+
+**Status:** Accepted · 2026-08-18
+
+**Context:**
+Android performance pass on the public NILCard (TECNO KL4). The `BorderGlow` rAF sweep wrote `--cursor-x`, `--cursor-y`, `--cursor-angle`, `--edge-proximity` onto `.border-glow-card` — the element whose subtree contains the *entire* card content (`.border-glow-inner`). Because custom properties inherit, each per-frame write forced style invalidation across the whole card subtree, and the `mask-image: radial-gradient(... at var(--cursor-x) var(--cursor-y))` re-resolution. `--cursor-angle` was written every frame but had zero CSS consumers. Separately, `.rc-container:hover` fired on every Android tap (tap = hover emulation), triggering a full box-shadow blur repaint per tap.
+
+**Decision:**
+- Add a dedicated `.border-glow-layer` div that owns all glow pseudo-elements (`::before`, `::after`, `.edge-light`); it is a sibling of `.border-glow-inner`. All per-frame `--cursor-x` / `--cursor-y` / `--edge-proximity` writes move from the card to the layer. The layer is `position: absolute; inset: 0`, no `z-index` (no stacking context), so paint order is byte-identical to before (card bg → mesh → edge-light → content) while per-frame invalidation is scoped to a 3-element subtree instead of the whole card.
+- Delete the `--cursor-angle` writes and its unused default — dead invalidation every frame.
+- Coarse-pointer throttle: loop tick interval 20 ms → 32 ms under `(pointer: coarse)`. The sweep takes ~5 s per perimeter, so ~31 fps vs ~50 fps is visually indistinguishable and halves per-frame recalc work on Android.
+- Pause sweep work when `document.hidden`.
+- `reflective-card.css`: the `.rc-container` box-shadow `transition` + `:hover` rule move under `@media (hover: hover) and (pointer: fine)`; the base rule has no transition, so Android taps no longer run blur transitions. Touch appearance unchanged (touch never meaningfully hovered).
+
+**Consequences:**
+- `npm run lint` clean (0 errors), `tsc --noEmit` clean, `npm run build` clean.
+- Playwright probe against a local production build (`/alexmercer`): sweep animates in both fine-pointer and coarse-pointer contexts; `--cursor-x` is written only on `.border-glow-layer` (card inline vars empty); `::before` mask resolves identically (`radial-gradient(...)` at cursor, opacity 0.8); flip and Support button work; no page errors. Desktop visuals unchanged — same gradients, masks, opacities, blend modes.
+- **Not yet done:** real TECNO KL4 `chrome://inspect` trace (INP, rendering, scripting, painting, Recalculate Style). Device not connected to the environment; before/after Android numbers are pending device access.
+
+---
+
 ## ADR-059 — Isolate Digital Card Popup State to Avoid Card-Subtree Re-renders
 
 **Status:** Accepted · 2026-08-17

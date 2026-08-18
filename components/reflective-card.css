@@ -32,16 +32,24 @@
      doesn't cause layout repaints on every frame */
   transform: translateZ(0);
   contain: layout style;
-  transition: box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.rc-container:hover {
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.09) inset,
-    0 4px 8px  rgba(0, 0, 0, 0.35),
-    0 20px 60px rgba(0, 0, 0, 0.65),
-    0 40px 90px rgba(0, 0, 0, 0.35),
-    0 0 32px -2px var(--rc-accent-glow-hover, rgba(198, 255, 61, 0.28));
+/* Hover-only states. On touch, :hover fires transiently on every tap
+   (tap = hover emulation), so gating the box-shadow transition here
+   prevents an expensive blur repaint per tap on Android. */
+@media (hover: hover) and (pointer: fine) {
+  .rc-container {
+    transition: box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .rc-container:hover {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.09) inset,
+      0 4px 8px  rgba(0, 0, 0, 0.35),
+      0 20px 60px rgba(0, 0, 0, 0.65),
+      0 40px 90px rgba(0, 0, 0, 0.35),
+      0 0 32px -2px var(--rc-accent-glow-hover, rgba(198, 255, 61, 0.28));
+  }
 }
 
 /* ── Hidden SVG filter definitions ────────────────── */

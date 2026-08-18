@@ -80,6 +80,7 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
   style,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
+  const glowLayerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
   const loopStartRef = useRef<number | null>(null);
   const lastXRef = useRef<number>(-1);
@@ -111,9 +112,9 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
   }, []);
 
   const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    const card = cardRef.current;
+    const layer = glowLayerRef.current;
     const rect = rectRef.current;
-    if (!card || !rect) return;
+    if (!layer || !rect) return;
 
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -126,16 +127,9 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
     let ky = dy !== 0 ? cy / Math.abs(dy) : Infinity;
     const edge = Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
 
-    let degrees = 0;
-    if (dx !== 0 || dy !== 0) {
-      degrees = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
-      if (degrees < 0) degrees += 360;
-    }
-
-    card.style.setProperty('--edge-proximity', `${(edge * 100) | 0}`);
-    card.style.setProperty('--cursor-angle', `${degrees | 0}deg`);
-    card.style.setProperty('--cursor-x', `${x | 0}px`);
-    card.style.setProperty('--cursor-y', `${y | 0}px`);
+    layer.style.setProperty('--edge-proximity', `${(edge * 100) | 0}`);
+    layer.style.setProperty('--cursor-x', `${x | 0}px`);
+    layer.style.setProperty('--cursor-y', `${y | 0}px`);
   }, []);
 
   useEffect(() => {
@@ -160,17 +154,30 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
     }
 
     if (loop && active) {
+      const layer = glowLayerRef.current;
+      if (!layer) return;
       const speed = 0.0002;
+      // Coarse pointers (mobile) get a slower tick so the per-frame
+      // custom-property writes — which invalidate the glow layer's styles —
+      // happen ~31fps instead of ~50fps. The sweep takes 5s per perimeter,
+      // so the halved write rate is visually indistinguishable.
+      const frameInterval = window.matchMedia?.('(pointer: coarse)').matches === true ? 32 : 20;
 
       card.classList.add('glow-looping');
-      card.style.setProperty('--edge-proximity', '90');
+      layer.style.setProperty('--edge-proximity', '90');
       lastXRef.current = -1;
       lastYRef.current = -1;
       loopStartRef.current = null;
 
       const tick = (now: number) => {
-        // Run at steady ~40-60fps
-        if (lastFrameTimeRef.current && now - lastFrameTimeRef.current < 20) {
+        // rAF keeps firing in background tabs; skip work and reset the gate
+        // so the sweep resumes immediately on return.
+        if (document.hidden) {
+          lastFrameTimeRef.current = 0;
+          rafRef.current = requestAnimationFrame(tick);
+          return;
+        }
+        if (lastFrameTimeRef.current && now - lastFrameTimeRef.current < frameInterval) {
           rafRef.current = requestAnimationFrame(tick);
           return;
         }
@@ -185,33 +192,27 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
         const dist = progress * perimeter;
 
         let x: number, y: number;
-        let angle = 0;
 
         if (dist < w) {
           x = dist;
           y = 0;
-          angle = (dist / w) * 90;
         } else if (dist < w + h) {
           x = w;
           y = dist - w;
-          angle = 90 + ((dist - w) / h) * 90;
         } else if (dist < 2 * w + h) {
           x = w - (dist - (w + h));
           y = h;
-          angle = 180 + ((dist - (w + h)) / w) * 90;
         } else {
           x = 0;
           y = h - (dist - (2 * w + h));
-          angle = 270 + ((dist - (2 * w + h)) / h) * 90;
         }
 
         const xi = Math.round(x);
         const yi = Math.round(y);
 
         if (xi !== lastXRef.current || yi !== lastYRef.current) {
-          card.style.setProperty('--cursor-x', `${xi}px`);
-          card.style.setProperty('--cursor-y', `${yi}px`);
-          card.style.setProperty('--cursor-angle', `${Math.round(angle)}deg`);
+          layer.style.setProperty('--cursor-x', `${xi}px`);
+          layer.style.setProperty('--cursor-y', `${yi}px`);
           lastXRef.current = xi;
           lastYRef.current = yi;
         }
@@ -259,7 +260,9 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
       className={`border-glow-card ${className}`}
       style={mergedStyles}
     >
-      <span className="edge-light" />
+      <div ref={glowLayerRef} className="border-glow-layer" aria-hidden="true">
+        <span className="edge-light" />
+      </div>
       <div className="border-glow-inner w-full h-full">
         {children}
       </div>

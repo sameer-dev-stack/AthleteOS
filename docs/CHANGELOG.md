@@ -3,7 +3,28 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
-## 2026-08-17 — Session: Smooth Send Inquiry / Support button animations + gate glow during the Tip popup
+## 2026-08-18 — Session: Android card performance pass — scope glow CSS-var writes + touch hover gating
+
+### What changed
+- **`components/border-glow.tsx`**: per-frame `--cursor-x` / `--cursor-y` / `--edge-proximity` writes moved from `.border-glow-card` onto a new minimal `.border-glow-layer` element (owns `::before`, `::after`, `.edge-light`). Removed `--cursor-angle` writes (no CSS consumer) and the `degrees` math. Loop tick interval now 32 ms on `(pointer: coarse)`, 20 ms on fine pointers, and the loop skips work while `document.hidden`.
+- **`components/border-glow.css`**: added `.border-glow-layer` (`position: absolute; inset: 0; border-radius: inherit; pointer-events: none`, no z-index so stacking is unchanged); retargeted all glow pseudo-element selectors onto it; removed the unused `--cursor-angle: 45deg` default.
+- **`components/reflective-card.css`**: `.rc-container` `:hover` box-shadow rule and its `transition` moved under `@media (hover: hover) and (pointer: fine)`; base container no longer has a transition, so Android taps don't trigger blur repaints.
+
+### Why
+- Android-style task: repeated Recalculate style (~19.4 ms chunks, ~454 ms workload) on a TECNO KL4. Root cause candidates: (1) the BorderGlow rAF loop writing inheritable CSS custom properties on the element that wraps the whole card subtree — every frame invalidated styles across it, plus the unused `--cursor-angle` write; (2) `.rc-container:hover` firing per tap on touch (hover emulation) driving expensive box-shadow blur transitions.
+
+### Files touched
+- `components/border-glow.tsx`
+- `components/border-glow.css`
+- `components/reflective-card.css`
+- `docs/DECISIONS.md`
+- `docs/CHANGELOG.md`
+- `docs/COMPONENTS.md`
+
+### Commit
+- Pending commit hash.
+
+
 
 ### What changed
 - **`components/tip-button.tsx`**: added `onOpenChange` prop (first-render skipped); removed `boxShadow` from `whileHover` on both Support buttons (glow kept as stable inline style); switched taps to spring transitions (`stiffness: 400, damping: 26`); `transition-all` → `transition-colors`; Tip popup overlay/sheet now `easeOut` / `ease [0.22,1,0.36,1]` with a subtle `y` slide.

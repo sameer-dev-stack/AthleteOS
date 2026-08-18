@@ -1,6 +1,5 @@
 .border-glow-card {
   --edge-proximity: 0;
-  --cursor-angle: 45deg;
   --edge-sensitivity: 30;
   --color-sensitivity: calc(var(--edge-sensitivity) + 20);
   --border-radius: 28px;
@@ -26,9 +25,20 @@
 }
 
 
-.border-glow-card::before,
-.border-glow-card::after,
-.border-glow-card > .edge-light {
+/* Dedicated glow layer — owns every element that consumes the per-frame
+   --cursor-* / --edge-proximity vars (::before, ::after, .edge-light).
+   Writing those vars here scopes style invalidation to this tiny subtree
+   instead of the whole card content, which sits in .border-glow-inner. */
+.border-glow-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.border-glow-layer::before,
+.border-glow-layer::after,
+.border-glow-layer > .edge-light {
   content: "";
   position: absolute;
   inset: 0;
@@ -37,15 +47,15 @@
   z-index: -1;
 }
 
-.border-glow-card:not(:hover):not(.sweep-active):not(.glow-looping)::before,
-.border-glow-card:not(:hover):not(.sweep-active):not(.glow-looping)::after,
-.border-glow-card:not(:hover):not(.sweep-active):not(.glow-looping) > .edge-light {
+.border-glow-card:not(:hover):not(.sweep-active):not(.glow-looping) .border-glow-layer::before,
+.border-glow-card:not(:hover):not(.sweep-active):not(.glow-looping) .border-glow-layer::after,
+.border-glow-card:not(:hover):not(.sweep-active):not(.glow-looping) .border-glow-layer > .edge-light {
   opacity: 0;
   transition: opacity 0.75s ease-in-out;
 }
 
 /* colored mesh-gradient border */
-.border-glow-card::before {
+.border-glow-layer::before {
   border: 1px solid transparent;
   background:
     linear-gradient(var(--card-bg, #120F17) 0 100%) padding-box,
@@ -78,7 +88,7 @@
 }
 
 /* colored mesh-gradient background fill near edges */
-.border-glow-card::after {
+.border-glow-layer::after {
   border: 1px solid transparent;
   background:
     var(--gradient-one, radial-gradient(at 80% 55%, hsla(268, 100%, 76%, 1) 0px, transparent 50%)) padding-box,
@@ -108,7 +118,7 @@
 }
 
 /* outer glow layer */
-.border-glow-card > .edge-light {
+.border-glow-layer > .edge-light {
   inset: calc(var(--glow-padding) * -1);
   pointer-events: none;
   z-index: 1;
@@ -134,7 +144,7 @@
   mix-blend-mode: plus-lighter;
 }
 
-.border-glow-card > .edge-light::before {
+.border-glow-layer > .edge-light::before {
   content: "";
   position: absolute;
   inset: var(--glow-padding);
