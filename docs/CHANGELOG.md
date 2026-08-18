@@ -21,7 +21,7 @@
 - `docs/CHANGELOG.md`
 
 ### Commit
-- (pending)
+- `cc109fb` — "perf(ui): smooth Send Inquiry/Support button animations and pause glow during tip popup"
 
 ## 2026-08-17 — Session: Inline CSS to eliminate render-blocking stylesheets
 
