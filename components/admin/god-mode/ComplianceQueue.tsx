@@ -1,19 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabaseApi } from './supabase';
 import { NilDeal } from './types';
-import { Shield, Check, X, FileText, AlertTriangle, Info, Calendar, DollarSign } from 'lucide-react';
+import { Shield, Check, X, FileText, Calendar, DollarSign, Info } from 'lucide-react';
+import { useToast, useConfirmDialog } from '../ui/overlays';
 
 export default function ComplianceQueue() {
   const [deals, setDeals] = useState<(NilDeal & { athlete_name: string; athlete_email: string })[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [actionLoading, setActionLoading] = useState(false);
 
-  // Confirmation Modal states
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedDeal, setSelectedDeal] = useState<(NilDeal & { athlete_name: string }) | null>(null);
-  const [actionType, setActionType] = useState<'clear' | 'reject'>('clear');
-  const [rejectionReason, setRejectionReason] = useState('');
+  const { showToast } = useToast();
+  const { openConfirm } = useConfirmDialog();
 
   const fetchPendingDeals = useCallback(async () => {
     setLoading(true);
@@ -43,33 +40,26 @@ export default function ComplianceQueue() {
   };
 
   // Open confirmation modal
-  const handleTriggerAction = (deal: any, action: 'clear' | 'reject') => {
-    setSelectedDeal(deal);
-    setActionType(action);
-    setRejectionReason('');
-    setModalOpen(true);
-  };
-
-  // Finalize compliance audit action
-  const handleConfirmAction = async () => {
-    if (!selectedDeal) return;
-    setActionLoading(true);
-    try {
-      const nextStatus = actionType === 'clear' ? 'cleared' : 'rejected';
-      const metadata = actionType === 'reject' 
-        ? { reason: rejectionReason } 
-        : { reason: 'Meets university conference standards and compliance thresholds.' };
-
-      await supabaseApi.updateDealStatus(selectedDeal.id, nextStatus, metadata);
-      fetchPendingDeals();
-    } catch (err) {
-      console.error(err);
-      setError(`Failed to ${actionType} deal`);
-    } finally {
-      setActionLoading(false);
-      setModalOpen(false);
-      setSelectedDeal(null);
-    }
+  const handleTriggerAction = (deal: NilDeal & { athlete_name: string; athlete_email: string }, action: 'clear' | 'reject') => {
+    openConfirm({
+      title: action === 'clear' ? 'Clear NIL Disclosure' : 'Reject NIL Disclosure',
+      description: action === 'clear'
+        ? `Confirm approval of ${deal.company_name} contract for ${deal.athlete_name}. This clears the deal for compliance and notifies the athlete.`
+        : `Confirm rejection of ${deal.company_name} contract for ${deal.athlete_name}. The athlete will be notified of the rejection reason.`,
+      actionLabel: action === 'clear' ? 'Clear Contract' : 'Reject Contract',
+      destructive: action === 'reject',
+      requiresReason: action === 'reject',
+      reasonPlaceholder: 'e.g. Conflicting category exclusivity, insufficient valuation disclosure...',
+      onConfirm: async (reason) => {
+        const nextStatus = action === 'clear' ? 'cleared' : 'rejected';
+        const metadata = action === 'reject'
+          ? { reason: reason || 'No reason provided' }
+          : { reason: 'Meets university conference standards and compliance thresholds.' };
+        await supabaseApi.updateDealStatus(deal.id, nextStatus, metadata);
+        showToast(`Deal ${action === 'clear' ? 'cleared' : 'rejected'} successfully`, 'success');
+        fetchPendingDeals();
+      }
+    });
   };
 
   return (
@@ -190,70 +180,6 @@ export default function ComplianceQueue() {
           </div>
         )}
       </div>
-
-      {/* Audit Confirmation Dialog */}
-      {modalOpen && selectedDeal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-neutral-900 border border-neutral-800 rounded w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-100">
-            <div className="p-4 space-y-4">
-              <div className={`w-8 h-8 rounded flex items-center justify-center ${
-                actionType === 'clear' ? 'bg-[#C6FF3D]/10 text-[#C6FF3D]' : 'bg-red-400/10 text-red-400'
-              }`}>
-                {actionType === 'clear' ? <Check className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
-              </div>
-              
-              <div className="space-y-1">
-                <h3 className="text-xs font-black uppercase tracking-wider text-white">
-                  {actionType === 'clear' ? 'Clear NIL Disclosure' : 'Reject NIL Disclosure'}
-                </h3>
-                <p className="text-[10px] text-neutral-400 font-mono">
-                  {actionType === 'clear' 
-                    ? `Confirm approval of ${selectedDeal.company_name} contract for ${selectedDeal.athlete_name}.`
-                    : `Confirm rejection of ${selectedDeal.company_name} contract for ${selectedDeal.athlete_name}.`
-                  }
-                </p>
-              </div>
-
-              {actionType === 'reject' && (
-                <div className="space-y-1.5">
-                  <label className="text-[10px] text-neutral-500 font-bold uppercase font-mono">Reason for Rejection</label>
-                  <textarea
-                    className="w-full bg-[#050505] border border-neutral-800 rounded p-2 text-xs text-neutral-200 focus:outline-none focus:border-red-400 h-20 font-mono"
-                    placeholder="e.g. Conflicting category exclusivity, insufficient valuation disclosure..."
-                    value={rejectionReason}
-                    onChange={(e) => setRejectionReason(e.target.value)}
-                  />
-                </div>
-              )}
-            </div>
-            
-            <div className="bg-[#050505] p-3 border-t border-neutral-800 flex justify-end gap-2">
-              <button
-                onClick={() => setModalOpen(false)}
-                className="px-3 py-1.5 bg-neutral-900 text-neutral-500 hover:text-neutral-300 text-[10px] font-bold uppercase rounded border border-neutral-800 transition-colors cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmAction}
-                disabled={(actionType === 'reject' && !rejectionReason.trim()) || actionLoading}
-                className={`px-3 py-1.5 text-black text-[10px] font-bold uppercase rounded transition-colors disabled:opacity-40 disabled:pointer-events-none cursor-pointer flex items-center gap-2 ${
-                  actionType === 'clear' ? 'bg-[#C6FF3D] hover:bg-lime-400' : 'bg-red-500 hover:bg-red-400 text-white'
-                }`}
-              >
-                {actionLoading ? (
-                  <>
-                    <div className="w-3 h-3 animate-spin border border-current border-t-transparent rounded-full"></div>
-                    Processing...
-                  </>
-                ) : (
-                  actionType === 'clear' ? 'Clear Contract' : 'Reject Contract'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

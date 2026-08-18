@@ -79,8 +79,19 @@ export const supabaseApi = {
     return handleResponse(res);
   },
 
-  async getPayoutData(onboardingStatus?: 'complete' | 'incomplete' | 'none' | 'all') {
-    return this.getFinancials({ onboardingStatus });
+  async getPayoutData(onboardingStatus?: 'complete' | 'incomplete' | 'none' | 'all'): Promise<{
+    athletes: (Profile & { tips_total: number; deals_total: number })[];
+    aggregates: {
+      totalTips: number;
+      totalDealsDisclosed: number;
+      platformFeeRevenue: number;
+    };
+  }> {
+    const query = new URLSearchParams({
+      onboardingStatus: onboardingStatus || 'all'
+    });
+    const res = await fetch(`${API_BASE}/financials?${query}`);
+    return handleResponse(res);
   },
 
   // Compliance Queue

@@ -2,17 +2,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { supabaseApi } from './supabase';
 import { RateLimit, Profile } from './types';
 import { ShieldAlert, ShieldCheck, AlertTriangle, UserMinus, Globe, RefreshCcw, Lock, X } from 'lucide-react';
+import { useToast, useConfirmDialog } from '../ui/overlays';
 
 export default function AbuseDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [actionLoading, setActionLoading] = useState(false);
   const [rateLimits, setRateLimits] = useState<RateLimit[]>([]);
   const [suspendedAccounts, setSuspendedAccounts] = useState<(Profile & { suspension_reason: string })[]>([]);
 
-  // Confirmation Modal for Reactivation
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedAthlete, setSelectedAthlete] = useState<Profile | null>(null);
+  const { showToast } = useToast();
+  const { openConfirm } = useConfirmDialog();
 
   const fetchSecurityData = useCallback(async () => {
     setLoading(true);
@@ -35,29 +34,21 @@ export default function AbuseDashboard() {
 
   // Handle Reactivate Trigger
   const handleTriggerReactivate = (athlete: Profile) => {
-    setSelectedAthlete(athlete);
-    setModalOpen(true);
-  };
-
-  const handleConfirmReactivate = async () => {
-    if (!selectedAthlete) return;
-    setActionLoading(true);
-    try {
-      await supabaseApi.updateProfileField(
-        selectedAthlete.id,
-        { suspended: false },
-        'USER_ACTIVATED',
-        { reason: 'Reactivated from Security Abuse Desk.' }
-      );
-      fetchSecurityData();
-    } catch (err) {
-      console.error(err);
-      setError('Failed to reactivate account');
-    } finally {
-      setActionLoading(false);
-      setModalOpen(false);
-      setSelectedAthlete(null);
-    }
+    openConfirm({
+      title: 'Reactivate Athlete Profile',
+      description: `Are you sure you want to lift the suspension for ${athlete.full_name}? This will instantly publish their public card and restore full access to their dashboard.`,
+      actionLabel: 'Reactivate Profile',
+      onConfirm: async () => {
+        await supabaseApi.updateProfileField(
+          athlete.id,
+          { suspended: false },
+          'USER_ACTIVATED',
+          { reason: 'Reactivated from Security Abuse Desk.' }
+        );
+        showToast(`${athlete.full_name} reactivated successfully`, 'success');
+        fetchSecurityData();
+      }
+    });
   };
 
   return (
@@ -187,49 +178,6 @@ export default function AbuseDashboard() {
           </div>
         </div>
       </div>
-
-      {/* Reactivate Account Confirmation Modal */}
-      {modalOpen && selectedAthlete && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0a0a0a] border border-neutral-800 rounded w-full max-w-sm overflow-hidden shadow-2xl">
-            <div className="p-5 space-y-3">
-              <div className="w-10 h-10 bg-emerald-500/10 text-emerald-400 rounded flex items-center justify-center">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              
-              <div className="space-y-1">
-                <h3 className="text-xs font-black text-white uppercase tracking-wider">Reactivate Athlete Profile</h3>
-                <p className="text-[10px] text-neutral-400 font-mono">
-                  Are you sure you want to lift the suspension for <span className="font-bold text-[#C6FF3D]">{selectedAthlete.full_name}</span>? This will instantly publish their public card and restore full access to their dashboard.
-                </p>
-              </div>
-            </div>
-            
-            <div className="bg-[#050505] p-3 border-t border-neutral-850 flex justify-end gap-2 font-mono text-[10px]">
-              <button
-                onClick={() => setModalOpen(false)}
-                className="px-3 py-1.5 text-neutral-500 hover:text-white font-bold uppercase tracking-wider cursor-pointer transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmReactivate}
-                disabled={actionLoading}
-                className="px-3 py-1.5 bg-[#C6FF3D] hover:bg-[#d0ff70] text-black font-bold uppercase tracking-wider rounded cursor-pointer transition-colors flex items-center gap-2 disabled:opacity-50"
-              >
-                {actionLoading ? (
-                  <>
-                    <div className="w-3 h-3 animate-spin border border-current border-t-transparent rounded-full"></div>
-                    Processing...
-                  </>
-                ) : (
-                  'Reactivate Profile'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

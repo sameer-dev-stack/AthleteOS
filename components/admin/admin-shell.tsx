@@ -13,6 +13,7 @@ import PlatformSettings from "./god-mode/PlatformSettings";
 import RealtimeDashboard from "./god-mode/RealtimeDashboard";
 import { motion, AnimatePresence } from "framer-motion";
 import { signOut } from "@/lib/actions/auth";
+import { ToastProvider, ConfirmDialogProvider } from "./ui/overlays";
 
 import {
   Users,
@@ -29,6 +30,8 @@ import {
   X,
   AlertTriangle,
   LogOut,
+  Activity,
+  ClipboardCheck,
 } from "lucide-react";
 
 type AdminShellProps = {
@@ -41,20 +44,33 @@ type AdminShellProps = {
   };
 };
 
-export function AdminShell({ user }: AdminShellProps) {
-  const [activeTab, setActiveTab] = useState<
-    "users" | "financials" | "usage" | "analytics" | "security" | "audit" | "settings" | "realtime"
-  >("users");
+type NavItem = {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  description: string;
+};
 
+const navItems: NavItem[] = [
+  { id: "users", label: "Users & Profiles", icon: Users, description: "Manage athlete profiles, public cards, verification badges, and plan tiers" },
+  { id: "financials", label: "Monetization & Tips", icon: DollarSign, description: "Track fan tips, platform fee revenue, and Stripe onboarding status" },
+  { id: "usage", label: "AI Toolkit Monitor", icon: Cpu, description: "Monitor AI tool generations and plan quota consumption" },
+  { id: "analytics", label: "Platform Analytics", icon: LineChart, description: "Track card page views, unique visitors, and link clicks" },
+  { id: "compliance", label: "Compliance & Deals", icon: ClipboardCheck, description: "Review pending NIL deals, approve or reject disclosures" },
+  { id: "security", label: "Security & Abuse", icon: ShieldAlert, description: "Monitor rate limits, suspended accounts, and abuse detection" },
+  { id: "audit", label: "Audit Logs", icon: ScrollText, description: "View immutable administrative action history" },
+  { id: "settings", label: "System & Settings", icon: Settings, description: "Configure feature flags, system health, and platform settings" },
+];
+
+export function AdminShell({ user }: AdminShellProps) {
+  const [activeTab, setActiveTab] = useState<string>("users");
   const [platformHealth, setPlatformHealth] = useState<{
     supabaseStatus: "connected" | "error";
     stripeWebhookHealth: "healthy" | "error";
   } | null>(null);
-
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [apiError, setApiError] = useState<boolean>(false);
 
-  // Fetch platform health status to show in top bar
   useEffect(() => {
     supabaseApi
       .getPlatformHealth()
@@ -68,14 +84,6 @@ export function AdminShell({ user }: AdminShellProps) {
       });
   }, []);
 
-  const navItems = [
-    { id: "users", label: "Users & Profiles", icon: Users, description: "Manage athlete profiles, public cards, verification badges, and plan tiers" },
-    { id: "financials", label: "Monetization & Tips", icon: DollarSign, description: "Track fan tips, platform fee revenue, and Stripe onboarding status" },
-    { id: "usage", label: "AI Toolkit Monitor", icon: Cpu, description: "Monitor AI tool generations and plan quota consumption" },
-    { id: "analytics", label: "Platform Analytics", icon: LineChart, description: "Track card page views, unique visitors, and link clicks" },
-    { id: "settings", label: "System & Audit Logs", icon: Settings, description: "Inspect system health, feature flags, and administrative audit trails" },
-  ] as const;
-
   const renderActiveComponent = () => {
     switch (activeTab) {
       case "users":
@@ -86,11 +94,17 @@ export function AdminShell({ user }: AdminShellProps) {
         return <UsageMonitor />;
       case "analytics":
         return <AnalyticsOverview />;
+      case "compliance":
+        return <ComplianceQueue />;
+      case "security":
+        return <AbuseDashboard />;
+      case "audit":
+        return <AuditLogViewer />;
       case "settings":
         return (
           <div className="space-y-8">
             <PlatformSettings />
-            <AuditLogViewer />
+            <RealtimeDashboard />
           </div>
         );
       default:
@@ -101,6 +115,8 @@ export function AdminShell({ user }: AdminShellProps) {
   const initials = user.email ? user.email.slice(0, 2).toUpperCase() : "AD";
 
   return (
+    <ToastProvider>
+    <ConfirmDialogProvider>
     <div className="flex min-h-screen bg-[#07070A] text-ink font-sans select-none relative">
       {/* Background ambient gradient glow */}
       <div className="absolute top-0 left-1/3 -translate-x-1/2 w-[700px] h-[350px] bg-[#C6FF3D]/[0.025] blur-[140px] rounded-full pointer-events-none" />
@@ -139,6 +155,7 @@ export function AdminShell({ user }: AdminShellProps) {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
+                title={item.description}
                 className={`w-full flex items-center gap-3 p-3 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer ${
                   isActive
                     ? "bg-accent/10 text-accent border border-accent/20 shadow-[0_0_20px_rgba(198,255,61,0.1)] font-bold"
@@ -350,5 +367,7 @@ export function AdminShell({ user }: AdminShellProps) {
         </section>
       </main>
     </div>
+    </ConfirmDialogProvider>
+    </ToastProvider>
   );
 }

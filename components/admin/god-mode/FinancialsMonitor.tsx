@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabaseApi } from './supabase';
 import { Profile } from './types';
-import { DollarSign, Landmark, HelpCircle, Briefcase, Award, ArrowUpRight, ShieldAlert } from 'lucide-react';
+import { DollarSign, Landmark, Briefcase, ArrowUpRight, Download, Loader2, X } from 'lucide-react';
+import { useToast } from '../ui/overlays';
 
 export default function FinancialsMonitor() {
   const [loading, setLoading] = useState(false);
@@ -13,6 +14,8 @@ export default function FinancialsMonitor() {
     totalDealsDisclosed: 0,
     platformFeeRevenue: 0
   });
+
+  const { showToast } = useToast();
 
   const fetchFinancialData = useCallback(async () => {
     setLoading(true);
@@ -41,6 +44,32 @@ export default function FinancialsMonitor() {
     }).format(cents / 100);
   };
 
+  // CSV Export
+  const handleExportCSV = useCallback(() => {
+    if (athletes.length === 0) return;
+    const headers = ['Athlete', 'Email', 'Sport', 'School', 'Plan', 'Stripe Status', 'Tips Total', 'Deals Total', 'Platform Fee'];
+    const rows = athletes.map(a => [
+      a.full_name || '',
+      a.email || '',
+      a.sport || '',
+      a.school || '',
+      a.plan || '',
+      a.stripe_onboarding_complete ? 'Complete' : 'Incomplete',
+      (a.tips_total / 100).toFixed(2),
+      (a.deals_total / 100).toFixed(2),
+      ((a.tips_total * 0.05) / 100).toFixed(2),
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `financials_${statusFilter}_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`Exported ${athletes.length} records to CSV`, 'success');
+  }, [athletes, statusFilter, showToast]);
+
   return (
     <div className="space-y-6">
       {/* Error State */}
@@ -52,7 +81,6 @@ export default function FinancialsMonitor() {
 
       {/* Aggregates Dashboard Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Card 1: Total Tips */}
         <div className="bg-neutral-900/50 p-4 rounded border border-neutral-800 relative overflow-hidden group">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-neutral-900 rounded text-[#C6FF3D]">
@@ -65,7 +93,6 @@ export default function FinancialsMonitor() {
           </div>
         </div>
 
-        {/* Card 2: Platform Revenue */}
         <div className="bg-neutral-900/50 p-4 rounded border border-neutral-800 relative overflow-hidden group">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-neutral-900 rounded text-[#C6FF3D]">
@@ -78,7 +105,6 @@ export default function FinancialsMonitor() {
           </div>
         </div>
 
-        {/* Card 3: Total Deals Disclosed */}
         <div className="bg-neutral-900/50 p-4 rounded border border-neutral-800 relative overflow-hidden group">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-neutral-900 rounded text-blue-400">
@@ -98,23 +124,33 @@ export default function FinancialsMonitor() {
           <h3 className="text-sm font-black uppercase tracking-wider text-white">Athlete Payout Monitor</h3>
           <p className="text-[10px] text-neutral-500 font-mono mt-0.5">Filter athletes based on their Stripe Connected status.</p>
         </div>
-        <div className="flex gap-2">
-          {(['all', 'complete', 'incomplete', 'none'] as const).map((filter) => (
-            <button
-              key={filter}
-              onClick={() => setStatusFilter(filter)}
-              className={`px-3 py-1.5 rounded text-[10px] font-bold border transition-colors cursor-pointer uppercase font-mono ${
-                statusFilter === filter 
-                  ? 'bg-neutral-900 border-[#C6FF3D]/30 text-[#C6FF3D]' 
-                  : 'bg-[#050505] border-neutral-800 text-neutral-500 hover:text-neutral-300'
-              }`}
-            >
-              {filter === 'all' && 'All Athletes'}
-              {filter === 'complete' && 'Stripe Complete'}
-              {filter === 'incomplete' && 'Incomplete'}
-              {filter === 'none' && 'No Stripe'}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <div className="flex gap-2">
+            {(['all', 'complete', 'incomplete', 'none'] as const).map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setStatusFilter(filter)}
+                className={`px-3 py-1.5 rounded text-[10px] font-bold border transition-colors cursor-pointer uppercase font-mono ${
+                  statusFilter === filter 
+                    ? 'bg-neutral-900 border-[#C6FF3D]/30 text-[#C6FF3D]' 
+                    : 'bg-[#050505] border-neutral-800 text-neutral-500 hover:text-neutral-300'
+                }`}
+              >
+                {filter === 'all' && 'All Athletes'}
+                {filter === 'complete' && 'Stripe Complete'}
+                {filter === 'incomplete' && 'Incomplete'}
+                {filter === 'none' && 'No Stripe'}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={handleExportCSV}
+            disabled={athletes.length === 0}
+            className="flex items-center gap-2 px-3 py-1.5 bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 rounded text-[10px] font-bold transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ml-2"
+          >
+            <Download className="w-3 h-3" />
+            Export
+          </button>
         </div>
       </div>
 
@@ -136,7 +172,7 @@ export default function FinancialsMonitor() {
               {loading ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-neutral-500 font-mono">
-                    <div className="w-5 h-5 animate-spin border border-[#C6FF3D] border-t-transparent rounded-full mx-auto mb-2"></div>
+                    <Loader2 className="w-5 h-5 animate-spin text-[#C6FF3D] mx-auto mb-2" />
                     Fetching Financial Data...
                   </td>
                 </tr>

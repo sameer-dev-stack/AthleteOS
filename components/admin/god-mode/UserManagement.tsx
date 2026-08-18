@@ -3,8 +3,9 @@ import { supabaseApi } from './supabase';
 import { Profile } from './types';
 import { 
   Search, Shield, CheckCircle, XCircle, Award, 
-  UserCheck, AlertTriangle, Info, Eye, Loader2, ArrowRight, Check, X
+  UserCheck, AlertTriangle, Info, Eye, Loader2, ArrowRight, Check, X, Download
 } from 'lucide-react';
+import { useToast, useConfirmDialog } from '../ui/overlays';
 
 export default function UserManagement() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -19,25 +20,8 @@ export default function UserManagement() {
   const [detailSocials, setDetailSocials] = useState<any[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
 
-  // Confirmation Modal State
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalConfig, setModalConfig] = useState<{
-    title: string;
-    description: string;
-    actionLabel: string;
-    onConfirm: () => void;
-    requiresReason?: boolean;
-  } | null>(null);
-  const [reason, setReason] = useState('');
-  const [actionLoading, setActionLoading] = useState(false);
-
-  // Toast notification state
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-
-  const showToast = (message: string, type: 'success' | 'error') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
-  };
+  const { showToast } = useToast();
+  const { openConfirm } = useConfirmDialog();
 
   // Fetch profiles on load or change
   const fetchProfiles = useCallback(async () => {
@@ -72,50 +56,54 @@ export default function UserManagement() {
     }
   };
 
-  // Triggers the Confirmation Modal
-  const triggerConfirmation = (config: {
-    title: string;
-    description: string;
-    actionLabel: string;
-    onConfirm: () => void;
-    requiresReason?: boolean;
-  }) => {
-    setReason('');
-    setModalConfig(config);
-    setModalOpen(true);
-  };
+  // CSV Export
+  const handleExportCSV = useCallback(() => {
+    if (profiles.length === 0) return;
+    const headers = ['Name', 'Email', 'Sport', 'School', 'Plan', 'Role', 'Verified', 'Suspended', 'Published'];
+    const rows = profiles.map(p => [
+      p.full_name || '',
+      p.email || '',
+      p.sport || '',
+      p.school || '',
+      p.plan || '',
+      p.role || '',
+      p.is_verified ? 'Yes' : 'No',
+      p.suspended ? 'Yes' : 'No',
+      p.profile_published ? 'Yes' : 'No',
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `athletes_export_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`Exported ${profiles.length} profiles to CSV`, 'success');
+  }, [profiles, showToast]);
 
   // Handle suspended status change
   const handleToggleSuspend = (profile: Profile) => {
     const isSuspending = !profile.suspended;
-    triggerConfirmation({
+    openConfirm({
       title: isSuspending ? 'Suspend Athlete Account' : 'Unsuspend Athlete Account',
       description: isSuspending 
         ? `Are you sure you want to suspend ${profile.full_name || 'this athlete'}? This blocks all access to their dashboard, disables public card page lookups, and hides their monetization links immediately.`
         : `Are you sure you want to reactivate ${profile.full_name || 'this athlete'}?`,
       actionLabel: isSuspending ? 'Suspend Account' : 'Reactivate Account',
+      destructive: isSuspending,
       requiresReason: isSuspending,
-      onConfirm: async () => {
-        setActionLoading(true);
-        try {
-          await supabaseApi.updateProfileField(
-            profile.id, 
-            { suspended: isSuspending },
-            isSuspending ? 'USER_SUSPEND' : 'USER_REACTIVATE',
-            { reason: isSuspending ? reason : 'Reactivated by admin.' }
-          );
-          showToast(`Account ${isSuspending ? 'suspended' : 'reactivated'} successfully`, 'success');
-          fetchProfiles();
-          if (selectedProfileId === profile.id) {
-            handleViewDetail(profile.id);
-          }
-        } catch (err) {
-          console.error(err);
-          showToast('Failed to update account status', 'error');
-        } finally {
-          setActionLoading(false);
-          setModalOpen(false);
-        }
+      reasonPlaceholder: 'Provide suspension reason (compliance, terms violation, etc.)',
+      onConfirm: async (reason) => {
+        await supabaseApi.updateProfileField(
+          profile.id, 
+          { suspended: isSuspending },
+          isSuspending ? 'USER_SUSPEND' : 'USER_REACTIVATE',
+          { reason: isSuspending ? reason : 'Reactivated by admin.' }
+        );
+        showToast(`Account ${isSuspending ? 'suspended' : 'reactivated'} successfully`, 'success');
+        fetchProfiles();
+        if (selectedProfileId === profile.id) handleViewDetail(profile.id);
       }
     });
   };
@@ -123,31 +111,22 @@ export default function UserManagement() {
   // Handle verification status change
   const handleToggleVerify = (profile: Profile) => {
     const nextVal = !profile.is_verified;
-    triggerConfirmation({
+    openConfirm({
       title: nextVal ? 'Verify Athlete Badge' : 'Revoke Verification Badge',
       description: nextVal
         ? `Apply the green NIL CARD verified badge to ${profile.full_name || 'this profile'}? This displays a verification signal across all search portals and cards.`
         : `Remove the verification badge from ${profile.full_name || 'this profile'}?`,
       actionLabel: nextVal ? 'Verify Profile' : 'Revoke Verification',
       onConfirm: async () => {
-        setActionLoading(true);
-        try {
-          await supabaseApi.updateProfileField(
-            profile.id,
-            { is_verified: nextVal },
-            nextVal ? 'VERIFICATION_GRANT' : 'VERIFICATION_REVOKE',
-            { reason: nextVal ? 'Granted by admin.' : 'Revoked by admin.' }
-          );
-          showToast(`Verification ${nextVal ? 'granted' : 'revoked'} successfully`, 'success');
-          fetchProfiles();
-          if (selectedProfileId === profile.id) handleViewDetail(profile.id);
-        } catch (err) {
-          console.error(err);
-          showToast('Failed to update verification status', 'error');
-        } finally {
-          setActionLoading(false);
-          setModalOpen(false);
-        }
+        await supabaseApi.updateProfileField(
+          profile.id,
+          { is_verified: nextVal },
+          nextVal ? 'VERIFICATION_GRANT' : 'VERIFICATION_REVOKE',
+          { reason: nextVal ? 'Granted by admin.' : 'Revoked by admin.' }
+        );
+        showToast(`Verification ${nextVal ? 'granted' : 'revoked'} successfully`, 'success');
+        fetchProfiles();
+        if (selectedProfileId === profile.id) handleViewDetail(profile.id);
       }
     });
   };
@@ -155,31 +134,23 @@ export default function UserManagement() {
   // Handle profile published change
   const handleTogglePublish = (profile: Profile) => {
     const nextVal = !profile.profile_published;
-    triggerConfirmation({
+    openConfirm({
       title: nextVal ? 'Publish Athlete Card' : 'Unpublish Athlete Card',
       description: nextVal
         ? `Force-publish ${profile.full_name || 'this athlete'}'s card to make it publicly viewable?`
         : `Take ${profile.full_name || 'this athlete'}'s card offline? This will result in 404 lookups for public viewers.`,
       actionLabel: nextVal ? 'Publish' : 'Take Offline',
+      destructive: !nextVal,
       onConfirm: async () => {
-        setActionLoading(true);
-        try {
-          await supabaseApi.updateProfileField(
-            profile.id,
-            { profile_published: nextVal },
-            nextVal ? 'PROFILE_PUBLISH_FORCE' : 'PROFILE_UNPUBLISH_FORCE',
-            { reason: 'Overridden by Administrator' }
-          );
-          showToast(`Profile ${nextVal ? 'published' : 'unpublished'} successfully`, 'success');
-          fetchProfiles();
-          if (selectedProfileId === profile.id) handleViewDetail(profile.id);
-        } catch (err) {
-          console.error(err);
-          showToast('Failed to update publish status', 'error');
-        } finally {
-          setActionLoading(false);
-          setModalOpen(false);
-        }
+        await supabaseApi.updateProfileField(
+          profile.id,
+          { profile_published: nextVal },
+          nextVal ? 'PROFILE_PUBLISH_FORCE' : 'PROFILE_UNPUBLISH_FORCE',
+          { reason: 'Overridden by Administrator' }
+        );
+        showToast(`Profile ${nextVal ? 'published' : 'unpublished'} successfully`, 'success');
+        fetchProfiles();
+        if (selectedProfileId === profile.id) handleViewDetail(profile.id);
       }
     });
   };
@@ -187,29 +158,20 @@ export default function UserManagement() {
   // Handle plan override dropdown change
   const handlePlanOverride = (profile: Profile, newPlan: 'free' | 'pro') => {
     if (profile.plan === newPlan) return;
-    triggerConfirmation({
+    openConfirm({
       title: `Override Tier to ${newPlan.toUpperCase()}`,
       description: `Override subscription parameters for ${profile.full_name || 'this user'} from ${profile.plan.toUpperCase()} to ${newPlan.toUpperCase()}? This overrides payment gateways and adjusts AI quotas.`,
       actionLabel: 'Confirm Overrides',
       onConfirm: async () => {
-        setActionLoading(true);
-        try {
-          await supabaseApi.updateProfileField(
-            profile.id,
-            { plan: newPlan },
-            'PLAN_OVERRIDE',
-            { old_plan: profile.plan, new_plan: newPlan }
-          );
-          showToast(`Plan overridden to ${newPlan.toUpperCase()} successfully`, 'success');
-          fetchProfiles();
-          if (selectedProfileId === profile.id) handleViewDetail(profile.id);
-        } catch (err) {
-          console.error(err);
-          showToast('Failed to override plan', 'error');
-        } finally {
-          setActionLoading(false);
-          setModalOpen(false);
-        }
+        await supabaseApi.updateProfileField(
+          profile.id,
+          { plan: newPlan },
+          'PLAN_OVERRIDE',
+          { old_plan: profile.plan, new_plan: newPlan }
+        );
+        showToast(`Plan overridden to ${newPlan.toUpperCase()} successfully`, 'success');
+        fetchProfiles();
+        if (selectedProfileId === profile.id) handleViewDetail(profile.id);
       }
     });
   };
@@ -217,29 +179,21 @@ export default function UserManagement() {
   // Handle role changes
   const handleRoleToggle = (profile: Profile) => {
     const newRole = profile.role === 'admin' ? 'user' : 'admin';
-    triggerConfirmation({
-      title: `Demote/Promote User Role to ${newRole.toUpperCase()}`,
+    openConfirm({
+      title: `Change User Role to ${newRole.toUpperCase()}`,
       description: `CRITICAL STEP: You are modifying system privileges for ${profile.full_name || 'this account'}. Promoting to admin grants full control over God Mode features, payout parameters, and compliance queues. Do you wish to continue?`,
       actionLabel: `Promote to ${newRole.toUpperCase()}`,
+      destructive: true,
       onConfirm: async () => {
-        setActionLoading(true);
-        try {
-          await supabaseApi.updateProfileField(
-            profile.id,
-            { role: newRole },
-            'ROLE_CHANGE',
-            { old_role: profile.role, new_role: newRole }
-          );
-          showToast(`Role changed to ${newRole.toUpperCase()} successfully`, 'success');
-          fetchProfiles();
-          if (selectedProfileId === profile.id) handleViewDetail(profile.id);
-        } catch (err) {
-          console.error(err);
-          showToast('Failed to change role', 'error');
-        } finally {
-          setActionLoading(false);
-          setModalOpen(false);
-        }
+        await supabaseApi.updateProfileField(
+          profile.id,
+          { role: newRole },
+          'ROLE_CHANGE',
+          { old_role: profile.role, new_role: newRole }
+        );
+        showToast(`Role changed to ${newRole.toUpperCase()} successfully`, 'success');
+        fetchProfiles();
+        if (selectedProfileId === profile.id) handleViewDetail(profile.id);
       }
     });
   };
@@ -261,18 +215,29 @@ export default function UserManagement() {
             Audit athlete accounts, toggle verification badges, override plan tiers, and manage permissions.
           </p>
         </div>
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-dim" />
-          <input
-            type="text"
-            placeholder="Search name, school, sport, email..."
-            className="w-full pl-10 pr-4 py-2 bg-black/40 border border-white/[0.1] rounded-xl text-xs text-white focus:outline-none focus:border-[#C6FF3D] focus:ring-1 focus:ring-[#C6FF3D]/30 placeholder:text-ink-dim transition-all shadow-inner"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-          />
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative flex-1 sm:w-72">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-dim" />
+            <input
+              type="text"
+              placeholder="Search name, school, sport, email..."
+              className="w-full pl-10 pr-4 py-2 bg-black/40 border border-white/[0.1] rounded-xl text-xs text-white focus:outline-none focus:border-[#C6FF3D] focus:ring-1 focus:ring-[#C6FF3D]/30 placeholder:text-ink-dim transition-all shadow-inner"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+            />
+          </div>
+          <button
+            onClick={handleExportCSV}
+            disabled={profiles.length === 0}
+            className="flex items-center gap-2 px-3 py-2 bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+            title="Export current page to CSV"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export
+          </button>
         </div>
       </div>
 
@@ -306,14 +271,13 @@ export default function UserManagement() {
                 </tr>
               ) : (
                 profiles.map((p) => {
-                  // Standardized display parameters for realistic fallbacks
                   const displayName = p.full_name || (p.email ? p.email.split('@')[0] : 'Athlete User');
                   const displaySport = p.sport && p.sport !== 'No Sport' ? p.sport : 'Track & Field';
                   const displaySchool = p.school && p.school !== 'No School' ? p.school : 'Stanford University';
                   
                   return (
                     <tr key={p.id} className="hover:bg-white/[0.02] transition-colors group">
-                      {/* Athlete Identity (Primary focus: bright, distinct typography) */}
+                      {/* Athlete Identity */}
                       <td className="py-4 px-5">
                         <div className="flex items-center gap-3.5">
                           <div className="w-9 h-9 rounded-xl bg-[#C6FF3D]/10 text-[#C6FF3D] border border-[#C6FF3D]/20 flex items-center justify-center font-black font-mono text-sm shrink-0 shadow-md">
@@ -332,8 +296,8 @@ export default function UserManagement() {
                           </div>
                         </div>
                       </td>
-
-                      {/* Profile Status (Interactive Chips: Verification & Published state) */}
+                      
+                      {/* Profile Status */}
                       <td className="py-4 px-4">
                         <div className="flex flex-col gap-1.5 items-start">
                           <button 
@@ -456,74 +420,6 @@ export default function UserManagement() {
           </div>
         </div>
       </div>
-
-      {/* Confirmation Modal */}
-      {modalOpen && modalConfig && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0a0a0a] border border-neutral-800 rounded w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-            <div className="p-6 space-y-4">
-              <div className="w-12 h-12 bg-red-400/10 text-red-400 rounded flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-sm font-black uppercase tracking-wider text-white">{modalConfig.title}</h3>
-                <p className="text-xs text-neutral-400">{modalConfig.description}</p>
-              </div>
-
-              {modalConfig.requiresReason && (
-                <div className="space-y-1.5">
-                  <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Reason for Suspension</label>
-                  <textarea
-                    className="w-full bg-[#050505] border border-neutral-800 rounded p-3 text-xs text-neutral-300 focus:outline-none focus:border-red-400 h-20"
-                    placeholder="Enter compliance, terms violation, or request parameters..."
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                  />
-                </div>
-              )}
-            </div>
-            <div className="bg-[#050505] p-4 border-t border-neutral-800 flex justify-end gap-3">
-              <button
-                onClick={() => setModalOpen(false)}
-                disabled={actionLoading}
-                className="px-3 py-1.5 bg-neutral-900 text-neutral-400 hover:text-white text-[10px] font-bold uppercase tracking-wider rounded transition-colors disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => modalConfig.onConfirm()}
-                disabled={(modalConfig.requiresReason && !reason.trim()) || actionLoading}
-                className="px-3 py-1.5 bg-red-500 hover:bg-red-400 text-black text-[10px] font-bold uppercase tracking-wider rounded disabled:opacity-40 disabled:pointer-events-none transition-colors flex items-center gap-2"
-              >
-                {actionLoading ? (
-                  <>
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  modalConfig.actionLabel
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Toast Notification */}
-      {toast && (
-        <div className={`fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded border shadow-lg animate-in slide-in-from-bottom duration-300 ${
-          toast.type === 'success' 
-            ? 'bg-[#C6FF3D]/10 border-[#C6FF3D]/30 text-[#C6FF3D]' 
-            : 'bg-red-500/10 border-red-500/30 text-red-400'
-        }`}>
-          {toast.type === 'success' ? (
-            <Check className="w-4 h-4" />
-          ) : (
-            <X className="w-4 h-4" />
-          )}
-          <span className="text-xs font-bold">{toast.message}</span>
-        </div>
-      )}
 
       {/* Details Slide-Over Drawer */}
       {selectedProfileId && detailProfile && (
