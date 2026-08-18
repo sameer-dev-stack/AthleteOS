@@ -10,7 +10,7 @@
 - **`components/border-glow.css`**: added `@media (pointer: coarse)` block. On touch devices the masked gradient mesh, `mix-blend-mode: soft-light`, and `mix-blend-mode: plus-lighter` are replaced by a simplified base-gradient border + a subtle CSS breathing animation (`mobile-glow-breathe` / `mobile-edge-breathe`), removing the per-frame mask re-raster and blend-mode compositing that caused ~4.5 fps on mobile.
 
 ### Why
-- User reported the page running at ~4.5 fps on mobile after the Aug 16 re-enable (ADR-061). The rAF sweep writing `--cursor-x`/`--cursor-y` every 32 ms, combined with `mask-image: radial-gradient(... at var(--cursor-x) ...)` and `plus-lighter`/`soft-light` blend modes, saturated the main thread on phone GPUs. The previous coarse-pointer fallback was a flat 1 px border, which users called a downgrade; this keeps a colorful animated border via cheap CSS keyframes instead of JS-driven masks.
+- User reported the page running at ~4.5 fps on mobile after the Aug 16 re-enable (ADR-061). The rAF sweep writing `--cursor-x`/`--cursor-y` every 32 ms, combined with `mask-image: radial-gradient(... at var(--cursor-x) ...)` and `plus-lighter`/`soft-light` blend modes, saturated the main thread on phone GPUs. The previous flat fallback was fast but users called it a downgrade because the signature moving glow disappeared. This fix restores the moving edge glow via a compositor-only CSS `conic-gradient` rotation, which looks like the old sweep but adds zero main-thread cost.
 
 ### Files touched
 - `components/border-glow.tsx`
@@ -20,7 +20,8 @@
 - `docs/COMPONENTS.md`
 
 ### Commit
-- `ae4011e` — "perf: disable BorderGlow sweep + blend modes on mobile, add breathing animation fallback"
+- `2c618c2` — "perf: disable BorderGlow sweep on mobile, add breathing animation fallback"
+- `2c618c2` — "perf: restore moving edge glow on mobile via CSS conic-gradient orbit"
 
 
 ## 2026-08-18 — Session: Android card performance pass — scope glow CSS-var writes + touch hover gating

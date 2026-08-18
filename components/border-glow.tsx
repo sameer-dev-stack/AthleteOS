@@ -241,7 +241,7 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
       card.classList.remove('glow-looping');
       loopStartRef.current = null;
     }
-  }, [loop, active, animated]);
+  }, [loop, active, animated, isCoarsePointer]);
 
 
   // Memoize static CSS vars — only recompute when props actually change

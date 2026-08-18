@@ -13,12 +13,12 @@
 The Aug 16 re-enable (ADR-061) removed the `@media (pointer: coarse)` block from `border-glow.css` and re-enabled the animated cursor sweep on all devices. On mobile GPUs the combination of per-frame `mask-image: radial-gradient(... at var(--cursor-x) var(--cursor-y))` re-rasterization plus `mix-blend-mode: plus-lighter` / `soft-light` compositing saturated the main thread, producing ~4.5 fps on a TECNO KL4. The previous coarse-pointer fallback (flat 1 px accent border + box-shadow) was fast but users called it a downgrade because the signature moving glow disappeared.
 
 **Decision:**
-- Restore a `@media (pointer: coarse)` block in `border-glow.css`, but keep the border colorful: replace the masked gradient mesh + blend modes with a simplified base-gradient border and a subtle CSS breathing animation (`mobile-glow-breathe` / `mobile-edge-breathe`). CSS animations run on the compositor thread, so they add zero main-thread cost.
+- Restore a `@media (pointer: coarse)` block in `border-glow.css`, but keep the border colorful and moving: replace the masked gradient mesh + blend modes with a rotating `conic-gradient` sweep driven by a compositor-only CSS `@keyframes border-glow-orbit` animation on `--sweep-angle` (registered via `@property`). This reproduces the old moving-edge glow look with zero main-thread cost.
 - Gate the JS rAF sweep on `animated !== false && !isCoarsePointer`. On touch devices the sweep never starts, so there is no per-frame style invalidation at all.
 - Disable `onPointerMove` on `(pointer: coarse)` so touch events don't write CSS variables into a subtree that no longer consumes them.
 
 **Consequences:**
-- Mobile: 0 rAF loop, 0 mask re-raster, 0 blend-mode compositing per frame. Border stays colorful via a slow opacity pulse.
+- Mobile: 0 rAF loop, 0 mask re-raster, 0 blend-mode compositing per frame. A `conic-gradient` spotlight rotates around the card border via CSS animation, visually matching the old sweep.
 - Desktop: unchanged — full masked gradient mesh, sweep, blend modes.
 - `animated` prop is now wired; passing `animated={false}` disables the sweep on any device.
 
