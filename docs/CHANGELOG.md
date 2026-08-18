@@ -3,6 +3,26 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-18 — Session: Fix mobile BorderGlow perf — disable sweep + blend modes on coarse pointers
+
+### What changed
+- **`components/border-glow.tsx`**: added `animated` prop (default `true`); rAF sweep now gated on `animated !== false && !isCoarsePointer` so touch devices skip the loop entirely. `onPointerMove` also disabled on `(pointer: coarse)`.
+- **`components/border-glow.css`**: added `@media (pointer: coarse)` block. On touch devices the masked gradient mesh, `mix-blend-mode: soft-light`, and `mix-blend-mode: plus-lighter` are replaced by a simplified base-gradient border + a subtle CSS breathing animation (`mobile-glow-breathe` / `mobile-edge-breathe`), removing the per-frame mask re-raster and blend-mode compositing that caused ~4.5 fps on mobile.
+
+### Why
+- User reported the page running at ~4.5 fps on mobile after the Aug 16 re-enable (ADR-061). The rAF sweep writing `--cursor-x`/`--cursor-y` every 32 ms, combined with `mask-image: radial-gradient(... at var(--cursor-x) ...)` and `plus-lighter`/`soft-light` blend modes, saturated the main thread on phone GPUs. The previous coarse-pointer fallback was a flat 1 px border, which users called a downgrade; this keeps a colorful animated border via cheap CSS keyframes instead of JS-driven masks.
+
+### Files touched
+- `components/border-glow.tsx`
+- `components/border-glow.css`
+- `docs/DECISIONS.md`
+- `docs/CHANGELOG.md`
+- `docs/COMPONENTS.md`
+
+### Commit
+- `ae4011e` — "perf: disable BorderGlow sweep + blend modes on mobile, add breathing animation fallback"
+
+
 ## 2026-08-18 — Session: Android card performance pass — scope glow CSS-var writes + touch hover gating
 
 ### What changed

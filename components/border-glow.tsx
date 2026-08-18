@@ -75,6 +75,7 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
   coneSpread = 25,
   loop = false,
   active = true,
+  animated = true,
   colors = ['#c084fc', '#f472b6', '#38bdf8'],
   fillOpacity = 0.5,
   style,
@@ -88,6 +89,10 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
   const lastFrameTimeRef = useRef<number>(0);
   const dimRef = useRef<{ w: number; h: number }>({ w: 360, h: 600 });
   const rectRef = useRef<DOMRect | null>(null);
+
+  const isCoarsePointer =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(pointer: coarse)').matches === true;
 
   // Cache the bounding rect on scroll/resize only — NOT inside pointermove.
   // Reading getBoundingClientRect() on every pointer move forces a sync layout
@@ -136,6 +141,8 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
     const card = cardRef.current;
     if (!card) return;
 
+    const shouldAnimate = animated !== false && !isCoarsePointer;
+
     // Cache dimensions via ResizeObserver — ZERO forced reflows during rAF ticks
     const updateDims = () => {
       if (card) {
@@ -153,7 +160,7 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
       ro.observe(card);
     }
 
-    if (loop && active) {
+    if (shouldAnimate && active) {
       const layer = glowLayerRef.current;
       if (!layer) return;
       const speed = 0.0002;
@@ -234,7 +241,7 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
       card.classList.remove('glow-looping');
       loopStartRef.current = null;
     }
-  }, [loop, active]);
+  }, [loop, active, animated]);
 
 
   // Memoize static CSS vars — only recompute when props actually change
@@ -256,7 +263,7 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
   return (
     <div
       ref={cardRef}
-      onPointerMove={loop ? undefined : handlePointerMove}
+      onPointerMove={loop && !isCoarsePointer ? handlePointerMove : undefined}
       className={`border-glow-card ${className}`}
       style={mergedStyles}
     >
