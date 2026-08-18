@@ -54,17 +54,8 @@ async function verifyAdminAuth() {
   }
 }
 
-const MOCK_ADMIN_ID = "00000000-0000-0000-0000-000000000000";
-
-let mockPlatformSettings = {
-  featureFlags: {
-    newCheckout: true,
-    darkMode: true,
-    analytics: true,
-  } as Record<string, boolean>,
-};
-
-// Feature flags are now DB-backed (see supabase/migrations/20260818_feature_flags.sql)
+// Feature flags are DB-backed (supabase/migrations/20260818_feature_flags.sql)
+const MOCK_ADMIN_ID = "83c283e5-ef8f-4c4f-a255-abc7e66f4970";
 
 let mockAuditLog: any[] = [
   {
@@ -660,8 +651,33 @@ export async function POST(
       return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
     const { flag, enabled } = parsed.data;
-    if (mockPlatformSettings.featureFlags.hasOwnProperty(flag)) {
-      mockPlatformSettings.featureFlags[flag as keyof typeof mockPlatformSettings.featureFlags] = enabled;
+
+    // Upsert feature flag in DB
+    let updatedFlags: Record<string, boolean> = {};
+    if (serviceRoleClient) {
+      const { data: existing } = await serviceRoleClient
+        .from("feature_flags")
+        .select("flag_name, enabled")
+        .eq("flag_name", flag)
+        .single();
+
+      if (existing) {
+        await serviceRoleClient
+          .from("feature_flags")
+          .update({ enabled, updated_at: new Date().toISOString() })
+          .eq("flag_name", flag);
+      } else {
+        await serviceRoleClient
+          .from("feature_flags")
+          .insert({ flag_name: flag, enabled, updated_at: new Date().toISOString() });
+      }
+
+      // Return all flags
+      const { data: allFlags } = await serviceRoleClient.from("feature_flags").select("flag_name, enabled");
+      (allFlags || []).forEach((row: any) => {
+        updatedFlags[row.flag_name] = row.enabled;
+      });
+    }
 
     // Get actual admin user ID from authenticated session
     let adminUserId: string;
@@ -692,7 +708,7 @@ export async function POST(
         console.error("Error writing audit log:", err);
       }
 
-      return NextResponse.json({ success: true, featureFlags: mockPlatformSettings.featureFlags });
+      return NextResponse.json({ success: true, featureFlags: updatedFlags });
     }
     return NextResponse.json({ error: "Invalid feature flag name" }, { status: 400 });
   }
