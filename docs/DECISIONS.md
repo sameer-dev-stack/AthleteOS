@@ -84,6 +84,24 @@ A user reported that pressing "Send Inquiry" on mobile "takes time" and the card
 
 
 
+## ADR-064 — Smooth CTA + Tip Button Animations and Pause Glow During the Tip Popup
+
+**Status:** Accepted · 2026-08-17
+
+**Context:**
+The card's Send Inquiry / Contact buttons and the Support (Tip) button animations felt abrupt, and the Support popup still lagged on open/close. The two prior popup fixes (ADR-059, ADR-062) gated the BorderGlow sweep on the Contact + Inquiry popups only; the Tip popup manages its own `open` state inside `TipButton`, so the continuous rAF sweep kept running behind its 0.15–0.2s entrance/exit animations. Separately, the buttons animated `boxShadow` inside Framer `whileHover`, forcing per-frame repaint on hover.
+
+**Decision:**
+- **Glow gating for the tip popup:** added `onOpenChange?: (open: boolean) => void` to `TipButton` (effect-notified, first render skipped via ref). `BusinessModalProvider` now tracks `showTip` + a `setTipOpen` callback; `anyOpen` becomes `showContact || showInquiry || showTip || closing`, and closing the tip reuses the 250 ms `closing` window so the sweep stays paused through the popup's exit. `BusinessBlock` passes `setTipOpen` into `TipButton`.
+- **Button smoothing:** removed `boxShadow` from `whileHover` on both Support buttons (kept the glow as a stable inline `style`), switched Framer taps to spring transitions (`type: "spring", stiffness: 400, damping: 26`), and changed `transition-all` to `transition-colors` so only transform/color animate. Send Inquiry + Contact use `ease-[cubic-bezier(0.22,1,0.36,1)]` with a slightly deeper `active:scale-[0.97]`.
+- **Popup easing:** the Tip popup and InquiryForm dialogs now use `easeOut` (overlay) and `ease: [0.22, 1, 0.36, 1]` (sheet) with a subtle `y` slide instead of bare linear `duration: 0.15`.
+
+**Consequences:**
+- Verified on a production build with a Playwright probe: opening the Tip popup on the card's back face leaves the sweep paused (1 frame in the open window), it stays paused through close (9 frames in the exit window), then resumes (31 frames after). Popup opens successfully; no console errors. `npm run lint` clean, `tsc --noEmit` clean, `npm run build` clean.
+- Tip popup and InquiryForm share the same open/close easing, so all three business popups now feel consistent.
+
+---
+
 ## ADR-063 — Inline CSS on SSR'd Pages to Remove Render-Blocking Stylesheets
 
 **Status:** Accepted · 2026-08-17

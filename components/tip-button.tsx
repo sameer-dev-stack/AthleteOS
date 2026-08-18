@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useMounted } from "@/lib/hooks/use-mounted";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,17 +12,27 @@ type Props = {
   athleteId: string;
   athleteName: string;
   accentColor?: string;
+  onOpenChange?: (open: boolean) => void;
 };
 
 const TIP_AMOUNTS = [500, 1000, 2500, 5000, 10000];
 
-export function TipButton({ athleteId, athleteName, accentColor = "#C6FF3D" }: Props) {
+export function TipButton({ athleteId, athleteName, accentColor = "#C6FF3D", onOpenChange }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
   const mounted = useMounted();
+  const firstRenderRef = useRef(true);
+
+  useEffect(() => {
+    if (firstRenderRef.current) {
+      firstRenderRef.current = false;
+      return;
+    }
+    onOpenChange?.(open);
+  }, [open, onOpenChange]);
 
   useEffect(() => {
     if (!open) return;
@@ -58,10 +68,11 @@ export function TipButton({ athleteId, athleteName, accentColor = "#C6FF3D" }: P
     <>
       <motion.button
         onClick={() => setOpen(true)}
-        whileHover={{ scale: 1.01, boxShadow: `0 0 32px -2px ${accentColor}60, 0 12px 40px -6px ${accentColor}40` }}
-        whileTap={{ scale: 0.98 }}
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.97 }}
+        transition={{ type: "spring", stiffness: 400, damping: 26 }}
         aria-label={`Support ${athleteName.split(" ")[0] || "me"}`}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-[13px] font-black tracking-wide transition-all duration-300 overflow-hidden min-w-0 transform translate-z-0 [backface-visibility:hidden] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+        className="w-full flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-[13px] font-black tracking-wide transition-colors duration-200 overflow-hidden min-w-0 transform translate-z-0 [backface-visibility:hidden] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
         style={{
           background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)`,
           color: "#0A0A0B",
@@ -83,7 +94,7 @@ export function TipButton({ athleteId, athleteName, accentColor = "#C6FF3D" }: P
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
                   className="fixed inset-0 z-[100] flex items-end justify-center pb-6 px-4"
                   style={{ background: "rgba(0,0,0,0.88)" }}
                   onClick={(e) => {
@@ -92,10 +103,10 @@ export function TipButton({ athleteId, athleteName, accentColor = "#C6FF3D" }: P
                   }}
                 >
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.15 }}
+                    initial={{ opacity: 0, scale: 0.95, y: 12 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 12 }}
+                    transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                     onClick={(e) => e.stopPropagation()}
                     className="w-full max-w-sm rounded-3xl overflow-hidden"
                     style={{
@@ -196,11 +207,12 @@ export function TipButton({ athleteId, athleteName, accentColor = "#C6FF3D" }: P
                       )}
 
                       <motion.button
-                        whileHover={{ scale: 1.01, boxShadow: `0 0 28px -4px ${accentColor}50` }}
-                        whileTap={{ scale: 0.99 }}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 26 }}
                         onClick={handleTip}
                         disabled={loading || (!selected && !customAmount)}
-                        className="flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-[13px] font-black tracking-wide transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-[13px] font-black tracking-wide transition-colors duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
                         style={{
                           background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)`,
                           color: "#0A0A0B",

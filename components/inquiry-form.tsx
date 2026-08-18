@@ -76,15 +76,15 @@ export function InquiryForm({ athleteId, athleteName, open, onClose }: Props) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.15 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
         onClick={onClose}
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.15 }}
+          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 10 }}
+          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
           onClick={(e) => e.stopPropagation()}
           className="w-full max-w-lg rounded-2xl bg-[#111113] border border-white/[0.08] shadow-2xl overflow-hidden"
            style={{ transform: "translateZ(0)" }}

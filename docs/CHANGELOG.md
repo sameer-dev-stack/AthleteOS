@@ -3,6 +3,26 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-17 — Session: Smooth Send Inquiry / Support button animations + gate glow during the Tip popup
+
+### What changed
+- **`components/tip-button.tsx`**: added `onOpenChange` prop (first-render skipped); removed `boxShadow` from `whileHover` on both Support buttons (glow kept as stable inline style); switched taps to spring transitions (`stiffness: 400, damping: 26`); `transition-all` → `transition-colors`; Tip popup overlay/sheet now `easeOut` / `ease [0.22,1,0.36,1]` with a subtle `y` slide.
+- **`components/profile-card.tsx`**: `BusinessModalProvider` now tracks `showTip` + `setTipOpen`; `anyOpen = showContact || showInquiry || showTip || closing` (tip close reuses the 250 ms closing window). `BusinessBlock` passes `setTipOpen` to `TipButton`. Send Inquiry / Contact buttons use `ease-[cubic-bezier(0.22,1,0.36,1)]` and `active:scale-[0.97]`.
+- **`components/inquiry-form.tsx`**: overlay `easeOut`, sheet `ease [0.22,1,0.36,1]` with `y` slide.
+
+### Why
+- The Tip (Support) popup wasn't covered by the `anyOpen` glow gate (ADR-062 gated only Contact + Inquiry), so the BorderGlow rAF sweep still fought its open/close animation. Buttons also animated `boxShadow` on hover (per-frame repaint) and used linear CSS timing.
+
+### Files touched
+- `components/tip-button.tsx`
+- `components/profile-card.tsx`
+- `components/inquiry-form.tsx`
+- `docs/DECISIONS.md`
+- `docs/CHANGELOG.md`
+
+### Commit
+- (pending)
+
 ## 2026-08-17 — Session: Inline CSS to eliminate render-blocking stylesheets
 
 ### What changed

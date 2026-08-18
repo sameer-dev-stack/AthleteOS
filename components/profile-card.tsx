@@ -1338,10 +1338,12 @@ const ContactModal = memo(function ContactModal({
 const BusinessModalCtx = createContext<{
   openContact: () => void;
   openInquiry: () => void;
+  setTipOpen: (open: boolean) => void;
   anyOpen: boolean;
 }>({
   openContact: () => {},
   openInquiry: () => {},
+  setTipOpen: () => {},
   anyOpen: false,
 });
 
@@ -1358,6 +1360,7 @@ function BusinessModalProvider({
 }) {
   const [showContact, setShowContact] = useState(false);
   const [showInquiry, setShowInquiry] = useState(false);
+  const [showTip, setShowTip] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -1374,18 +1377,34 @@ function BusinessModalProvider({
   const closePopup = useCallback(() => {
     setShowContact(false);
     setShowInquiry(false);
+    setShowTip(false);
     setClosing(true);
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     closeTimerRef.current = window.setTimeout(() => setClosing(false), 250);
   }, []);
 
+  const setTipOpen = useCallback(
+    (open: boolean) => {
+      if (open) {
+        setShowTip(true);
+      } else {
+        setShowTip(false);
+        setClosing(true);
+        if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+        closeTimerRef.current = window.setTimeout(() => setClosing(false), 250);
+      }
+    },
+    []
+  );
+
   const value = useMemo(
     () => ({
       openContact: () => setShowContact(true),
       openInquiry: () => setShowInquiry(true),
-      anyOpen: showContact || showInquiry || closing,
+      setTipOpen,
+      anyOpen: showContact || showInquiry || showTip || closing,
     }),
-    [showContact, showInquiry, closing]
+    [showContact, showInquiry, showTip, closing, setTipOpen]
   );
 
   return (
@@ -1477,7 +1496,7 @@ const BusinessBlock = memo(function BusinessBlock({
   onInteract,
   isPro,
 }: BusinessBlockProps) {
-  const { openContact, openInquiry } = useContext(BusinessModalCtx);
+  const { openContact, openInquiry, setTipOpen } = useContext(BusinessModalCtx);
   return (
     <div className={`flex flex-col gap-2 w-full px-4 pt-2 flex-shrink-0 ${isPro ? "pb-4" : "pb-2"}`}>
       {/* Sponsor / business affordance label */}
@@ -1497,7 +1516,7 @@ const BusinessBlock = memo(function BusinessBlock({
               onInteract();
               openContact();
             }}
-            className="flex-1 flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[11.5px] font-black tracking-wide transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            className="flex-1 flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[11.5px] font-black tracking-wide transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.02] active:scale-[0.97]"
             style={{
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(255,255,255,0.08)",
@@ -1514,7 +1533,7 @@ const BusinessBlock = memo(function BusinessBlock({
             onInteract();
             openInquiry();
           }}
-          className={`${hasContact ? "flex-1" : "w-full"} flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[11.5px] font-black tracking-wide transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]`}
+          className={`${hasContact ? "flex-1" : "w-full"} flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[11.5px] font-black tracking-wide transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.02] active:scale-[0.97]`}
           style={{
             background: `${accent}15`,
             border: `1px solid ${accent}30`,
@@ -1532,6 +1551,7 @@ const BusinessBlock = memo(function BusinessBlock({
           athleteId={profileId}
           athleteName={displayName}
           accentColor={accent}
+          onOpenChange={setTipOpen}
         />
       </div>
     </div>
