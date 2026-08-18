@@ -80,7 +80,7 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
   style,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
-  const spotRef = useRef<HTMLSpanElement>(null);
+  const glowLayerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
   const loopStartRef = useRef<number | null>(null);
   const lastXRef = useRef<number>(-1);
@@ -112,9 +112,9 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
   }, []);
 
   const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    const spot = spotRef.current;
+    const layer = glowLayerRef.current;
     const rect = rectRef.current;
-    if (!spot || !rect) return;
+    if (!layer || !rect) return;
 
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -127,16 +127,9 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
     let ky = dy !== 0 ? cy / Math.abs(dy) : Infinity;
     const edge = Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
 
-    // Compositor-only writes: transform + opacity never force a repaint.
-    spot.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-    spot.style.opacity = `${0.35 + edge * 0.65}`;
-  }, []);
-
-  const handlePointerLeave = useCallback(() => {
-    const spot = spotRef.current;
-    if (!spot) return;
-    // Clear inline opacity so the CSS default (0) hides the sprite.
-    spot.style.opacity = '';
+    layer.style.setProperty('--edge-proximity', `${(edge * 100) | 0}`);
+    layer.style.setProperty('--cursor-x', `${x | 0}px`);
+    layer.style.setProperty('--cursor-y', `${y | 0}px`);
   }, []);
 
   useEffect(() => {
@@ -161,16 +154,17 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
     }
 
     if (loop && active) {
-      const spot = spotRef.current;
-      if (!spot) return;
+      const layer = glowLayerRef.current;
+      if (!layer) return;
       const speed = 0.0002;
-      // Coarse pointers (mobile) get a slower tick. The only per-frame
-      // write is `transform` (compositor-only), so the halved rate is
-      // purely a power/temperature nicety — not a paint-avoidance measure.
+      // Coarse pointers (mobile) get a slower tick so the per-frame
+      // custom-property writes — which invalidate the glow layer's styles —
+      // happen ~31fps instead of ~50fps. The sweep takes 5s per perimeter,
+      // so the halved write rate is visually indistinguishable.
       const frameInterval = window.matchMedia?.('(pointer: coarse)').matches === true ? 32 : 20;
 
       card.classList.add('glow-looping');
-      spot.style.opacity = '1';
+      layer.style.setProperty('--edge-proximity', '90');
       lastXRef.current = -1;
       lastYRef.current = -1;
       loopStartRef.current = null;
@@ -217,7 +211,8 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
         const yi = Math.round(y);
 
         if (xi !== lastXRef.current || yi !== lastYRef.current) {
-          spot.style.transform = `translate3d(${xi}px, ${yi}px, 0)`;
+          layer.style.setProperty('--cursor-x', `${xi}px`);
+          layer.style.setProperty('--cursor-y', `${yi}px`);
           lastXRef.current = xi;
           lastYRef.current = yi;
         }
@@ -231,7 +226,6 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
         if (rafRef.current) cancelAnimationFrame(rafRef.current);
         if (ro) ro.disconnect();
         card.classList.remove('glow-looping');
-        spot.style.opacity = '';
         loopStartRef.current = null;
       };
     } else {
@@ -263,15 +257,13 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
     <div
       ref={cardRef}
       onPointerMove={loop ? undefined : handlePointerMove}
-      onPointerLeave={loop ? undefined : handlePointerLeave}
       className={`border-glow-card ${className}`}
       style={mergedStyles}
     >
-      <div className="border-glow-layer" aria-hidden="true">
+      <div ref={glowLayerRef} className="border-glow-layer" aria-hidden="true">
         <div className="border-glow-layer" aria-hidden="true">
-          <span className="edge-light" />
-        </div>
-        <span ref={spotRef} className="border-glow-spot" aria-hidden="true" />
+        <span className="edge-light" />
+      </div>
       </div>
       <div className="border-glow-inner w-full h-full">
         {children}
