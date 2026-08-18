@@ -681,24 +681,22 @@ export async function POST(
     const newLog = {
       id: auditId,
       admin_id: adminUserId,
-        action: "FEATURE_FLAG_TOGGLE",
-        target_type: "platform",
-        target_id: flag,
-        metadata: { enabled },
-        created_at: new Date().toISOString()
-      };
-      
-      try {
-        if (serviceRoleClient) {
-          await serviceRoleClient.from("audit_log").insert(newLog);
-        }
-      } catch (err) {
-        console.error("Error writing audit log:", err);
-      }
+      action: "FEATURE_FLAG_TOGGLE",
+      target_type: "platform",
+      target_id: flag,
+      metadata: { enabled },
+      created_at: new Date().toISOString()
+    };
 
-      return NextResponse.json({ success: true, featureFlags: updatedFlags });
+    try {
+      if (serviceRoleClient) {
+        await serviceRoleClient.from("audit_log").insert(newLog);
+      }
+    } catch (err) {
+      console.error("Error writing audit log:", err);
     }
-    return NextResponse.json({ error: "Invalid feature flag name" }, { status: 400 });
+
+    return NextResponse.json({ success: true, featureFlags: updatedFlags });
   }
 
   return NextResponse.json({ error: "Not Found" }, { status: 404 });

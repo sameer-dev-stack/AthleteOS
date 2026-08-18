@@ -14,6 +14,7 @@ import RealtimeDashboard from "./god-mode/RealtimeDashboard";
 import { motion, AnimatePresence } from "framer-motion";
 import { signOut } from "@/lib/actions/auth";
 import { ToastProvider, ConfirmDialogProvider } from "./ui/overlays";
+import AdminKeyboardShortcuts from "./ui/keyboard-shortcuts";
 
 import {
   Users,
@@ -367,6 +368,7 @@ export function AdminShell({ user }: AdminShellProps) {
         </section>
       </main>
     </div>
+    <AdminKeyboardShortcuts />
     </ConfirmDialogProvider>
     </ToastProvider>
   );
