@@ -3,6 +3,20 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-19 — Session: Disable automatic flip-back on mobile
+
+### What changed
+- **`components/profile-card.tsx`**: `startAutoReturn` now bails on `(pointer: coarse)`, so the card no longer auto-flips back to the front after 12 s on touch devices. Desktop behavior unchanged.
+
+### Why
+- User request: turn off the card's automatic flip feature on mobile.
+
+### Files touched
+- `components/profile-card.tsx`
+
+### Commit
+- Pending commit hash.
+
 ## 2026-08-19 — Session: Install Google Tag (gtag.js) on every page
 
 ### What changed

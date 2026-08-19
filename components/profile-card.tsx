@@ -1863,6 +1863,9 @@ export function ProfileCard({
   /* ── Auto-return ────────────────────────────────── */
   const startAutoReturn = useCallback(() => {
     if (autoReturnRef.current) clearTimeout(autoReturnRef.current);
+    // No automatic flip-back on touch devices — mobile users keep the face
+    // they chose until they tap to flip.
+    if (window.matchMedia?.('(pointer: coarse)').matches) return;
     autoReturnRef.current = setTimeout(() => setFlipped(false), AUTO_RETURN_MS);
   }, []);
 
