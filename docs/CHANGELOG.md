@@ -3,46 +3,24 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
-## 2026-08-18 — Session: Restore perimeter snake glow via compositor-only transform snake-head
+## 2026-08-18 — Session: Revert snake-head glow rework back to scoped glow-layer implementation
 
 ### What changed
-- **`components/border-glow.tsx`**: the rAF perimeter loop no longer writes `--cursor-x`/`--cursor-y` every frame. Instead it moves a dedicated `.snake-head` div via `transform: translate3d(...)`. Transform updates bypass style invalidation and are handled by the GPU compositor, so the snake travels at 60fps with zero main-thread style recalc. On `(pointer: coarse)` the snake head is hidden and a CSS `conic-gradient` orbit provides a similar moving edge glow with zero JS cost.
-- **`components/border-glow.css`**: added `.snake-head` (64×64 radial gradient, `mix-blend-mode: plus-lighter`, `will-change: transform`). Removed per-frame `mask-image` dependency from the sweep path. `@media (pointer: coarse)` hides `.snake-head` and uses the existing `conic-gradient` orbit on `::before`.
+- Reverted `components/border-glow.tsx` / `components/border-glow.css` back to the glow-layer implementation (per-frame CSS-var writes scoped to `.border-glow-layer`, 32 ms coarse-pointer tick, `document.hidden` pause) plus the hydration-fix nested layer div from `6d36228`.
+- Undid the snake-head / conic-orbit / breathing-fallback rework (`2c618c2`, `2c770d6`, `94fc7aa`).
+- Removed the corresponding stale `docs/CHANGELOG.md` entries and re-added `allowedDevOrigins` in `next.config.mjs`.
 
 ### Why
-- User wants the old snake perimeter glow back, but the previous implementation caused ~4.5 fps on mobile because writing CSS custom properties every frame forced style invalidation + mask re-raster across the glow subtree. Moving a single element by `transform` is compositor-only and avoids all of that.
+- Production must match the verified glow-layer implementation; the snake-head rework superseded it without approval.
 
 ### Files touched
 - `components/border-glow.tsx`
 - `components/border-glow.css`
-- `docs/DECISIONS.md`
 - `docs/CHANGELOG.md`
-- `docs/COMPONENTS.md`
+- `next.config.mjs`
 
 ### Commit
-- `2c770d6` — "perf: replace glow sweep CSS-var writes with compositor-only snake-head transform"
-
-
-## 2026-08-18 — Session: Fix mobile BorderGlow perf — disable sweep + blend modes on coarse pointers
-
-### What changed
-- **`components/border-glow.tsx`**: added `animated` prop (default `true`); rAF sweep now gated on `animated !== false && !isCoarsePointer` so touch devices skip the loop entirely. `onPointerMove` also disabled on `(pointer: coarse)`.
-- **`components/border-glow.css`**: added `@media (pointer: coarse)` block. On touch devices the masked gradient mesh, `mix-blend-mode: soft-light`, and `mix-blend-mode: plus-lighter` are replaced by a simplified base-gradient border + a subtle CSS breathing animation (`mobile-glow-breathe` / `mobile-edge-breathe`), removing the per-frame mask re-raster and blend-mode compositing that caused ~4.5 fps on mobile.
-
-### Why
-- User reported the page running at ~4.5 fps on mobile after the Aug 16 re-enable (ADR-061). The rAF sweep writing `--cursor-x`/`--cursor-y` every 32 ms, combined with `mask-image: radial-gradient(... at var(--cursor-x) ...)` and `plus-lighter`/`soft-light` blend modes, saturated the main thread on phone GPUs. The previous flat fallback was fast but users called it a downgrade because the signature moving glow disappeared. This fix restores the moving edge glow via a compositor-only CSS `conic-gradient` rotation, which looks like the old sweep but adds zero main-thread cost.
-
-### Files touched
-- `components/border-glow.tsx`
-- `components/border-glow.css`
-- `docs/DECISIONS.md`
-- `docs/CHANGELOG.md`
-- `docs/COMPONENTS.md`
-
-### Commit
-- `2c618c2` — "perf: disable BorderGlow sweep on mobile, add breathing animation fallback"
-- `2c618c2` — "perf: restore moving edge glow on mobile via CSS conic-gradient orbit"
-
+- Pending commit hash.
 
 ## 2026-08-18 — Session: Android card performance pass — scope glow CSS-var writes + touch hover gating
 

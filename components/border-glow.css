@@ -1,14 +1,3 @@
-@property --sweep-angle {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: 0deg;
-}
-
-@keyframes border-glow-orbit {
-  from { --sweep-angle: 0deg; }
-  to { --sweep-angle: 360deg; }
-}
-
 .border-glow-card {
   --edge-proximity: 0;
   --edge-sensitivity: 30;
@@ -52,13 +41,21 @@
 .border-glow-layer > .edge-light {
   content: "";
   position: absolute;
+  inset: 0;
   border-radius: inherit;
   transition: opacity 0.25s ease-out;
-  pointer-events: none;
+  z-index: -1;
 }
 
+.border-glow-card:not(:hover):not(.sweep-active):not(.glow-looping) .border-glow-layer::before,
+.border-glow-card:not(:hover):not(.sweep-active):not(.glow-looping) .border-glow-layer::after,
+.border-glow-card:not(:hover):not(.sweep-active):not(.glow-looping) .border-glow-layer > .edge-light {
+  opacity: 0;
+  transition: opacity 0.75s ease-in-out;
+}
+
+/* colored mesh-gradient border */
 .border-glow-layer::before {
-  inset: 0;
   border: 1px solid transparent;
   background:
     linear-gradient(var(--card-bg, #120F17) 0 100%) padding-box,
@@ -71,12 +68,28 @@
     var(--gradient-six, radial-gradient(at 82% 18%, hsla(52, 100%, 65%, 1) 0px, transparent 50%)) border-box,
     var(--gradient-seven, radial-gradient(at 51% 4%, hsla(12, 100%, 72%, 1) 0px, transparent 50%)) border-box,
     var(--gradient-base, linear-gradient(#c299ff 0 100%)) border-box;
-  opacity: 0.35;
-  z-index: 0;
+
+  opacity: calc((var(--edge-proximity) - var(--color-sensitivity)) / (100 - var(--color-sensitivity)));
+
+  -webkit-mask-image:
+    radial-gradient(
+      calc(var(--glow-padding) * 6) circle at var(--cursor-x, 50%) var(--cursor-y, 0%),
+      black 0%,
+      black 25%,
+      transparent 100%
+    );
+  mask-image:
+    radial-gradient(
+      calc(var(--glow-padding) * 6) circle at var(--cursor-x, 50%) var(--cursor-y, 0%),
+      black 0%,
+      black 25%,
+      transparent 100%
+    );
 }
 
+/* colored mesh-gradient background fill near edges */
 .border-glow-layer::after {
-  inset: 0;
+  border: 1px solid transparent;
   background:
     var(--gradient-one, radial-gradient(at 80% 55%, hsla(268, 100%, 76%, 1) 0px, transparent 50%)) padding-box,
     var(--gradient-two, radial-gradient(at 69% 34%, hsla(349, 100%, 74%, 1) 0px, transparent 50%)) padding-box,
@@ -86,30 +99,28 @@
     var(--gradient-six, radial-gradient(at 82% 18%, hsla(52, 100%, 65%, 1) 0px, transparent 50%)) padding-box,
     var(--gradient-seven, radial-gradient(at 51% 4%, hsla(12, 100%, 72%, 1) 0px, transparent 50%)) padding-box,
     var(--gradient-base, linear-gradient(#c299ff 0 100%)) padding-box;
-  opacity: 0.25;
-  mix-blend-mode: soft-light;
-  z-index: 1;
-}
 
-/* traveling snake head — moved by JS transform, no style invalidation */
-.border-glow-layer > .snake-head {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(192,132,252,0.7) 25%, rgba(244,114,182,0.4) 45%, transparent 70%);
-  mix-blend-mode: plus-lighter;
-  will-change: transform;
-  pointer-events: none;
-  transform: translate3d(0, 0, 0);
-  z-index: 2;
+  -webkit-mask-image:
+    radial-gradient(
+      calc(var(--glow-padding) * 5) circle at var(--cursor-x, 50%) var(--cursor-y, 0%),
+      black 0%,
+      transparent 80%
+    );
+  mask-image:
+    radial-gradient(
+      calc(var(--glow-padding) * 5) circle at var(--cursor-x, 50%) var(--cursor-y, 0%),
+      black 0%,
+      transparent 80%
+    );
+
+  opacity: calc(var(--fill-opacity, 0.5) * (var(--edge-proximity) - var(--color-sensitivity)) / (100 - var(--color-sensitivity)));
+  mix-blend-mode: soft-light;
 }
 
 /* outer glow layer */
 .border-glow-layer > .edge-light {
   inset: calc(var(--glow-padding) * -1);
+  pointer-events: none;
   z-index: 1;
   border-radius: calc(var(--border-radius) + var(--glow-padding));
   transform: translateZ(0);
@@ -152,39 +163,4 @@
   border-radius: inherit;
   overflow: hidden;
   z-index: 1;
-}
-
-@media (pointer: coarse) {
-  .border-glow-layer::before {
-    -webkit-mask-image: none;
-    mask-image: none;
-    mix-blend-mode: normal;
-    background:
-      linear-gradient(var(--card-bg, #120F17) 0 100%) padding-box,
-      conic-gradient(from var(--sweep-angle), transparent 0%, var(--gradient-base, linear-gradient(#c299ff 0 100%)) 15%, transparent 30%) border-box;
-    animation: border-glow-orbit 3s linear infinite;
-  }
-
-  .border-glow-layer::after {
-    display: none;
-  }
-
-  .border-glow-layer > .edge-light {
-    -webkit-mask-image: none;
-    mask-image: none;
-    mix-blend-mode: normal;
-    opacity: 0.35;
-    box-shadow:
-      inset 0 0 0 1px var(--glow-color, hsl(40deg 80% 80% / 100%)),
-      0 0 18px 1px var(--glow-color-40, hsl(40deg 80% 80% / 40%));
-  }
-
-  .border-glow-layer > .snake-head {
-    display: none;
-  }
-}
-
-@keyframes border-glow-orbit {
-  from { --sweep-angle: 0deg; }
-  to { --sweep-angle: 360deg; }
 }
