@@ -5,6 +5,7 @@ import { AdminSidebar } from "./admin-sidebar";
 import { AdminHeader } from "./admin-header";
 import { supabaseApi } from "./god-mode/supabase";
 import UserManagement from "./god-mode/UserManagement";
+import AdminDashboard from "./god-mode/AdminDashboard";
 import FinancialsMonitor from "./god-mode/FinancialsMonitor";
 import ComplianceQueue from "./god-mode/ComplianceQueue";
 import UsageMonitor from "./god-mode/UsageMonitor";
@@ -28,7 +29,7 @@ type AdminShellProps = {
 };
 
 export function AdminShell({ user }: AdminShellProps) {
-  const [activeTab, setActiveTab] = useState<string>("users");
+  const [activeTab, setActiveTab] = useState<string>("dashboard");
   const [platformHealth, setPlatformHealth] = useState<{
     supabaseStatus: "connected" | "error";
     stripeWebhookHealth: "healthy" | "error";
@@ -50,6 +51,8 @@ export function AdminShell({ user }: AdminShellProps) {
 
   const renderActiveComponent = () => {
     switch (activeTab) {
+      case "dashboard":
+        return <AdminDashboard />;
       case "users":
         return <UserManagement />;
       case "financials":

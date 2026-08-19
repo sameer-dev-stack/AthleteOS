@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, ClipboardCheck, DollarSign, LineChart, Cpu, ShieldAlert, ScrollText, Settings, ChevronLeft, ChevronRight, type LucideIcon } from "lucide-react";
+import { Users, ClipboardCheck, DollarSign, LineChart, Cpu, ShieldAlert, ScrollText, Settings, ChevronLeft, ChevronRight, LayoutDashboard, type LucideIcon } from "lucide-react";
 
 type NavItem = {
   id: string;
@@ -23,6 +23,12 @@ type AdminSidebarProps = {
 };
 
 export const adminNavSections: NavSection[] = [
+  {
+    label: "Overview",
+    items: [
+      { id: "dashboard", label: "Dashboard", icon: require("lucide-react").LayoutDashboard },
+    ],
+  },
   {
     label: "Management",
     items: [

@@ -4,6 +4,30 @@
 > Format: `## ADR-NNN — Title` · `Status` · `Context` · `Decision` · `Consequences` · `Date`.
 
 ---
+## ADR-067 — Harden the Admin Mutation API (validation, rate limits, origin check, self-protection)
+
+**Status:** Accepted · 2026-08-19
+
+**Context:**
+Security audit of the God Mode admin panel exposed that the two admin write surfaces are asymmetrically guarded. Server actions (`lib/actions/admin.ts`: `updateUserPlan`, `toggleUserStatus`) are Zod-typed and rate-limited but run through the user-scoped client, which Postgres blocks from writing the `plan`/`suspended`/`role`/`email` columns (column-level `REVOKE` from `anon, authenticated` in `20260812_security_hardening.sql`) — so they cannot serve the panel's mutations. The REST API (`app/api/admin/[...adminPath]/route.ts`), which the panel actually uses via the service-role client, was the working path but used `z.any()` per field, had no rate limiting, no cross-origin check, a `MOCK_ADMIN_ID` audit fallback, and allowed an admin to tamper with their own privileged fields. Separately, the UI's verification/publish toggles were silently no-ops because `is_verified`/`profile_published` were missing from the REST patch allowlist.
+
+**Decision:**
+- Enforce a strict, typed Zod schema on `PATCH /api/admin/profiles/:id` fields (string caps, `plan`/`role` enums, booleans) instead of `z.any()`, with `.strict()` rejecting unknown keys.
+- Add `is_verified` and `profile_published` to the allowed patch fields so the verification/publish toggles actually persist.
+- Add per-admin rate limiting on all state-changing admin endpoints (originated from `audit_log`, 240/hr total, 120/hr per action) mirroring the server-action limiter.
+- Add an origin allow-list check (same-origin or nilcard/Vercel hosts) on PATCH/POST as CSRF defense-in-depth layered on the SameSite session cookie.
+- Block modifying an admin's own `role`, `suspended`, `email`, or `plan` via the panel.
+- Remove the `MOCK_ADMIN_ID` audit fallback; resolve the acting admin strictly from the session and fail closed (401) if it cannot be resolved.
+
+**Consequences:**
+- The single functional admin mutation path now enforces the validation/rate-limit origin rigor that previously only the (blocked) server-action twins had.
+- Verification and publish toggles in **User Management** now persist correctly.
+- Audit logs can no longer be attributed to a fabricated admin id.
+- `plan` is limited to `free|pro`, matching the server action and UI; widen later if a `team`/`elite` tier must be settable from the panel.
+- GET endpoints remain read-only and ungated by origin (not state-changing).
+- `npx tsc --noEmit` clean; `npm run lint` 0 errors; build compiled successfully.
+
+---
 
 ## ADR-066 — Restore Perimeter Snake Glow via Compositor-Only Transform Snake-Head
 

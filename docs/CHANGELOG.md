@@ -3,6 +3,37 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-19 — Session: Harden admin panel mutation API (security audit)
+
+### What changed
+Security review of the God Mode /admin panel (auth, RLS, API hardening) surfaced a structural inconsistency: the panel's *effective* mutation path is `app/api/admin/[...adminPath]/route.ts` (service-role client, bypasses RLS), but that path was the **least-guarded** of the two admin write paths — the Zod-typed, rate-limited server-action twins are silently defeated by the RLS column `REVOKE` on `plan`/`suspended`/`role`/`email` (they use the user-scoped client). Hardened the REST API route so the one working mutation path now enforces the same rigor:
+
+- **`app/api/admin/[...adminPath]/route.ts`**
+  1. **Strict per-field Zod validation replaces `z.any()`** for profile PATCH (typed strings with length caps, `plan`∈{free,pro}, `role`∈{user,admin}, booleans for `suspended`/`is_verified`/`profile_published`; `.strict()` rejects unknown keys and 400s).
+  2. **Fixed functional bug:** added `is_verified` and `profile_published` to the allowlist — the UI toggles verification/publish, but they were absent so Zod stripped them and the PATCH silently wrote nothing.
+  3. **Self-protection:** an admin can no longer change their *own* `role`, `suspended`, `email`, or `plan` through the panel (prevents self-demotion/suspension/re-email tampering the allowlist-tied identity).
+  4. **Rate limiting** on all state-changing endpoints (PATCH profiles, PATCH deals, POST feature-flags) derived from the append-only `audit_log` (240 mutations/hr, 120 of one action/hr per admin) — mirrors `lib/actions/admin.ts`.
+  5. **Origin/CSRF defense-in-depth:** PATCH/POST now reject cross-origin requests (same-origin or allowlisted hosts: localhost, nilcard.app variants, Vercel deployment URLs).
+  6. **Removed `MOCK_ADMIN_ID` audit fallback.** Audit attribution now resolves the admin strictly from the session; unresolvable → 401, so audit entries can never be attributed to a plausible-looking fake id.
+
+### Why
+- User requested a security review of the admin panel (admin auth, RLS, API hardening).
+- The REST mutation path is the one that actually changes data; it lacked validation, rate limits, origin checks, and had a stale fallback id. Also `is_verified`/`profile_published` toggles in the UI were no-ops.
+
+### Files touched
+- `app/api/admin/[...adminPath]/route.ts`
+- `docs/CHANGELOG.md`
+- `docs/DECISIONS.md`
+
+### Verified
+- `npx tsc --noEmit` clean (exit 0); `npm run lint` 0 errors (15 pre-existing warnings, none in the touched file); `npm run build` reached `✓ Compiled successfully` (the run was cut at the 30s tool window during the build's own type-check phase, which `tsc --noEmit` already passed).
+
+### Concerns / notes
+- The `plan` schema is `z.enum(["free","pro"])`, matching `lib/actions/admin.ts` and the UI's allowed values. If a `team`/`elite` tier must be settable from the panel later, widen the enum at that time.
+- `GET /api/admin/*` remains read-only and was not origin-gated (reads are not state-changing); auth still enforced.
+
+### Commit
+- `(set on commit)`
 ## 2026-08-19 — Session: Rebuild admin panel layout to match dashboard design system
 
 ### What changed
