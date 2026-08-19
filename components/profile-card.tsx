@@ -1713,7 +1713,6 @@ export function ProfileCard({
   const autoReturnRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const glowRestartRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const trackedRef = useRef(false);
-  const verifyingRef = useRef(false);
   /** Shared webcam stream between front and back ReflectiveCard instances */
   const webcamStreamRef = useRef<MediaStream | null>(null);
 
@@ -1733,42 +1732,50 @@ export function ProfileCard({
     setTipError(null);
 
     let attempts = 0;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
     const maxAttempts = 12;
-    const interval = setInterval(async () => {
-      if (verifyingRef.current) return;
-      verifyingRef.current = true;
+
+    const poll = async () => {
+      if (cancelled) return;
       attempts++;
 
       try {
         const result = await verifyRecentTip(profile.id);
+        if (cancelled) return;
+
         if (result.verified) {
-          clearInterval(interval);
           setTipVerified(true);
           setShowTipSuccess(true);
           setShowTipConfirming(false);
           setTipError(null);
-          import("canvas-confetti").then((mod) => {
-            mod.default({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-          }).catch(() => {});
+          import("canvas-confetti")
+            .then((mod) => {
+              mod.default({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            })
+            .catch(() => {});
         } else if (attempts >= maxAttempts) {
-          clearInterval(interval);
-          setShowTipConfirming(false);
           setTipError("Verification timed out. Your tip may still be processing.");
+        } else {
+          timer = setTimeout(poll, 3000);
         }
       } catch (err) {
-        clearInterval(interval);
-        setShowTipConfirming(false);
-        setTipError(err instanceof Error ? err.message : "Verification failed. Please refresh to check your tip status.");
-      } finally {
-        verifyingRef.current = false;
+        if (cancelled) return;
+        setTipError(
+          err instanceof Error
+            ? err.message
+            : "Verification failed. Please refresh to check your tip status."
+        );
       }
-    }, 3000);
+    };
+
+    timer = setTimeout(poll, 3000);
 
     return () => {
-      clearInterval(interval);
-      verifyingRef.current = false;
+      cancelled = true;
+      clearTimeout(timer);
     };
-  }, [searchParams, profile.id]);
+  }, [searchParams?.get("tip"), profile.id]);
 
   /* ── Derived data ───────────────────────────────── */
   const themeObj = useMemo(() => resolveTheme(profile.theme_accent), [profile.theme_accent]);
