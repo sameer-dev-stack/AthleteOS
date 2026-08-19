@@ -4,6 +4,25 @@
 > Format: `## ADR-NNN — Title` · `Status` · `Context` · `Decision` · `Consequences` · `Date`.
 
 ---
+## ADR-069 — Adopt the /dashboard design language for the Admin Platform Analytics module
+
+**Status:** Accepted · 2026-08-19
+
+**Context:**
+The Admin panel's Platform Analytics module previously used a bespoke god-mode "console" look (dark `#050505`/`#0A0A0B`, `border-neutral-800`, monospace chips, `text-neutral-*`) that is visually inconsistent with the athlete `/dashboard` design system. The dashboard already defines the canonical language: `bg-bg` page, `bg-[#111113]` cards with `border-white/[0.06]`, `text-ink-muted` / `text-ink-dim`, single accent `#C6FF3D`, segment pills with `bg-accent text-black` for the active state, `animate-page-in`, and `SkeletonCard` shimmer loading. Keeping two design dialects in one product increases maintenance and weakens the "same product" feel.
+
+**Decision:**
+- Rebuild `AnalyticsOverview.tsx` using ONLY the `/dashboard` tokens and primitives (no god-mode-specific surface colors).
+- Reuse `SkeletonCard` from `components/ui/skeleton` for loading placeholders and the accent-tinted icon-chip pattern used across dashboard panels.
+- Keep the data contract and backend (`GET /api/admin/analytics?days=`) unchanged so the module continues to receive windowed, accurate data with no fabricated values.
+- Use lucide icons (Active/eye/click/...), single lime accent for primary highlights, and per-metric muted accent tints (sky/emerald/purple/amber) only for categorical KPIs, mirroring dashboard precedent.
+
+**Consequences:**
+- The admin analytics section now reads as part of the same dashboard system; maintenance follows one set of tokens.
+- Future dashboard design-language changes apply to this module automatically via the shared tokens.
+- No backend or data-contract change; fetch/error/empty/loading behavior preserved.
+
+---
 ## ADR-068 — Rebuild Platform Analytics: fix broken metrics, exact totals, server-side time window
 
 **Status:** Accepted · 2026-08-19

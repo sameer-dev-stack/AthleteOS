@@ -1,11 +1,27 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { supabaseApi } from './supabase';
-import { 
-  Eye, MousePointer, Globe, TrendingUp, Compass, Share2, X, 
-  Users, DollarSign, Award, RefreshCw, Loader2, Zap, Shield, Trophy, Activity, Mail,
-  ChevronDown, ChevronUp
-} from 'lucide-react';
+"use client";
 
+import { useState, useEffect, useCallback } from "react";
+import {
+  Eye,
+  MousePointerClick,
+  Trophy,
+  Sparkles,
+  Gift,
+  Wallet,
+  Timer,
+  Compass,
+  Globe2,
+  Share2,
+  Award,
+  Activity,
+  Loader2,
+  RefreshCw,
+  Users,
+} from "lucide-react";
+import { SkeletonCard } from "@/components/ui/skeleton";
+import { supabaseApi } from "./supabase";
+
+// Data contract mirrors GET /api/admin/analytics (see app/api/admin/[...adminPath]/route.ts).
 type AnalyticsData = {
   totalViews: number;
   uniqueViewers: number;
@@ -56,463 +72,477 @@ const emptyAnalytics: AnalyticsData = {
   },
 };
 
+const RANGES = [
+  { key: "7d", days: 7, label: "7D" },
+  { key: "30d", days: 30, label: "30D" },
+  { key: "90d", days: 90, label: "90D" },
+  { key: "all", days: 0, label: "All time" },
+] as const;
+
+type RangeKey = (typeof RANGES)[number]["key"];
+
+const fmtNum = (n: number | undefined) => (n || 0).toLocaleString();
+
+const fmtUSD = (cents: number | undefined) =>
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(
+    (cents || 0) / 100
+  );
+
+// ---------------------------------------------------------------------------
+// Visual primitives — dashboard design language (bg-bg, ink, single accent).
+// ---------------------------------------------------------------------------
+
+function Panel({
+  title,
+  icon,
+  iconCls,
+  action,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  iconCls: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-2xl border border-white/[0.06] bg-[#111113]">
+      <header className="flex items-center justify-between gap-3 px-5 pt-5">
+        <h3 className="flex items-center gap-2.5 text-sm font-semibold text-white">
+          <span className={`flex h-8 w-8 items-center justify-center rounded-xl border ${iconCls}`}>{icon}</span>
+          {title}
+        </h3>
+        {action}
+      </header>
+      <div className="p-5 pt-4">{children}</div>
+    </section>
+  );
+}
+
+function Kpi({
+  icon,
+  iconCls,
+  label,
+  value,
+  sub,
+}: {
+  icon: React.ReactNode;
+  iconCls: string;
+  label: string;
+  value: string;
+  sub?: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/[0.06] bg-[#111113] p-4 sm:p-5">
+      <div className="flex items-center gap-2.5">
+        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${iconCls}`}>{icon}</span>
+        <span className="text-xs font-medium text-ink-muted">{label}</span>
+      </div>
+      <p className="mt-3 text-2xl font-black tracking-tight text-white">{value}</p>
+      {sub ? <p className="mt-1 text-xs text-ink-dim">{sub}</p> : null}
+    </div>
+  );
+}
+function TrafficChart({ points }: { points: { date: string; views: number; clicks: number }[] }) {
+  if (!points.length) return null;
+
+  const W = 600;
+  const H = 170;
+  const P = 12;
+  const max = Math.max(...points.map((p) => Math.max(p.views, p.clicks)), 1);
+  const step = (W - P * 2) / (points.length - 1 || 1);
+  const x = (i: number) => (P + i * step).toFixed(1);
+  const y = (v: number) => (H - P - (v / max) * (H - P * 2)).toFixed(1);
+
+  const viewLine = points.map((p, i) => `${x(i)},${y(p.views)}`).join(" L ");
+  const clickLine = points.map((p, i) => `${x(i)},${y(p.clicks)}`).join(" L ");
+  const areaPath = `M ${viewLine} L ${x(points.length - 1)},${H - P} L ${x(0)},${H - P} Z`;
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="h-48 w-full">
+      <defs>
+        <linearGradient id="analyticsViewFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#C6FF3D" stopOpacity="0.2" />
+          <stop offset="100%" stopColor="#C6FF3D" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {[0.25, 0.5, 0.75].map((t) => (
+        <line
+          key={t}
+          x1={P}
+          x2={W - P}
+          y1={(H - P * 2) * t + P}
+          y2={(H - P * 2) * t + P}
+          stroke="rgba(255,255,255,0.05)"
+          strokeWidth="1"
+        />
+      ))}
+      <path d={areaPath} fill="url(#analyticsViewFill)" />
+      <path d={`M ${viewLine}`} fill="none" stroke="#C6FF3D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={`M ${clickLine}`} fill="none" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default function AnalyticsOverview() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
-  const [showAllReferrals, setShowAllReferrals] = useState(false);
+  const [range, setRange] = useState<RangeKey>("30d");
   const [data, setData] = useState<AnalyticsData>(emptyAnalytics);
 
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const days = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : timeRange === '90d' ? 90 : 0;
-      const result = await supabaseApi.getAnalyticsOverview(days);
-
-      const filteredTimeline = (result.viewsOverTime || []).slice(-(days || 365));
-
+      const days = RANGES.find((r) => r.key === range)?.days ?? 0;
+      const res = await supabaseApi.getAnalyticsOverview(days);
       setData({
-        totalViews: result.totalViews || 0,
-        uniqueViewers: result.uniqueViewers || 0,
-        totalClicks: result.totalClicks || 0,
-        totalProfiles: result.totalProfiles || 0,
-        proAthletesCount: result.proAthletesCount || 0,
-        stripeOnboardedCount: result.stripeOnboardedCount || 0,
-        waitlistCount: result.waitlistCount || 0,
-        newsletterCount: result.newsletterCount || 0,
-        totalTipsCents: result.totalTipsCents || 0,
-        totalNilCents: result.totalNilCents || 0,
-        totalAiGenerations: result.totalAiGenerations || 0,
-        viewsOverTime: filteredTimeline,
-        topReferrers: result.topReferrers || [],
-        topCountries: result.topCountries || [],
-        topSports: result.topSports || [],
-        topAthletes: result.topAthletes || [],
-        referralAnalytics: result.referralAnalytics || {
-          totalReferralClicks: 0,
-          completedReferrals: 0,
-          pendingReferrals: 0,
-          topReferrerAthletes: [],
-        },
+        ...emptyAnalytics,
+        ...res,
+        viewsOverTime: (res.viewsOverTime || []).slice(-(days || 366)),
+        referralAnalytics: res.referralAnalytics || emptyAnalytics.referralAnalytics,
+        topReferrers: res.topReferrers || [],
+        topCountries: res.topCountries || [],
+        topSports: res.topSports || [],
+        topAthletes: res.topAthletes || [],
       });
-    } catch (err) {
-      console.error(err);
-      setError('Failed to load full platform analytics data');
+    } catch (e) {
+      console.error(e);
+      setError("Couldn't load platform analytics.");
     } finally {
       setLoading(false);
     }
-  }, [timeRange]);
+  }, [range]);
 
   useEffect(() => {
-    queueMicrotask(() => fetchAnalytics());
+    queueMicrotask(fetchAnalytics);
   }, [fetchAnalytics]);
 
-  const totalClicks = data.totalClicks;
-  const totalViews = data.totalViews;
-  const clickThroughRate = totalViews > 0 ? ((totalClicks / totalViews) * 100).toFixed(1) : '0.0';
+  const clickRate = data.totalViews > 0 ? ((data.totalClicks / data.totalViews) * 100).toFixed(1) : "0.0";
+  const ref = data.referralAnalytics;
+  const timeline = data.viewsOverTime;
+  const firstDate = timeline[0]?.date;
+  const lastDate = timeline[timeline.length - 1]?.date;
 
-  const formatUSD = (cents: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(cents / 100);
-  };
-
-  // SVG Chart Calculation
-  const chartHeight = 140;
-  const chartWidth = 600;
-  const padding = 20;
-
-  const getChartCoordinates = (points: { date: string; views: number; clicks: number }[]) => {
-    if (points.length === 0) return { viewPath: '', clickPath: '', viewPoints: [] as string[] };
-
-    const maxVal = Math.max(...points.map(p => Math.max(p.views, p.clicks)), 1);
-    const xStep = (chartWidth - padding * 2) / (points.length - 1 || 1);
-
-    const viewCoordinates = points.map((p, idx) => {
-      const x = padding + idx * xStep;
-      const y = chartHeight - padding - (p.views / maxVal) * (chartHeight - padding * 2);
-      return `${x},${y}`;
-    });
-
-    const clickCoordinates = points.map((p, idx) => {
-      const x = padding + idx * xStep;
-      const y = chartHeight - padding - (p.clicks / maxVal) * (chartHeight - padding * 2);
-      return `${x},${y}`;
-    });
-
-    return {
-      viewPath: `M ${viewCoordinates.join(' L ')}`,
-      clickPath: `M ${clickCoordinates.join(' L ')}`,
-      viewPoints: viewCoordinates
-    };
-  };
-
-  const { viewPath, clickPath, viewPoints } = getChartCoordinates(data.viewsOverTime);
-  const hasData = data.totalProfiles > 0 || data.totalViews > 0;
+  if (error) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 rounded-2xl border border-white/[0.06] bg-[#111113] p-10 text-center">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-500/25 bg-red-500/10 text-red-400">
+          <Activity className="h-6 w-6" />
+        </span>
+        <div>
+          <p className="text-sm font-semibold text-white">Analytics unavailable</p>
+          <p className="mt-1 text-xs text-ink-muted">{error}</p>
+        </div>
+        <button
+          onClick={() => fetchAnalytics()}
+          className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2.5 text-xs font-black text-black transition hover:bg-[#b8f52b]"
+        >
+          <RefreshCw className="h-3.5 w-3.5" /> Retry
+        </button>
+      </div>
+    );
+  }
+const hasData = !loading && (data.totalProfiles > 0 || data.totalViews > 0);
 
   return (
-    <div className="space-y-6">
-      {/* Top Header & Range Controls */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#0A0A0B]/80 backdrop-blur-xl p-5 rounded-2xl border border-white/[0.08] shadow-xl">
+    <div className="space-y-6 animate-page-in">
+      {/* Header + range control */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <div className="flex items-center gap-3">
-            <h2 className="text-base font-black tracking-tight text-white flex items-center gap-2">
-              Platform Analytics & Master Insights
-            </h2>
-            <span className="text-[10px] bg-[#C6FF3D]/10 text-[#C6FF3D] border border-[#C6FF3D]/25 py-0.5 px-2.5 rounded-full font-bold font-mono uppercase tracking-wider">
-              360° Control Engine
-            </span>
-          </div>
-          <p className="text-xs text-ink-muted mt-1 leading-relaxed">
-            Full-spectrum telemetry across user acquisition, revenue volume, AI toolkit consumption, sports distribution, and public reach.
+          <h1 className="text-lg font-black tracking-tight text-white sm:text-xl">Platform analytics</h1>
+          <p className="mt-1 text-sm text-ink-muted">
+            Full-spectrum telemetry across reach, signups, revenue, AI, and distribution.
           </p>
         </div>
-
-        {/* Time Range Selector */}
-        <div className="flex items-center gap-2 bg-black/40 p-1 rounded-xl border border-white/[0.08]">
-          {(['7d', '30d', '90d', 'all'] as const).map((range) => (
+        <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-white/[0.03] p-1">
+          {RANGES.map((r) => (
             <button
-              key={range}
-              onClick={() => setTimeRange(range)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold uppercase transition-all cursor-pointer ${
-                timeRange === range
-                  ? 'bg-[#C6FF3D] text-black shadow-md'
-                  : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
+              key={r.key}
+              onClick={() => setRange(r.key)}
+              className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                range === r.key ? "bg-accent text-black" : "text-ink-muted hover:text-white"
               }`}
             >
-              {range}
+              {r.label}
             </button>
           ))}
-          <button
-            onClick={() => fetchAnalytics()}
-            disabled={loading}
-            className="p-1.5 text-ink-dim hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors cursor-pointer ml-1"
-            title="Refresh Master Analytics Data"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#C6FF3D]' : ''}`} />
-          </button>
         </div>
       </div>
 
-      {/* Error Banner */}
-      {error && (
-        <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 text-rose-400 text-xs font-mono flex items-center justify-between shadow-lg">
-          <span>{error}</span>
-          <button onClick={() => setError(null)} className="text-rose-400 hover:text-rose-300">
-            <X className="w-4 h-4" />
-          </button>
+      {/* KPI grid */}
+      {loading ? (
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} className="h-[118px]" />)}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <Kpi
+            icon={<Eye className="h-4 w-4" />}
+            iconCls="bg-accent/10 border-accent/25 text-accent"
+            label="Card views"
+            value={fmtNum(data.totalViews)}
+            sub={`${fmtNum(data.uniqueViewers)} unique viewers`}
+          />
+          <Kpi
+            icon={<MousePointerClick className="h-4 w-4" />}
+            iconCls="bg-sky-500/10 border-sky-500/25 text-sky-400"
+            label="Link clicks"
+            value={fmtNum(data.totalClicks)}
+            sub={`${clickRate}% click-through`}
+          />
+          <Kpi
+            icon={<Users className="h-4 w-4" />}
+            iconCls="bg-emerald-500/10 border-emerald-500/25 text-emerald-400"
+            label="Athlete profiles"
+            value={fmtNum(data.totalProfiles)}
+            sub={`${fmtNum(data.proAthletesCount)} on Pro`}
+          />
+          <Kpi
+            icon={<Sparkles className="h-4 w-4" />}
+            iconCls="bg-purple-500/10 border-purple-500/25 text-purple-400"
+            label="AI generations"
+            value={fmtNum(data.totalAiGenerations)}
+            sub="Toolkit usage"
+          />
+          <Kpi
+            icon={<Wallet className="h-4 w-4" />}
+            iconCls="bg-accent/10 border-accent/25 text-accent"
+            label="Tip revenue"
+            value={fmtUSD(data.totalTipsCents)}
+            sub="Succeeded tips"
+          />
+          <Kpi
+            icon={<Timer className="h-4 w-4" />}
+            iconCls="bg-amber-500/10 border-amber-500/25 text-amber-400"
+            label="Deal value"
+            value={fmtUSD(data.totalNilCents)}
+            sub="Disclosed deals"
+          />
+          <Kpi
+            icon={<Gift className="h-4 w-4" />}
+            iconCls="bg-pink-500/10 border-pink-500/25 text-pink-400"
+            label="Waitlist"
+            value={fmtNum(data.waitlistCount)}
+            sub={`${fmtNum(data.newsletterCount)} newsletter leads`}
+          />
+          <Kpi
+            icon={<Trophy className="h-4 w-4" />}
+            iconCls="bg-emerald-500/10 border-emerald-500/25 text-emerald-400"
+            label="Stripe onboarded"
+            value={fmtNum(data.stripeOnboardedCount)}
+            sub="Connect accounts"
+          />
         </div>
       )}
 
-      {/* Empty State */}
-      {!loading && !hasData && !error && (
-        <div className="bg-[#0A0A0B]/80 backdrop-blur-xl p-12 rounded-2xl border border-white/[0.08] text-center">
-          <Activity className="w-12 h-12 text-ink-dim mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-white mb-2">No Analytics Data Yet</h3>
-          <p className="text-sm text-ink-muted">Platform analytics will appear here once athletes start using their cards.</p>
+      {/* Traffic trend */}
+      <Panel
+        title="Traffic over time"
+        icon={<Activity className="h-4 w-4" />}
+        iconCls="bg-accent/10 border-accent/25 text-accent"
+      >
+        {loading ? (
+          <SkeletonCard className="h-48 p-3" />
+        ) : timeline.length === 0 ? (
+          <div className="flex h-44 flex-col items-center justify-center gap-2 text-center text-ink-muted">
+            <Activity className="h-6 w-6 text-ink-dim" />
+            <p className="text-xs">No traffic recorded in this window yet.</p>
+          </div>
+        ) : (
+          <>
+            <TrafficChart points={timeline} />
+            <div className="mt-2 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <span className="flex items-center gap-1.5 text-xs font-medium text-ink-muted">
+                  <span className="h-2 w-2 rounded-sm bg-accent shadow-[0_0_8px_rgba(198,255,61,0.5)]" />
+                  Views · {fmtNum(data.totalViews)}
+                </span>
+                <span className="flex items-center gap-1.5 text-xs font-medium text-ink-muted">
+                  <span className="h-2 w-2 rounded-sm bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.5)]" />
+                  Clicks · {fmtNum(data.totalClicks)}
+                </span>
+              </div>
+              <span className="text-xs text-ink-dim">
+                {firstDate} → {lastDate}
+              </span>
+            </div>
+          </>
+        )}
+      </Panel>
+{/* Distributions */}
+      {loading ? (
+        <div className="grid gap-6 lg:grid-cols-3">
+          <SkeletonCard className="h-56 lg:col-span-2" />
+          <SkeletonCard className="h-56" />
         </div>
-      )}
-
-      {/* SECTION 1: MASTER KPI OVERVIEW */}
-      {(hasData || loading) && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-[#0A0A0B]/80 backdrop-blur-xl p-5 rounded-2xl border border-white/[0.08] flex items-center space-x-4 shadow-xl">
-            <div className="p-3 bg-[#C6FF3D]/10 text-[#C6FF3D] border border-[#C6FF3D]/20 rounded-xl shadow-md">
-              <Users className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-[10px] font-mono text-ink-muted font-bold uppercase tracking-wider">Total Athletes</p>
-              <h3 className="text-xl font-black text-white font-mono mt-0.5">{data.totalProfiles.toLocaleString()}</h3>
-              <p className="text-[10px] text-ink-dim font-mono mt-0.5">{data.proAthletesCount} Pro Tier Subscribers</p>
-            </div>
-          </div>
-
-          <div className="bg-[#0A0A0B]/80 backdrop-blur-xl p-5 rounded-2xl border border-white/[0.08] flex items-center space-x-4 shadow-xl">
-            <div className="p-3 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl shadow-md">
-              <DollarSign className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-[10px] font-mono text-ink-muted font-bold uppercase tracking-wider">Fan Tips Revenue</p>
-              <h3 className="text-xl font-black text-[#C6FF3D] font-mono mt-0.5">{formatUSD(data.totalTipsCents)}</h3>
-              <p className="text-[10px] text-ink-dim font-mono mt-0.5">{data.stripeOnboardedCount} Stripe Onboarded</p>
-            </div>
-          </div>
-
-          <div className="bg-[#0A0A0B]/80 backdrop-blur-xl p-5 rounded-2xl border border-white/[0.08] flex items-center space-x-4 shadow-xl">
-            <div className="p-3 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-xl shadow-md">
-              <Zap className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-[10px] font-mono text-ink-muted font-bold uppercase tracking-wider">AI Toolkit Generations</p>
-              <h3 className="text-xl font-black text-white font-mono mt-0.5">{data.totalAiGenerations.toLocaleString()}</h3>
-              <p className="text-[10px] text-ink-dim font-mono mt-0.5">Pitch & Bio Engine Active</p>
-            </div>
-          </div>
-
-          <div className="bg-[#0A0A0B]/80 backdrop-blur-xl p-5 rounded-2xl border border-white/[0.08] flex items-center space-x-4 shadow-xl">
-            <div className="p-3 bg-sky-500/10 text-sky-400 border border-sky-500/20 rounded-xl shadow-md">
-              <Mail className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-[10px] font-mono text-ink-muted font-bold uppercase tracking-wider">Waitlist Growth</p>
-              <h3 className="text-xl font-black text-white font-mono mt-0.5">{data.waitlistCount.toLocaleString()}</h3>
-              <p className="text-[10px] text-ink-dim font-mono mt-0.5">{data.newsletterCount} Newsletter Leads</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SECTION 1.5: REFERRAL SYSTEM TELEMETRY */}
-      {(hasData || loading) && data.referralAnalytics && (
-        <div className="bg-[#0A0A0B]/80 backdrop-blur-xl p-6 rounded-2xl border border-white/[0.08] space-y-6 shadow-xl">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/[0.06] pb-4">
-            <div>
-              <h3 className="text-sm font-black text-white flex items-center gap-2 uppercase tracking-wider">
-                <Share2 className="w-4 h-4 text-[#C6FF3D]" /> Referral Engine & Viral Growth Analytics
-              </h3>
-              <p className="text-xs text-ink-muted mt-0.5">Track referral link clicks, qualified profile conversions, and top referrer milestone progress.</p>
-            </div>
-            <span className="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2.5 py-1 rounded-full font-mono font-bold uppercase">
-              6 Months Max Cap Enabled
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-4 bg-black/40 rounded-xl border border-white/[0.06] flex items-center justify-between">
-              <div>
-                <p className="text-[10px] font-mono text-ink-muted font-bold uppercase tracking-wider">Referral Link Clicks</p>
-                <h4 className="text-lg font-black text-white font-mono mt-0.5">{data.referralAnalytics.totalReferralClicks.toLocaleString()}</h4>
-              </div>
-              <span className="text-xs text-sky-400 font-mono font-bold">100% Attributed</span>
-            </div>
-
-            <div className="p-4 bg-black/40 rounded-xl border border-white/[0.06] flex items-center justify-between">
-              <div>
-                <p className="text-[10px] font-mono text-ink-muted font-bold uppercase tracking-wider">Qualified Conversions</p>
-                <h4 className="text-lg font-black text-[#C6FF3D] font-mono mt-0.5">{data.referralAnalytics.completedReferrals}</h4>
-              </div>
-              <span className="text-xs text-[#C6FF3D] font-mono font-bold">Completed & Rewarded</span>
-            </div>
-
-            <div className="p-4 bg-black/40 rounded-xl border border-white/[0.06] flex items-center justify-between">
-              <div>
-                <p className="text-[10px] font-mono text-ink-muted font-bold uppercase tracking-wider">Pending Profile Audits</p>
-                <h4 className="text-lg font-black text-amber-400 font-mono mt-0.5">{data.referralAnalytics.pendingReferrals}</h4>
-              </div>
-              <span className="text-xs text-amber-400 font-mono font-bold">Card Completion Pending</span>
-            </div>
-          </div>
-
-          {/* Top Referral Champions Leaderboard */}
-          {data.referralAnalytics.topReferrerAthletes.length > 0 && (
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center justify-between">
-                <h4 className="text-xs font-mono font-bold text-ink-muted uppercase tracking-wider flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-amber-400" /> Referral Champions Leaderboard
-                </h4>
-                {data.referralAnalytics.topReferrerAthletes.length > 4 && (
-                  <button
-                    onClick={() => setShowAllReferrals(!showAllReferrals)}
-                    className="text-xs font-mono font-bold text-[#C6FF3D] hover:text-[#b0ed2f] flex items-center gap-1 transition-colors cursor-pointer bg-[#C6FF3D]/10 hover:bg-[#C6FF3D]/20 px-2.5 py-1 rounded-lg border border-[#C6FF3D]/20"
-                  >
-                    {showAllReferrals ? (
-                      <>Show Top 4 <ChevronUp className="w-3.5 h-3.5" /></>
-                    ) : (
-                      <>View All ({data.referralAnalytics.topReferrerAthletes.length}) <ChevronDown className="w-3.5 h-3.5" /></>
-                    )}
-                  </button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {(showAllReferrals ? data.referralAnalytics.topReferrerAthletes : data.referralAnalytics.topReferrerAthletes.slice(0, 4)).map((leader, idx) => (
-                  <div 
-                    key={leader.id} 
-                    className="p-3.5 bg-black/40 rounded-xl border border-white/[0.06] flex items-center justify-between hover:border-[#C6FF3D]/30 transition-all overflow-hidden"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <span className={`w-6 h-6 rounded-lg flex items-center justify-center font-mono font-black text-[11px] shrink-0 ${
-                        idx === 0 ? 'bg-amber-400/20 text-amber-400 border border-amber-400/30' :
-                        idx === 1 ? 'bg-slate-300/20 text-slate-200 border border-slate-300/30' :
-                        idx === 2 ? 'bg-amber-700/20 text-amber-500 border border-amber-700/30' :
-                        'bg-white/10 text-white border border-white/10'
-                      }`}>
-                        #{idx + 1}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <h5 className="text-xs font-bold text-white tracking-tight truncate">{leader.full_name}</h5>
-                        <p className="text-[10px] text-ink-muted font-mono truncate">@{leader.username}</p>
-                      </div>
-                    </div>
-                    <div className="text-right shrink-0 ml-2">
-                      <span className="text-xs font-mono font-bold text-[#C6FF3D] block">
-                        {leader.completedCount} referrals
-                      </span>
-                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/5 text-ink-dim">
-                        +{leader.completedCount} Mo Pro
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* SECTION 2: TRAFFIC TIMELINE & ENGAGEMENT METRICS */}
-      {(hasData || loading) && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          <div className="lg:col-span-2 space-y-6">
-            {/* Vector Timeline Chart Card */}
-            <div className="bg-[#0A0A0B]/80 backdrop-blur-xl p-6 rounded-2xl border border-white/[0.08] space-y-5 shadow-2xl">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                <div>
-                  <h3 className="text-sm font-black text-white flex items-center gap-2 uppercase tracking-wider">
-                    <TrendingUp className="w-4 h-4 text-[#C6FF3D]" /> Profile Traffic & Link Click Trends
-                  </h3>
-                  <p className="text-xs text-ink-muted mt-0.5">Aggregated daily engagement across public athlete cards.</p>
-                </div>
-                
-                <div className="flex items-center gap-4 text-xs font-bold uppercase font-mono">
-                  <span className="flex items-center gap-2 text-[#C6FF3D]">
-                    <span className="w-2.5 h-2.5 bg-[#C6FF3D] rounded-sm inline-block shadow-[0_0_8px_rgba(198,255,61,0.5)]" /> Views ({totalViews.toLocaleString()})
-                  </span>
-                  <span className="flex items-center gap-2 text-sky-400">
-                    <span className="w-2.5 h-2.5 bg-sky-400 rounded-sm inline-block shadow-[0_0_8px_rgba(56,189,248,0.5)]" /> Clicks ({totalClicks.toLocaleString()})
-                  </span>
-                </div>
-              </div>
-
-              {loading ? (
-                <div className="h-44 flex flex-col items-center justify-center text-ink-muted font-mono text-xs gap-2">
-                  <Loader2 className="w-6 h-6 animate-spin text-[#C6FF3D]" />
-                  Syncing master platform telemetry...
-                </div>
-              ) : data.viewsOverTime.length === 0 ? (
-                <div className="h-44 flex flex-col items-center justify-center text-ink-muted font-mono text-xs gap-2">
-                  <Activity className="w-6 h-6" />
-                  No traffic data recorded yet
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="relative w-full h-44 bg-black/30 rounded-xl p-3 border border-white/[0.04]">
-                    <svg
-                      viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-                      className="w-full h-full"
-                      preserveAspectRatio="none"
-                    >
-                      <line x1={padding} y1={padding} x2={chartWidth - padding} y2={padding} stroke="#1F1F24" strokeWidth="1" />
-                      <line x1={padding} y1={chartHeight / 2} x2={chartWidth - padding} y2={chartHeight / 2} stroke="#1F1F24" strokeWidth="1" strokeDasharray="4 4" />
-                      <line x1={padding} y1={chartHeight - padding} x2={chartWidth - padding} y2={chartHeight - padding} stroke="#27272A" strokeWidth="1" />
-
-                      <path d={viewPath} fill="none" stroke="#C6FF3D" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d={clickPath} fill="none" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-
-                      {viewPoints && viewPoints.map((pt, idx) => {
-                        const [x, y] = pt.split(',');
-                        return (
-                          <circle key={`v-${idx}`} cx={x} cy={y} r="3" fill="#0A0A0B" stroke="#C6FF3D" strokeWidth="2" />
-                        );
-                      })}
-                    </svg>
-                  </div>
-
-                  <div className="flex justify-between px-2 text-[10px] text-ink-dim font-mono uppercase tracking-wider font-bold">
-                    <span>{data.viewsOverTime[0]?.date || 'Start'}</span>
-                    <span>CTR: {clickThroughRate}%</span>
-                    <span>{data.viewsOverTime[data.viewsOverTime.length - 1]?.date || 'Today'}</span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Top Performing Athlete Profiles Card */}
+      ) : hasData ? (
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Left column */}
+          <div className="space-y-6 lg:col-span-2">
             {data.topAthletes.length > 0 && (
-              <div className="bg-[#0A0A0B]/80 backdrop-blur-xl p-6 rounded-2xl border border-white/[0.08] space-y-4 shadow-xl">
-                <h3 className="text-sm font-black text-white flex items-center gap-2 uppercase tracking-wider">
-                  <Award className="w-4 h-4 text-[#C6FF3D]" /> Top Performing Athlete Profiles
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {data.topAthletes.map((athlete, idx) => (
-                    <div key={athlete.athlete_id} className="p-3.5 bg-black/40 rounded-xl border border-white/[0.06] flex items-center justify-between hover:border-[#C6FF3D]/30 transition-all overflow-hidden">
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <span className="w-7 h-7 rounded-lg bg-[#C6FF3D]/10 text-[#C6FF3D] border border-[#C6FF3D]/20 flex items-center justify-center font-mono font-black text-xs shrink-0">
-                          #{idx + 1}
+              <Panel
+                title="Top performing athletes"
+                icon={<Award className="h-4 w-4" />}
+                iconCls="bg-accent/10 border-accent/25 text-accent"
+              >
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {data.topAthletes.map((a, idx) => (
+                    <div
+                      key={a.athlete_id}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-2.5"
+                    >
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span
+                          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-black ${
+                            idx === 0
+                              ? "bg-amber-400/15 text-amber-400 border border-amber-400/30"
+                              : idx === 1
+                                ? "bg-slate-300/15 text-slate-200 border border-slate-300/30"
+                                : idx === 2
+                                  ? "bg-amber-700/15 text-amber-500 border border-amber-700/30"
+                                  : "bg-white/[0.06] text-ink-muted border border-white/[0.08]"
+                          }`}
+                        >
+                          {idx + 1}
                         </span>
-                        <div className="min-w-0 flex-1">
-                          <h5 className="text-xs font-bold text-white tracking-tight truncate">{athlete.full_name}</h5>
-                          <p className="text-[10px] text-ink-muted font-mono truncate">@{athlete.username} • {athlete.sport || 'Athlete'}</p>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-white">{a.full_name}</p>
+                          <p className="truncate text-xs text-ink-muted">
+                            @{a.username || "athlete"} · {a.sport || "N/A"}
+                          </p>
                         </div>
                       </div>
-                      <span className="text-xs font-mono font-bold text-[#C6FF3D] shrink-0 ml-2">
-                        {athlete.views.toLocaleString()} views
-                      </span>
+                      <span className="shrink-0 text-xs font-bold text-accent">{fmtNum(a.views)} views</span>
                     </div>
                   ))}
                 </div>
-              </div>
+              </Panel>
+            )}
+
+            {ref && (
+              <Panel
+                title="Referral Engine"
+                icon={<Share2 className="h-4 w-4" />}
+                iconCls="border-amber-500/25 bg-amber-500/10 text-amber-400"
+              >
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-ink-muted">Link clicks</p>
+                    <p className="mt-1.5 text-xl font-black text-white">{fmtNum(ref.totalReferralClicks)}</p>
+                  </div>
+                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-ink-muted">Qualified</p>
+                    <p className="mt-1.5 text-xl font-black text-accent">{fmtNum(ref.completedReferrals)}</p>
+                  </div>
+                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-ink-muted">Pending</p>
+                    <p className="mt-1.5 text-xl font-black text-amber-400">{fmtNum(ref.pendingReferrals)}</p>
+                  </div>
+                </div>
+
+                {ref.topReferrerAthletes.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-dim">Top referrers</p>
+                    {ref.topReferrerAthletes.slice(0, 5).map((leader) => (
+                      <div
+                        key={leader.id}
+                        className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-2.5"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-white">{leader.full_name}</p>
+                          <p className="truncate text-xs text-ink-muted">@{leader.username}</p>
+                        </div>
+                        <span className="shrink-0 text-xs font-bold text-accent">
+                          {fmtNum(leader.completedCount)} referrals
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Panel>
             )}
           </div>
-
-          {/* Right Column: Sports, Channels & Geographic Telemetry */}
+{/* Right column */}
           <div className="space-y-6">
-            {data.topSports.length > 0 && (
-              <div className="bg-[#0A0A0B]/80 backdrop-blur-xl p-5 rounded-2xl border border-white/[0.08] space-y-4 shadow-xl">
-                <h4 className="text-xs font-mono font-bold text-ink-muted uppercase tracking-wider flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-[#C6FF3D]" /> Sports Demographics
-                </h4>
-                <div className="space-y-2">
-                  {data.topSports.map((s, idx) => (
-                    <div key={idx} className="flex justify-between items-center p-2.5 bg-black/40 rounded-xl border border-white/[0.06]">
-                      <span className="text-xs font-bold text-white font-mono">{s.sport}</span>
-                      <span className="text-[10px] bg-[#C6FF3D]/10 text-[#C6FF3D] border border-[#C6FF3D]/20 px-2 py-0.5 rounded-lg font-mono font-bold">
-                        {s.count} athletes
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {data.topReferrers.length > 0 && (
-              <div className="bg-[#0A0A0B]/80 backdrop-blur-xl p-5 rounded-2xl border border-white/[0.08] space-y-4 shadow-xl overflow-hidden">
-                <h4 className="text-xs font-mono font-bold text-ink-muted uppercase tracking-wider flex items-center gap-2">
-                  <Compass className="w-4 h-4 text-sky-400 shrink-0" /> Acquisition Channels
-                </h4>
+              <Panel
+                title="Acquisition channels"
+                icon={<Compass className="h-4 w-4" />}
+                iconCls="bg-sky-500/10 border-sky-500/25 text-sky-400"
+              >
                 <div className="space-y-2">
                   {data.topReferrers.map((r, idx) => (
-                    <div key={idx} className="flex items-center justify-between gap-3 p-2.5 bg-black/40 rounded-xl border border-white/[0.06] overflow-hidden">
-                      <span 
-                        className="text-xs font-bold text-white font-mono truncate min-w-0 flex-1"
-                        title={r.referrer}
-                      >
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-2.5"
+                    >
+                      <span className="min-w-0 truncate text-xs font-semibold text-white" title={r.referrer}>
                         {r.referrer}
                       </span>
-                      <span className="text-xs text-sky-400 font-mono font-bold shrink-0 text-right whitespace-nowrap">
-                        {r.count.toLocaleString()} hits
-                      </span>
+                      <span className="shrink-0 text-xs font-bold text-sky-400">{fmtNum(r.count)} hits</span>
                     </div>
                   ))}
                 </div>
-              </div>
+              </Panel>
+            )}
+
+            {data.topSports.length > 0 && (
+              <Panel
+                title="Sports distribution"
+                icon={<Trophy className="h-4 w-4" />}
+                iconCls="bg-emerald-500/10 border-emerald-500/25 text-emerald-400"
+              >
+                <div className="space-y-3">
+                  {(() => {
+                    const maxCount = Math.max(...data.topSports.map((s) => s.count), 1);
+                    return data.topSports.map((s) => (
+                      <div key={s.sport}>
+                        <div className="mb-1 flex items-center justify-between text-xs">
+                          <span className="font-semibold text-white">{s.sport}</span>
+                          <span className="text-ink-muted">{fmtNum(s.count)}</span>
+                        </div>
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                          <div
+                            className="h-full rounded-full bg-accent"
+                            style={{ width: `${Math.round((s.count / maxCount) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              </Panel>
             )}
 
             {data.topCountries.length > 0 && (
-              <div className="bg-[#0A0A0B]/80 backdrop-blur-xl p-5 rounded-2xl border border-white/[0.08] space-y-3 shadow-xl">
-                <h4 className="text-xs font-mono font-bold text-ink-muted uppercase tracking-wider flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-emerald-400" /> Geographic Footprint
-                </h4>
+              <Panel
+                title="Geographic footprint"
+                icon={<Globe2 className="h-4 w-4" />}
+                iconCls="bg-purple-500/10 border-purple-500/25 text-purple-400"
+              >
                 <div className="space-y-2">
                   {data.topCountries.map((c, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2.5 bg-black/40 rounded-xl border border-white/[0.06]">
-                      <span className="text-xs font-bold text-white font-mono">{c.country}</span>
-                      <span className="text-xs text-emerald-400 font-mono font-bold">{c.count.toLocaleString()} visits</span>
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-2.5"
+                    >
+                      <span className="text-xs font-semibold text-white">{c.country}</span>
+                      <span className="shrink-0 text-xs font-bold text-purple-400">{fmtNum(c.count)} visits</span>
                     </div>
                   ))}
                 </div>
-              </div>
+              </Panel>
             )}
           </div>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-white/[0.06] bg-[#111113] p-10 text-center">
+          <Activity className="h-6 w-6 text-ink-dim" />
+          <p className="text-sm font-semibold text-white">No platform data yet</p>
+          <p className="text-xs text-ink-muted">
+            Analytics will appear here once athletes create profiles and drive traffic.
+          </p>
         </div>
       )}
     </div>

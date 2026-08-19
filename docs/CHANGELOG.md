@@ -3,6 +3,28 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-19 — Session: Rebuild Platform Analytics in the /dashboard design language
+
+### What changed
+Rewrote the Admin panel's **Platform Analytics** module (`components/admin/god-mode/AnalyticsOverview.tsx`) from scratch so it uses the same visual design language as the athlete `/dashboard` instead of the old god-mode "console" styling. Backend unchanged (`GET /api/admin/analytics?days=`).
+
+- **Design tokens adopted from `/dashboard`:** `bg-bg` page background, `bg-[#111113]` cards with `border-white/[0.06]`, `text-ink-muted`/`text-ink-dim` labels, single accent `#C6FF3D`, `bg-accent` (lime) => `text-black` active segments, `animate-page-in`, and `SkeletonCard` loading placeholders from `components/ui/skeleton` (shimmer pulse).
+- **Layout:** page header with title + subtitle and a 7D / 30D / 90D / All-time segmented control (uppercase pill chips, active = `bg-accent text-black`); 8-card KPI grid (views, clicks, athletes, AI, tips, deals, waitlist, stripe-onboarded) with accent-tinted icon chips and humanised sub-copy; a proportional "Traffic over time" SVG sparkline area/line chart (lime views + sky clicks, gridlines, legend, date range); a 2/3 + 1/3 distribution grid with ranked "Top athletes" cards (gold/silver/bronze rank chips), a Referral Engine panel (3 stat tiles + top referrers), Acquisition channels, Sports distribution (progress bars), and Geographic footprint (flag-tinted rows).
+- **Interaction**: range selector refetches from the server so KPIs + chart match the window; explicit retry on error; empty states for no-data windows; responsive 2-col → 4-col KPIs and stacked mobile layout.
+- Demo screenshots are visual only — no new data is fabricated (previous `Math.random()` views removed in an earlier session).
+
+### Why
+- Requested: build Platform Analytics like the `/dashboard`, using the whole dashboard design language, rather than keeping the existing (separate) style.
+
+### Files touched
+- `components/admin/god-mode/AnalyticsOverview.tsx`
+- `docs/CHANGELOG.md`
+
+### Verified
+- `npx tsc --noEmit` clean (exit 0); `npx eslint components/admin/god-mode/AnalyticsOverview.tsx` 0 errors/0 warnings; `npm run lint` 0 errors (same 15 pre-existing warnings elsewhere, none in admin files).
+
+### Commit
+- `(committed below)`
 ## 2026-08-19 — Session: Rebuild Platform Analytics module (accuracy, performance, UX)
 
 ### What changed
