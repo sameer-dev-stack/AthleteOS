@@ -15,7 +15,7 @@
 - `components/profile-card.tsx`
 
 ### Commit
-- Pending commit hash.
+- `551517a` — "fix(card): disable auto flip-back on mobile"
 
 ## 2026-08-19 — Session: Install Google Tag (gtag.js) on every page
 
