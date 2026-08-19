@@ -156,6 +156,10 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
     if (loop && active) {
       const layer = glowLayerRef.current;
       if (!layer) return;
+      // ── Mobile: sweep loop disabled ─────────────────────
+      // Touch devices get no border glow (see the (pointer: coarse)
+      // block in border-glow.css). Delete this gate to re-enable.
+      if (window.matchMedia?.('(pointer: coarse)').matches) return;
       const speed = 0.000025;
       // Coarse pointers (mobile) get a slower tick so the per-frame
       // custom-property writes — which invalidate the glow layer's styles —

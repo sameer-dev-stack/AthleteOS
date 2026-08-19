@@ -3,6 +3,22 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-19 — Session: Disable border glow on mobile
+
+### What changed
+- **`components/border-glow.css`**: added `@media (pointer: coarse) { .border-glow-layer { display: none; } }` — touch devices get no border glow at all (mesh gradient, edge light). Both spots marked with comments saying to delete the block/gate to re-enable.
+- **`components/border-glow.tsx`**: the loop sweep now bails early on `(pointer: coarse)` so no rAF work happens on mobile either.
+
+### Why
+- User request: border glow should be completely off on mobile; keep the disabled code visible/commented so it can be brought back.
+
+### Files touched
+- `components/border-glow.css`
+- `components/border-glow.tsx`
+
+### Commit
+- Pending commit hash.
+
 ## 2026-08-19 — Session: Disable automatic flip-back on mobile
 
 ### What changed
