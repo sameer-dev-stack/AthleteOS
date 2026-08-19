@@ -4,6 +4,31 @@
 > Format: `## ADR-NNN — Title` · `Status` · `Context` · `Decision` · `Consequences` · `Date`.
 
 ---
+## ADR-068 — Rebuild Platform Analytics: fix broken metrics, exact totals, server-side time window
+
+**Status:** Accepted · 2026-08-19
+
+**Context:**
+The Admin panel's Platform Analytics module rendered inaccurate or fabricated data:
+1. The `GET /api/admin/analytics` handler selected the nonexistent `profiles.stripe_connect_id` column (the real ones are `stripe_account_id` + `stripe_onboarding_complete`). PostgREST errors on an unknown `select` column, so the endpoint returned 500 and the module showed an error.
+2. `topAthletes` injected `Math.random()`-based view counts for athletes with no real views — dishonest analytics.
+3. Traffic totals came from the length of an arbitrary 10k-row fetch, so KPIs undercounted past 10k rows.
+4. The 7d/30d/90d/all selector only sliced the timeline chart client-side; headline KPIs remained all-time, so the range control was misleading.
+
+**Decision:**
+- Select the real Stripe columns and count "Stripe onboarded" as `stripe_account_id && stripe_onboarding_complete`.
+- Use only real view counts for `topAthletes` (`|| 0`), top 10, filtered to `views > 0`.
+- Derive `totalViews`/`totalClicks` from PostgREST exact counts (`count: "exact"`) so they aren't capped by the row window.
+- Add a `?days=` window parameter; scope traffic/activity metrics (timeline, referrers, countries, top athletes) to `created_at >= rangeStart`, while leaving installed-base snapshots (profiles, waitlist, newsletter, revenue, AI, referrals) all-time.
+- Thread `days` from the module's selector through `supabaseApi.getAnalyticsOverview(days)` so KPIs and the chart are consistent.
+
+**Consequences:**
+- The analytics endpoint renders real data instead of a 500.
+- No fabricated view counts anywhere in the module.
+- KPI totals are exact and range-aware; the 7d/30d/90d/all selector now means what it says for traffic metrics.
+- Data still aggregates in Node memory for the timeline/top lists (bounded to the window, up to 20k rows) — acceptable at current scale; a Postgres GROUP BY aggregation is the future step if volume grows.
+
+---
 ## ADR-067 — Harden the Admin Mutation API (validation, rate limits, origin check, self-protection)
 
 **Status:** Accepted · 2026-08-19

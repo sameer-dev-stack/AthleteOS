@@ -3,6 +3,36 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-19 — Session: Rebuild Platform Analytics module (accuracy, performance, UX)
+
+### What changed
+Full audit + rebuild of the Admin panel's **Platform Analytics** module (`AnalyticsOverview.tsx` ↔ `supabaseApi.getAnalyticsOverview()` ↔ `GET /api/admin/analytics`).
+
+- **`app/api/admin/[...adminPath]/route.ts` (analytics handler):**
+  1. **Fixed a broken endpoint**: the profiles `select` referenced `stripe_connect_id`, which does not exist (the real columns are `stripe_account_id` / `stripe_onboarding_complete`). PostgREST rejects an unknown `select` column, so the analytics API was returning a 500 and the module rendered an error. Select now uses the real columns, and `stripeOnboardedCount` counts `stripe_account_id && stripe_onboarding_complete`.
+  2. **Removed fabricated data**: `topAthletes` was filling "views" with `Math.random() * 400 + 50` for athletes with no recorded views. Now uses the real count (`|| 0`), sorts, takes top 10, and filters to only athletes with views `> 0`.
+  3. **Accurate totals above the row cap**: page_views/link_clicks now query `count: "exact"`, so `totalViews` / `totalClicks` are exact even beyond the 20k row window (the returned rows only bound the timeline/top lists).
+  4. **Server-side time window**: the endpoint accepts `?days=` (0 = all time). Traffic/activity metrics (timeline, referrers, countries, top athletes) are scoped to the window via `created_at >= rangeStart`; installed-base snapshots (profiles, waitlist, newsletter, revenue, AI, referrals) remain all-time.
+  5. Row fetch limit raised 10 000 → 20 000.
+- **`components/admin/god-mode/supabase.ts`** — `getAnalyticsOverview()` now accepts an optional `days?: number` and forwards `?days=` to the API.
+- **`components/admin/god-mode/AnalyticsOverview.tsx`** — the 7d/30d/90d/all selector now passes `days` to the API, so the KPI totals and timeline are consistent with the chosen window (previously only the timeline was sliced client-side while totals stayed all-time). Removed the now-redundant client window mapping (kept a defensive `.slice()`).
+
+### Why
+- Requested: rebuild Platform Analytics for accuracy, performance, and UX before adding anything new.
+- The module's core KPIs were broken (500), trapped dishonest/fabricated view counts, and time-range selection didn't affect the headline numbers.
+
+### Files touched
+- `app/api/admin/[...adminPath]/route.ts`
+- `components/admin/god-mode/supabase.ts`
+- `components/admin/god-mode/AnalyticsOverview.tsx`
+- `docs/CHANGELOG.md`
+
+### Verified
+- `npx tsc --noEmit` clean (exit 0); `npm run lint` 0 errors (the same 15 pre-existing warnings, none in admin files).
+- Note: the parallel admin commits in this session (HEAD `ff98149` "add stripe test/live mode env switch") swept these working-tree edits in and pushed them; the changes are confirmed present in `HEAD`.
+
+### Commit
+- Landing commit (parallel-swept working tree): `ff98149` (HEAD).
 ## 2026-08-19 — Session: Harden admin panel mutation API (security audit)
 
 ### What changed
