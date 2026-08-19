@@ -18,7 +18,7 @@
 - `npm run lint` 0 errors; `npx tsc --noEmit` clean; `npm run build` clean.
 
 ### Commit
-- pending (this session)
+- `db2740b` — "fix(cookie-consent): wire Learn more link to privacy policy"
 
 ## 2026-08-19 — Session: Fix Cookie Consent overlap, page scoping, and modal size
 
