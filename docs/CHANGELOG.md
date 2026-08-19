@@ -15,7 +15,7 @@
 - `components/border-glow.tsx`
 
 ### Commit
-- Pending commit hash.
+- `31739f1` — "feat(card): speed up desktop border glow sweep"
 
 ## 2026-08-19 — Session: Disable border glow on mobile
 
