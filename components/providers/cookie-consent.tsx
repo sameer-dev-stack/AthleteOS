@@ -4,6 +4,7 @@ import { CookieIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 
 export function CookieConsent({
   variant = "default",
@@ -12,6 +13,7 @@ export function CookieConsent({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [hide, setHide] = useState(false);
+  const pathname = usePathname();
 
   const accept = () => {
     setIsOpen(false);
@@ -32,6 +34,11 @@ export function CookieConsent({
   };
 
   useEffect(() => {
+    if (pathname !== "/") {
+      setHide(true);
+      setIsOpen(false);
+      return;
+    }
     try {
       setIsOpen(true);
       if (document.cookie.includes("cookieConsent=true")) {
@@ -45,7 +52,9 @@ export function CookieConsent({
     } catch (error) {
       console.error("Error checking cookie consent:", error);
     }
-  }, [variant]);
+  }, [pathname, variant]);
+
+  if (pathname !== "/" || hide) return null;
 
   if (variant === "default") {
     return (
