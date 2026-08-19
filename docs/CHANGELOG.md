@@ -3,6 +3,20 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-19 — Session: Lock page scroll on public card
+
+### What changed
+- **`components/profile-card.tsx`**: while mounted, `document.body`/`document.documentElement` get `overflow: hidden` (restored on unmount), so visitors can no longer scroll past the card. The card already filled the viewport; body scrolling only revealed empty space.
+
+### Why
+- User request: the card page had a side scrollbar and users could scroll down; scrolling should be disabled.
+
+### Files touched
+- `components/profile-card.tsx`
+
+### Commit
+- Pending commit hash.
+
 ## 2026-08-19 — Session: Pause border glow during card flip + slower sweep
 
 ### What changed

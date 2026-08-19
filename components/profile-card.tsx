@@ -1837,6 +1837,20 @@ export function ProfileCard({
     };
   }, []);
 
+  /* ── Lock page scroll while the card is on screen ──
+     The card fills the viewport; body scrolling reveals nothing
+     but empty space, so pin body/html while mounted. */
+  useEffect(() => {
+    const prevBody = document.body.style.overflow;
+    const prevHtml = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevBody;
+      document.documentElement.style.overflow = prevHtml;
+    };
+  }, []);
+
   /* ── Photo carousel ─────────────────────────────── */
   useEffect(() => {
     if (!hasMultiplePhotos) return;
