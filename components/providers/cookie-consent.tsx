@@ -54,51 +54,40 @@ export function CookieConsent({
     }
   }, [pathname, variant]);
 
-  if (pathname !== "/" || hide) return null;
+  if (!pathname || pathname !== "/" || hide) return null;
 
   if (variant === "default") {
     return (
       <div
         className={cn(
-          "fixed z-200 bottom-0 left-0 right-0 p-4 sm:p-0 sm:left-4 sm:bottom-4 w-full sm:max-w-md duration-700",
+          "fixed z-[200] bottom-0 left-0 right-0 w-full px-4 pb-4 sm:left-4 sm:bottom-4 sm:w-auto sm:max-w-sm sm:px-0 sm:pb-0 duration-700",
           !isOpen
             ? "transition-[opacity,transform] translate-y-8 opacity-0"
             : "transition-[opacity,transform] translate-y-0 opacity-100",
           hide && "hidden"
         )}
       >
-        <div className="dark:bg-card bg-bg-elev rounded-lg sm:rounded-md border border-white/[0.06] shadow-lg">
-          <div className="grid gap-2">
-            <div className="border-b border-white/[0.06] h-12 sm:h-14 flex items-center justify-between p-3 sm:p-4">
-              <h1 className="text-base sm:text-lg font-medium text-ink">We use cookies</h1>
-              <CookieIcon className="h-4 w-4 sm:h-[1.2rem] sm:w-[1.2rem] text-ink-muted" />
-            </div>
-            <div className="p-3 sm:p-4">
-              <p className="text-xs sm:text-sm font-normal text-start text-ink-muted">
-                We use cookies to ensure you get the best experience on our
-                website. For more information on how we use cookies, please see
-                our cookie policy.
-                <br />
-                <br />
-                <span className="text-xs">
-                  By clicking{" "}
-                  <span className="font-medium text-ink">Accept</span>, you
-                  agree to our use of cookies.
-                </span>
-                <br />
-                <a href="#" className="text-xs underline text-accent hover:text-accent-soft">
-                  Learn more.
-                </a>
-              </p>
-            </div>
-            <div className="grid grid-cols-2 items-center gap-2 p-3 sm:p-4 sm:py-5 border-t border-white/[0.06] dark:bg-bg-elev/20">
-              <Button onClick={accept} className="w-full">
-                Accept
-              </Button>
-              <Button onClick={decline} variant="outline" className="w-full">
-                Decline
-              </Button>
-            </div>
+        <div className="dark:bg-card bg-bg-elev overflow-hidden rounded-2xl border border-white/[0.06] shadow-lg sm:rounded-xl">
+          <div className="flex items-center justify-between gap-2 border-b border-white/[0.06] px-4 py-3">
+            <h1 className="text-sm font-semibold text-ink">We use cookies</h1>
+            <CookieIcon className="h-4 w-4 text-ink-muted" />
+          </div>
+          <div className="px-4 py-3">
+            <p className="text-xs leading-relaxed text-ink-muted sm:text-[13px]">
+              We use cookies to ensure you get the best experience on our
+              website. By clicking Accept, you agree to our use of cookies.
+            </p>
+            <a href="#" className="mt-1.5 inline-block text-xs underline text-accent hover:text-accent-soft">
+              Learn more.
+            </a>
+          </div>
+          <div className="grid grid-cols-2 gap-2 border-t border-white/[0.06] px-4 py-3 dark:bg-bg-elev/20">
+            <Button onClick={accept} className="!px-3 !py-2 text-xs">
+              Accept
+            </Button>
+            <Button onClick={decline} variant="outline" className="!px-3 !py-2 text-xs">
+              Decline
+            </Button>
           </div>
         </div>
       </div>
@@ -109,7 +98,7 @@ export function CookieConsent({
     return (
       <div
         className={cn(
-          "fixed z-200 bottom-0 left-0 right-0 p-4 sm:p-0 sm:left-4 sm:bottom-4 w-full sm:max-w-md duration-700",
+          "fixed z-[200] bottom-0 left-0 right-0 p-4 sm:p-0 sm:left-4 sm:bottom-4 w-full sm:max-w-md duration-700",
           !isOpen
             ? "transition-[opacity,transform] translate-y-8 opacity-0"
             : "transition-[opacity,transform] translate-y-0 opacity-100",
@@ -149,7 +138,7 @@ export function CookieConsent({
     variant === "minimal" && (
       <div
         className={cn(
-          "fixed z-200 bottom-0 left-0 right-0 p-4 sm:p-0 sm:left-4 sm:bottom-4 w-full sm:max-w-[300px] duration-700",
+          "fixed z-[200] bottom-0 left-0 right-0 p-4 sm:p-0 sm:left-4 sm:bottom-4 w-full sm:max-w-[300px] duration-700",
           !isOpen
             ? "transition-[opacity,transform] translate-y-8 opacity-0"
             : "transition-[opacity,transform] translate-y-0 opacity-100",

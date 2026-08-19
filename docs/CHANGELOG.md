@@ -3,6 +3,27 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-19 — Session: Fix Cookie Consent overlap, page scoping, and modal size
+
+### What changed
+- **`components/providers/cookie-consent.tsx`**:
+  1. **Overlap with everything — fixed.** The banner used `z-200`, which is NOT a valid Tailwind utility (not in config, not in CSS), so the class compiled to nothing and the banner was left at `z-index: auto`. On the landing page, motion-transformed content and the mobile install banner (`z-50`) painted on top of it. All three variants now use `z-[200]` so the banner always stacks above page content.
+  2. **On every page — hardened.** The `pathname !== "/"` guard (added in `f65c2c6`) already restricted SSR rendering to the landing page — verified live: `https://www.nilcard.app/discover` and `/docs` contain 0 cookie-modal matches, root contains 2. The guard is now additionally SSR-safe: `!pathname || pathname !== "/"` so no non-`/` route can ever flash the banner (including hydration-edge cases).
+  3. **Modal too big — compacted.** Default variant reduced from `sm:max-w-md` (448px) to `sm:max-w-sm` (384px) on desktop; on mobile it's now a floating rounded card (inset `px-4 pb-4`) instead of a full-bleed sheet. Header shrank (`text-sm`, `px-4 py-3`, was `h-12/14` with `text-base/lg`), body is a single compact paragraph with no forced `<br/>` spacing, `Learn more.` moved to its own small link, and the Accept/Decline buttons are compact (`!px-3 !py-2 text-xs`).
+
+### Why
+- User-reported: cookie consent (1) overlaps everything, (2) shows on every page (stale deployment / cached page — live SSR was already scoped to `/`), (3) is too large.
+
+### Files touched
+- `components/providers/cookie-consent.tsx`
+
+### Verified
+- `npm run lint` 0 errors; `npx tsc --noEmit` clean; `npm run build` clean ("Compiled successfully in 16.7s", full route table printed).
+- Live SSR probe: cookie text present on `/` (2 matches), absent on `/discover` and `/docs` (0 matches).
+
+### Commit
+- pending (this session)
+
 ## 2026-08-19 — Session: Fix Analytics page mobile skeleton (fixed 3-col grid overflow)
 
 ### What changed

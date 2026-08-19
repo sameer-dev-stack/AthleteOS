@@ -21,6 +21,12 @@ Each renders `{children}` unchanged. Metadata lives in the layout (not the clien
 
 ---
 
+## `<CookieConsent>` — `components/providers/cookie-consent.tsx` [UPDATED 2026-08-19]
+
+Client-only cookie banner, mounted once in `app/layout.tsx` (body). Renders `null` unless `pathname === "/"` (landing page only — SSR-safe guard `!pathname || pathname !== "/"`), so it never appears on any other route. Sets `cookieConsent=true` (30 years, path `/`) on Accept. Variants: `default` (used by layout), `small`, `minimal`.
+
+- **2026-08-19:** `z-200` → `z-[200]` (`z-200` is not a Tailwind utility, so the banner had `z-index: auto` and painted beneath motion-transformed landing content and the mobile install banner). Default variant compacted: smaller header/body padding, `text-xs/13px`, single paragraph (removed forced `<br/>` spacing), `Learn more.` as its own link, compact buttons (`!px-3 !py-2 text-xs`), desktop width `sm:max-w-sm` (was `sm:max-w-md`).
+
 ## `<InfinityLoop>` — `components/loading-ui/infinity.tsx` [NEW 2026-08-15]
 
 An SVG infinity-path loader that animates a continuous dash for long-running/continuous loading states (route transitions, sync, background jobs — no percent-complete value). Source: loading-ui registry (MIT). Inherits `currentColor`; tune `--duration` for speed (default 2s), `className` for size (wider than tall reads best, e.g. `h-12 w-16`). Used in `app/loading.tsx` (route-level loader) with `text-accent`.
