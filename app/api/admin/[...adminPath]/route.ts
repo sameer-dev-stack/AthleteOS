@@ -4,6 +4,7 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { isAdmin } from "@/lib/admin";
 import { z } from "zod";
 import { getStripe } from "@/lib/stripe";
+import { calculateTipPayout, type TipPlan } from "@/lib/tip-payout";
 
 // Initialize Supabase admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -215,19 +216,66 @@ export async function GET(
         if (pError) throw pError;
 
         const { data: deals } = await serviceRoleClient.from("nil_deals").select("athlete_id, deal_value, status").limit(10000);
-        const { data: metrics } = await serviceRoleClient.from("nil_value_metrics").select("profile_id, tips_amount").limit(10000);
+
+        const tipByAthlete: Record<string, { gross: number; count: number; stripeFee: number }> = {};
+        try {
+          const stripe = getStripe();
+          let hasMore = true;
+          let pageToken: string | undefined;
+          const maxPages = 10;
+          let pages = 0;
+
+          while (hasMore && pages < maxPages) {
+            const searchParams: any = {
+              query: "metadata['athleteos_athlete_id']:'exists' AND status:'succeeded'",
+              limit: 100,
+            };
+            if (pageToken) searchParams.page = pageToken;
+
+            const result = await stripe.charges.search(searchParams);
+
+            for (const charge of result.data) {
+              const athleteId = charge.metadata?.athleteos_athlete_id as string | undefined;
+              if (!athleteId) continue;
+
+              if (!tipByAthlete[athleteId]) {
+                tipByAthlete[athleteId] = { gross: 0, count: 0, stripeFee: 0 };
+              }
+
+              tipByAthlete[athleteId].gross += charge.amount;
+              tipByAthlete[athleteId].count += 1;
+
+              const stripeFee = Math.round(charge.amount * 0.029) + 30;
+              tipByAthlete[athleteId].stripeFee += stripeFee;
+            }
+
+            hasMore = result.has_more;
+            pageToken = (result as any).next_page_token;
+            pages++;
+          }
+        } catch (stripeErr) {
+          console.error("[admin] financials stripe query failed", stripeErr);
+        }
 
         const athletes = (profiles || []).map((p: any) => {
           const athleteDeals = (deals || []).filter((d: any) => d.athlete_id === p.id && d.status === "cleared");
           const dealSum = athleteDeals.reduce((sum: number, d: any) => sum + (d.deal_value || 0), 0);
 
-          const athleteMetric = (metrics || []).find((m: any) => m.profile_id === p.id);
-          const tipSum = athleteMetric ? (athleteMetric.tips_amount * 100) : 0;
+          const tipData = tipByAthlete[p.id] || { gross: 0, count: 0, stripeFee: 0 };
+          const plan = (p.plan || "free") as TipPlan;
+
+          const payout = calculateTipPayout(tipData.gross, plan);
+          const platformFee = payout.platformFeeCents;
+          const netTipping = payout.netPayoutCents;
 
           return {
             ...p,
-            tips_total: tipSum,
-            deals_total: dealSum
+            tips_total: tipData.gross,
+            deals_total: dealSum,
+            platform_fee: platformFee,
+            stripe_fee: tipData.stripeFee,
+            net_tipping: netTipping,
+            tips_count: tipData.count,
           };
         });
 
@@ -242,13 +290,18 @@ export async function GET(
 
         const totalTipsCents = athletes.reduce((sum: number, a: any) => sum + a.tips_total, 0);
         const totalDealsCents = athletes.reduce((sum: number, a: any) => sum + a.deals_total, 0);
+        const totalPlatformFee = athletes.reduce((sum: number, a: any) => sum + (a.platform_fee || 0), 0);
+        const totalStripeFee = athletes.reduce((sum: number, a: any) => sum + (a.stripe_fee || 0), 0);
+        const totalNetTipping = athletes.reduce((sum: number, a: any) => sum + (a.net_tipping || 0), 0);
 
         return NextResponse.json({
           athletes: filtered,
           aggregates: {
             totalTips: totalTipsCents,
             totalDealsDisclosed: totalDealsCents,
-            platformFeeRevenue: Math.round(totalTipsCents * 0.05)
+            platformFeeRevenue: totalPlatformFee,
+            stripeFeeTotal: totalStripeFee,
+            netTipping: totalNetTipping,
           }
         });
       }

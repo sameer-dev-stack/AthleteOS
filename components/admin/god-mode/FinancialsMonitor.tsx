@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabaseApi } from './supabase';
 import { Profile } from './types';
-import { DollarSign, Landmark, Briefcase, ArrowUpRight, Download, Loader2, X } from 'lucide-react';
+import { DollarSign, Landmark, Briefcase, CreditCard, Wallet, ArrowUpRight, Download, Loader2, X } from 'lucide-react';
 import { useToast } from '../ui/overlays';
 import { RevenueChart } from './RevenueChart';
 
@@ -9,11 +9,20 @@ export default function FinancialsMonitor() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'complete' | 'incomplete' | 'none'>('all');
-  const [athletes, setAthletes] = useState<(Profile & { tips_total: number; deals_total: number })[]>([]);
+  const [athletes, setAthletes] = useState<(Profile & { 
+    tips_total: number; 
+    deals_total: number; 
+    platform_fee: number;
+    stripe_fee: number;
+    net_tipping: number;
+    tips_count: number;
+  })[]>([]);
   const [aggregates, setAggregates] = useState({
     totalTips: 0,
     totalDealsDisclosed: 0,
-    platformFeeRevenue: 0
+    platformFeeRevenue: 0,
+    stripeFeeTotal: 0,
+    netTipping: 0,
   });
 
   const { showToast } = useToast();
@@ -48,7 +57,7 @@ export default function FinancialsMonitor() {
   // CSV Export
   const handleExportCSV = useCallback(() => {
     if (athletes.length === 0) return;
-    const headers = ['Athlete', 'Email', 'Sport', 'School', 'Plan', 'Stripe Status', 'Tips Total', 'Deals Total', 'Platform Fee'];
+    const headers = ['Athlete', 'Email', 'Sport', 'School', 'Plan', 'Stripe Status', 'Tips Gross', 'Platform Fee', 'Stripe Fee', 'Net Tipping', 'Deals Total'];
     const rows = athletes.map(a => [
       a.full_name || '',
       a.email || '',
@@ -57,8 +66,10 @@ export default function FinancialsMonitor() {
       a.plan || '',
       a.stripe_onboarding_complete ? 'Complete' : 'Incomplete',
       (a.tips_total / 100).toFixed(2),
+      (a.platform_fee / 100).toFixed(2),
+      (a.stripe_fee / 100).toFixed(2),
+      (a.net_tipping / 100).toFixed(2),
       (a.deals_total / 100).toFixed(2),
-      ((a.tips_total * 0.05) / 100).toFixed(2),
     ]);
     const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -81,14 +92,14 @@ export default function FinancialsMonitor() {
       )}
 
       {/* Aggregates Dashboard Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <div className="bg-neutral-900/50 p-4 rounded border border-neutral-800 relative overflow-hidden group">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-neutral-900 rounded text-[#C6FF3D]">
               <Landmark className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">Total Tipping Volume</p>
+              <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">Tips Gross (Stripe)</p>
               <h3 className="text-lg font-black text-white font-mono mt-0.5">{formatCurrency(aggregates.totalTips)}</h3>
             </div>
           </div>
@@ -96,12 +107,36 @@ export default function FinancialsMonitor() {
 
         <div className="bg-neutral-900/50 p-4 rounded border border-neutral-800 relative overflow-hidden group">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-neutral-900 rounded text-[#C6FF3D]">
+            <div className="p-2 bg-neutral-900 rounded text-amber-400">
               <DollarSign className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">Platform Fee Revenue (5%)</p>
-              <h3 className="text-lg font-black text-[#C6FF3D] font-mono mt-0.5">{formatCurrency(aggregates.platformFeeRevenue)}</h3>
+              <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">Platform Fee (20%)</p>
+              <h3 className="text-lg font-black text-amber-400 font-mono mt-0.5">{formatCurrency(aggregates.platformFeeRevenue)}</h3>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-neutral-900/50 p-4 rounded border border-neutral-800 relative overflow-hidden group">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-neutral-900 rounded text-red-400">
+              <CreditCard className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">Stripe Fees</p>
+              <h3 className="text-lg font-black text-red-400 font-mono mt-0.5">{formatCurrency(aggregates.stripeFeeTotal)}</h3>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-neutral-900/50 p-4 rounded border border-neutral-800 relative overflow-hidden group">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-neutral-900 rounded text-emerald-400">
+              <Wallet className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">Net to Athletes</p>
+              <h3 className="text-lg font-black text-emerald-400 font-mono mt-0.5">{formatCurrency(aggregates.netTipping)}</h3>
             </div>
           </div>
         </div>
@@ -112,7 +147,7 @@ export default function FinancialsMonitor() {
               <Briefcase className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">Disclosed Deal Volume</p>
+              <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">Deals Volume</p>
               <h3 className="text-lg font-black text-white font-mono mt-0.5">{formatCurrency(aggregates.totalDealsDisclosed)}</h3>
             </div>
           </div>
@@ -167,28 +202,29 @@ export default function FinancialsMonitor() {
                 <th className="py-3 px-4">Athlete</th>
                 <th className="py-3 px-4">Stripe Connected ID</th>
                 <th className="py-3 px-4">Onboarding</th>
-                <th className="py-3 px-4 text-right">Tipping (Net)</th>
-                <th className="py-3 px-4 text-right">Cleared Deals</th>
+                <th className="py-3 px-4 text-right">Tips (Gross)</th>
                 <th className="py-3 px-4 text-right">Platform Fee</th>
+                <th className="py-3 px-4 text-right">Stripe Fee</th>
+                <th className="py-3 px-4 text-right">Net to Athlete</th>
+                <th className="py-3 px-4 text-right">Deals</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-800/50 text-xs">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-neutral-500 font-mono">
+                  <td colSpan={8} className="py-12 text-center text-neutral-500 font-mono">
                     <Loader2 className="w-5 h-5 animate-spin text-[#C6FF3D] mx-auto mb-2" />
                     Fetching Financial Data...
                   </td>
                 </tr>
               ) : athletes.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-neutral-500 font-mono">
+                  <td colSpan={8} className="py-12 text-center text-neutral-500 font-mono">
                     No athletes matching this Stripe onboarding filter found.
                   </td>
                 </tr>
               ) : (
                 athletes.map((a) => {
-                  const tipsFee = Math.round(a.tips_total * 0.05);
                   return (
                     <tr key={a.id} className="hover:bg-neutral-900/20 transition-colors">
                       <td className="py-3 px-4">
@@ -220,11 +256,17 @@ export default function FinancialsMonitor() {
                       <td className="py-3 px-4 text-right font-bold text-neutral-200 font-mono">
                         {formatCurrency(a.tips_total)}
                       </td>
+                      <td className="py-3 px-4 text-right font-bold text-amber-400 font-mono">
+                        {formatCurrency(a.platform_fee)}
+                      </td>
+                      <td className="py-3 px-4 text-right font-bold text-red-400 font-mono">
+                        {formatCurrency(a.stripe_fee)}
+                      </td>
+                      <td className="py-3 px-4 text-right font-bold text-emerald-400 font-mono">
+                        {formatCurrency(a.net_tipping)}
+                      </td>
                       <td className="py-3 px-4 text-right font-bold text-neutral-200 font-mono">
                         {formatCurrency(a.deals_total)}
-                      </td>
-                      <td className="py-3 px-4 text-right font-bold text-[#C6FF3D] font-mono">
-                        {formatCurrency(tipsFee)}
                       </td>
                     </tr>
                   );

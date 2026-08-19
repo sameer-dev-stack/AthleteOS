@@ -80,11 +80,20 @@ export const supabaseApi = {
   },
 
   async getPayoutData(onboardingStatus?: 'complete' | 'incomplete' | 'none' | 'all'): Promise<{
-    athletes: (Profile & { tips_total: number; deals_total: number })[];
+    athletes: (Profile & { 
+      tips_total: number; 
+      deals_total: number; 
+      platform_fee: number;
+      stripe_fee: number;
+      net_tipping: number;
+      tips_count: number;
+    })[];
     aggregates: {
       totalTips: number;
       totalDealsDisclosed: number;
       platformFeeRevenue: number;
+      stripeFeeTotal: number;
+      netTipping: number;
     };
   }> {
     const query = new URLSearchParams({
