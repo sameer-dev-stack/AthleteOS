@@ -1222,14 +1222,20 @@ const ContactModal = memo(function ContactModal({
       exit={{ opacity: 0 }}
       transition={{ opacity: { duration: 0.15, ease: "easeOut" } }}
       onClick={(e) => e.stopPropagation()}
-      className="absolute inset-0 z-30 flex flex-col justify-center gap-5 p-5 rounded-[18.5px]"
+      className="fixed inset-0 z-30 flex items-center justify-center p-5"
       style={{
         background: "rgba(10,10,14,0.96)",
         transform: "translateZ(0)",
         willChange: "transform",
       }}
     >
-      <div>
+      <div
+        className="w-full max-w-[360px] rounded-[18.5px] border p-5"
+        style={{
+          background: "#0d0d12",
+          borderColor: "rgba(255,255,255,0.07)",
+        }}
+      >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Mail className="h-3.5 w-3.5" style={{ color: accent }} />

@@ -3,6 +3,20 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-19 — Session: Fix Contact modal full-viewport stretch on desktop
+
+### What changed
+- **`components/profile-card.tsx`**: the `ContactModal` was portaled to `document.body` with `absolute inset-0` and no width cap, so on desktop/large viewports it resolved against the viewport and stretched to 100vw (stretched buttons, misaligned X, blank space). Now it uses the same pattern as the tip modals: `fixed inset-0 z-30 flex items-center justify-center p-5` scrim with a centered `max-w-[360px]` rounded panel (`#0d0d12` + hairline border), matching the card width and radius.
+
+### Why
+- User-reported: opening Contact Details on desktop breaks out of the card frame and spans the full viewport width.
+
+### Files touched
+- `components/profile-card.tsx`
+
+### Commit
+- `Pending commit hash` — "fix(card): constrain contact modal to card width on desktop"
+
 ## 2026-08-19 — Session: Digital Card Blueprint
 
 ### What changed
