@@ -17,7 +17,7 @@
 - `components/border-glow.tsx`
 
 ### Commit
-- Pending commit hash.
+- `c56d225` — "perf(card): disable border glow on mobile"
 
 ## 2026-08-19 — Session: Disable automatic flip-back on mobile
 
