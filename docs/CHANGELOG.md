@@ -3,6 +3,20 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-19 — Session: Digital Card Blueprint
+
+### What changed
+- **`Blueprint.md`** (repo root): new full-stack blueprint for the NIL Card. Covers what the card is, the tech stack, the component architecture tree, data flow, theming (`lib/themes.ts` presets + CSS custom properties), the visual layer stack (z-order), the BorderGlow system, the ReflectiveCard material, the mobile/desktop divergence map, the flip system, interactions/monetization, performance rules, and the editing guide + file map.
+
+### Why
+- User request: "I need you to give me the full stack of our digital card, like how to design everything. I wanted Blueprint.md for the digital Card."
+
+### Files touched
+- `Blueprint.md` (new)
+
+### Commit
+- `Pending commit hash` — "docs: add NIL Card blueprint"
+
 ## 2026-08-19 — Session: Speed up desktop border glow
 
 ### What changed
