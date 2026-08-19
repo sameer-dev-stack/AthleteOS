@@ -207,5 +207,31 @@ export const supabaseApi = {
       body: JSON.stringify({ flag, enabled })
     });
     return handleResponse(res);
+  },
+
+  async getRevenueData(): Promise<{
+    tips: {
+      grossCents: number;
+      platformFeeCents: number;
+      stripeFeeCents: number;
+      netToAthletesCents: number;
+      freePlanGrossCents: number;
+      proPlanGrossCents: number;
+      count: number;
+    };
+    subscriptions: {
+      grossCents: number;
+      stripeFeeCents: number;
+      netRevenueCents: number;
+      activeCount: number;
+    };
+    platform: {
+      netRevenueCents: number;
+      commissionRate: number;
+      note: string;
+    };
+  }> {
+    const res = await fetch(`${API_BASE}/revenue`);
+    return handleResponse(res);
   }
 };

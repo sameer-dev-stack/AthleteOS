@@ -3,6 +3,7 @@ import { supabaseApi } from './supabase';
 import { Profile } from './types';
 import { DollarSign, Landmark, Briefcase, ArrowUpRight, Download, Loader2, X } from 'lucide-react';
 import { useToast } from '../ui/overlays';
+import { RevenueChart } from './RevenueChart';
 
 export default function FinancialsMonitor() {
   const [loading, setLoading] = useState(false);
@@ -117,6 +118,9 @@ export default function FinancialsMonitor() {
           </div>
         </div>
       </div>
+
+      {/* Revenue Breakdown */}
+      <RevenueChart />
 
       {/* Filter and Control Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-neutral-900/50 p-4 rounded border border-neutral-800">

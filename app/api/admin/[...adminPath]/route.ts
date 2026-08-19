@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { isAdmin } from "@/lib/admin";
 import { z } from "zod";
+import { getStripe } from "@/lib/stripe";
 
 // Initialize Supabase admin client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -474,7 +475,97 @@ export async function GET(
     }
   }
 
-  // 7. GET /api/admin/security
+  // 7. GET /api/admin/revenue
+  if (path[0] === "revenue") {
+    try {
+      if (serviceRoleClient) {
+        const [tipsResult, profilesResult] = await Promise.all([
+          serviceRoleClient.from("tips").select("amount, platform_fee, stripe_fee, net_amount, status, created_at").eq("status", "succeeded"),
+          serviceRoleClient.from("profiles").select("id, plan, stripe_subscription_id").not("stripe_subscription_id", "is", null),
+        ]);
+
+        const tips = tipsResult.data || [];
+        const profiles = profilesResult.data || [];
+
+        const totalTipsGross = tips.reduce((sum, t: any) => sum + (t.amount || 0), 0);
+        const totalPlatformFee = tips.reduce((sum, t: any) => sum + (t.platform_fee || 0), 0);
+        const totalStripeFeeTips = tips.reduce((sum, t: any) => sum + (t.stripe_fee || 0), 0);
+        const totalNetToAthletes = tips.reduce((sum, t: any) => sum + (t.net_amount || 0), 0);
+
+        const freePlanTips = tips.filter((t: any) => {
+          const profile = profiles.find((p: any) => p.id === t.athlete_id);
+          return profile?.plan === "free";
+        });
+        const proPlanTips = tips.filter((t: any) => {
+          const profile = profiles.find((p: any) => p.id === t.athlete_id);
+          return profile?.plan === "pro";
+        });
+
+        const freePlanTipsGross = freePlanTips.reduce((sum, t: any) => sum + (t.amount || 0), 0);
+        const proPlanTipsGross = proPlanTips.reduce((sum, t: any) => sum + (t.amount || 0), 0);
+
+        let subscriptionRevenueCents = 0;
+        let subscriptionStripeFeesCents = 0;
+        try {
+          const stripe = getStripe();
+          const subscriptions = await stripe.subscriptions.list({
+            status: "active",
+            limit: 100,
+          });
+
+          for (const sub of subscriptions.data) {
+            const price = sub.items.data[0]?.price;
+            if (!price) continue;
+            const unitAmount = price.unit_amount || 0;
+            const interval = price.recurring?.interval || "month";
+            const quantity = sub.items.data[0]?.quantity || 1;
+
+            if (interval === "year") {
+              subscriptionRevenueCents += unitAmount * quantity;
+            } else if (interval === "month") {
+              subscriptionRevenueCents += unitAmount * quantity;
+            }
+
+            const stripeFee = Math.round(unitAmount * 0.029) + 30;
+            subscriptionStripeFeesCents += stripeFee * quantity;
+          }
+        } catch (stripeErr) {
+          console.error("[admin] revenue stripe query failed", stripeErr);
+        }
+
+        const subscriptionNetRevenue = subscriptionRevenueCents - subscriptionStripeFeesCents;
+        const platformNetRevenue = totalPlatformFee + subscriptionNetRevenue;
+
+        return NextResponse.json({
+          tips: {
+            grossCents: totalTipsGross,
+            platformFeeCents: totalPlatformFee,
+            stripeFeeCents: totalStripeFeeTips,
+            netToAthletesCents: totalNetToAthletes,
+            freePlanGrossCents: freePlanTipsGross,
+            proPlanGrossCents: proPlanTipsGross,
+            count: tips.length,
+          },
+          subscriptions: {
+            grossCents: subscriptionRevenueCents,
+            stripeFeeCents: subscriptionStripeFeesCents,
+            netRevenueCents: subscriptionNetRevenue,
+            activeCount: 0,
+          },
+          platform: {
+            netRevenueCents: platformNetRevenue,
+            commissionRate: 20,
+            note: "Platform takes 20% commission on tips from free-plan athletes only. Pro-plan athletes keep 100% of tips. Transaction fees are passed through to athletes/subscribers; platform does not cover Stripe processing fees.",
+          },
+        });
+      }
+    } catch (error: any) {
+      console.error("[admin] revenue query failed", error.message);
+      return NextResponse.json({ error: "Failed to load revenue data" }, { status: 500 });
+    }
+  }
+
+  // 8. GET /api/admin/security
   if (path[0] === "security") {
     try {
       if (serviceRoleClient) {
@@ -498,7 +589,7 @@ export async function GET(
     }
   }
 
-  // 8. GET /api/admin/audit-logs
+  // 9. GET /api/admin/audit-logs
   if (path[0] === "audit-logs") {
     const page = parseInt(url.searchParams.get("page") || "1", 10);
     const pageSize = parseInt(url.searchParams.get("pageSize") || "15", 10);
@@ -538,7 +629,7 @@ export async function GET(
     }
   }
 
-  // 9. GET /api/admin/platform/health
+  // 10. GET /api/admin/platform/health
   if (path[0] === "platform" && path[1] === "health") {
     try {
       if (serviceRoleClient) {
