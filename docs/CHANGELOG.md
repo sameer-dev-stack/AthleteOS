@@ -33,7 +33,7 @@ Security review of the God Mode /admin panel (auth, RLS, API hardening) surfaced
 - `GET /api/admin/*` remains read-only and was not origin-gated (reads are not state-changing); auth still enforced.
 
 ### Commit
-- `(set on commit)`
+- `8833038` — "refactor(admin): align admin shell with dashboard design system; harden admin API" (route hardening; `is_verified`/`profile_published` fix, self-protection, rate limiting, origin check, removed MOCK_ADMIN_ID)
 ## 2026-08-19 — Session: Rebuild admin panel layout to match dashboard design system
 
 ### What changed
