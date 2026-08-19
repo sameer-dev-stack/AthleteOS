@@ -28,7 +28,8 @@
 - Local prod build (`next start`) + Playwright login as `Admin@nilcard.app`: sidebar `display: flex` (256px) at 1280×720 and `display: none` at 700×900.
 
 ### Commit
-- `PLACEHOLDER` — "fix(css): stop critical stylesheet overriding Tailwind utilities (admin sidebar)"
+- `7560db2` — "fix(css): stop critical stylesheet overriding Tailwind utilities (admin sidebar)"
+- `307ea7e` — "fix(middleware): skip robots.txt and sitemap.xml"
 
 ## 2026-08-19 — Session: Fix Contact modal full-viewport stretch on desktop
 
