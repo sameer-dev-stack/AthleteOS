@@ -39,13 +39,12 @@ export async function initPostHog(): Promise<void> {
       capture_pageview: false,
       capture_pageleave: false,
       autocapture: false,
-      session_recording: false,
       persistence: "localStorage+cookie",
       debug: false,
       loaded: () => {
         instance?.capture("$pageview");
       },
-    } as Parameters<PostHog["init"]>[1]);
+    } as unknown as Parameters<PostHog["init"]>[1]);
   } catch (err) {
     console.error("[posthog] init failed:", err);
   }
