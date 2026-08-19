@@ -9,18 +9,63 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 const serviceRoleClient = supabaseUrl && supabaseKey ? createServiceClient(supabaseUrl, supabaseKey) : null;
 
-const ADMIN_PROFILE_UPDATE_FIELDS = [
-  "full_name", "username", "email", "sport", "school", "position",
-  "bio", "avatar_url", "cover_url", "plan", "role", "suspended",
-] as const;
+// Allowlisted, strictly-typed profile columns an admin may patch. The explicit
+// field schema replaces the previous `z.any()` catch-all so malformed payloads
+// (wrong types, oversized strings, unknown keys) are rejected before they reach
+// the service-role write path — which bypasses RLS entirely.
+const AdminProfileFieldsSchema = z
+  .object({
+    full_name: z.string().trim().max(120).optional(),
+    username: z.string().trim().max(60).regex(/^[a-zA-Z0-9_-]+$/).optional(),
+    email: z.string().trim().email().max(320).optional(),
+    sport: z.string().trim().max(100).optional(),
+    school: z.string().trim().max(160).optional(),
+    position: z.string().trim().max(100).optional(),
+    bio: z.string().trim().max(5000).optional(),
+    avatar_url: z.string().trim().max(2000).optional(),
+    cover_url: z.string().trim().max(2000).optional(),
+    plan: z.enum(["free", "pro"]).optional(),
+    role: z.enum(["user", "admin"]).optional(),
+    suspended: z.boolean().optional(),
+    is_verified: z.boolean().optional(),
+    profile_published: z.boolean().optional(),
+  })
+  .strict();
 
 const AdminProfileUpdateSchema = z.object({
-  fields: z.object(
-    Object.fromEntries(ADMIN_PROFILE_UPDATE_FIELDS.map((f) => [f, z.any().optional()]))
-  ),
+  fields: AdminProfileFieldsSchema,
   adminAction: z.string().max(100).optional(),
   metadata: z.record(z.unknown()).optional(),
 });
+
+// Privileged fields that MUST NOT be changed on an admin's OWN row. Prevents a
+// single compromised session from self-demoting, self-suspending, or re-editing
+// the email that ties the account to the hardcoded admin allowlist.
+const SELF_PROTECTED_FIELDS = ["role", "suspended", "email", "plan"] as const;
+
+// Hosts allowed to issue state-changing admin requests (defense-in-depth CSRF,
+// layered on top of the SameSite session cookie).
+const ALLOWED_ORIGIN_HOSTS = new Set([
+  "localhost",
+  "nilcard.app",
+  "www.nilcard.app",
+  "athlete-os-vert.vercel.app",
+  "athlete-os-sameers-projects-165cb2e7.vercel.app",
+]);
+
+function isAllowedOrigin(request: Request): boolean {
+  const origin = request.headers.get("origin");
+  if (!origin) return true; // non-browser client; cookie auth is still required
+  let hostname: string;
+  try {
+    hostname = new URL(origin).hostname;
+  } catch {
+    return false;
+  }
+  const hostHeader = request.headers.get("host") || "";
+  if (hostname === hostHeader.split(":")[0]) return true; // same-origin request
+  return ALLOWED_ORIGIN_HOSTS.has(hostname);
+}
 
 const AdminDealUpdateSchema = z.object({
   status: z.enum(["pending", "approved", "rejected", "completed", "cleared"]),
@@ -54,8 +99,42 @@ async function verifyAdminAuth() {
   }
 }
 
-// Feature flags are DB-backed (supabase/migrations/20260818_feature_flags.sql)
-const MOCK_ADMIN_ID = "83c283e5-ef8f-4c4f-a255-abc7e66f4970";
+// Resolve the authenticated admin's id strictly. Returns null when the session
+// cannot be resolved — callers fail closed rather than attributing the action to
+// a plausible-looking fallback id.
+async function resolveAdminUserId(): Promise<string | null> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    return user?.id ?? null;
+  } catch (err) {
+    console.error("resolveAdminUserId error:", err);
+    return null;
+  }
+}
+
+// Generous per-admin cap on state-changing admin actions derived from the
+// append-only audit_log (additive; the cap is an abuse backstop, not the primary
+// guard). Mirrors the server-action rate limiter in lib/actions/admin.ts.
+async function checkAdminMutationRateLimit(
+  adminId: string,
+  action: string,
+  totalLimit = 240,
+  actionLimit = 120
+): Promise<boolean> {
+  if (!serviceRoleClient) return true; // env missing: fail open, auth still enforced
+  const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const { data, error } = await serviceRoleClient
+    .from("audit_log")
+    .select("action")
+    .eq("admin_id", adminId)
+    .gte("created_at", since);
+  if (error) return true;
+  const rows = data || [];
+  if (rows.length >= totalLimit) return false;
+  if (rows.filter((r: any) => r.action === action).length >= actionLimit) return false;
+  return true;
+}
 
 export async function GET(
   request: Request,
@@ -499,8 +578,14 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ adminPath: string[] }> }
 ) {
-  const isAuthorized = await verifyAdminAuth();
-  if (!isAuthorized) {
+  if (!(await verifyAdminAuth())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!isAllowedOrigin(request)) {
+    return NextResponse.json({ error: "Cross-origin requests not permitted" }, { status: 403 });
+  }
+  const adminUserId = await resolveAdminUserId();
+  if (!adminUserId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -520,14 +605,25 @@ export async function PATCH(
     }
     const { fields, adminAction, metadata } = parsed.data;
 
-    // Get actual admin user ID from authenticated session
-    let adminUserId = MOCK_ADMIN_ID;
-    try {
-      const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) adminUserId = user.id;
-    } catch (err) {
-      console.warn("Could not get admin user ID, using fallback");
+    if (Object.keys(fields).length === 0) {
+      return NextResponse.json({ error: "No fields provided" }, { status: 400 });
+    }
+
+    // Self-protection: an admin must not be able to demote, suspend, re-plan, or
+    // re-email their own account through the panel — that would let a single
+    // compromised session tamper with the admin boundary or the allowlist-tied email.
+    if (
+      profileId === adminUserId &&
+      SELF_PROTECTED_FIELDS.some((k) => k in fields)
+    ) {
+      return NextResponse.json(
+        { error: "Cannot modify your own privileged fields (role, email, plan, suspended)" },
+        { status: 400 }
+      );
+    }
+
+    if (!(await checkAdminMutationRateLimit(adminUserId, adminAction || "USER_UPDATE"))) {
+      return NextResponse.json({ error: "Too many admin changes. Try again later." }, { status: 429 });
     }
 
     const auditId = "audit-" + crypto.randomUUID();
@@ -575,21 +671,16 @@ export async function PATCH(
     }
     const { status, metadata } = parsed.data;
 
-    // Get actual admin user ID from authenticated session
-    let adminUserId = MOCK_ADMIN_ID;
-    try {
-      const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) adminUserId = user.id;
-    } catch (err) {
-      console.warn("Could not get admin user ID, using fallback");
+    const dealAction = status === "cleared" ? "DEAL_CLEAR" : "DEAL_REJECT";
+    if (!(await checkAdminMutationRateLimit(adminUserId, dealAction))) {
+      return NextResponse.json({ error: "Too many admin changes. Try again later." }, { status: 429 });
     }
 
     const auditId = "audit-" + crypto.randomUUID();
     const newLog = {
       id: auditId,
       admin_id: adminUserId,
-      action: status === "cleared" ? "DEAL_CLEAR" : "DEAL_REJECT",
+      action: dealAction,
       target_type: "deal",
       target_id: dealId,
       metadata: metadata || {},
@@ -623,8 +714,14 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ adminPath: string[] }> }
 ) {
-  const isAuthorized = await verifyAdminAuth();
-  if (!isAuthorized) {
+  if (!(await verifyAdminAuth())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!isAllowedOrigin(request)) {
+    return NextResponse.json({ error: "Cross-origin requests not permitted" }, { status: 403 });
+  }
+  const adminUserId = await resolveAdminUserId();
+  if (!adminUserId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -667,14 +764,8 @@ export async function POST(
       });
     }
 
-    // Get actual admin user ID from authenticated session
-    let adminUserId: string;
-    try {
-      const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      adminUserId = user?.id ?? MOCK_ADMIN_ID;
-    } catch {
-      adminUserId = MOCK_ADMIN_ID;
+    if (!(await checkAdminMutationRateLimit(adminUserId, "FEATURE_FLAG_TOGGLE"))) {
+      return NextResponse.json({ error: "Too many admin changes. Try again later." }, { status: 429 });
     }
 
     const auditId = "audit-" + crypto.randomUUID();

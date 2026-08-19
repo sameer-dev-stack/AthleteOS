@@ -547,26 +547,40 @@ Frontend API client for admin endpoints. Maps god-mode module calls to `/api/adm
 
 ---
 
-## Legacy Admin Components (`components/admin/`)
+## Admin Components (`components/admin/`)
 
 ### `<AdminShell>` — `components/admin/admin-shell.tsx`
-Full admin workspace layout with sidebar navigation and content area. Sidebar has: Logo + brand mark, nav items (Dashboard, Users, Waitlist, Audit, Settings), user card with email and sign out. Main pane renders stat cards (Dashboard), AdminTabs (Users/Waitlist/Audit), or AdminSettings (Settings). Manages active nav state client-side.
+Admin workspace layout using the shared dashboard design system. Composes `AdminSidebar` + `AdminHeader` + tab content area. Manages `activeTab` state client-side and renders god-mode modules per tab.
+
 - **Used by:** `app/admin/page.tsx`
 - **Props:**
   - `user: { email: string; id: string }` — current admin user
   - `stats: { totalUsers: number; waitlistCount: number; newsletterCount: number; activeUsers: number }` — dashboard metrics
 
-### `<AdminTabs>` — `components/admin/admin-tabs.tsx`
-Tab navigation component for the admin dashboard. Switches between Dashboard, Users, Waitlist, Audit Log, and Settings views. Active tab highlighted with accent color. Accepts `initialTab` to set default active tab from parent.
-- **Used by:** `components/admin/admin-shell.tsx`, `app/admin/page.tsx`
-- **Props:** `initialTab?: "dashboard" | "users" | "waitlist" | "audit" | "settings"` (default: "users")
-- **State:** `activeTab`
+### `<AdminSidebar>` — `components/admin/admin-sidebar.tsx`
+Collapsible left sidebar matching the dashboard sidebar pattern. Sections: Management, Revenue, Insights, System. Active tab gets accent highlight + dot indicator. Collapse toggle + user block with initials avatar.
 
-### `<AdminSettings>` — `components/admin/admin-settings.tsx`
-Admin settings panel showing platform status (connected services), admin access info, and quick links to operational dashboards. Accepts optional `user` prop for AdminShell compatibility.
-- **Used by:** `components/admin/admin-tabs.tsx`, `components/admin/admin-shell.tsx`
-- **Props:**
-  - `user?: { email: string; id: string }` — current admin user (optional, shows account info when provided)
+- **Used by:** `components/admin/admin-shell.tsx`
+- **Props:** `activeTab`, `onTabChange`, `userEmail`
+- **Exports:** `adminNavSections` (shared nav config)
+
+### `<AdminHeader>` — `components/admin/admin-header.tsx`
+Sticky header with breadcrumb trail and mobile hamburger → drawer navigation. Matches dashboard header styling and spacing.
+
+- **Used by:** `components/admin/admin-shell.tsx`
+- **Props:** `activeTab`, `onTabChange`
+
+### `<ToastProvider>` / `<ConfirmDialogProvider>` — `components/admin/ui/overlays.tsx`
+Global toast + confirmation dialog context providers used across admin god-mode modules.
+
+- **Used by:** `components/admin/admin-shell.tsx` (wraps entire admin shell)
+
+### `<AdminKeyboardShortcuts>` — `components/admin/ui/keyboard-shortcuts.tsx`
+Keyboard shortcut hints overlay for admin power users.
+
+- **Used by:** `components/admin/admin-shell.tsx`
+
+---
 
 ### `<UserTable>` — `components/admin/user-table.tsx`
 Full user management table with debounced search (email, name, username), server-side pagination (20/page), and inline action dropdown. Actions: view user details (modal), change plan (free/pro/elite), suspend/unsuspend. Mutations call `updateUserPlan()` and `toggleUserStatus()` server actions with optimistic local state updates.

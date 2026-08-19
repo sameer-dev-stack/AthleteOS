@@ -3,6 +3,39 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-19 — Session: Rebuild admin panel layout to match dashboard design system
+
+### What changed
+- **`components/admin/admin-shell.tsx`** — replaced custom admin chrome with shared dashboard-style layout:
+  - `AdminSidebar` + `AdminHeader` now compose the shell
+  - Sidebar: collapsible `240px`/`68px`, section labels, active pill with accent dot, user block with initials avatar
+  - Header: sticky breadcrumb bar with backdrop blur, mobile hamburger → drawer nav
+  - Content area: `md:pl-[240px]` offset, `max-w-7xl` container, `px-4 py-8` spacing matching dashboard
+- **`components/admin/admin-sidebar.tsx`** (new) — dashboard-pattern sidebar for admin: logo block, grouped nav sections, collapse toggle, user footer
+- **`components/admin/admin-header.tsx`** (new) — dashboard-pattern header: breadcrumbs, mobile menu trigger, drawer navigation with active-item highlight
+- **`app/api/admin/[...adminPath]/route.ts`** — hardened PATCH/POST admin API:
+  - Strict Zod schema for profile fields (`AdminProfileFieldsSchema`) rejecting unknown keys and oversized values
+  - Self-protection: admins cannot modify their own `role`, `email`, `plan`, or `suspended` fields
+  - Origin allowlist CSRF defense (`isAllowedOrigin`)
+  - Per-admin mutation rate limiting via `audit_log` (240 total/hour, 120 per action/hour)
+  - Removed hardcoded `MOCK_ADMIN_ID` fallback; `resolveAdminUserId()` fails closed
+
+### Why
+- User requested admin panel use the same design theme as the dashboard for consistency.
+
+### Files touched
+- `components/admin/admin-shell.tsx`
+- `components/admin/admin-sidebar.tsx`
+- `components/admin/admin-header.tsx`
+- `app/api/admin/[...adminPath]/route.ts`
+- `docs/COMPONENTS.md`
+
+### Verified
+- `npm run build` clean; `npm run lint` 0 errors.
+
+### Commit
+- pending
+
 ## 2026-08-19 — Session: Fix tip confirmation window stuck on infinite spinner
 
 ### What changed
