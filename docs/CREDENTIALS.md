@@ -6,6 +6,14 @@
 
 ---
 
+## Analytics — Google Tag (gtag.js)
+
+| Item | Value | Where to find it |
+|------|-------|-----------------|
+| Google Analytics Measurement ID | `G-END1CXF54P` | Google Analytics → Admin → Data Streams. Hardcoded in `app/layout.tsx` via `next/script`. |
+
+---
+
 ## Supabase
 
 | Item | Value | Where to find it |

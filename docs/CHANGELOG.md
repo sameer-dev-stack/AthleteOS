@@ -3,6 +3,22 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-19 — Session: Install Google Tag (gtag.js) on every page
+
+### What changed
+- **`app/layout.tsx`**: added the gtag.js loader (`https://www.googletagmanager.com/gtag/js?id=G-END1CXF54P`) plus the `dataLayer`/`gtag('config')` init script via `next/script` with `strategy="afterInteractive"`, in `<head>` so analytics runs on every route.
+- **`docs/CREDENTIALS.md`**: recorded the GA measurement ID `G-END1CXF54P`.
+
+### Why
+- User request: install the provided Google Tag on the site.
+
+### Files touched
+- `app/layout.tsx`
+- `docs/CREDENTIALS.md`
+
+### Commit
+- Pending commit hash.
+
 ## 2026-08-19 — Session: Lock page scroll on public card
 
 ### What changed
