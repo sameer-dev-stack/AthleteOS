@@ -3,6 +3,20 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-19 — Session: Speed up desktop border glow
+
+### What changed
+- **`components/border-glow.tsx`**: desktop sweep speed `0.000025` → `0.0003` (40 s → ~3.3 s per perimeter lap). Mobile stays disabled via the `(pointer: coarse)` gate.
+
+### Why
+- User request: faster glow animation on desktop; keep mobile disabled.
+
+### Files touched
+- `components/border-glow.tsx`
+
+### Commit
+- Pending commit hash.
+
 ## 2026-08-19 — Session: Disable border glow on mobile
 
 ### What changed
