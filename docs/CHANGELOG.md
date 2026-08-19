@@ -3,6 +3,33 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-19 — Session: Diagnose zero tip earnings (dead Stripe webhook endpoint)
+
+### What changed
+- **Root cause found:** the Stripe webhook endpoint is configured in the Stripe Dashboard (Event Destination "captivating-oasis") to `https://athlete-os-vert.vercel.app/api/stripe/webhook` — a DEAD Vercel deployment URL (`DEPLOYMENT_NOT_FOUND`, confirmed 404). Fan tip Checkout completes, but Stripe's `checkout.session.completed` event 404s and the `tips` row is never created, so the dashboard shows $0.00.
+- **`docs/DEPLOYMENT.md` + `docs/CREDENTIALS.md`:** webhook endpoint corrected to `https://www.nilcard.app/api/stripe/webhook` with an IMPORTANT callout (signing secret unchanged; Stripe auto-retries undelivered events ~3 days so recent tips/subscriptions backfill once healthy).
+- **`app/api/stripe/webhook/route.ts` hardening:**
+  - Tip insert errors were silently swallowed (`if (!insertErr) { ... }` with no else → webhook returned 200, Stripe never retried, zero log evidence). Now logs the error and throws → outer catch writes an `audit_log` error entry and returns 500 so Stripe retries.
+  - `session.payment_intent` now handled in both string and expanded-object forms (was string-only; an object form silently `break`ed out of the branch without recording the tip).
+
+### Why
+- User-reported: tipping flow completes but tip never appears in the dashboard (zero tip earnings).
+
+### Files touched
+- `app/api/stripe/webhook/route.ts`
+- `docs/DEPLOYMENT.md`
+- `docs/CREDENTIALS.md`
+
+### Action required (manual, not code)
+- Stripe Dashboard → Developers → Event Destinations → captivating-oasis → endpoint URL: change to `https://www.nilcard.app/api/stripe/webhook`. Then send a test event and confirm 200 in Vercel function logs.
+
+### Verified
+- `npm run lint` 0 errors; `npx tsc --noEmit` clean; `npm run build` clean.
+- Dead URL confirmed: `https://athlete-os-vert.vercel.app/` → 404.
+
+### Commit
+- pending (this session)
+
 ## 2026-08-19 — Session: Wire Cookie Consent "Learn more." to the privacy policy
 
 ### What changed

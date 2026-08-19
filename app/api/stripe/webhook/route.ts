@@ -168,7 +168,10 @@ export async function POST(request: NextRequest) {
         } else if (athleteId && session.amount_total) {
           // Platform-collected tip: the full amount lands in AthleteOS's own
           // Stripe account. Compute the platform fee & athlete net ourselves.
-          const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : null;
+          const paymentIntentId =
+            typeof session.payment_intent === "string"
+              ? session.payment_intent
+              : (session.payment_intent as { id?: string } | null)?.id ?? null;
           if (!paymentIntentId) break;
           const amount = session.amount_total ?? 0;
 
@@ -202,29 +205,32 @@ export async function POST(request: NextRequest) {
               status: "succeeded",
             });
 
-            if (!insertErr) {
-              try {
-                const { sendTipReceivedEmail } = await import("@/lib/actions/emails");
-                const { data: athlete } = await supabase
-                  .from("profiles")
-                  .select("email, full_name, email_preferences")
-                  .eq("id", athleteId)
-                  .single();
-                if (athlete?.email) {
-                  const prefs = athlete.email_preferences as Record<string, boolean> | null;
-                  if (prefs?.tips !== false && prefs?.earnings !== false) {
-                    const senderName = session.metadata?.sender_name || "Someone";
-                    const netDollars = (payout.netPayoutCents / 100).toFixed(2);
-                    sendTipReceivedEmail(athlete.email, athlete.full_name || "there", senderName, netDollars).catch(() => {});
-                  }
-                }
-              } catch { /* non-blocking */ }
-
-              try {
-                const { checkMilestones } = await import("@/lib/actions/milestones");
-                checkMilestones(athleteId);
-              } catch { /* non-blocking */ }
+            if (insertErr) {
+              console.error("[webhook] tip insert FAILED:", insertErr);
+              throw new Error(`Failed to record tip for athlete ${athleteId}: ${insertErr.message}`);
             }
+
+            try {
+              const { sendTipReceivedEmail } = await import("@/lib/actions/emails");
+              const { data: athlete } = await supabase
+                .from("profiles")
+                .select("email, full_name, email_preferences")
+                .eq("id", athleteId)
+                .single();
+              if (athlete?.email) {
+                const prefs = athlete.email_preferences as Record<string, boolean> | null;
+                if (prefs?.tips !== false && prefs?.earnings !== false) {
+                  const senderName = session.metadata?.sender_name || "Someone";
+                  const netDollars = (payout.netPayoutCents / 100).toFixed(2);
+                  sendTipReceivedEmail(athlete.email, athlete.full_name || "there", senderName, netDollars).catch(() => {});
+                }
+              }
+            } catch { /* non-blocking */ }
+
+            try {
+              const { checkMilestones } = await import("@/lib/actions/milestones");
+              checkMilestones(athleteId);
+            } catch { /* non-blocking */ }
           }
         }
         break;

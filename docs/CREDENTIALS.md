@@ -152,7 +152,7 @@ These must be set in Vercel Dashboard → Settings → Environment Variables for
 | Price ID (Pro) | `price_1TqAqgAhbY1vKIDZfad8S5Uu` — in `.env` as `STRIPE_PRICE_ID_PRO` | Stripe Dashboard → Products → AthleteOS Pro ($14/mo) |
 | Price ID (Elite) | `price_1TqAsAAhbY1vKIDZfpP9XaAn` — in `.env` as `STRIPE_PRICE_ID_ELITE` | Stripe Dashboard → Products → AthleteOS Elite ($29/mo) |
 | Webhook secret | `whsec_jrRisuRZV0wBZqHXOkEFxZO8YlY4YIYx` — in `.env` as `STRIPE_WEBHOOK_SECRET` | Stripe Dashboard → Developers → Event Destinations → captivating-oasis |
-| Webhook endpoint | `https://athlete-os-vert.vercel.app/api/stripe/webhook` | Stripe Dashboard → Developers → Event Destinations |
+| Webhook endpoint | `https://www.nilcard.app/api/stripe/webhook` — **updated 2026-08-19**: old endpoint `https://athlete-os-vert.vercel.app/api/stripe/webhook` was DEAD (tips/subscriptions never processed). Verify in Stripe Dashboard → Developers → Event Destinations |
 | Product ID (Pro) | `prod_UpqXk10SgNGblm` | Stripe Dashboard → Products → AthleteOS Pro |
 | Product ID (Elite) | `prod_UpqZwmGBWCxwea` | Stripe Dashboard → Products → AthleteOS Elite |
 

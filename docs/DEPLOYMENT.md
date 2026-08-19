@@ -314,12 +314,14 @@ To go live:
 
 ## Stripe Webhooks (Production)
 
-Webhook endpoint: `https://athlete-os-vert.vercel.app/api/stripe/webhook`
+Webhook endpoint: `https://www.nilcard.app/api/stripe/webhook`
+
+> **IMPORTANT (2026-08-19):** The old endpoint `https://athlete-os-vert.vercel.app/api/stripe/webhook` is DEAD (Vercel `DEPLOYMENT_NOT_FOUND`). Tips and subscriptions silently never processed while the Stripe Dashboard still pointed there. Update Stripe Dashboard → Developers → Event Destinations → "captivating-oasis" → endpoint URL to `https://www.nilcard.app/api/stripe/webhook`. The signing secret is unchanged. Stripe auto-retries undelivered events for ~3 days, so recent failed tips/subscriptions will backfill once the endpoint is healthy.
 
 **Configured in Stripe Dashboard:**
 - Events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed`
 - Signing secret: `STRIPE_WEBHOOK_SECRET` in Vercel env vars
-- API version: `2024-11-20.acacia`
+- API version: `2026-06-24.dahlia`
 
 **Local development:**
 ```bash
@@ -327,7 +329,7 @@ stripe listen --forward-to http://localhost:3000/api/stripe/webhook
 ```
 
 **Verifying webhook delivery:**
-1. Stripe Dashboard → Developers → Webhooks → athlete-os-vert.vercel.app
+1. Stripe Dashboard → Developers → Event Destinations → captivating-oasis (endpoint must be `https://www.nilcard.app/api/stripe/webhook`)
 2. Click "Send test event" for any event type
 3. Check Vercel function logs for 200 response
 
