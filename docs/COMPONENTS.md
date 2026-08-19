@@ -25,7 +25,7 @@ Each renders `{children}` unchanged. Metadata lives in the layout (not the clien
 
 Client-only cookie banner, mounted once in `app/layout.tsx` (body). Renders `null` unless `pathname === "/"` (landing page only — SSR-safe guard `!pathname || pathname !== "/"`), so it never appears on any other route. Sets `cookieConsent=true` (30 years, path `/`) on Accept. Variants: `default` (used by layout), `small`, `minimal`.
 
-- **2026-08-19:** `z-200` → `z-[200]` (`z-200` is not a Tailwind utility, so the banner had `z-index: auto` and painted beneath motion-transformed landing content and the mobile install banner). Default variant compacted: smaller header/body padding, `text-xs/13px`, single paragraph (removed forced `<br/>` spacing), `Learn more.` as its own link, compact buttons (`!px-3 !py-2 text-xs`), desktop width `sm:max-w-sm` (was `sm:max-w-md`).
+- **2026-08-19:** `z-200` → `z-[200]` (`z-200` is not a Tailwind utility, so the banner had `z-index: auto` and painted beneath motion-transformed landing content and the mobile install banner). Default variant compacted: smaller header/body padding, `text-xs/13px`, single paragraph (removed forced `<br/>` spacing), `Learn more.` as its own link, compact buttons (`!px-3 !py-2 text-xs`), desktop width `sm:max-w-sm` (was `sm:max-w-md`). "Learn more." wired to `/legal/privacy` (was `href="#"`).
 
 ## `<InfinityLoop>` — `components/loading-ui/infinity.tsx` [NEW 2026-08-15]
 

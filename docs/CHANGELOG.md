@@ -3,6 +3,23 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-19 — Session: Wire Cookie Consent "Learn more." to the privacy policy
+
+### What changed
+- **`components/providers/cookie-consent.tsx`**: the default variant's "Learn more." link previously pointed to `href="#"` (dead link). Replaced the `<a>` with `next/link` `<Link href="/legal/privacy">` so clicking it navigates to the privacy policy page (`app/legal/privacy/page.tsx`) with client-side routing.
+
+### Why
+- Follow-up from the cookie consent fix — the user asked to wire the dead link to the real policy page.
+
+### Files touched
+- `components/providers/cookie-consent.tsx`
+
+### Verified
+- `npm run lint` 0 errors; `npx tsc --noEmit` clean; `npm run build` clean.
+
+### Commit
+- pending (this session)
+
 ## 2026-08-19 — Session: Fix Cookie Consent overlap, page scoping, and modal size
 
 ### What changed

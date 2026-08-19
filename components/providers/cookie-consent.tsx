@@ -1,6 +1,7 @@
 "use client";
 
 import { CookieIcon, X } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -77,9 +78,12 @@ export function CookieConsent({
               We use cookies to ensure you get the best experience on our
               website. By clicking Accept, you agree to our use of cookies.
             </p>
-            <a href="#" className="mt-1.5 inline-block text-xs underline text-accent hover:text-accent-soft">
+            <Link
+              href="/legal/privacy"
+              className="mt-1.5 inline-block text-xs underline text-accent hover:text-accent-soft"
+            >
               Learn more.
-            </a>
+            </Link>
           </div>
           <div className="grid grid-cols-2 gap-2 border-t border-white/[0.06] px-4 py-3 dark:bg-bg-elev/20">
             <Button onClick={accept} className="!px-3 !py-2 text-xs">
