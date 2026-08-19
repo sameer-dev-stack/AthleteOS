@@ -17,7 +17,7 @@
 - `components/border-glow.tsx`
 
 ### Commit
-- Pending commit hash.
+- `816341e` — "feat(card): pause border glow during flip with 800ms restart, slow sweep to 10s lap"
 
 ## 2026-08-18 — Session: Revert snake-head glow rework back to scoped glow-layer implementation
 
