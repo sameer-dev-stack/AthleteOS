@@ -15,7 +15,7 @@
 - `Blueprint.md` (new)
 
 ### Commit
-- `Pending commit hash` — "docs: add NIL Card blueprint"
+- `6d413d6` — "docs: add NIL Card blueprint"
 
 ## 2026-08-19 — Session: Speed up desktop border glow
 
