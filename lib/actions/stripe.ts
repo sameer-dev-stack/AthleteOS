@@ -84,7 +84,9 @@ export async function createTipSession(
 
     return { ok: true, url: session.url };
   } catch (err) {
-    console.error("[stripe] createTipSession failed", err);
-    return { ok: false, error: "Failed to create tip session. Please try again." };
+    const message = err instanceof Error ? err.message : "Unknown error";
+    const code = err instanceof Error && 'code' in err ? (err as { code?: string }).code : undefined;
+    console.error("[stripe] createTipSession failed", err, { code });
+    return { ok: false, error: `Failed to create tip session: ${message}${code ? ` (${code})` : ""}` };
   }
 }
