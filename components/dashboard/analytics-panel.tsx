@@ -271,7 +271,7 @@ export function AnalyticsPanel({ athleteId, initialData, themeAccent = "#C6FF3D"
         <div className="p-6 space-y-6">
           {loading && (
             <div className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <Skeleton className="h-20 rounded-lg" />
                 <Skeleton className="h-20 rounded-lg" />
                 <Skeleton className="h-20 rounded-lg" />

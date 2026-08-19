@@ -3,6 +3,25 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-19 — Session: Fix Analytics page mobile skeleton (fixed 3-col grid overflow)
+
+### What changed
+- **`app/dashboard/analytics/loading.tsx`**: the route-level loading skeleton used a fixed `grid grid-cols-3 gap-4`, which forced three stat-card skeletons side-by-side on every viewport. On mobile (≈328px content width after `px-4` page padding) each card shrank to ~98px while its inner placeholder bars were `w-20/16/24` (80–96px), so the cards overflowed/crowded. Grid is now responsive: `grid gap-4 sm:grid-cols-2 lg:grid-cols-3` — full-width stacked cards on mobile, matching the real analytics layout exactly and eliminating layout shift on `sm`/`lg` breakpoints.
+- **`components/dashboard/analytics-panel.tsx`** (client-side loading state): the in-panel skeleton grid used `grid gap-4 sm:grid-cols-3`, which did not match the actual summary-card grid (`sm:grid-cols-2 lg:grid-cols-3`). Updated to the same responsive classes so the loading state lines up with the loaded content on every breakpoint.
+
+### Why
+- User-reported: the Analytics page skeleton looks broken / squeezed on mobile.
+
+### Files touched
+- `app/dashboard/analytics/loading.tsx`
+- `components/dashboard/analytics-panel.tsx`
+
+### Verified
+- `npm run lint` 0 errors; `npx tsc --noEmit` clean; `npm run build` clean (route table printed; `/dashboard/*` auth routes correctly `ƒ Dynamic`).
+
+### Commit
+- pending (this session)
+
 ## 2026-08-19 — Session: Fix blank admin sidebar (critical CSS overriding Tailwind utilities)
 
 ### What changed

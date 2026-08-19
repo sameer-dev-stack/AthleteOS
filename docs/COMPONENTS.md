@@ -1053,6 +1053,9 @@ Full-page skeleton loading state for the dashboard. Mirrors the exact layout of 
 Base skeleton primitives with shimmer animation. Used throughout dashboard for loading states.
 - **Used by:** `components/dashboard/overview.tsx`, `components/dashboard/todays-digest.tsx`, and many more
 
+### `/dashboard/analytics` loading — `app/dashboard/analytics/loading.tsx` + `components/dashboard/analytics-panel.tsx`
+Analytics route skeleton. Both the route-level loader and the client-side panel loading grid are responsive (`grid gap-4 sm:grid-cols-2 lg:grid-cols-3`) to mirror the real summary-card layout on mobile/sm/lg — no overflow or layout shift.
+
 ### `<VerificationBanner>` — `components/verification-banner.tsx`
 Fixed top-center success banner shown after email verification. Reads `?verified=1` from the URL and auto-dismisses after 6s. Single accent `#C6FF3D`.
 - **Used by:** `app/onboarding/page.tsx`, `app/dashboard/page.tsx`
