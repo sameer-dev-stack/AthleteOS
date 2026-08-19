@@ -15,7 +15,7 @@
 - `components/profile-card.tsx`
 
 ### Commit
-- Pending commit hash.
+- `2159498` — "fix(card): lock page scroll while card is mounted"
 
 ## 2026-08-19 — Session: Pause border glow during card flip + slower sweep
 
