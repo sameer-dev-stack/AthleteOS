@@ -29,21 +29,24 @@ export async function initPostHog(): Promise<void> {
 
   if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) return;
 
-  const mod = await import("posthog-js");
-  instance = mod.default;
+  try {
+    const mod = await import("posthog-js");
+    instance = mod.default;
 
-  instance.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
-    // Serve PostHog's lazy static assets (surveys, dead-clicks, web-vitals)
-    // through our origin proxy so we control their cache lifetime instead of
-    // the PostHog CDN's 4h TTL.
-    asset_host: "/proxy/posthog",
-    capture_pageview: false,
-    capture_pageleave: true,
-    autocapture: true,
-    persistence: "localStorage+cookie",
-    loaded: () => {
-      instance?.capture("$pageview");
-    },
-  } as Parameters<PostHog["init"]>[1]);
+    instance.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
+      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
+      asset_host: "/proxy/posthog",
+      capture_pageview: false,
+      capture_pageleave: false,
+      autocapture: false,
+      session_recording: false,
+      persistence: "localStorage+cookie",
+      debug: false,
+      loaded: () => {
+        instance?.capture("$pageview");
+      },
+    } as Parameters<PostHog["init"]>[1]);
+  } catch (err) {
+    console.error("[posthog] init failed:", err);
+  }
 }
