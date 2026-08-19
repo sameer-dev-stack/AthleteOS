@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-const BASE = "https://athlete-os-vert.vercel.app";
+const BASE = "https://www.nilcard.app";
 
 test.describe("User Flow: Landing → Waitlist → Sign Up → Onboarding", () => {
   test("landing page has all critical elements", async ({ page }) => {

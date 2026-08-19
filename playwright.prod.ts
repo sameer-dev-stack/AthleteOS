@@ -9,7 +9,7 @@ module.exports = defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   timeout: 30000,
   use: {
-    baseURL: 'https://athlete-os-vert.vercel.app',
+    baseURL: 'https://www.nilcard.app',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     actionTimeout: 10000,
