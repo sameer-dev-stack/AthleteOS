@@ -20,7 +20,7 @@
 - `npm run lint` 0 errors; `npx tsc --noEmit` clean; `npm run build` clean (route table printed; `/dashboard/*` auth routes correctly `ƒ Dynamic`).
 
 ### Commit
-- pending (this session)
+- `44b2a50` — "fix(analytics): make loading skeleton responsive on mobile"
 
 ## 2026-08-19 — Session: Fix blank admin sidebar (critical CSS overriding Tailwind utilities)
 
