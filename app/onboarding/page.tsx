@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -30,6 +29,7 @@ import confetti from "canvas-confetti";
 import { Logo } from "@/components/logo";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { WelcomeModal } from "@/components/onboarding/welcome-modal";
+import { LiveCardPreview } from "@/components/onboarding/live-card-preview";
 import { trackFunnel } from "@/lib/hooks/use-funnel-tracking";
 import { getStatTemplatesForSport } from "@/lib/sport-stat-templates";
 
@@ -122,118 +122,12 @@ function fireCelebration() {
   frame();
 }
 
-function PreviewCard({
-  avatarUrl,
-  fullName,
-  sport,
-  school,
-  classYear,
-  position,
-  bio,
-  username,
-  instagram,
-  tiktok,
-  stats,
+function StepGrid({
+  children,
 }: {
-  avatarUrl: string | null;
-  fullName: string;
-  sport: string;
-  school: string;
-  classYear: string;
-  position: string;
-  bio: string;
-  username: string;
-  instagram: string;
-  tiktok: string;
-  stats: { label: string; value: string }[];
+  children: React.ReactNode;
 }) {
-  const [failedUrl, setFailedUrl] = useState<string | null>(null);
-  const displayName = fullName || "Your Name";
-
-  const subtitle = [position, sport].filter(Boolean).join(" ");
-  const schoolLine = [school, classYear].filter(Boolean).join(" \u00b7 ");
-  const hasSocials = instagram.trim() || tiktok.trim();
-
-  return (
-    <div className="w-full rounded-2xl border border-white/[0.08] bg-bg-elev overflow-hidden">
-      <div className="relative h-20 bg-gradient-to-br from-accent/20 via-accent/5 to-transparent">
-        <div className="absolute inset-0 opacity-40" style={{
-          backgroundImage: "radial-gradient(circle at 30% 50%, rgba(198,255,61,0.3), transparent 40%), radial-gradient(circle at 80% 30%, rgba(255,255,255,0.06), transparent 50%)",
-        }} />
-      </div>
-
-      <div className="relative px-4 pb-4 -mt-8">
-        <div className="flex items-end gap-3">
-          {avatarUrl && avatarUrl !== failedUrl ? (
-            <Image
-              src={avatarUrl}
-              alt="Avatar"
-              unoptimized
-              width={64}
-              height={64}
-              onError={() => setFailedUrl(avatarUrl)}
-              className="h-16 w-16 rounded-2xl object-cover ring-4 ring-bg-elev"
-            />
-          ) : (
-            <div className="h-16 w-16 rounded-2xl bg-accent/15 ring-4 ring-bg-elev flex items-center justify-center">
-              <span className="text-xl font-bold text-accent">
-                {fullName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase() || "A"}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div className="mt-3">
-          <div className="flex items-center gap-1.5">
-            <h3 className="text-base font-bold text-ink truncate">{displayName}</h3>
-            <Check className="h-3.5 w-3.5 text-accent flex-shrink-0" />
-          </div>
-          {subtitle && (
-            <p className="mt-0.5 text-[11px] text-ink-muted">{subtitle}</p>
-          )}
-          {schoolLine && (
-            <p className="mt-0.5 text-[11px] text-ink-dim">{schoolLine}</p>
-          )}
-        </div>
-
-        {bio && (
-          <p className="mt-2 text-[11px] text-ink-muted line-clamp-2">{bio}</p>
-        )}
-
-        {stats.length > 0 && (
-          <div className="mt-2 grid grid-cols-2 gap-1.5">
-            {stats.slice(0, 4).map((s, i) => (
-              <div key={i} className="rounded-lg border border-white/[0.05] bg-white/[0.04] px-2 py-1.5">
-                <p className="truncate text-[8px] uppercase tracking-wider text-ink-dim">{s.label}</p>
-                <p className="truncate text-xs font-bold text-white">{s.value}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {hasSocials && (
-          <div className="mt-2 flex items-center gap-2">
-            {instagram.trim() && (
-              <div className="flex items-center gap-1 rounded-full bg-white/[0.04] border border-white/[0.06] px-2 py-1">
-                <Instagram className="h-3 w-3 text-pink-400" />
-                <span className="text-[9px] text-ink-dim font-medium">{instagram.replace(/^@/, "")}</span>
-              </div>
-            )}
-            {tiktok.trim() && (
-              <div className="flex items-center gap-1 rounded-full bg-white/[0.04] border border-white/[0.06] px-2 py-1">
-                <Music2 className="h-3 w-3 text-cyan-400" />
-                <span className="text-[9px] text-ink-dim font-medium">{tiktok.replace(/^@/, "")}</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        <p className="mt-3 text-[9px] text-ink-dim text-center font-medium truncate">
-          www.nilcard.app/{username || "yourname"}
-        </p>
-      </div>
-    </div>
-  );
+  return <>{children}</>;
 }
 
 export default function OnboardingPage() {
@@ -585,11 +479,11 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg px-4 pt-8 pb-[max(2rem,env(safe-area-inset-bottom))] sm:pt-12 sm:pb-12">
+    <div className="min-h-screen bg-bg px-4 pt-6 pb-[max(2rem,env(safe-area-inset-bottom))] sm:pt-10 sm:pb-12">
       {showWelcome && <WelcomeModal onDismiss={() => setShowWelcome(false)} />}
-      <div className="w-full max-w-lg">
-        <div className="mb-4 sm:mb-8 text-center">
-          <div className="inline-flex items-center gap-2.5 mb-4 sm:mb-6">
+      <div className="mx-auto w-full max-w-5xl">
+        <div className="mb-5 text-center sm:mb-8">
+          <div className="inline-flex items-center gap-2.5 mb-3 sm:mb-5">
             <Logo />
             <span className="text-lg font-semibold tracking-tight">NIL CARD</span>
           </div>
@@ -636,7 +530,7 @@ export default function OnboardingPage() {
             })}
           </div>
 
-          <div className="mx-auto max-w-xs mb-6 sm:mb-8">
+          <div className="mx-auto max-w-md mb-6 sm:mb-8">
             <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
               <motion.div
                 className="h-full rounded-full bg-accent"
@@ -742,8 +636,9 @@ export default function OnboardingPage() {
               exit="exit"
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">Build your profile</h1>
+              <StepGrid>
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight">Build your profile</h1>
                 <p className="mt-2 text-sm text-ink-muted">
                   Every field is required so your card looks complete.
                 </p>
@@ -916,21 +811,7 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
-              <div className="mt-6">
-                <PreviewCard
-                  avatarUrl={avatarLocalUrl ?? avatarUrl}
-                  fullName={fullName}
-                  sport={sport}
-                  school={school}
-                  classYear={classYear}
-                  position={position}
-                  bio={bio}
-                  username={username}
-                  instagram={instagram}
-                  tiktok={tiktok}
-                  stats={stats}
-                />
-              </div>
+              
 
               {error && (
                 <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
@@ -957,6 +838,7 @@ export default function OnboardingPage() {
                   </button>
                 </div>
               </div>
+              </StepGrid>
             </motion.div>
           )}
 
@@ -970,8 +852,9 @@ export default function OnboardingPage() {
               exit="exit"
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">Connect your socials</h1>
+              <StepGrid>
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight">Connect your socials</h1>
                 <p className="mt-2 text-sm text-ink-muted">
                   Brands look at this first. Add at least one account.
                 </p>
@@ -1012,21 +895,7 @@ export default function OnboardingPage() {
                 <p className="text-[11px] text-ink-dim">You can add more handles later from your dashboard.</p>
               </div>
 
-              <div className="mt-6">
-                <PreviewCard
-                  avatarUrl={avatarLocalUrl ?? avatarUrl}
-                  fullName={fullName}
-                  sport={sport}
-                  school={school}
-                  classYear={classYear}
-                  position={position}
-                  bio={bio}
-                  username={username}
-                  instagram={instagram}
-                  tiktok={tiktok}
-                  stats={stats}
-                />
-              </div>
+              
 
               {error && (
                 <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
@@ -1053,6 +922,7 @@ export default function OnboardingPage() {
                   </button>
                 </div>
               </div>
+              </StepGrid>
             </motion.div>
           )}
 
@@ -1066,8 +936,9 @@ export default function OnboardingPage() {
               exit="exit"
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">Show your numbers</h1>
+              <StepGrid>
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight">Show your numbers</h1>
                 <p className="mt-2 text-sm text-ink-muted">
                   At least one stat is required. Stats appear on the front of your card.
                 </p>
@@ -1153,21 +1024,7 @@ export default function OnboardingPage() {
                 </p>
               )}
 
-              <div className="mt-6">
-                <PreviewCard
-                  avatarUrl={avatarLocalUrl ?? avatarUrl}
-                  fullName={fullName}
-                  sport={sport}
-                  school={school}
-                  classYear={classYear}
-                  position={position}
-                  bio={bio}
-                  username={username}
-                  instagram={instagram}
-                  tiktok={tiktok}
-                  stats={stats}
-                />
-              </div>
+              
 
               {error && (
                 <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
@@ -1194,6 +1051,7 @@ export default function OnboardingPage() {
                   </button>
                 </div>
               </div>
+              </StepGrid>
             </motion.div>
           )}
 
@@ -1207,8 +1065,9 @@ export default function OnboardingPage() {
               exit="exit"
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">Finish your card</h1>
+              <StepGrid>
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight">Finish your card</h1>
                 <p className="mt-2 text-sm text-ink-muted">
                   Links, highlights, and a way to reach you &mdash; all required so nothing is missing.
                 </p>
@@ -1419,6 +1278,7 @@ export default function OnboardingPage() {
                   </p>
                 )}
               </div>
+              </StepGrid>
             </motion.div>
           )}
 
@@ -1481,29 +1341,18 @@ export default function OnboardingPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7 }}
-                className="mt-6"
+                className="mt-8 flex justify-center"
               >
-                <button
-                  onClick={() => {
-                    const url = `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app"}/${username}`;
-                    navigator.clipboard.writeText(url);
-                    setCopiedLink(true);
-                    setTimeout(() => setCopiedLink(false), 2000);
-                  }}
-                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium text-ink transition-all hover:bg-white/[0.06]"
-                >
-                  {copiedLink ? (
-                    <>
-                      <Check className="h-4 w-4 text-accent" />
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-4 w-4" />
-                      Copy link
-                    </>
-                  )}
-                </button>
+                <LiveCardPreview
+                  avatarUrl={avatarLocalUrl ?? avatarUrl}
+                  fullName={fullName}
+                  sport={sport}
+                  school={school}
+                  classYear={classYear}
+                  position={position}
+                  username={username}
+                  stats={stats}
+                />
               </motion.div>
 
               <motion.div
