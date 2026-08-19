@@ -1,99 +1,182 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ShieldCheck, X } from "lucide-react";
+import { CookieIcon, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
-const CONSENT_KEY = "nilcard_cookie_consent";
+export function CookieConsent({
+  variant = "default",
+  onAcceptCallback = () => {},
+  onDeclineCallback = () => {},
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [hide, setHide] = useState(false);
 
-export function CookieConsent() {
-  const [visible, setVisible] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
+  const accept = () => {
+    setIsOpen(false);
+    document.cookie =
+      "cookieConsent=true; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
+    setTimeout(() => {
+      setHide(true);
+    }, 700);
+    onAcceptCallback();
+  };
+
+  const decline = () => {
+    setIsOpen(false);
+    setTimeout(() => {
+      setHide(true);
+    }, 700);
+    onDeclineCallback();
+  };
 
   useEffect(() => {
-    const consent = localStorage.getItem(CONSENT_KEY);
-    if (!consent) {
-      const timer = setTimeout(() => {
-        setVisible(true);
-      }, 1200);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
-  function accept() {
-    localStorage.setItem(CONSENT_KEY, "accepted");
-    setVisible(false);
-  }
-
-  function decline() {
-    localStorage.setItem(CONSENT_KEY, "declined");
-    setVisible(false);
     try {
-      import("posthog-js").then((m) => m.default.opt_out_capturing());
-    } catch { /* posthog not loaded */ }
-  }
+      setIsOpen(true);
+      if (document.cookie.includes("cookieConsent=true")) {
+        if (variant === "default") {
+          setIsOpen(false);
+          setTimeout(() => {
+            setHide(true);
+          }, 700);
+        }
+      }
+    } catch (error) {
+      console.error("Error checking cookie consent:", error);
+    }
+  }, [variant]);
 
-  if (!visible || dismissed) return null;
-
-  return (
-    <div className="fixed bottom-4 inset-x-0 z-50 px-4 md:px-6">
+  if (variant === "default") {
+    return (
       <div
-        className="relative mx-auto max-w-md overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0d0d12] shadow-2xl"
-        style={{ animation: "cookieSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)" }}
+        className={cn(
+          "fixed z-200 bottom-0 left-0 right-0 p-4 sm:p-0 sm:left-4 sm:bottom-4 w-full sm:max-w-md duration-700",
+          !isOpen
+            ? "transition-[opacity,transform] translate-y-8 opacity-0"
+            : "transition-[opacity,transform] translate-y-0 opacity-100",
+          hide && "hidden"
+        )}
       >
-        {/* Accent top line */}
-        <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#C6FF3D]/80 to-transparent opacity-90" />
-
-        <div className="p-5">
-          <div className="flex items-start gap-3.5">
-            {/* Icon */}
-            <div className="relative flex-shrink-0">
-              <div className="h-10 w-10 rounded-xl bg-[#C6FF3D]/[0.07] border border-[#C6FF3D]/[0.15] flex items-center justify-center">
-                <ShieldCheck className="h-5 w-5 text-[#C6FF3D]" />
-              </div>
+        <div className="dark:bg-card bg-bg-elev rounded-lg sm:rounded-md border border-white/[0.06] shadow-lg">
+          <div className="grid gap-2">
+            <div className="border-b border-white/[0.06] h-12 sm:h-14 flex items-center justify-between p-3 sm:p-4">
+              <h1 className="text-base sm:text-lg font-medium text-ink">We use cookies</h1>
+              <CookieIcon className="h-4 w-4 sm:h-[1.2rem] sm:w-[1.2rem] text-ink-muted" />
             </div>
-
-            {/* Content */}
-            <div className="flex-1 min-w-0 pt-0.5">
-              <p className="text-sm font-semibold text-white/95 mb-1 tracking-tight">
-                Privacy & Cookies
-              </p>
-              <p className="text-[11px] text-white/40 leading-relaxed">
-                We use cookies and analytics to improve your experience. Your data is never sold to third parties.
+            <div className="p-3 sm:p-4">
+              <p className="text-xs sm:text-sm font-normal text-start text-ink-muted">
+                We use cookies to ensure you get the best experience on our
+                website. For more information on how we use cookies, please see
+                our cookie policy.
+                <br />
+                <br />
+                <span className="text-xs">
+                  By clicking{" "}
+                  <span className="font-medium text-ink">Accept</span>, you
+                  agree to our use of cookies.
+                </span>
+                <br />
+                <a href="#" className="text-xs underline text-accent hover:text-accent-soft">
+                  Learn more.
+                </a>
               </p>
             </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <button
-                onClick={decline}
-                className="h-8 px-3.5 rounded-lg border border-white/[0.08] bg-white/[0.02] text-white/50 text-[11px] font-semibold transition-all hover:border-white/[0.15] hover:text-white hover:bg-white/[0.05]"
-              >
-                Decline
-              </button>
-              <button
-                onClick={accept}
-                className="h-8 px-3.5 rounded-lg bg-[#C6FF3D] text-[#0A0A0B] text-[11px] font-bold transition-all hover:brightness-110 hover:shadow-[0_0_16px_-4px_rgba(198,255,61,0.35)]"
-              >
+            <div className="grid grid-cols-2 items-center gap-2 p-3 sm:p-4 sm:py-5 border-t border-white/[0.06] dark:bg-bg-elev/20">
+              <Button onClick={accept} className="w-full">
                 Accept
-              </button>
-              <button
-                onClick={() => setDismissed(true)}
-                aria-label="Dismiss"
-                className="h-8 w-8 flex items-center justify-center rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.04] transition-all"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
+              </Button>
+              <Button onClick={decline} variant="outline" className="w-full">
+                Decline
+              </Button>
             </div>
           </div>
         </div>
-
-        <style>{`
-          @keyframes cookieSlideUp {
-            from { opacity: 0; transform: translateY(16px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-          }
-        `}</style>
       </div>
-    </div>
+    );
+  }
+
+  if (variant === "small") {
+    return (
+      <div
+        className={cn(
+          "fixed z-200 bottom-0 left-0 right-0 p-4 sm:p-0 sm:left-4 sm:bottom-4 w-full sm:max-w-md duration-700",
+          !isOpen
+            ? "transition-[opacity,transform] translate-y-8 opacity-0"
+            : "transition-[opacity,transform] translate-y-0 opacity-100",
+          hide && "hidden"
+        )}
+      >
+        <div className="m-0 sm:m-3 dark:bg-card bg-bg-elev border border-white/[0.06] rounded-lg shadow-lg">
+          <div className="flex items-center justify-between p-3">
+            <h1 className="text-base sm:text-lg font-medium text-ink">We use cookies</h1>
+            <CookieIcon className="h-4 w-4 sm:h-[1.2rem] sm:w-[1.2rem] text-ink-muted" />
+          </div>
+          <div className="p-3 -mt-2">
+            <p className="text-xs sm:text-sm text-left text-ink-muted">
+              We use cookies to ensure you get the best experience on our website.
+              For more information on how we use cookies, please see our cookie
+              policy.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 items-center gap-2 p-3 mt-2 border-t border-white/[0.06]">
+            <Button onClick={accept} className="w-full">
+              Accept
+            </Button>
+            <Button
+              onClick={decline}
+              className="w-full"
+              variant="outline"
+            >
+              Decline
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    variant === "minimal" && (
+      <div
+        className={cn(
+          "fixed z-200 bottom-0 left-0 right-0 p-4 sm:p-0 sm:left-4 sm:bottom-4 w-full sm:max-w-[300px] duration-700",
+          !isOpen
+            ? "transition-[opacity,transform] translate-y-8 opacity-0"
+            : "transition-[opacity,transform] translate-y-0 opacity-100",
+          hide && "hidden"
+        )}
+      >
+        <div className="m-0 sm:m-3 dark:bg-card bg-bg-elev border border-white/[0.06] rounded-lg shadow-lg">
+          <div className="p-3 flex items-center justify-between border-b border-white/[0.06]">
+            <div className="flex items-center gap-2">
+              <CookieIcon className="h-3 w-3 sm:h-4 sm:w-4 text-ink-muted" />
+              <span className="text-xs sm:text-sm font-medium text-ink">Cookie Notice</span>
+            </div>
+          </div>
+          <div className="p-3">
+            <p className="text-[11px] sm:text-xs text-ink-muted">
+              We use cookies to enhance your browsing experience.
+            </p>
+            <div className="grid grid-cols-2 items-center gap-2 mt-3">
+              <Button
+                onClick={accept}
+                variant="default"
+                className="w-full"
+              >
+                Accept
+              </Button>
+              <Button
+                onClick={decline}
+                variant="ghost"
+                className="w-full"
+              >
+                Decline
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   );
 }
