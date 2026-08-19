@@ -41,6 +41,9 @@ export async function createTipSession(
     return { ok: false, error: parsed.error.issues[0].message };
   }
 
+  const rawBase = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app").replace(/\/$/, "");
+  const base = rawBase.startsWith("http://") || rawBase.startsWith("https://") ? rawBase : `https://${rawBase}`;
+
   const supabase = getServiceClient();
   const { data: athlete } = await supabase
     .from("profiles")
@@ -69,8 +72,8 @@ export async function createTipSession(
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app"}/${athlete.username}?tip=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.nilcard.app"}/${athlete.username}?tip=cancelled`,
+      success_url: `${base}/${athlete.username}?tip=success`,
+      cancel_url: `${base}/${athlete.username}?tip=cancelled`,
       metadata: {
         athleteos_athlete_id: athleteId,
         sender_email: senderEmail || "",
