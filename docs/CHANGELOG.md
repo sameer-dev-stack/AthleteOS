@@ -20,7 +20,7 @@
 - `next.config.mjs`
 
 ### Commit
-- Pending commit hash.
+- `66ecc33` — "revert: back to scoped glow-layer implementation, drop snake-head rework"
 
 ## 2026-08-18 — Session: Android card performance pass — scope glow CSS-var writes + touch hover gating
 
