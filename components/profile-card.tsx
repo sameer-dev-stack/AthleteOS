@@ -73,6 +73,8 @@ import { isValidPosition, getFallbackGradient } from "@/lib/sport-config";
 
 const AUTO_RETURN_MS = 12_000;
 const PHOTO_INTERVAL_MS = 4_000;
+/** Restart the border glow sweep this long after a flip animation completes. */
+const GLOW_RESTART_DELAY_MS = 800;
 const PLACEHOLDER_RE = /^(test|asdf|foo|bar|baz|aaa|123|000|xxx|yyy|zzz|na|n\/a|none|sample|demo|example|temp|placeholder)$/i;
 
 /** Maps well-known stat keys to lucide icons */
@@ -1690,6 +1692,7 @@ export function ProfileCard({
   /* ── State ──────────────────────────────────────── */
   const [flipped, setFlipped] = useState(false);
   const [isFlipping, setIsFlipping] = useState(false);
+  const [glowPaused, setGlowPaused] = useState(false);
   const [copied, setCopied] = useState(false);
   const [urlCopied, setUrlCopied] = useState(false);
   const [photoIdx, setPhotoIdx] = useState(0);
@@ -1701,6 +1704,7 @@ export function ProfileCard({
   const [tipVerified, setTipVerified] = useState(false);
   const searchParams = useSearchParams();
   const autoReturnRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const glowRestartRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const trackedRef = useRef(false);
   /** Shared webcam stream between front and back ReflectiveCard instances */
   const webcamStreamRef = useRef<MediaStream | null>(null);
@@ -1827,6 +1831,12 @@ export function ProfileCard({
 
   const hasContact = Boolean(profile.contact_email?.trim() || profile.contact_phone?.trim());
 
+  useEffect(() => {
+    return () => {
+      if (glowRestartRef.current) clearTimeout(glowRestartRef.current);
+    };
+  }, []);
+
   /* ── Photo carousel ─────────────────────────────── */
   useEffect(() => {
     if (!hasMultiplePhotos) return;
@@ -1862,6 +1872,8 @@ export function ProfileCard({
   function handleFlip() {
     if (isFlipping) return;
     setIsFlipping(true);
+    setGlowPaused(true);
+    if (glowRestartRef.current) clearTimeout(glowRestartRef.current);
     setFlipped((f) => !f);
     if (hintVisible) setHintVisible(false);
   }
@@ -1939,7 +1951,11 @@ export function ProfileCard({
           role="button"
           aria-label={flipped ? "Flip card to front" : "Flip card to see more"}
           aria-pressed={flipped}
-          onAnimationComplete={() => setIsFlipping(false)}
+          onAnimationComplete={() => {
+            setIsFlipping(false);
+            if (glowRestartRef.current) clearTimeout(glowRestartRef.current);
+            glowRestartRef.current = setTimeout(() => setGlowPaused(false), GLOW_RESTART_DELAY_MS);
+          }}
         >
 
           {/* ═══════════════════════════════════════════
@@ -1961,7 +1977,7 @@ export function ProfileCard({
               glowIntensity={1.2}
               coneSpread={25}
               loop
-              baseActive={!flipped && !isFlipping}
+              baseActive={!flipped && !glowPaused}
               colors={[accent, `${accent}cc`, `${accent}88`]}
               className="w-full h-full"
               style={{
@@ -2057,7 +2073,7 @@ export function ProfileCard({
               glowIntensity={1.2}
               coneSpread={25}
               loop
-              baseActive={flipped && !isFlipping}
+              baseActive={flipped && !glowPaused}
               colors={[accent, `${accent}cc`, `${accent}88`]}
               className="w-full h-full"
               style={{

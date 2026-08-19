@@ -3,6 +3,22 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-19 — Session: Pause border glow during card flip + slower sweep
+
+### What changed
+- **`components/profile-card.tsx`**: added `glowPaused` state; `handleFlip` now pauses both faces' BorderGlow sweep immediately on flip and `onAnimationComplete` re-enables it after `GLOW_RESTART_DELAY_MS` (800 ms), so the sweep never runs mid-rotation and restarts only once the card settles. Replaced `!isFlipping` in both `FaceGlow` `baseActive` props with `!glowPaused`.
+- **`components/border-glow.tsx`**: sweep speed `0.0002` → `0.0001` (5 s → 10 s per perimeter lap).
+
+### Why
+- User request: glow should turn off during the flip and come back a few hundred ms later; the moving border should travel slower.
+
+### Files touched
+- `components/profile-card.tsx`
+- `components/border-glow.tsx`
+
+### Commit
+- Pending commit hash.
+
 ## 2026-08-18 — Session: Revert snake-head glow rework back to scoped glow-layer implementation
 
 ### What changed
