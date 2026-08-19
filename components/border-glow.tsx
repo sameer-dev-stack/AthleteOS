@@ -156,7 +156,7 @@ export const BorderGlow: React.FC<BorderGlowProps> = ({
     if (loop && active) {
       const layer = glowLayerRef.current;
       if (!layer) return;
-      const speed = 0.0001;
+      const speed = 0.000025;
       // Coarse pointers (mobile) get a slower tick so the per-frame
       // custom-property writes — which invalidate the glow layer's styles —
       // happen ~31fps instead of ~50fps. The sweep takes 5s per perimeter,
