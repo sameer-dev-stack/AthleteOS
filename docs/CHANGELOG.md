@@ -7,22 +7,21 @@
 
 ### What changed
 - **`components/profile-card.tsx`** — `?tip=success` confirmation modal:
-  1. **Error/timout message was unreachable (dead UI).** On timeout/error the effect called `setShowTipConfirming(false)` AND `setTipError(...)` in the same commit; the whole modal is gated on `showTipConfirming`, so it unmounted before the error branch could render → modal silently vanished with no message. Now the effect only sets `tipError` (keeps the modal open) so the "Confirmation Issue" card with the message + Refresh button actually displays.
+  1. **Error/timeout message was unreachable (dead UI).** On timeout/error the effect called `setShowTipConfirming(false)` AND `setTipError(...)` in the same commit; the whole modal is gated on `showTipConfirming`, so it unmounted before the error branch could render → modal silently vanished with no message. Now the effect only sets `tipError` (keeps the modal open) so the "Confirmation Issue" card with the message + Refresh button actually displays.
   2. **Poll could restart forever.** The effect depended on the `useSearchParams()` object (`[searchParams, profile.id]`). In Next.js that's a fresh instance each render, so each state update re-ran the effect, cleared the interval, and reset `attempts` → the 12-attempt timeout was never reached → infinite spinner. Rewrote as a self-scheduling `setTimeout` chain keyed on the stable string `searchParams?.get("tip")`, with a `cancelled` guard and cleanup. Removed the now-unused `verifyingRef`.
-- **`lib/posthog.ts`** — the user's commit `d0494fe` introduced a TS2352 type error (`session_recording: false` no longer assignable to `posthog-js` config types), which breaks `tsc`/`next build`/Vercel deploys. Fixed the config cast (`as Parameters<...>` → `as unknown as Parameters<...>`). Runtime behavior unchanged.
+- Note: a transient PostHog TS error surfaced during verification; it was resolved by the user's `dcd3924` (harden init), not by this commit.
 
 ### Why
 - User-reported: after paying, the tip confirmation window spins forever and never shows "Thank You" or any result.
 
 ### Files touched
 - `components/profile-card.tsx`
-- `lib/posthog.ts`
 
 ### Verified
 - `npx tsc --noEmit` clean; `npm run lint` 0 errors; `npm run build` clean (had to clear a stale `.next` build lock first).
 
 ### Commit
-- pending (this session)
+- `4c147de` — "fix(tips): show verification timeout; robust poll without infinite restart"
 
 ## 2026-08-19 — Session: Diagnose zero tip earnings (dead Stripe webhook endpoint)
 
