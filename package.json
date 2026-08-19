@@ -12,6 +12,7 @@
     "gen:og": "node scripts/gen-og.js"
   },
   "dependencies": {
+    "@google-analytics/data": "^7.0.0",
     "@google/generative-ai": "^0.24.1",
     "@sentry/nextjs": "^10.63.0",
     "@supabase/ssr": "^0.12.0",

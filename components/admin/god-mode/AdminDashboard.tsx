@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabaseApi } from "./supabase";
 import { Users, DollarSign, Eye, MousePointerClick, Zap, ClipboardCheck, Activity, TrendingUp } from "lucide-react";
+import { GoogleAnalyticsDashboard } from "./GoogleAnalyticsDashboard";
 
 type KpiCard = {
   label: string;
@@ -199,6 +200,9 @@ export default function AdminDashboard() {
           </span>
         </div>
       </div>
+
+      {/* Google Analytics 4 */}
+      <GoogleAnalyticsDashboard />
     </div>
   );
 }

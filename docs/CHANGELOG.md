@@ -34,6 +34,46 @@ Security review of the God Mode /admin panel (auth, RLS, API hardening) surfaced
 
 ### Commit
 - `8833038` — "refactor(admin): align admin shell with dashboard design system; harden admin API" (route hardening; `is_verified`/`profile_published` fix, self-protection, rate limiting, origin check, removed MOCK_ADMIN_ID)
+## 2026-08-19 — Session: Connect Google Analytics 4 to admin dashboard
+
+### What changed
+- **`lib/ga4.ts`** — new GA4 Data API client using `@google-analytics/data`
+  - `getGa4Overview(days)` fetches active users, sessions, page views, avg session duration, bounce rate
+  - `getGa4Realtime()` fetches current active users
+  - Supports service account key as JSON string or base64-encoded JSON via `GA4_SERVICE_ACCOUNT_KEY` env var
+- **`lib/actions/ga4.ts`** — server actions wrapping GA4 client for admin use
+  - `getGa4Data(days)` — returns overview metrics, top pages, top countries, device breakdown
+  - `getGa4RealtimeUsers()` — returns realtime active user count
+- **`components/admin/god-mode/GoogleAnalyticsDashboard.tsx`** — new GA4 dashboard component
+  - 5 KPI cards: Active Users, Sessions, Page Views, Avg Session, Bounce Rate
+  - Top Pages table with view counts
+  - Top Countries breakdown
+  - Device breakdown with icons
+  - Realtime online users indicator with pulsing dot
+  - Loading skeleton and error state with setup instructions
+- **`components/admin/god-mode/AdminDashboard.tsx`** — integrated GA4 dashboard below system health strip
+
+### Why
+- User requested connecting Google Analytics dashboard to the admin panel for unified platform metrics.
+
+### Required setup
+- Add `GA4_PROPERTY_ID` and `GA4_SERVICE_ACCOUNT_KEY` to `.env.local`
+- Service account key format: either raw JSON string or base64-encoded JSON
+- Service account needs `https://www.googleapis.com/auth/analytics.readonly` permission in GA4
+
+### Files touched
+- `lib/ga4.ts` (new)
+- `lib/actions/ga4.ts` (new)
+- `components/admin/god-mode/GoogleAnalyticsDashboard.tsx` (new)
+- `components/admin/god-mode/AdminDashboard.tsx`
+- `package.json`
+
+### Verified
+- `npm run build` clean; `npm run lint` 0 errors.
+
+### Commit
+- pending
+
 ## 2026-08-19 — Session: Rebuild admin panel layout to match dashboard design system
 
 ### What changed
