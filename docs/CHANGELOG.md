@@ -17,7 +17,7 @@
 - `docs/CREDENTIALS.md`
 
 ### Commit
-- Pending commit hash.
+- `d26f330` — "feat: install Google Tag gtag.js on every page"
 
 ## 2026-08-19 — Session: Lock page scroll on public card
 
