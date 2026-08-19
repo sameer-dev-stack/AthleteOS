@@ -1708,10 +1708,12 @@ export function ProfileCard({
   const [showTipSuccess, setShowTipSuccess] = useState(false);
   const [showTipConfirming, setShowTipConfirming] = useState(false);
   const [tipVerified, setTipVerified] = useState(false);
+  const [tipError, setTipError] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const autoReturnRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const glowRestartRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const trackedRef = useRef(false);
+  const verifyingRef = useRef(false);
   /** Shared webcam stream between front and back ReflectiveCard instances */
   const webcamStreamRef = useRef<MediaStream | null>(null);
 
@@ -1724,31 +1726,48 @@ export function ProfileCard({
   }, [profile.id]);
 
   useEffect(() => {
-    if (searchParams?.get("tip") === "success") {
-      setShowTipConfirming(true);
-      setTipVerified(false);
+    if (searchParams?.get("tip") !== "success") return;
 
-      let attempts = 0;
-      const maxAttempts = 10;
-      const interval = setInterval(async () => {
-        attempts++;
+    setShowTipConfirming(true);
+    setTipVerified(false);
+    setTipError(null);
+
+    let attempts = 0;
+    const maxAttempts = 12;
+    const interval = setInterval(async () => {
+      if (verifyingRef.current) return;
+      verifyingRef.current = true;
+      attempts++;
+
+      try {
         const result = await verifyRecentTip(profile.id);
         if (result.verified) {
           clearInterval(interval);
           setTipVerified(true);
           setShowTipSuccess(true);
           setShowTipConfirming(false);
+          setTipError(null);
           import("canvas-confetti").then((mod) => {
             mod.default({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
           }).catch(() => {});
         } else if (attempts >= maxAttempts) {
           clearInterval(interval);
           setShowTipConfirming(false);
+          setTipError("Verification timed out. Your tip may still be processing.");
         }
-      }, 3000);
+      } catch (err) {
+        clearInterval(interval);
+        setShowTipConfirming(false);
+        setTipError(err instanceof Error ? err.message : "Verification failed. Please refresh to check your tip status.");
+      } finally {
+        verifyingRef.current = false;
+      }
+    }, 3000);
 
-      return () => clearInterval(interval);
-    }
+    return () => {
+      clearInterval(interval);
+      verifyingRef.current = false;
+    };
   }, [searchParams, profile.id]);
 
   /* ── Derived data ───────────────────────────────── */
@@ -2268,16 +2287,39 @@ export function ProfileCard({
               >
                 <X className="h-5 w-5" />
               </button>
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl"
-                style={{ background: `${accent}14`, border: `1px solid ${accent}28` }}
-              >
-                <Loader2 className="h-7 w-7 animate-spin" style={{ color: accent }} />
-              </div>
-              <h3 className="text-xl font-black text-white">Confirming Your Tip</h3>
-              <p className="mt-2 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
-                Payment received! Your tip for{" "}
-                <span className="font-semibold text-white">{firstName}</span> is being confirmed and will appear in their dashboard shortly.
-              </p>
+              {tipError ? (
+                <>
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl"
+                    style={{ background: `rgba(239, 68, 68, 0.14)`, border: `1px solid rgba(239, 68, 68, 0.28)` }}
+                  >
+                    <X className="h-7 w-7 text-red-400" />
+                  </div>
+                  <h3 className="text-xl font-black text-white">Confirmation Issue</h3>
+                  <p className="mt-2 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+                    {tipError}
+                  </p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="mt-5 w-full rounded-2xl py-3 text-xs font-black transition-all hover:brightness-110"
+                    style={{ backgroundColor: accent, color: "#0a0a0e" }}
+                  >
+                    Refresh Page
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl"
+                    style={{ background: `${accent}14`, border: `1px solid ${accent}28` }}
+                  >
+                    <Loader2 className="h-7 w-7 animate-spin" style={{ color: accent }} />
+                  </div>
+                  <h3 className="text-xl font-black text-white">Confirming Your Tip</h3>
+                  <p className="mt-2 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+                    Payment received! Your tip for{" "}
+                    <span className="font-semibold text-white">{firstName}</span> is being confirmed and will appear in their dashboard shortly.
+                  </p>
+                </>
+              )}
             </motion.div>
           </motion.div>
         )}
