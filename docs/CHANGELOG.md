@@ -15,7 +15,7 @@
 - `components/profile-card.tsx`
 
 ### Commit
-- `Pending commit hash` — "fix(card): constrain contact modal to card width on desktop"
+- `8a22d01` — "fix(card): constrain contact modal to card width on desktop"
 
 ## 2026-08-19 — Session: Digital Card Blueprint
 
