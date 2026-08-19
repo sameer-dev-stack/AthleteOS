@@ -67,14 +67,10 @@ export default function AnalyticsOverview() {
     setLoading(true);
     setError(null);
     try {
-      const result = await supabaseApi.getAnalyticsOverview();
-      
-      let daysLimit = 30;
-      if (timeRange === '7d') daysLimit = 7;
-      if (timeRange === '90d') daysLimit = 90;
-      if (timeRange === 'all') daysLimit = 365;
+      const days = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : timeRange === '90d' ? 90 : 0;
+      const result = await supabaseApi.getAnalyticsOverview(days);
 
-      const filteredTimeline = (result.viewsOverTime || []).slice(-daysLimit);
+      const filteredTimeline = (result.viewsOverTime || []).slice(-(days || 365));
 
       setData({
         totalViews: result.totalViews || 0,

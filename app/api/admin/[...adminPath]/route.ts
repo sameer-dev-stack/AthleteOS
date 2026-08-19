@@ -391,16 +391,37 @@ export async function GET(
     }
   }
 
-  // 6. GET /api/admin/analytics
+  // 6. GET /api/admin/analytics?days=30
   if (path[0] === "analytics") {
+    // Traffic / activity metrics respect the requested window (0 = all time);
+    // installed-base snapshots (profiles, waitlist, newsletter, revenue, AI,
+    // referrals) are always all-time.
+    const daysRaw = parseInt(url.searchParams.get("days") || "0", 10);
+    const days = Number.isFinite(daysRaw) && daysRaw > 0 ? Math.min(daysRaw, 1095) : 0;
+    const rangeStart = days ? new Date(Date.now() - days * 86400000).toISOString() : null;
+
     try {
       if (serviceRoleClient) {
-        // Query Page Views & Link Clicks
-        const { data: pageViews } = await serviceRoleClient.from("page_views").select("athlete_id, referrer, country, created_at, viewer_ip_hash").order("created_at", { ascending: false }).limit(10000);
-        const { data: linkClicks } = await serviceRoleClient.from("link_clicks").select("athlete_id, created_at").order("created_at", { ascending: false }).limit(10000);
+        // Windowed traffic. Exact counts come from PostgREST so the KPIs are not
+        // capped by the row limit; the returned rows bound the timeline/top lists.
+        let viewedQuery = serviceRoleClient
+          .from("page_views")
+          .select("athlete_id, referrer, country, created_at, viewer_ip_hash", { count: "exact" })
+          .order("created_at", { ascending: false });
+        if (rangeStart) viewedQuery = viewedQuery.gte("created_at", rangeStart);
+        const { data: pageViews, count: totalViews } = await viewedQuery.limit(20000);
 
-        // Query Profiles & User Growth
-        const { data: profiles } = await serviceRoleClient.from("profiles").select("id, full_name, username, plan, sport, school, is_verified, created_at, stripe_connect_id");
+        let clickedQuery = serviceRoleClient
+          .from("link_clicks")
+          .select("athlete_id, created_at", { count: "exact" })
+          .order("created_at", { ascending: false });
+        if (rangeStart) clickedQuery = clickedQuery.gte("created_at", rangeStart);
+        const { data: linkClicks, count: totalClicks } = await clickedQuery.limit(20000);
+
+        // Query Profiles & User Growth (all-time snapshot)
+        const { data: profiles } = await serviceRoleClient
+          .from("profiles")
+          .select("id, full_name, username, plan, sport, school, is_verified, stripe_account_id, stripe_onboarding_complete, created_at");
         
         // Query Waitlist & Newsletter Count
         const { count: waitlistCount } = await serviceRoleClient.from("waitlist").select("*", { count: "exact", head: true });
@@ -482,15 +503,16 @@ export async function GET(
             full_name: p.full_name || "Anonymous",
             username: p.username || "athlete",
             sport: p.sport || "N/A",
-            views: athleteViewMap[p.id] || Math.floor(Math.random() * 400) + 50
+            views: athleteViewMap[p.id] || 0
           }))
-          .sort((a, b) => b.views - a.views)
-          .slice(0, 5);
+          .sort((a: any, b: any) => b.views - a.views)
+          .slice(0, 10)
+          .filter((p: any) => p.views > 0);
 
         const totalTipsCents = (tips || []).reduce((sum, t) => sum + (t.amount_cents || 0), 0);
         const totalNilCents = (deals || []).reduce((sum, d) => sum + (d.compensation_amount_cents || 0), 0);
         const proAthletesCount = (profiles || []).filter((p: any) => p.plan === "pro").length;
-        const stripeOnboardedCount = (profiles || []).filter((p: any) => p.stripe_connect_id).length;
+        const stripeOnboardedCount = (profiles || []).filter((p: any) => p.stripe_account_id && p.stripe_onboarding_complete).length;
 
         const topReferrers = Object.keys(refMap).map(k => ({ referrer: k, count: refMap[k] })).sort((a, b) => b.count - a.count).slice(0, 5);
         const topCountries = Object.keys(countryMap).map(k => ({ country: k, count: countryMap[k] })).sort((a, b) => b.count - a.count).slice(0, 5);
@@ -498,9 +520,9 @@ export async function GET(
         const viewsOverTime = Object.values(timeMap).sort((a, b) => a.date.localeCompare(b.date));
 
         return NextResponse.json({
-          totalViews: (pageViews || []).length,
+          totalViews: totalViews || 0,
           uniqueViewers: uniqueIPs.size,
-          totalClicks: (linkClicks || []).length,
+          totalClicks: totalClicks || 0,
           totalProfiles: (profiles || []).length,
           proAthletesCount,
           stripeOnboardedCount,

@@ -136,7 +136,7 @@ export const supabaseApi = {
   },
 
   // Analytics Overview
-  async getAnalyticsOverview(): Promise<{
+  async getAnalyticsOverview(days?: number): Promise<{
     totalViews: number;
     uniqueViewers: number;
     totalClicks: number;
@@ -160,7 +160,8 @@ export const supabaseApi = {
     topAthletes?: { athlete_id: string; full_name: string; username: string; sport?: string; views: number }[];
     viewsOverTime: { date: string; views: number; clicks: number }[];
   }> {
-    const res = await fetch(`${API_BASE}/analytics`);
+    const query = days && days > 0 ? `?days=${days}` : '';
+    const res = await fetch(`${API_BASE}/analytics${query}`);
     return handleResponse(res);
   },
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { isAdmin } from "@/lib/admin";
+import { getStripe, getStripeMode } from "@/lib/stripe";
 
 export async function GET() {
   const supabase = await createClient();
@@ -21,11 +22,16 @@ export async function GET() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  // Check env vars (presence only, not values)
+  const mode = getStripeMode();
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
   const envCheck = {
+    STRIPE_MODE: process.env.STRIPE_MODE || mode,
     STRIPE_SECRET_KEY: !!process.env.STRIPE_SECRET_KEY,
+    STRIPE_TEST_SECRET_KEY: !!process.env.STRIPE_TEST_SECRET_KEY,
+    STRIPE_LIVE_SECRET_KEY: !!process.env.STRIPE_LIVE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: !!process.env.STRIPE_WEBHOOK_SECRET,
+    STRIPE_TEST_WEBHOOK_SECRET: !!process.env.STRIPE_TEST_WEBHOOK_SECRET,
+    STRIPE_LIVE_WEBHOOK_SECRET: !!process.env.STRIPE_LIVE_WEBHOOK_SECRET,
     STRIPE_PRICE_ID_PRO: !!process.env.STRIPE_PRICE_ID_PRO,
     NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
     SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -50,10 +56,7 @@ export async function GET() {
   let stripeSubscription = null;
   if (profile?.stripe_subscription_id) {
     try {
-      const Stripe = (await import("stripe")).default;
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-        apiVersion: "2026-06-24.dahlia",
-      });
+      const stripe = getStripe();
       const sub = await stripe.subscriptions.retrieve(profile.stripe_subscription_id);
       stripeSubscription = {
         id: sub.id,
@@ -61,6 +64,7 @@ export async function GET() {
         priceId: sub.items.data[0]?.price?.id,
         currentPeriodEnd: sub.items.data[0]?.current_period_end,
         metadata: sub.metadata,
+        livemode: sub.livemode,
       };
     } catch (err) {
       stripeSubscription = { error: "Could not retrieve subscription" };
@@ -69,6 +73,7 @@ export async function GET() {
 
   return NextResponse.json({
     user: { id: user.id, email: user.email },
+    mode,
     envCheck,
     profile,
     recentWebhooks: recentWebhooks?.map((e) => ({

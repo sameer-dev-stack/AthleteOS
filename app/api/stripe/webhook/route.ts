@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import { resolvePlan } from "@/lib/referral-reward";
 import { calculateTipPayout, type TipPlan } from "@/lib/tip-payout";
+import { getStripe, getStripeMode } from "@/lib/stripe";
 
 const ALLOWED_EVENTS = new Set([
   "checkout.session.completed",
@@ -14,12 +15,15 @@ const ALLOWED_EVENTS = new Set([
   "charge.refunded",
 ]);
 
-function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error("STRIPE_SECRET_KEY is not set");
-  return new Stripe(key, {
-    apiVersion: "2026-06-24.dahlia",
-  });
+function getStripeWebhookSecret(): string {
+  const mode = getStripeMode();
+  if (mode === "live") {
+    return process.env.STRIPE_LIVE_WEBHOOK_SECRET || process.env.STRIPE_WEBHOOK_SECRET || "";
+  }
+  if (mode === "test") {
+    return process.env.STRIPE_TEST_WEBHOOK_SECRET || process.env.STRIPE_WEBHOOK_SECRET || "";
+  }
+  return process.env.STRIPE_WEBHOOK_SECRET || "";
 }
 
 function getSupabaseServiceRole() {
@@ -50,10 +54,10 @@ async function logWebhookEvent(
 }
 
 export async function POST(request: NextRequest) {
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const webhookSecret = getStripeWebhookSecret();
 
   if (!webhookSecret) {
-    console.error("[webhook] STRIPE_WEBHOOK_SECRET is not set in environment variables");
+    console.error("[webhook] Stripe webhook secret is not set in environment variables");
     return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 });
   }
 
