@@ -28,7 +28,7 @@
 - Dead URL confirmed: `https://athlete-os-vert.vercel.app/` → 404.
 
 ### Commit
-- pending (this session)
+- `14321ff` — "fix(stripe): point webhook docs at live URL, surface tip insert failures"
 
 ## 2026-08-19 — Session: Wire Cookie Consent "Learn more." to the privacy policy
 
