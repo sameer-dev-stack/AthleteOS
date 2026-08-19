@@ -22,7 +22,7 @@
 - Live SSR probe: cookie text present on `/` (2 matches), absent on `/discover` and `/docs` (0 matches).
 
 ### Commit
-- pending (this session)
+- `e1d61e8` — "fix(cookie-consent): raise z-index, harden landing-only guard, shrink modal"
 
 ## 2026-08-19 — Session: Fix Analytics page mobile skeleton (fixed 3-col grid overflow)
 
