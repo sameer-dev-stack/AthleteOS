@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { stripe } from "@/lib/stripe";
 
 const TipSchema = z.object({
@@ -16,6 +16,13 @@ export type TipResult = {
   url?: string;
   error?: string;
 };
+
+function getServiceClient() {
+  return createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 /**
  * Creates a one-time payment Checkout Session for a fan tip.
@@ -34,7 +41,7 @@ export async function createTipSession(
     return { ok: false, error: parsed.error.issues[0].message };
   }
 
-  const supabase = await createClient();
+  const supabase = getServiceClient();
   const { data: athlete } = await supabase
     .from("profiles")
     .select("id, full_name, username")
