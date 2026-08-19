@@ -189,44 +189,56 @@ export function TipEarnings({
           </div>
         )}
 
-        {/* ── Recent Tips ────────────────────── */}
-        {e.recentTips.length > 0 && (
-          <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/30">
-              Recent tips
-            </p>
-            <div className="space-y-2">
-              {e.recentTips.map((tip) => (
-                <div
-                  key={tip.id}
-                  className="flex items-center justify-between rounded-xl bg-white/[0.03] border border-white/[0.04] px-4 py-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/15">
-                      <User className="h-3.5 w-3.5 text-accent" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-white">
-                        {tip.senderName || "Anonymous"}
-                      </p>
-                      <p className="text-[11px] text-white/30">
-                        {timeAgo(tip.createdAt)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-accent">
-                      {formatCents(tip.amount)}
-                    </p>
-                    <p className="text-[11px] text-white/30">
-                      {formatCents(tip.netAmount)} net
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+                 {/* ── Recent Tips ────────────────────── */}
+         {e.recentTips.length > 0 && (
+           <div>
+             <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/30">
+               Recent tips
+             </p>
+             <div className="space-y-2">
+               {e.recentTips.map((tip) => (
+                 <div
+                   key={tip.id}
+                   className="rounded-xl bg-white/[0.03] border border-white/[0.04] px-4 py-3"
+                 >
+                   <div className="flex items-center justify-between">
+                     <div className="flex items-center gap-3">
+                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/15">
+                         <User className="h-3.5 w-3.5 text-accent" />
+                       </div>
+                       <div>
+                         <p className="text-sm font-medium text-white">
+                           {tip.senderName || "Anonymous"}
+                         </p>
+                         <p className="text-[11px] text-white/30">
+                           {timeAgo(tip.createdAt)}
+                         </p>
+                       </div>
+                     </div>
+                     <div className="text-right">
+                       <p className="text-sm font-semibold text-accent">
+                         {formatCents(tip.amount)}
+                       </p>
+                       <p className="text-[11px] text-white/30">
+                         {formatCents(tip.netAmount)} net
+                       </p>
+                     </div>
+                   </div>
+                   {(tip.platformFee > 0 || tip.stripeFee > 0) && (
+                     <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-white/40 font-mono">
+                       {tip.platformFee > 0 && (
+                         <span>Platform fee: -{formatCents(tip.platformFee)}</span>
+                       )}
+                       {tip.stripeFee > 0 && (
+                         <span>Stripe fee: -{formatCents(tip.stripeFee)}</span>
+                       )}
+                     </div>
+                   )}
+                 </div>
+               ))}
+             </div>
+           </div>
+         )}
 
         {/* ── Empty State ────────────────────── */}
         {e.totalTips === 0 && (

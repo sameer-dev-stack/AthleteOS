@@ -13,6 +13,8 @@ export type TipEarnings = {
   recentTips: {
     id: string;
     amount: number;
+    platformFee: number;
+    stripeFee: number;
     netAmount: number;
     senderName: string | null;
     createdAt: string;
@@ -38,7 +40,7 @@ export async function getTipEarnings(): Promise<{
 
     const { data: tips, error } = await admin
       .from("tips")
-      .select("id, amount, net_amount, sender_name, created_at")
+      .select("id, amount, platform_fee, stripe_fee, net_amount, sender_name, created_at")
       .eq("athlete_id", user.id)
       .eq("status", "succeeded")
       .order("created_at", { ascending: false });
@@ -62,6 +64,8 @@ export async function getTipEarnings(): Promise<{
         recentTips: allTips.slice(0, 5).map((t) => ({
           id: t.id,
           amount: t.amount,
+          platformFee: t.platform_fee,
+          stripeFee: t.stripe_fee,
           netAmount: t.net_amount,
           senderName: t.sender_name,
           createdAt: t.created_at,
