@@ -3,6 +3,34 @@
 > Append a new entry at the **top** at the end of every session that changed files.
 > Format: `## YYYY-MM-DD — Session N: <Title>` followed by `### What changed`, `### Why`, `### Files touched`, `### Commit`.
 
+## 2026-08-20 — Session: Upgrade Digital Card Analytics Engine to Industry Standards
+
+### What changed
+- **Bot Detection & Traffic Guarding (`lib/actions/analytics.ts`)**: Added `isBotUserAgent` regex helper to identify search crawlers, social preview bots, and scrapers. Set `is_bot = true` on `page_views` and `link_clicks`, and excluded bot traffic from all athlete dashboard queries.
+- **UTM & Campaign Attribution (`lib/actions/analytics.ts`, `components/profile-card.tsx`)**: Extended `TrackViewSchema` and `TrackClickSchema` with `utmSource`, `utmMedium`, `utmCampaign`, `refTag`. Updated `profile-card.tsx` mount effect to extract `utm_source`, `utm_medium`, `utm_campaign`, and `ref` from `searchParams` on mount. Added `topUtmSources` breakdown to `AnalyticsData` and added a **Campaign Sources (UTM)** breakdown card to `components/dashboard/analytics-panel.tsx`.
+- **Database Migration (`supabase/migrations/20260820_analytics_industry_standards.sql`)**:
+  - Added `utm_source`, `utm_medium`, `utm_campaign`, `ref_tag`, and `is_bot` columns to `page_views` and `link_clicks`.
+  - Created `daily_athlete_analytics` permanent rollup table (`athlete_id`, `date`, `total_views`, `unique_visitors`, `total_clicks`, `total_inquiries`, `total_tips_cents`).
+  - Added `aggregate_daily_analytics(target_date DATE)` PL/pgSQL function.
+  - Updated `cleanup_raw_analytics()` PL/pgSQL function so raw log cleanup automatically computes daily rollups before purging 90-day-old event logs.
+
+### Why
+- Upgraded the AthleteOS Digital Card Analytics Algorithm to match top-tier industry standards (Linktree, Mixpanel, Plausible) by eliminating bot noise, tracking UTM campaign sources, and preserving multi-year historical metrics via daily rollup aggregation.
+
+### Files touched
+- `supabase/migrations/20260820_analytics_industry_standards.sql` (new)
+- `lib/actions/analytics.ts`
+- `components/profile-card.tsx`
+- `components/dashboard/analytics-panel.tsx`
+- `docs/CHANGELOG.md`
+- `docs/COMPONENTS.md`
+
+### Verified
+- `npm run lint` clean (0 errors); `npm run build` completed successfully (exit code 0).
+
+### Commit
+- `(committed below)`
+
 ## 2026-08-19 — Session: Rebuild Platform Analytics in the /dashboard design language
 
 ### What changed

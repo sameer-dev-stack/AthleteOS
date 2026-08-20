@@ -470,9 +470,9 @@ Currently empty. Reserved for shadcn-style atomic UI if/when introduced (e.g., `
 - `getSubscriptionStatus()` — Returns combined subscription status + AI quota (plan, status, periodEnd, aiUsed, aiLimit, aiRemaining).
 
 ### `lib/actions/analytics.ts`
-- `trackView(athleteId)` — Hashes viewer IP with SHA-256 + salt, deduplicates per athlete per 24h window, inserts into `page_views`. Returns `{ ok, deduped }`.
-- `trackLinkClick(athleteId, linkLabel, linkUrl)` — Hashes viewer IP, inserts into `link_clicks`. Returns `{ ok }`.
-- `getAnalytics(athleteId, range)` — Returns aggregated analytics: totalViews, uniqueVisitors, totalClicks, topReferrers, geoBreakdown, viewsByDay, topLinks. All hashing and aggregation server-side; raw IP never exposed.
+- `trackView(athleteId, utmOptions?)` — Hashes viewer IP with SHA-256 + salt, filters bot user-agents (`is_bot`), records UTM params, deduplicates per athlete per 24h window, inserts into `page_views`. Returns `{ ok, deduped }`.
+- `trackLinkClick(athleteId, linkLabel, linkUrl, utmOptions?)` — Hashes viewer IP, filters bot user-agents, records UTM params, inserts into `link_clicks`. Returns `{ ok }`.
+- `getAnalytics(athleteId, range)` — Returns aggregated analytics excluding bot noise: totalViews, uniqueVisitors, totalClicks, topReferrers, topUtmSources, geoBreakdown, viewsByDay, topLinks. All hashing and aggregation server-side; raw IP never exposed.
 
 ### `lib/actions/admin.ts`
 - `getWaitlistEntries()` — Fetches all waitlist entries (admin only).

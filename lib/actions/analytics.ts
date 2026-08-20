@@ -513,6 +513,7 @@ export type AnalyticsData = {
   totalInquiries: number;
   totalTipsReceived: number;
   topReferrers: { referrer: string; count: number }[];
+  topUtmSources?: { source: string; count: number }[];
   geoBreakdown: { country: string; count: number }[];
   viewsByDay: { date: string; count: number }[];
   topLinks: { label: string; url: string; clicks: number }[];
@@ -570,6 +571,7 @@ const EMPTY_ANALYTICS_DATA: AnalyticsData = {
   totalInquiries: 0,
   totalTipsReceived: 0,
   topReferrers: [],
+  topUtmSources: [],
   geoBreakdown: [],
   viewsByDay: [],
   topLinks: [],
@@ -608,24 +610,27 @@ export async function getAnalyticsData(
     const previousSince = new Date(new Date(since).getTime() - rangeDays * 24 * 60 * 60 * 1000).toISOString();
 
     const fetchPeriod = async (start: string, end: string) => {
-      const [viewsResult, clicksResult, referrersResult, geoResult, linksResult, inquiriesResult, tipsResult, uaResult] =
+      const [viewsResult, clicksResult, referrersResult, geoResult, linksResult, inquiriesResult, tipsResult, uaResult, utmResult] =
         await Promise.allSettled([
           serviceRole
             .from("page_views")
             .select("id, viewer_ip_hash, created_at, user_agent", { count: "exact" })
             .eq("athlete_id", athleteId)
+            .eq("is_bot", false)
             .gte("created_at", start)
             .lte("created_at", end),
           serviceRole
             .from("link_clicks")
             .select("id", { count: "exact" })
             .eq("athlete_id", athleteId)
+            .eq("is_bot", false)
             .gte("created_at", start)
             .lte("created_at", end),
           serviceRole
             .from("page_views")
             .select("referrer")
             .eq("athlete_id", athleteId)
+            .eq("is_bot", false)
             .gte("created_at", start)
             .lte("created_at", end)
             .not("referrer", "is", null),
@@ -633,6 +638,7 @@ export async function getAnalyticsData(
             .from("page_views")
             .select("country")
             .eq("athlete_id", athleteId)
+            .eq("is_bot", false)
             .gte("created_at", start)
             .lte("created_at", end)
             .not("country", "is", null),
@@ -640,6 +646,7 @@ export async function getAnalyticsData(
             .from("link_clicks")
             .select("link_label, link_url")
             .eq("athlete_id", athleteId)
+            .eq("is_bot", false)
             .gte("created_at", start)
             .lte("created_at", end),
           serviceRole
@@ -658,8 +665,17 @@ export async function getAnalyticsData(
             .from("page_views")
             .select("user_agent")
             .eq("athlete_id", athleteId)
+            .eq("is_bot", false)
             .gte("created_at", start)
             .lte("created_at", end),
+          serviceRole
+            .from("page_views")
+            .select("utm_source")
+            .eq("athlete_id", athleteId)
+            .eq("is_bot", false)
+            .gte("created_at", start)
+            .lte("created_at", end)
+            .not("utm_source", "is", null),
         ]);
 
       const viewsData = viewsResult.status === "fulfilled" ? (viewsResult.value.data ?? []) : [];
@@ -681,6 +697,18 @@ export async function getAnalyticsData(
       }
       const topReferrers = Array.from(referrerCounts.entries())
         .map(([referrer, count]) => ({ referrer, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
+
+      const utmData = utmResult.status === "fulfilled" ? (utmResult.value.data ?? []) : [];
+      const utmCounts = new Map<string, number>();
+      for (const u of utmData) {
+        if (!u?.utm_source) continue;
+        const src = u.utm_source.toLowerCase().trim();
+        utmCounts.set(src, (utmCounts.get(src) || 0) + 1);
+      }
+      const topUtmSources = Array.from(utmCounts.entries())
+        .map(([source, count]) => ({ source, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 10);
 
@@ -750,6 +778,7 @@ export async function getAnalyticsData(
         totalInquiries,
         totalTipsReceived,
         topReferrers,
+        topUtmSources,
         geoBreakdown,
         viewsByDay,
         topLinks,

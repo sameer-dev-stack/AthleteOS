@@ -548,7 +548,7 @@ export function AnalyticsPanel({ athleteId, initialData, themeAccent = "#C6FF3D"
                     </div>
                   )}
 
-                  <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="grid gap-6 sm:grid-cols-3">
                     {data.topReferrers.length > 0 && (
                       <div>
                         <p className="mb-3 text-xs font-medium uppercase tracking-wider text-ink-dim">
@@ -565,6 +565,28 @@ export function AnalyticsPanel({ athleteId, initialData, themeAccent = "#C6FF3D"
                                 {r.referrer}
                               </span>
                               <span className="text-ink-muted">{r.count}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {data.topUtmSources && data.topUtmSources.length > 0 && (
+                      <div>
+                        <p className="mb-3 text-xs font-medium uppercase tracking-wider text-ink-dim">
+                          Campaign Sources (UTM)
+                        </p>
+                        <div className="space-y-2">
+                          {data.topUtmSources.map((u) => (
+                            <div
+                              key={u.source}
+                              className="flex items-center justify-between rounded-lg bg-white/[0.03] px-3 py-2 text-xs text-white"
+                            >
+                              <span className="flex items-center gap-2">
+                                <TrendingUp className="h-3 w-3 text-accent" />
+                                {u.source}
+                              </span>
+                              <span className="text-accent font-semibold">{u.count}</span>
                             </div>
                           ))}
                         </div>
